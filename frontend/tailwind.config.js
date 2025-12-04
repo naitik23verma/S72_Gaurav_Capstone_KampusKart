@@ -5,17 +5,31 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}"
   ],
   theme: {
+    screens: {
+      'xs': '475px',
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+      '2xl': '1536px',
+    },
     extend: {
       fontFamily: {
         sans: ["'Work Sans'", 'ui-sans-serif', 'system-ui'],
       },
       fontSize: {
-        'h1': ['48px', { lineHeight: '1.2', fontWeight: '700' }],
-        'h2': ['36px', { lineHeight: '1.3', fontWeight: '700' }],
-        'h3': ['30px', { lineHeight: '1.4', fontWeight: '600' }],
-        'h4': ['24px', { lineHeight: '1.4', fontWeight: '600' }],
-        'h5': ['20px', { lineHeight: '1.5', fontWeight: '500' }],
-        'body': ['16px', { lineHeight: '1.5', fontWeight: '400' }],
+        'h1': ['clamp(2rem, 5vw, 3rem)', { lineHeight: '1.2', fontWeight: '700' }],
+        'h2': ['clamp(1.5rem, 4vw, 2.25rem)', { lineHeight: '1.3', fontWeight: '700' }],
+        'h3': ['clamp(1.25rem, 3vw, 1.875rem)', { lineHeight: '1.4', fontWeight: '600' }],
+        'h4': ['clamp(1.125rem, 2.5vw, 1.5rem)', { lineHeight: '1.4', fontWeight: '600' }],
+        'h5': ['clamp(1rem, 2vw, 1.25rem)', { lineHeight: '1.5', fontWeight: '500' }],
+        'body': ['clamp(0.875rem, 1.5vw, 1rem)', { lineHeight: '1.5', fontWeight: '400' }],
+      },
+      spacing: {
+        'safe-top': 'env(safe-area-inset-top)',
+        'safe-bottom': 'env(safe-area-inset-bottom)',
+        'safe-left': 'env(safe-area-inset-left)',
+        'safe-right': 'env(safe-area-inset-right)',
       },
       colors: {
         'deep-purple': {
@@ -47,6 +61,14 @@ export default {
         black: {
           DEFAULT: '#000000',
         },
+      },
+      minHeight: {
+        'touch': '44px',
+        'touch-lg': '48px',
+      },
+      minWidth: {
+        'touch': '44px',
+        'touch-lg': '48px',
       },
     },
   },

@@ -1,0 +1,36 @@
+name: Keep Server Alive
+
+on:
+  schedule:
+    # Run every 5 minutes
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  ping-server:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - name: Ping Health Endpoint
+        run: |
+          echo "🔄 Pinging server to keep it alive..."
+          response=$(curl -s -w "\n%{http_code}" -o /tmp/response.json https://s72-gaurav-capstone.onrender.com/api/health)
+          http_code=$(echo "$response" | tail -n1)
+          body=$(cat /tmp/response.json)
+          
+          if [ "$http_code" -eq 200 ]; then
+            echo "✅ Server is awake! Response: $body"
+            exit 0
+          else
+            echo "❌ Server ping failed with HTTP $http_code"
+            echo "Response: $body"
+            exit 1
+          fi
+        continue-on-error: true
+
+      - name: Ping Server Status Endpoint
+        run: |
+          echo "🔄 Pinging server-status endpoint..."
+          curl -s https://s72-gaurav-capstone.onrender.com/api/server-status || true
+

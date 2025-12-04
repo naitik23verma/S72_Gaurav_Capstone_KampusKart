@@ -459,28 +459,29 @@ const Complaints = () => {
   return (
     <div className="min-h-screen flex flex-col bg-white font-sans">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-[100px]">
+      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-20 sm:pt-24 md:pt-28">
         {/* Top Bar: Heading + Add Button */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
-          <h1 className="text-h2 font-extrabold text-black">College Complaints</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-black">College Complaints</h1>
           <button
             onClick={openAddComplaintModal}
             aria-label="Add Complaint"
-            className="flex items-center gap-2 px-6 py-3 rounded-full bg-black text-white font-bold text-lg shadow hover:bg-[#00C6A7] transition"
+            className="flex items-center justify-center gap-2 px-5 py-3 sm:px-6 sm:py-3.5 rounded-full bg-black text-white font-bold text-base sm:text-lg shadow-lg hover:bg-[#00C6A7] active:bg-[#00C6A7] transition-all duration-200 min-h-touch w-full sm:w-auto"
           >
-            + Add Complaint
+            <span className="text-xl sm:text-2xl">+</span>
+            <span>Add Complaint</span>
           </button>
         </div>
         {/* Filter/Search Row */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4 px-4 md:px-0">
-          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 gap-4">
+          <div className="flex flex-col xs:flex-row gap-3 sm:gap-4 w-full lg:w-auto">
             {/* Filter by Category */}
             <select
               value={filterCategory}
               onChange={e => setFilterCategory(e.target.value as any)}
-              // Enhanced styling for rounded corners and border
-              className="px-4 py-2 rounded-md bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
+              className="px-4 py-2.5 sm:py-3 rounded-lg bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] text-sm sm:text-base min-h-touch w-full xs:w-auto"
             >
+              <option value="all">All Categories</option>
               <option value="Academic">Academic</option>
               <option value="Administrative">Administrative</option>
               <option value="Facilities">Facilities</option>
@@ -492,8 +493,7 @@ const Complaints = () => {
             <select
               value={filterStatus}
               onChange={e => setFilterStatus(e.target.value as 'all' | 'Open' | 'InProgress' | 'Resolved' | 'Closed')}
-              // Enhanced styling for rounded corners and border
-              className="px-4 py-2 rounded-md bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
+              className="px-4 py-2.5 sm:py-3 rounded-lg bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] text-sm sm:text-base min-h-touch w-full xs:w-auto"
             >
               <option value="All">All Statuses</option>
               <option value="Open">Open</option>
@@ -503,7 +503,7 @@ const Complaints = () => {
             </select>
           </div>
           {/* AI-Powered Search Bar */}
-          <div className="relative w-full md:w-[500px]">
+          <div className="relative w-full lg:w-[400px] xl:w-[500px]">
             <AIAutocomplete
               value={searchInput}
               onChange={(value) => {
@@ -516,7 +516,7 @@ const Complaints = () => {
                 handleSuggestionSelect(suggestion);
               }}
               placeholder="Search complaints"
-              className="w-full md:w-[500px]"
+              className="w-full"
               suggestions={suggestions}
               isLoading={aiLoading}
               disabled={false}
@@ -527,16 +527,16 @@ const Complaints = () => {
           </div>
         </div>
         {/* Card Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
           {complaints.map((complaint, idx) => (
             <div
               key={complaint._id}
               ref={idx === complaints.length - 1 ? lastComplaintRef : undefined}
-              className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden group"
+              className="bg-white rounded-xl shadow-sm hover:shadow-lg active:shadow-md transition-all duration-300 border border-gray-100 overflow-hidden group cursor-pointer"
               onClick={() => setSelectedComplaintForDetails(complaint)}
             >
               {/* Image Section with Overlay */}
-              <div className="relative h-60 sm:h-80 overflow-hidden">
+              <div className="relative h-48 xs:h-56 sm:h-64 md:h-72 lg:h-80 overflow-hidden">
                 {complaint.images && complaint.images.length > 0 ? (
                   <>
                     <img
@@ -577,9 +577,9 @@ const Complaints = () => {
               </div>
 
               {/* Content Section */}
-              <div className="p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">{complaint.title}</h2>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-3">{complaint.description}</p>
+              <div className="p-4 sm:p-5 md:p-6">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{complaint.title}</h2>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{complaint.description}</p>
 
                 {/* Meta Info Row */}
                 <div className="space-y-3 pt-4 border-t border-gray-100">
@@ -628,17 +628,17 @@ const Complaints = () => {
                   <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t border-gray-100">
                     <button
                       onClick={(e) => { e.stopPropagation(); openEditComplaintModal(complaint); }}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 sm:py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200 text-sm sm:text-base min-w-0"
+                      className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-4 sm:py-2.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 active:bg-blue-200 transition-colors duration-200 text-xs sm:text-sm min-w-0 min-h-touch"
                     >
-                      <FiEdit2 className="w-4 h-4 flex-shrink-0" />
-                      <span className="truncate">Edit</span>
+                      <FiEdit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <span className="truncate text-xs sm:text-sm">Edit</span>
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDeleteComplaint(complaint._id); }}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 sm:py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200 text-sm sm:text-base min-w-0"
+                      className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-4 sm:py-2.5 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 active:bg-red-200 transition-colors duration-200 text-xs sm:text-sm min-w-0 min-h-touch"
                     >
-                      <FiTrash2 className="w-4 h-4 flex-shrink-0" />
-                      <span className="truncate">Delete</span>
+                      <FiTrash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <span className="truncate text-xs sm:text-sm">Delete</span>
                     </button>
                   </div>
                 )}
@@ -649,18 +649,18 @@ const Complaints = () => {
 
         {/* Add/Edit Complaint Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto relative">
-                              <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 safe-top safe-bottom">
+            <div className="bg-white rounded-lg md:rounded-xl p-4 sm:p-6 md:p-8 max-w-2xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
+                              <div className="flex justify-between items-center mb-4 sm:mb-6">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                     {editingComplaint ? 'Edit Complaint' : 'Add New Complaint'}
                   </h2>
                   <button
                     onClick={closeComplaintModal}
                     aria-label="Close"
-                    className="text-red-500 hover:text-red-700 transition-colors duration-200"
+                    className="text-red-500 hover:text-red-700 active:text-red-800 transition-colors duration-200 p-2 -mr-2 min-h-touch min-w-touch"
                   >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -901,30 +901,30 @@ const Complaints = () => {
 
          {/* Complaint Details Modal */}
          {selectedComplaintForDetails && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-xl shadow-xl p-8 max-w-3xl w-full mx-auto max-h-[90vh] overflow-y-auto relative">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 safe-top safe-bottom">
+                <div className="bg-white rounded-xl shadow-xl p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
                   {/* Close Button */}
                   <button
                     onClick={() => setSelectedComplaintForDetails(null)}
                     aria-label="Close"
-                    className="absolute top-4 right-4 text-red-500 hover:text-red-700 transition-colors duration-200"
+                    className="absolute top-2 right-2 sm:top-4 sm:right-4 text-red-500 hover:text-red-700 active:text-red-800 transition-colors duration-200 p-2 min-h-touch min-w-touch"
                   >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
 
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4 pr-8">{selectedComplaintForDetails.title}</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-10 sm:pr-12">{selectedComplaintForDetails.title}</h2>
 
                     {/* Images Section - Moved Up */}
                     {selectedComplaintForDetails.images && selectedComplaintForDetails.images.length > 0 && (
-                      <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         {selectedComplaintForDetails.images.map((image, index) => (
                           <img
                             key={index}
                             src={image.url}
                             alt={`${selectedComplaintForDetails.title} image ${index + 1}`}
-                            className="w-full h-64 object-cover rounded-md cursor-zoom-in hover:opacity-90 transition-opacity duration-200"
+                            className="w-full h-48 sm:h-56 md:h-64 object-cover rounded-md cursor-zoom-in hover:opacity-90 active:opacity-75 transition-opacity duration-200"
                             onClick={() => setZoomedImage(image.url)}
                           />
                         ))}
@@ -959,27 +959,27 @@ const Complaints = () => {
                          user.isAdmin) && 
                         !['Resolved', 'Closed'].includes(selectedComplaintForDetails.status)
                      ) && (
-                        <div className="flex gap-3 mt-6">
+                        <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-6">
                             <button
                                 onClick={() => { setSelectedComplaintForDetails(null); openEditComplaintModal(selectedComplaintForDetails); }}
-                                className="px-4 py-2 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 flex items-center"
+                                className="flex-1 sm:flex-none px-4 py-3 sm:py-2.5 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 active:bg-gray-100 flex items-center justify-center min-h-touch"
                             >
-                                <FiEdit2 className="mr-1" /> Edit
+                                <FiEdit2 className="mr-1.5 sm:mr-1" /> Edit
                             </button>
                             <button
                                 onClick={() => handleDeleteComplaint(selectedComplaintForDetails._id)}
-                                className="px-4 py-2 rounded-full text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 flex items-center"
+                                className="flex-1 sm:flex-none px-4 py-3 sm:py-2.5 rounded-full text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 active:bg-red-700 flex items-center justify-center min-h-touch"
                             >
-                                <FiTrash2 className="mr-1" /> Delete
+                                <FiTrash2 className="mr-1.5 sm:mr-1" /> Delete
                             </button>
                         </div>
                      )}
 
                     {/* Close button at the bottom for larger screens/better UX */}
-                    <div className="mt-6 text-right">
+                    <div className="mt-4 sm:mt-6 text-center sm:text-right">
                         <button
                             onClick={() => setSelectedComplaintForDetails(null)}
-                            className="px-6 py-3 rounded-full font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition"
+                            className="px-6 py-3 sm:py-3.5 rounded-full font-bold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#009e87] transition-all duration-200 min-h-touch w-full sm:w-auto text-base sm:text-lg"
                         >
                             Close
                         </button>
@@ -990,7 +990,7 @@ const Complaints = () => {
 
          {/* Zoomed Image Modal */}
          {zoomedImage && selectedComplaintForDetails && selectedComplaintForDetails.images && selectedComplaintForDetails.images.length > 0 && (
-           <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4" onClick={() => setZoomedImage(null)}>
+           <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 safe-top safe-bottom" onClick={() => setZoomedImage(null)}>
              {/* Image */}
              <img 
                src={zoomedImage} 
@@ -1004,7 +1004,7 @@ const Complaints = () => {
                <>
                  {/* Previous Button */}
                  <button
-                   className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/30 backdrop-blur-sm rounded-full p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+                   className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white/30 backdrop-blur-sm rounded-full p-2.5 sm:p-3 text-white hover:bg-white/50 active:bg-white/60 transition-colors duration-200 z-50 min-h-touch min-w-touch"
                    onClick={(e) => {
                      e.stopPropagation();
                      const currentIndex = selectedComplaintForDetails.images.findIndex(img => img.url === zoomedImage);
@@ -1013,13 +1013,13 @@ const Complaints = () => {
                    }}
                    aria-label="Previous image"
                  >
-                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 sm:w-6 sm:h-6">
                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                    </svg>
                  </button>
                  {/* Next Button */}
                  <button
-                   className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/30 backdrop-blur-sm rounded-full p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+                   className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white/30 backdrop-blur-sm rounded-full p-2.5 sm:p-3 text-white hover:bg-white/50 active:bg-white/60 transition-colors duration-200 z-50 min-h-touch min-w-touch"
                    onClick={(e) => {
                      e.stopPropagation();
                      const currentIndex = selectedComplaintForDetails.images.findIndex(img => img.url === zoomedImage);
@@ -1028,7 +1028,7 @@ const Complaints = () => {
                    }}
                    aria-label="Next image"
                  >
-                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 sm:w-6 sm:h-6">
                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                    </svg>
                  </button>
@@ -1039,9 +1039,9 @@ const Complaints = () => {
               <button
                onClick={() => setZoomedImage(null)}
                aria-label="Close zoomed image"
-               className="absolute top-4 right-4 bg-white/30 backdrop-blur-sm rounded-full p-2 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+               className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-white/30 backdrop-blur-sm rounded-full p-2.5 sm:p-3 text-white hover:bg-white/50 active:bg-white/60 transition-colors duration-200 z-50 min-h-touch min-w-touch"
              >
-               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+               <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                  <line x1="18" y1="6" x2="6" y2="18" />
                  <line x1="6" y1="6" x2="18" y2="18" />
                </svg>

@@ -37,8 +37,8 @@ const NavLinks: React.FC<NavLinksProps> = ({
   <>
     {user && (
       <>
-        <Link to="/home" className="px-1.5 lg:px-2 xl:px-3 py-1 lg:py-1.5 rounded-full font-bold text-black bg-white hover:bg-[#FFD166] hover:text-black transition-colors duration-200 text-xs lg:text-sm xl:text-base whitespace-nowrap flex items-center justify-center min-w-0">
-          <HomeIcon sx={{ mr: 0.5, fontSize: '0.75rem', lg: { fontSize: '0.875rem' } }} />
+        <Link to="/home" className="px-2 md:px-2.5 lg:px-3 xl:px-4 py-1.5 md:py-2 rounded-full font-bold text-black bg-white hover:bg-[#FFD166] hover:text-black active:bg-[#FFD166] transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap flex items-center justify-center min-w-0 min-h-touch">
+          <HomeIcon sx={{ mr: 0.5, fontSize: { md: '0.75rem', lg: '0.875rem' } }} />
           <span className="hidden lg:inline">Home</span>
         </Link>
         <Link to="/campus-map" className="px-1.5 lg:px-2 xl:px-3 py-1 lg:py-1.5 rounded-full font-bold text-black bg-white hover:bg-[#FFD166] hover:text-black transition-colors duration-200 text-xs lg:text-sm xl:text-base whitespace-nowrap flex items-center justify-center min-w-0">
@@ -108,13 +108,13 @@ interface AuthButtonsProps {
 
 const AuthButtons: React.FC<AuthButtonsProps> = ({ user, location, logout }) => (
   <div className="flex flex-col md:flex-row gap-1 lg:gap-2 w-full md:w-auto">
-    {!user && (
+        {!user && (
       <>
         {location.pathname !== '/login' && (
-          <Link to="/login" className="px-4 py-4 md:px-1.5 md:py-1 lg:px-2 xl:px-3 lg:py-1.5 rounded-full font-bold text-black bg-white border border-[#E0E0E0] hover:bg-[#FFD166] hover:text-black transition-colors duration-200 text-lg md:text-xs lg:text-sm xl:text-base whitespace-nowrap w-full md:w-auto text-center min-w-0">Login</Link>
+          <Link to="/login" className="px-4 py-3 md:px-2 md:py-1.5 lg:px-3 lg:py-2 rounded-full font-bold text-black bg-white border border-[#E0E0E0] hover:bg-[#FFD166] active:bg-[#FFD166] hover:text-black transition-colors duration-200 text-base md:text-sm lg:text-base whitespace-nowrap w-full md:w-auto text-center min-w-0 min-h-touch md:min-h-0">Login</Link>
         )}
         {location.pathname !== '/signup' && (
-          <Link to="/signup" className="px-4 py-4 md:px-1.5 md:py-1 lg:px-2 xl:px-3 lg:py-1.5 rounded-full font-bold text-white bg-[#181818] hover:bg-[#00C6A7] hover:text-white transition-colors duration-200 text-lg md:text-xs lg:text-sm xl:text-base whitespace-nowrap w-full md:w-auto text-center min-w-0">Sign up</Link>
+          <Link to="/signup" className="px-4 py-3 md:px-2 md:py-1.5 lg:px-3 lg:py-2 rounded-full font-bold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#00C6A7] hover:text-white transition-colors duration-200 text-base md:text-sm lg:text-base whitespace-nowrap w-full md:w-auto text-center min-w-0 min-h-touch md:min-h-0">Sign up</Link>
         )}
       </>
     )}
@@ -201,10 +201,10 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-white shadow-md fixed top-0 left-0 w-full z-50">
-      <div className="container mx-auto px-2 sm:px-4 py-1.5 sm:py-2">
+    <nav className="bg-white shadow-md fixed top-0 left-0 w-full z-50 safe-top">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2.5 md:py-3">
         {/* Desktop Navigation */}
-        <div className="hidden md:flex justify-between items-center relative min-h-[50px] max-w-full">
+        <div className="hidden md:flex justify-between items-center relative min-h-[56px] md:min-h-[60px] max-w-full">
           {/* Left Section - Navigation Links */}
           <div className="flex items-center space-x-1 lg:space-x-2 xl:space-x-4 flex-shrink-0 min-w-0 max-w-[40%]">
             <NavLinks
@@ -232,21 +232,21 @@ const Navbar: React.FC = () => {
         </div>
 
         {/* Mobile Navigation */}
-        <div className="md:hidden flex justify-between items-center">
-          <Link to="/home" className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity duration-200">
-            <img src='/Logo.png' alt='KampusKart Logo' className='h-8 w-8 object-contain transition-transform duration-300 hover:scale-110' style={{ background: 'none', border: 'none', borderRadius: 0, boxShadow: 'none' }} />
-            <span className='text-lg font-extrabold text-black font-sans' style={{ fontFamily: 'Work Sans, sans-serif' }}>Kampuskart</span>
+        <div className="md:hidden flex justify-between items-center min-h-[56px]">
+          <Link to="/home" className="flex items-center gap-2 sm:gap-3 cursor-pointer hover:opacity-80 transition-opacity duration-200 min-w-0 flex-shrink">
+            <img src='/Logo.png' alt='KampusKart Logo' className='h-7 w-7 sm:h-8 sm:w-8 object-contain transition-transform duration-300 hover:scale-110 flex-shrink-0' style={{ background: 'none', border: 'none', borderRadius: 0, boxShadow: 'none' }} />
+            <span className='text-base sm:text-lg font-extrabold text-black font-sans truncate' style={{ fontFamily: 'Work Sans, sans-serif' }}>Kampuskart</span>
           </Link>
           <button
             onClick={toggleMobileMenu}
-            className="p-2 rounded-md bg-white hover:bg-gray-100 focus:outline-none transition-all duration-300 ease-in-out transform hover:scale-110 shadow-none border-none mobile-touch-friendly mobile-no-hover mobile-active-feedback"
+            className="p-2.5 sm:p-3 rounded-md bg-white hover:bg-gray-100 active:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:ring-offset-2 transition-all duration-200 min-h-touch min-w-touch"
             aria-label="Toggle menu"
             aria-expanded={isMobileMenuOpen}
           >
             {isMobileMenuOpen ? (
-              <HiX className="h-6 w-6 text-[#00C6A7]" />
+              <HiX className="h-6 w-6 sm:h-7 sm:w-7 text-[#00C6A7]" />
             ) : (
-              <HiMenu className="h-6 w-6 text-[#00C6A7]" />
+              <HiMenu className="h-6 w-6 sm:h-7 sm:w-7 text-[#00C6A7]" />
             )}
           </button>
         </div>
@@ -261,24 +261,25 @@ const Navbar: React.FC = () => {
 
         {/* Mobile Menu */}
         <div
-          className={`md:hidden fixed top-[60px] left-0 w-full bg-white shadow-lg z-50 transition-all duration-300 ease-in-out transform ${
+          className={`md:hidden fixed top-[56px] sm:top-[60px] left-0 w-full bg-white shadow-lg z-50 transition-all duration-300 ease-in-out transform safe-bottom ${
             isMobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'
           }`}
           style={{
-            maxHeight: isMobileMenuOpen ? 'calc(100vh - 60px)' : '0',
-            overflow: 'auto'
+            maxHeight: isMobileMenuOpen ? 'calc(100vh - 56px - env(safe-area-inset-bottom))' : '0',
+            overflow: 'auto',
+            paddingBottom: 'env(safe-area-inset-bottom)',
           }}
         >
-          <div className="flex flex-col space-y-3 p-4">
+          <div className="flex flex-col space-y-2 sm:space-y-3 p-4 sm:p-6">
             {user && (
               <>
                 {/* Main Navigation Links */}
                 <Link 
                   to="/home" 
-                  className="px-4 py-4 rounded-full font-bold text-black bg-white hover:bg-[#FFD166] hover:text-black transition-all duration-300 ease-in-out text-lg w-full text-center transform hover:scale-105 flex items-center justify-center mobile-touch-friendly mobile-no-hover mobile-active-feedback"
+                  className="px-4 py-3 sm:py-4 rounded-full font-bold text-black bg-white hover:bg-[#FFD166] active:bg-[#FFD166] hover:text-black transition-all duration-200 text-base sm:text-lg w-full text-center flex items-center justify-center min-h-touch"
                   onClick={handleMobileNavClick}
                 >
-                  <HomeIcon sx={{ mr: 2, fontSize: '1.25rem' }} />
+                  <HomeIcon sx={{ mr: 2, fontSize: { xs: '1.125rem', sm: '1.25rem' } }} />
                   Home
                 </Link>
                 <Link 
@@ -300,10 +301,10 @@ const Navbar: React.FC = () => {
 
                 {/* Mobile Features Section */}
                 <div className="space-y-2">
-                  <div className="text-base font-semibold text-gray-600 px-3 mb-3">Features</div>
+                  <div className="text-sm sm:text-base font-semibold text-gray-600 px-3 mb-2 sm:mb-3">Features</div>
                   <Link 
                     to="/lostfound" 
-                    className="block px-4 py-4 rounded-full font-bold text-black bg-white hover:bg-[#FFD166] hover:text-black transition-all duration-300 ease-in-out text-lg w-full text-center transform hover:scale-105"
+                    className="block px-4 py-3 sm:py-4 rounded-full font-bold text-black bg-white hover:bg-[#FFD166] active:bg-[#FFD166] hover:text-black transition-all duration-200 text-base sm:text-lg w-full text-center min-h-touch"
                     onClick={handleMobileNavClick}
                   >
                     Lost and Found
@@ -347,13 +348,13 @@ const Navbar: React.FC = () => {
 
                 {/* User Actions */}
                 <div className="space-y-2 pt-4 border-t border-gray-200">
-                  <div className="text-base font-semibold text-gray-600 px-3 mb-3">Account</div>
+                  <div className="text-sm sm:text-base font-semibold text-gray-600 px-3 mb-2 sm:mb-3">Account</div>
                   <Link 
                     to="/profile" 
-                    className="block px-4 py-4 rounded-full font-bold text-black bg-white hover:bg-[#FFD166] hover:text-black transition-all duration-300 ease-in-out text-lg w-full text-center transform hover:scale-105 flex items-center justify-center"
+                    className="block px-4 py-3 sm:py-4 rounded-full font-bold text-black bg-white hover:bg-[#FFD166] active:bg-[#FFD166] hover:text-black transition-all duration-200 text-base sm:text-lg w-full text-center min-h-touch flex items-center justify-center"
                     onClick={handleMobileNavClick}
                   >
-                    <AccountCircleIcon sx={{ mr: 2, fontSize: '1.25rem' }} />
+                    <AccountCircleIcon sx={{ mr: 2, fontSize: { xs: '1.125rem', sm: '1.25rem' } }} />
                     Profile
                   </Link>
                   <button
@@ -361,9 +362,9 @@ const Navbar: React.FC = () => {
                       logout();
                       handleMobileNavClick();
                     }}
-                    className="w-full px-4 py-4 rounded-full font-bold text-white bg-[#181818] hover:bg-[#00C6A7] hover:text-white transition-all duration-300 ease-in-out text-lg transform hover:scale-105 flex items-center justify-center"
+                    className="w-full px-4 py-3 sm:py-4 rounded-full font-bold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#00C6A7] hover:text-white transition-all duration-200 text-base sm:text-lg min-h-touch flex items-center justify-center"
                   >
-                    <LogoutIcon sx={{ mr: 2, fontSize: '1.25rem' }} />
+                    <LogoutIcon sx={{ mr: 2, fontSize: { xs: '1.125rem', sm: '1.25rem' } }} />
                     Logout
                   </button>
                 </div>

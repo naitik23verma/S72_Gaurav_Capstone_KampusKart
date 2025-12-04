@@ -35,6 +35,7 @@ const lostfoundRoutes = require('./routes/lostfound');
 const profileRoutes = require('./routes/profile');
 const complaintsRoutes = require('./routes/complaints');
 const startDeletionCronJob = require('./cron/deleteItems');
+const { startKeepAlive } = require('./cron/keepAlive');
 const http = require('http');
 const { Server } = require('socket.io');
 const newsRoutes = require('./routes/news');
@@ -159,6 +160,8 @@ mongoose.connect(process.env.MONGODB_URI)
     console.log('Connected to MongoDB');
     // Start the cron job after successful DB connection
     startDeletionCronJob();
+    // Start keep-alive service to prevent Render from spinning down
+    startKeepAlive();
   })
   .catch((err) => {
     console.error('MongoDB connection error:', err);

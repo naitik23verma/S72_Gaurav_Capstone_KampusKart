@@ -177,6 +177,28 @@ const ChatWindow = () => {
   }, [user]);
 
   // Load more messages when scrolling up
+  const loadMoreMessages = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `${API_BASE}/api/chat/messages?page=${page + 1}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+      const data = await response.json();
+      setMessages((prev) => [...data.messages, ...prev]);
+      setPage((prev) => prev + 1);
+      setHasMore(data.pagination.page < data.pagination.pages);
+    } catch (error) {
+      console.error('Error loading more messages:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [page]);
+
   useEffect(() => {
     const options = {
       root: null,
@@ -203,28 +225,6 @@ const ChatWindow = () => {
       }
     };
   }, [messages, hasMore, loading, loadMoreMessages]);
-
-  const loadMoreMessages = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(
-        `${API_BASE}/api/chat/messages?page=${page + 1}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        }
-      );
-      const data = await response.json();
-      setMessages((prev) => [...data.messages, ...prev]);
-      setPage((prev) => prev + 1);
-      setHasMore(data.pagination.page < data.pagination.pages);
-    } catch (error) {
-      console.error('Error loading more messages:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();

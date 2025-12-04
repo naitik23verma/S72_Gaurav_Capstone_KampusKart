@@ -78,7 +78,8 @@ const Complaints = () => {
   // AI Autocomplete hook
   const preExistingStrings = useMemo(() => {
     const pool: string[] = [];
-    complaints.forEach(c => {
+    complaints.forEach((c: Complaint | null) => {
+      if (!c) return;
       if (c.title) pool.push(c.title);
       if (c.description) pool.push(c.description);
       if (c.category) pool.push(c.category);
@@ -177,12 +178,12 @@ const Complaints = () => {
   const openEditComplaintModal = (complaint: Complaint) => {
     setEditingComplaint(complaint);
     setNewComplaint({
-      title: complaint.title,
-      description: complaint.description,
-      category: complaint.category,
-      priority: complaint.priority,
-      department: complaint.department,
-      status: complaint.status,
+      title: complaint?.title || '',
+      description: complaint?.description || '',
+      category: complaint?.category || 'General',
+      priority: complaint?.priority || 'Medium',
+      department: complaint?.department || '',
+      status: complaint?.status || 'Open',
     });
     setImages(
       (complaint.images || []).map(img => ({
@@ -510,7 +511,7 @@ const Complaints = () => {
         </div>
         {/* Card Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-          {complaints.map((complaint, idx) => (
+          {complaints.filter(complaint => complaint).map((complaint, idx) => (
             <div
               key={complaint._id}
               ref={idx === complaints.length - 1 ? lastComplaintRef : undefined}

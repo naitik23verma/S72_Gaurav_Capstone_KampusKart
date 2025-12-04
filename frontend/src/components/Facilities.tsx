@@ -64,7 +64,8 @@ const Facilities = () => {
   // AI Autocomplete hook
   const preExistingStrings = useMemo(() => {
     const pool: string[] = [];
-    facilities.forEach((f: Facility) => {
+    facilities.forEach((f: Facility | null) => {
+      if (!f) return;
       if (f.name) pool.push(f.name);
       if (f.description) pool.push(f.description);
       if (f.location) pool.push(f.location);
@@ -87,8 +88,9 @@ const Facilities = () => {
   });
 
   const filteredFacilities = facilities.filter(facility =>
-    (filterType === 'All' || facility.type === filterType) &&
-    (facility.name.toLowerCase().includes(searchQuery.toLowerCase()) || facility.description.toLowerCase().includes(searchQuery.toLowerCase()))
+    facility &&
+    (filterType === 'All' || facility?.type === filterType) &&
+    ((facility.name?.toLowerCase()?.includes(searchQuery.toLowerCase()) ?? false) || (facility.description?.toLowerCase()?.includes(searchQuery.toLowerCase()) ?? false))
   );
 
   useEffect(() => {
@@ -200,7 +202,7 @@ const Facilities = () => {
                   <>
                     <img
                       src={facility.images[0].url}
-                      alt={facility.name}
+                      alt={facility?.name || 'Facility'}
                       className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-300"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -208,31 +210,35 @@ const Facilities = () => {
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-50">
                     <div className="flex flex-col items-center justify-center text-gray-300">
-                      {iconOptions.find(opt => opt.value === facility.icon)?.icon || <FiHome className="w-16 h-16" />}
+                      {iconOptions.find(opt => opt.value === facility?.icon)?.icon || <FiHome className="w-16 h-16" />}
                       <span className="text-xs mt-2">No Image</span>
                     </div>
                   </div>
                 )}
                 {/* Type Badge */}
-                <div className="absolute top-4 left-4">
-                  <span className="text-xs px-3 py-1.5 rounded-full font-medium shadow-sm bg-white/90 backdrop-blur-sm text-gray-800 flex items-center gap-1">
-                    <FiTag className="w-3 h-3" />
-                    {facility.type}
-                  </span>
-                </div>
+                {facility?.type && (
+                  <div className="absolute top-4 left-4">
+                    <span className="text-xs px-3 py-1.5 rounded-full font-medium shadow-sm bg-white/90 backdrop-blur-sm text-gray-800 flex items-center gap-1">
+                      <FiTag className="w-3 h-3" />
+                      {facility.type}
+                    </span>
+                  </div>
+                )}
                 {/* Location Badge */}
-                <div className="absolute top-4 right-4">
-                  <span className="text-xs px-3 py-1.5 rounded-full font-medium shadow-sm bg-white/90 backdrop-blur-sm text-gray-800 flex items-center gap-1">
-                    <FiMapPin className="w-3 h-3" />
-                    {facility.location}
-                  </span>
-                </div>
+                {facility?.location && (
+                  <div className="absolute top-4 right-4">
+                    <span className="text-xs px-3 py-1.5 rounded-full font-medium shadow-sm bg-white/90 backdrop-blur-sm text-gray-800 flex items-center gap-1">
+                      <FiMapPin className="w-3 h-3" />
+                      {facility.location}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Content Section */}
               <div className="p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">{facility.name}</h2>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-3">{facility.description}</p>
+                <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">{facility?.name || 'Facility'}</h2>
+                <p className="text-gray-600 text-sm mb-4 line-clamp-3">{facility?.description || ''}</p>
 
                 {/* Meta Info Row */}
                 <div className="space-y-3 pt-4 border-t border-gray-100">
@@ -249,7 +255,7 @@ const Facilities = () => {
                   {facility.createdBy && (
                     <div className="flex items-center text-sm text-gray-500">
                       <FiUser className="mr-2 flex-shrink-0" />
-                      <span className="truncate">Posted by {facility.createdBy.name || facility.createdBy.email || 'User'}</span>
+                      <span className="truncate">Posted by {facility.createdBy?.name || facility.createdBy?.email || 'User'}</span>
                     </div>
                   )}
                 </div>
@@ -258,7 +264,14 @@ const Facilities = () => {
                 {user?.isAdmin && (
                   <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t border-gray-100">
                     <button
-                      onClick={(e) => { e.stopPropagation(); setEditingFacility(facility); setIsEditModalOpen(true); }}
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        if (!facility) return;
+                        setEditingFacility(facility); 
+                        setEditFacility({ ...facility }); 
+                        setEditFacilityImages((facility.images || []).map(img => ({ ...img, previewUrl: img.url })));
+                        setIsEditModalOpen(true); 
+                      }}
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-3 sm:py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200 text-sm sm:text-base min-w-0"
                     >
                       <FiEdit2 className="w-4 h-4 flex-shrink-0" />
@@ -449,21 +462,26 @@ const Facilities = () => {
                 setEditLoading(true);
                 setFormError(null);
                 if (!token) return;
-                if (!editFacility.name.trim()) { setFormError('Name is required'); setEditLoading(false); return; }
-                if (!editFacility.description.trim()) { setFormError('Description is required'); setEditLoading(false); return; }
-                if (!editFacility.location.trim()) { setFormError('Location is required'); setEditLoading(false); return; }
+                if (!editFacility?.name?.trim()) { setFormError('Name is required'); setEditLoading(false); return; }
+                if (!editFacility?.description?.trim()) { setFormError('Description is required'); setEditLoading(false); return; }
+                if (!editFacility?.location?.trim()) { setFormError('Location is required'); setEditLoading(false); return; }
                 const formData = new FormData();
-                formData.append('name', editFacility.name);
-                formData.append('description', editFacility.description);
-                formData.append('location', editFacility.location);
-                formData.append('type', editFacility.type);
-                formData.append('icon', editFacility.icon);
+                formData.append('name', editFacility?.name || '');
+                formData.append('description', editFacility?.description || '');
+                formData.append('location', editFacility?.location || '');
+                formData.append('type', editFacility?.type || 'Academic');
+                formData.append('icon', editFacility?.icon || 'FiBookOpen');
                 // Keep images
                 const keepPublicIds = editFacilityImages.filter(img => img.public_id).map(img => img.public_id);
                 formData.append('keepImages', JSON.stringify(keepPublicIds));
                 // New images
                 editFacilityImages.forEach(img => { if (img.file) formData.append('images', img.file); });
                 try {
+                  if (!editFacility?._id) {
+                    setFormError('Facility ID is missing');
+                    setEditLoading(false);
+                    return;
+                  }
                   const res = await fetch(`${API_BASE}/api/facilities/${editFacility._id}`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}` },
@@ -486,8 +504,8 @@ const Facilities = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                       <input
                         type="text"
-                        value={editFacility.name}
-                        onChange={e => setEditFacility({ ...editFacility, name: e.target.value })}
+                        value={editFacility?.name || ''}
+                        onChange={e => setEditFacility(editFacility ? { ...editFacility, name: e.target.value } : null)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
                         required
                         placeholder="e.g. Main Library"
@@ -498,8 +516,8 @@ const Facilities = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
                       <input
                         type="text"
-                        value={editFacility.location}
-                        onChange={e => setEditFacility({ ...editFacility, location: e.target.value })}
+                        value={editFacility?.location || ''}
+                        onChange={e => setEditFacility(editFacility ? { ...editFacility, location: e.target.value } : null)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
                         required
                         placeholder="e.g. Central Block"
@@ -510,8 +528,8 @@ const Facilities = () => {
                   <div className="mt-6">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                     <textarea
-                      value={editFacility.description}
-                      onChange={e => setEditFacility({ ...editFacility, description: e.target.value })}
+                      value={editFacility?.description || ''}
+                      onChange={e => setEditFacility(editFacility ? { ...editFacility, description: e.target.value } : null)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
                       rows={3}
                       required
@@ -523,8 +541,8 @@ const Facilities = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
                       <select
-                        value={editFacility.type}
-                        onChange={e => setEditFacility({ ...editFacility, type: e.target.value })}
+                        value={editFacility?.type || 'Academic'}
+                        onChange={e => setEditFacility(editFacility ? { ...editFacility, type: e.target.value as Facility['type'] } : null)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
                         required
                       >
@@ -538,8 +556,8 @@ const Facilities = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Icon</label>
                       <select
-                        value={editFacility.icon}
-                        onChange={e => setEditFacility({ ...editFacility, icon: e.target.value })}
+                        value={editFacility?.icon || 'FiBookOpen'}
+                        onChange={e => setEditFacility(editFacility ? { ...editFacility, icon: e.target.value } : null)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
                         required
                       >
@@ -549,7 +567,7 @@ const Facilities = () => {
                       </select>
                       <div className="flex gap-4 mt-2">
                         {iconOptions.map(opt => (
-                          <span key={opt.value} className={`p-2 rounded-full border ${editFacility.icon === opt.value ? 'border-[#00C6A7]' : 'border-gray-200'}`}>{opt.icon}</span>
+                          <span key={opt.value} className={`p-2 rounded-full border ${editFacility?.icon === opt.value ? 'border-[#00C6A7]' : 'border-gray-200'}`}>{opt.icon}</span>
                         ))}
                       </div>
                       <p className="text-xs text-gray-500 mt-1">Choose an icon for this facility.</p>
@@ -609,8 +627,8 @@ const Facilities = () => {
               </button>
 
               <div className="flex items-center gap-3 mb-4">
-                {iconOptions.find(opt => opt.value === selectedFacility.icon)?.icon}
-                <h2 className="text-2xl font-bold text-gray-900 pr-8">{selectedFacility.name}</h2>
+                {iconOptions.find(opt => opt.value === selectedFacility?.icon)?.icon}
+                <h2 className="text-2xl font-bold text-gray-900 pr-8">{selectedFacility?.name || 'Facility'}</h2>
               </div>
               {/* Images Gallery */}
               {selectedFacility.images && selectedFacility.images.length > 0 && (
@@ -631,7 +649,7 @@ const Facilities = () => {
                 {/* Description */}
                 <div>
                   <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
-                  <p className="text-gray-700 whitespace-pre-wrap">{selectedFacility.description}</p>
+                  <p className="text-gray-700 whitespace-pre-wrap">{selectedFacility?.description || 'No description available'}</p>
                 </div>
                 {/* Meta Info - Location, Date, Posted By */}
                 <div className="space-y-3 pt-4 border-t border-gray-100">
@@ -654,7 +672,7 @@ const Facilities = () => {
                   {selectedFacility.createdBy && selectedFacility.createdAt && (
                     <div className="flex items-center text-sm text-gray-500">
                       <FiUser className="w-5 h-5 mr-2 text-gray-500" />
-                      <span className="truncate">Posted by {selectedFacility.createdBy.name || selectedFacility.createdBy.email || 'User'} on {new Date(selectedFacility.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</span>
+                      <span className="truncate">Posted by {selectedFacility.createdBy?.name || selectedFacility.createdBy?.email || 'User'} on {new Date(selectedFacility.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</span>
                     </div>
                   )}
                 </div>
@@ -664,6 +682,7 @@ const Facilities = () => {
                 <div className="flex gap-2 pt-6">
                   <button
                     onClick={() => {
+                      if (!selectedFacility) return;
                       setEditingFacility(selectedFacility);
                       setEditFacility({ ...selectedFacility });
                       setEditFacilityImages((selectedFacility.images || []).map(img => ({ ...img, previewUrl: img.url })));
@@ -674,6 +693,7 @@ const Facilities = () => {
                   ><span className="truncate">Edit</span></button>
                   <button
                     onClick={async () => {
+                      if (!selectedFacility) return;
                       if (!window.confirm('Are you sure you want to delete this facility?')) return;
                       try {
                         const res = await fetch(`${API_BASE}/api/facilities/${selectedFacility._id}`, {

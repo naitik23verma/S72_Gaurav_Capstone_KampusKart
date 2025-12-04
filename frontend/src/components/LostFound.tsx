@@ -78,7 +78,8 @@ const LostFound = () => {
   // AI Autocomplete hook
   const preExistingStrings = useMemo(() => {
     const pool: string[] = [];
-    items.forEach(i => {
+    items.forEach((i: LostFoundItem | null) => {
+      if (!i) return;
       if (i.title) pool.push(i.title);
       if (i.location) pool.push(i.location);
       if (i.description) pool.push(i.description);
@@ -118,12 +119,12 @@ const LostFound = () => {
     setEditingItem(item);
     const formattedDate = item.date ? new Date(item.date).toISOString().split('T')[0] : '';
     setNewItem({
-      type: item.type,
-      title: item.title,
-      description: item.description,
-      location: item.location || '',
+      type: item?.type || 'Lost',
+      title: item?.title || '',
+      description: item?.description || '',
+      location: item?.location || '',
       date: formattedDate,
-      contact: item.contact || '',
+      contact: item?.contact || '',
       images: (item.images || []).map(img => ({
         existing: img,
         previewUrl: img.url,
@@ -351,7 +352,7 @@ const LostFound = () => {
         </div>
         {/* Card Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-          {items.map((item, idx) => (
+          {items.filter(item => item).map((item, idx) => (
             <div
               key={item._id}
               ref={idx === items.length - 1 ? lastItemRef : undefined}
@@ -364,7 +365,7 @@ const LostFound = () => {
                   <>
                     <img
                       src={item.images[0].url}
-                      alt={item.title}
+                      alt={item?.title || 'Item'}
                       className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-300"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -395,7 +396,7 @@ const LostFound = () => {
 
               {/* Content Section */}
               <div className="p-4 sm:p-5 md:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{item.title}</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{item?.title || 'Item'}</h2>
                 <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{item.description}</p>
 
                 {/* Meta Info Row - Location, Date, User */}

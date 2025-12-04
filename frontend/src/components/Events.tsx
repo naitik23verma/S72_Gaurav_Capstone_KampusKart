@@ -527,10 +527,29 @@ const Events = () => {
     setSelectedEventForDetails(null);
   };
 
+  const closeEventModal = () => {
+    setIsModalOpen(false);
+    setEditingEvent(null);
+    setNewEvent({ 
+      title: '', 
+      description: '', 
+      date: '', 
+      location: '', 
+      status: 'Upcoming', 
+      registerUrl: '', 
+      images: [],
+      operatingHours: '',
+      contactInfo: { name: undefined, email: undefined, phone: undefined },
+      mapLocation: { building: undefined, floor: undefined, room: undefined, coordinates: undefined }
+    });
+    setError(null);
+  };
+
   const filteredEvents = events.filter(event =>
+    event &&
     (filterStatus === 'All' || event.status === filterStatus) &&
-    (event.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-     event.description.toLowerCase().includes(searchQuery.toLowerCase()))
+    ((event.title?.toLowerCase()?.includes(searchQuery.toLowerCase()) ?? false) || 
+     (event.description?.toLowerCase()?.includes(searchQuery.toLowerCase()) ?? false))
   );
 
   if (isLoading) {

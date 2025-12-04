@@ -73,8 +73,10 @@ const Login: React.FC = () => {
       <div className="flex flex-col justify-center items-center w-full md:w-1/2 px-8 py-8 bg-white rounded-2xl shadow-lg">
         <div className="w-full max-w-sm">
           <div className="flex items-center justify-center gap-6 mb-6">
-            <img src="/Logo.png" alt="KampusKart Logo" className="h-12 w-12 object-contain" style={{ background: 'none', border: 'none', borderRadius: 0, boxShadow: 'none' }} />
-            <span className="text-h4 font-extrabold text-black tracking-tight font-sans">Kampuskart</span>
+            <Link to="/" className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+              <img src="/Logo.png" alt="KampusKart Logo" className="h-12 w-12 object-contain" style={{ background: 'none', border: 'none', borderRadius: 0, boxShadow: 'none' }} />
+              <span className="text-h4 font-extrabold text-black tracking-tight font-sans">Kampuskart</span>
+            </Link>
           </div>
           <h2 className="mb-6 text-h3 font-bold text-black text-center pt-6">Login</h2>
           <form className="space-y-4" onSubmit={handleSubmit}>

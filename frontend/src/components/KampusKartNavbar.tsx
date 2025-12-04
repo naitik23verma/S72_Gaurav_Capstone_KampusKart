@@ -13,10 +13,11 @@ const KampusKartNavbar: React.FC = () => {
     navigate('/login');
   };
 
-  const menuItems = token && user ? [
+  // Full menu structure - same for both authenticated and unauthenticated
+  const fullMenuItems = [
     {
       title: "Home",
-      url: "/home",
+      url: token && user ? "/home" : "/",
     },
     {
       title: "Features",
@@ -25,32 +26,32 @@ const KampusKartNavbar: React.FC = () => {
         {
           title: "Lost & Found",
           description: "Report or find lost items on campus",
-          url: "/lostfound",
+          url: token && user ? "/lostfound" : "/login",
         },
         {
           title: "Complaints",
           description: "Submit and track campus complaints",
-          url: "/complaints",
+          url: token && user ? "/complaints" : "/login",
         },
         {
           title: "Events",
           description: "Discover and join campus events",
-          url: "/events",
+          url: token && user ? "/events" : "/login",
         },
         {
           title: "Clubs Recruitment",
           description: "Join student clubs and organizations",
-          url: "/clubs-recruitment",
+          url: token && user ? "/clubs-recruitment" : "/login",
         },
         {
           title: "News",
           description: "Stay updated with campus news",
-          url: "/news",
+          url: token && user ? "/news" : "/login",
         },
         {
           title: "Facilities",
           description: "Explore campus facilities",
-          url: "/facilities",
+          url: token && user ? "/facilities" : "/login",
         },
       ],
     },
@@ -61,52 +62,23 @@ const KampusKartNavbar: React.FC = () => {
         {
           title: "Campus Map",
           description: "Navigate the campus with interactive map",
-          url: "/campus-map",
+          url: token && user ? "/campus-map" : "/login",
         },
         {
           title: "Chat",
           description: "Connect with students and staff",
-          url: "/chat",
+          url: token && user ? "/chat" : "/login",
         },
         {
           title: "Profile",
           description: "Manage your account and settings",
-          url: "/profile",
-        },
-      ],
-    },
-  ] : [
-    {
-      title: "Home",
-      url: "/",
-    },
-    {
-      title: "Features",
-      url: "#",
-      items: [
-        {
-          title: "Lost & Found",
-          description: "Report or find lost items on campus",
-          url: "/lostfound",
-        },
-        {
-          title: "Campus Map",
-          description: "Navigate the campus with interactive map",
-          url: "/campus-map",
-        },
-        {
-          title: "Events",
-          description: "Discover and join campus events",
-          url: "/events",
-        },
-        {
-          title: "News",
-          description: "Stay updated with campus news",
-          url: "/news",
+          url: token && user ? "/profile" : "/login",
         },
       ],
     },
   ];
+
+  const menuItems = fullMenuItems;
 
   const mobileExtraLinks = token && user ? [
     { name: "Profile", url: "/profile" },

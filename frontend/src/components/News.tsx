@@ -181,6 +181,19 @@ const News = () => {
     }
   };
 
+  const closeNewsModal = () => {
+    setIsModalOpen(false);
+    setEditingNews(null);
+    setNewNews({
+      title: '',
+      description: '',
+      date: '',
+      category: 'Campus'
+    });
+    setNewsImages([]);
+    setError(null);
+  };
+
   const filteredNews = news.filter(item =>
     (filterCategory === 'All' || item.category === filterCategory) &&
     (item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 

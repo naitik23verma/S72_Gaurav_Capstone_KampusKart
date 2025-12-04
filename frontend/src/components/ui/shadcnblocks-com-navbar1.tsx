@@ -1,3 +1,4 @@
+import React from "react";
 import { Book, Menu, Sunset, Trees, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -28,7 +29,7 @@ interface MenuItem {
   title: string;
   url: string;
   description?: string;
-  icon?: JSX.Element;
+  icon?: React.ReactElement;
   items?: MenuItem[];
 }
 
@@ -150,8 +151,8 @@ const Navbar1 = ({
   themeToggle,
 }: Navbar1Props) => {
   return (
-    <section className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md w-full" style={{ overflowX: 'hidden', overflowY: 'visible', overflow: 'visible' }}>
-      <div className="max-w-7xl mx-auto px-4 py-3" style={{ overflow: 'visible' }}>
+    <section className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md w-full border-b border-gray-100" style={{ overflowX: 'hidden', overflowY: 'visible', overflow: 'visible' }}>
+      <div className="max-w-7xl mx-auto px-4 py-[0.8625rem]" style={{ overflow: 'visible' }}>
         <nav className="hidden justify-between lg:flex">
           <div className="flex items-center gap-6">
             <Link to={logo.url} className="flex items-center gap-2">
@@ -168,15 +169,15 @@ const Navbar1 = ({
           </div>
           <div className="flex gap-2 items-center">
             {themeToggle}
-            <Button asChild variant="outline" size="sm" className="text-black bg-white border border-[#E0E0E0] hover:bg-[#FFD166] hover:text-black">
+            <Button asChild variant="outline" size="sm" className="text-black bg-white border border-gray-300 hover:bg-[#FFD166] hover:text-black hover:border-[#FFD166] transition-colors">
               <Link to={auth.login.url}>{auth.login.text}</Link>
             </Button>
             {auth.signup.onClick ? (
-              <Button size="sm" onClick={auth.signup.onClick} className="bg-[#181818] text-white hover:bg-[#00C6A7] hover:text-white">
+              <Button size="sm" onClick={auth.signup.onClick} className="bg-[#181818] text-white hover:bg-[#00C6A7] hover:text-white transition-colors shadow-sm hover:shadow-md">
                 {auth.signup.text}
               </Button>
             ) : (
-              <Button asChild size="sm" className="bg-[#181818] text-white hover:bg-[#00C6A7] hover:text-white">
+              <Button asChild size="sm" className="bg-[#181818] text-white hover:bg-[#00C6A7] hover:text-white transition-colors shadow-sm hover:shadow-md">
                 <Link to={auth.signup.url}>{auth.signup.text}</Link>
               </Button>
             )}
@@ -219,7 +220,7 @@ const Navbar1 = ({
                         <Link
                           key={idx}
                           to={link.url}
-                          className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold text-black bg-white transition-colors hover:bg-[#FFD166] hover:text-black"
+                          className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold text-black bg-white transition-colors hover:bg-[#FFD166] hover:text-black hover:shadow-sm"
                         >
                           {link.name}
                         </Link>
@@ -232,15 +233,15 @@ const Navbar1 = ({
                           {themeToggle}
                         </div>
                       )}
-                      <Button asChild variant="outline" className="text-black bg-white border border-[#E0E0E0] hover:bg-[#FFD166] hover:text-black">
+                      <Button asChild variant="outline" className="text-black bg-white border border-gray-300 hover:bg-[#FFD166] hover:text-black hover:border-[#FFD166] transition-colors">
                         <Link to={auth.login.url}>{auth.login.text}</Link>
                       </Button>
                       {auth.signup.onClick ? (
-                        <Button onClick={auth.signup.onClick} className="bg-[#181818] text-white hover:bg-[#00C6A7] hover:text-white">
+                        <Button onClick={auth.signup.onClick} className="bg-[#181818] text-white hover:bg-[#00C6A7] hover:text-white transition-colors shadow-sm hover:shadow-md">
                           {auth.signup.text}
                         </Button>
                       ) : (
-                        <Button asChild className="bg-[#181818] text-white hover:bg-[#00C6A7] hover:text-white">
+                        <Button asChild className="bg-[#181818] text-white hover:bg-[#00C6A7] hover:text-white transition-colors shadow-sm hover:shadow-md">
                           <Link to={auth.signup.url}>{auth.signup.text}</Link>
                         </Button>
                       )}
@@ -259,14 +260,14 @@ const renderMenuItem = (item: MenuItem) => {
   if (item.items) {
     return (
       <NavigationMenuItem key={item.title} className="text-black">
-        <NavigationMenuTrigger className="text-black font-bold hover:text-black data-[state=open]:text-black">{item.title}</NavigationMenuTrigger>
+        <NavigationMenuTrigger className="text-black font-bold bg-gray-50 hover:bg-[#00C6A7] hover:text-white data-[state=open]:bg-[#00C6A7] data-[state=open]:text-white transition-colors rounded-full px-4 py-2">{item.title}</NavigationMenuTrigger>
         <NavigationMenuContent>
-          <ul className="w-80 p-3" style={{ overflow: 'hidden', overflowY: 'hidden', overflowX: 'hidden' }}>
+          <ul className="w-80 p-3 bg-white" style={{ overflow: 'hidden', overflowY: 'hidden', overflowX: 'hidden' }}>
             {item.items.map((subItem) => (
               <li key={subItem.title}>
                 <NavigationMenuLink asChild>
                   <Link
-                    className="flex select-none gap-4 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-[#FFD166] hover:text-gray-900 focus:bg-[#FFD166] focus:text-gray-900"
+                    className="flex select-none gap-4 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-[#FFD166] hover:text-black focus:bg-[#FFD166] focus:text-black"
                     to={subItem.url}
                   >
                     <div>
@@ -294,7 +295,7 @@ const renderMenuItem = (item: MenuItem) => {
       <NavigationMenuLink asChild>
         <Link
           to={item.url}
-          className="group inline-flex h-10 w-max items-center justify-center rounded-full px-4 py-2 text-sm font-bold text-black bg-white transition-colors hover:bg-[#FFD166] hover:text-black focus:bg-[#FFD166] focus:text-black"
+          className="group inline-flex h-10 w-max items-center justify-center rounded-full px-4 py-2 text-sm font-bold text-black bg-gray-50 transition-colors hover:bg-[#00C6A7] hover:text-white focus:bg-[#00C6A7] focus:text-white"
         >
           {item.title}
         </Link>
@@ -307,7 +308,7 @@ const renderMobileMenuItem = (item: MenuItem) => {
   if (item.items) {
     return (
       <AccordionItem key={item.title} value={item.title} className="border-b-0">
-        <AccordionTrigger className="py-0 font-bold hover:no-underline text-black">
+        <AccordionTrigger className="py-0 font-bold hover:no-underline text-black hover:text-[#00C6A7] data-[state=open]:text-[#00C6A7] transition-colors">
           {item.title}
         </AccordionTrigger>
         <AccordionContent className="mt-2">
@@ -315,7 +316,7 @@ const renderMobileMenuItem = (item: MenuItem) => {
             <Link
               key={subItem.title}
               to={subItem.url}
-              className="flex select-none gap-4 rounded-md p-3 leading-none outline-none transition-colors hover:bg-[#FFD166] hover:text-gray-900 focus:bg-[#FFD166] focus:text-gray-900"
+              className="flex select-none gap-4 rounded-md p-3 leading-none outline-none transition-colors hover:bg-[#FFD166] hover:text-black focus:bg-[#FFD166] focus:text-black"
             >
               <div>
                 <div className="text-sm font-semibold">{subItem.title}</div>
@@ -333,7 +334,7 @@ const renderMobileMenuItem = (item: MenuItem) => {
   }
 
   return (
-    <Link key={item.title} to={item.url} className="font-bold text-black hover:text-black">
+    <Link key={item.title} to={item.url} className="font-bold text-black hover:text-[#00C6A7] transition-colors">
       {item.title}
     </Link>
   );

@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { FiPlus, FiCalendar, FiFileText, FiSearch, FiAlertCircle, FiInfo, FiTag, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiPlus, FiCalendar, FiFileText, FiSearch, FiInfo, FiTag, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
 import AIAutocomplete from './AIAutocomplete';
 import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
+import { FeatureModal } from './common/FeatureModal';
+import { ImageUpload, ImageFile } from './common/ImageUpload';
+import { validateMultipleRequired } from '../utils/formValidation';
 
 interface NewsItem {
   _id: string;
@@ -30,7 +33,7 @@ const News = () => {
     category: 'Campus'
   });
   const [error, setError] = useState<string | null>(null);
-  const [newsImages, setNewsImages] = useState<{ file?: File; previewUrl: string }[]>([]);
+  const [newsImages, setNewsImages] = useState<ImageFile[]>([]);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const dragImage = useRef<number | null>(null);
   const dragOverImage = useRef<number | null>(null);
@@ -172,10 +175,7 @@ const News = () => {
       } else {
         setNews([savedNews, ...news]);
       }
-      setIsModalOpen(false);
-      setEditingNews(null);
-      setNewNews({ title: '', description: '', date: '', category: 'Campus' });
-      setNewsImages([]);
+      closeNewsModal();
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to save news');
     }
@@ -328,33 +328,12 @@ const News = () => {
         </div>
 
         {/* Add/Edit News Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                          <div className="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto relative">
-                {/* Close Button */}
-                <button
-                  onClick={() => { setIsModalOpen(false); setEditingNews(null); setNewNews({ title: '', description: '', date: '', category: 'Campus' }); setNewsImages([]); }}
-                  aria-label="Close"
-                  className="absolute top-4 right-4 bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-
-                <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {editingNews ? 'Edit News' : 'Add News'}
-                </h2>
-              </div>
-              {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="flex items-center text-red-700">
-                    <FiAlertCircle className="w-5 h-5 mr-2" />
-                    <span>{error}</span>
-                  </div>
-                </div>
-              )}
+        <FeatureModal
+          isOpen={isModalOpen}
+          onClose={closeNewsModal}
+          title={editingNews ? 'Edit News' : 'Add News'}
+          error={error}
+        >
               <form onSubmit={handleSaveNews} className="space-y-8">
                 {/* News Details Section */}
                 <div className="border-b pb-6 mb-6 bg-gray-50 rounded-lg p-6">
@@ -422,82 +401,16 @@ const News = () => {
                   </div>
                 </div>
                 {/* Images Section */}
-                <div className="bg-gray-50 rounded-lg p-6">
-                  <h3 className="text-lg font-bold mb-4 text-gray-900">Images (Optional, Max 5)</h3>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Images</label>
-                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                    <div className="space-y-1 text-center">
-                      <div className="flex text-sm text-gray-600">
-                        <label htmlFor="news-file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-[#3FA9F6] hover:text-blue-500 focus-within:outline-none">
-                          <span>Upload files</span>
-                          <input
-                            id="news-file-upload"
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            className="sr-only"
-                            onChange={e => {
-                              if (e.target.files) {
-                                const filesArray = Array.from(e.target.files).slice(0, 5 - newsImages.length);
-                                setNewsImages([
-                                  ...newsImages,
-                                  ...filesArray.map(file => ({ file, previewUrl: URL.createObjectURL(file) }))
-                                ]);
-                              }
-                            }}
-                            disabled={newsImages.length >= 5}
-                          />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
-                      </div>
-                      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB each. Add clear images to help illustrate the news.</p>
-                    </div>
-                  </div>
-                  {newsImages.length > 0 && (
-                    <div className="mt-2 grid grid-cols-5 gap-2">
-                      {newsImages.map((image, index) => (
-                        <div
-                          key={index}
-                          className="relative cursor-move"
-                          draggable
-                          onDragStart={() => { dragImage.current = index; }}
-                          onDragEnter={() => { dragOverImage.current = index; }}
-                          onDragEnd={() => {
-                            if (dragImage.current === null || dragOverImage.current === null) return;
-                            const newImages = [...newsImages];
-                            const dragged = newImages.splice(dragImage.current, 1)[0];
-                            newImages.splice(dragOverImage.current, 0, dragged);
-                            setNewsImages(newImages);
-                            dragImage.current = null;
-                            dragOverImage.current = null;
-                          }}
-                          onDragOver={e => e.preventDefault()}
-                        >
-                          <img
-                            src={image.previewUrl}
-                            alt={`Preview ${index + 1}`}
-                            className="h-28 w-28 object-cover rounded-md cursor-zoom-in hover:opacity-90 transition-opacity duration-200"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setNewsImages(newsImages.filter((_, i) => i !== index))}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                            aria-label={`Remove image ${index + 1}`}
-                          >
-                            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                              <line x1="18" y1="6" x2="6" y2="18" />
-                              <line x1="6" y1="6" x2="18" y2="18" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <ImageUpload
+                  images={newsImages}
+                  onImagesChange={setNewsImages}
+                  maxImages={5}
+                  id="news-image-upload"
+                />
                 <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
                   <button
                     type="button"
-                    onClick={() => { setIsModalOpen(false); setEditingNews(null); setNewNews({ title: '', description: '', date: '', category: 'Campus' }); setNewsImages([]); }}
+                    onClick={closeNewsModal}
                     className="px-4 py-2 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
                   >
                     Cancel
@@ -510,9 +423,7 @@ const News = () => {
                   </button>
                 </div>
               </form>
-            </div>
-          </div>
-        )}
+        </FeatureModal>
 
         {/* Zoomed Image Modal */}
         {zoomedImage && (

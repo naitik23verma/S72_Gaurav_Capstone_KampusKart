@@ -7,6 +7,11 @@ import path from 'path';
 export default defineConfig({
   plugins: [react(), basicSsl()],
   base: '/',
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
   build: {
     outDir: 'dist',
     sourcemap: true,
@@ -14,10 +19,5 @@ export default defineConfig({
   server: {
     port: 3000,
     https: true,
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
   },
 }); 

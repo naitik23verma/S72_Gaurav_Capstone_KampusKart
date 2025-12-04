@@ -150,13 +150,13 @@ const Navbar1 = ({
   themeToggle,
 }: Navbar1Props) => {
   return (
-    <section className="fixed top-0 left-0 right-0 z-50 bg-[#FAFAFA] backdrop-blur-sm bg-opacity-95 shadow-sm border-b border-gray-200/50 w-full" style={{ overflowX: 'hidden', overflowY: 'visible', overflow: 'visible' }}>
+    <section className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md w-full" style={{ overflowX: 'hidden', overflowY: 'visible', overflow: 'visible' }}>
       <div className="max-w-7xl mx-auto px-4 py-3" style={{ overflow: 'visible' }}>
         <nav className="hidden justify-between lg:flex">
           <div className="flex items-center gap-6">
             <Link to={logo.url} className="flex items-center gap-2">
               <img src={logo.src} className="w-8" alt={logo.alt} />
-              <span className="text-lg font-black text-gray-900 tracking-tight">{logo.title}</span>
+              <span className="text-lg font-extrabold text-black tracking-tight">{logo.title}</span>
             </Link>
             <div className="flex items-center">
               <NavigationMenu>
@@ -168,15 +168,15 @@ const Navbar1 = ({
           </div>
           <div className="flex gap-2 items-center">
             {themeToggle}
-            <Button asChild variant="outline" size="sm">
+            <Button asChild variant="outline" size="sm" className="text-black bg-white border border-[#E0E0E0] hover:bg-[#FFD166] hover:text-black">
               <Link to={auth.login.url}>{auth.login.text}</Link>
             </Button>
             {auth.signup.onClick ? (
-              <Button size="sm" onClick={auth.signup.onClick}>
+              <Button size="sm" onClick={auth.signup.onClick} className="bg-[#181818] text-white hover:bg-[#00C6A7] hover:text-white">
                 {auth.signup.text}
               </Button>
             ) : (
-              <Button asChild size="sm">
+              <Button asChild size="sm" className="bg-[#181818] text-white hover:bg-[#00C6A7] hover:text-white">
                 <Link to={auth.signup.url}>{auth.signup.text}</Link>
               </Button>
             )}
@@ -186,7 +186,7 @@ const Navbar1 = ({
           <div className="flex items-center justify-between">
             <Link to={logo.url} className="flex items-center gap-2">
               <img src={logo.src} className="w-8" alt={logo.alt} />
-              <span className="text-lg font-black text-gray-900 tracking-tight">{logo.title}</span>
+              <span className="text-lg font-extrabold text-black tracking-tight">{logo.title}</span>
             </Link>
             <Sheet>
               <SheetTrigger asChild>
@@ -199,7 +199,7 @@ const Navbar1 = ({
                     <SheetTitle>
                       <Link to={logo.url} className="flex items-center gap-2">
                         <img src={logo.src} className="w-8" alt={logo.alt} />
-                        <span className="text-lg font-black text-gray-900 tracking-tight">
+                        <span className="text-lg font-extrabold text-black tracking-tight">
                           {logo.title}
                         </span>
                       </Link>
@@ -219,7 +219,7 @@ const Navbar1 = ({
                         <Link
                           key={idx}
                           to={link.url}
-                          className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:bg-[#FFD166] hover:text-gray-900"
+                          className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold text-black bg-white transition-colors hover:bg-[#FFD166] hover:text-black"
                         >
                           {link.name}
                         </Link>
@@ -232,15 +232,15 @@ const Navbar1 = ({
                           {themeToggle}
                         </div>
                       )}
-                      <Button asChild variant="outline">
+                      <Button asChild variant="outline" className="text-black bg-white border border-[#E0E0E0] hover:bg-[#FFD166] hover:text-black">
                         <Link to={auth.login.url}>{auth.login.text}</Link>
                       </Button>
                       {auth.signup.onClick ? (
-                        <Button onClick={auth.signup.onClick}>
+                        <Button onClick={auth.signup.onClick} className="bg-[#181818] text-white hover:bg-[#00C6A7] hover:text-white">
                           {auth.signup.text}
                         </Button>
                       ) : (
-                        <Button asChild>
+                        <Button asChild className="bg-[#181818] text-white hover:bg-[#00C6A7] hover:text-white">
                           <Link to={auth.signup.url}>{auth.signup.text}</Link>
                         </Button>
                       )}
@@ -258,8 +258,8 @@ const Navbar1 = ({
 const renderMenuItem = (item: MenuItem) => {
   if (item.items) {
     return (
-      <NavigationMenuItem key={item.title} className="text-gray-900">
-        <NavigationMenuTrigger className="text-gray-900 font-semibold hover:text-[#00C6A7] data-[state=open]:text-[#00C6A7]">{item.title}</NavigationMenuTrigger>
+      <NavigationMenuItem key={item.title} className="text-black">
+        <NavigationMenuTrigger className="text-black font-bold hover:text-black data-[state=open]:text-black">{item.title}</NavigationMenuTrigger>
         <NavigationMenuContent>
           <ul className="w-80 p-3" style={{ overflow: 'hidden', overflowY: 'hidden', overflowX: 'hidden' }}>
             {item.items.map((subItem) => (
@@ -269,7 +269,6 @@ const renderMenuItem = (item: MenuItem) => {
                     className="flex select-none gap-4 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-[#FFD166] hover:text-gray-900 focus:bg-[#FFD166] focus:text-gray-900"
                     to={subItem.url}
                   >
-                    {subItem.icon}
                     <div>
                       <div className="text-sm font-semibold">
                         {subItem.title}
@@ -295,7 +294,7 @@ const renderMenuItem = (item: MenuItem) => {
       <NavigationMenuLink asChild>
         <Link
           to={item.url}
-          className="group inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-semibold text-gray-900 transition-colors hover:bg-[#FFD166] hover:text-gray-900 focus:bg-[#FFD166] focus:text-gray-900"
+          className="group inline-flex h-10 w-max items-center justify-center rounded-full px-4 py-2 text-sm font-bold text-black bg-white transition-colors hover:bg-[#FFD166] hover:text-black focus:bg-[#FFD166] focus:text-black"
         >
           {item.title}
         </Link>
@@ -308,7 +307,7 @@ const renderMobileMenuItem = (item: MenuItem) => {
   if (item.items) {
     return (
       <AccordionItem key={item.title} value={item.title} className="border-b-0">
-        <AccordionTrigger className="py-0 font-semibold hover:no-underline text-gray-900">
+        <AccordionTrigger className="py-0 font-bold hover:no-underline text-black">
           {item.title}
         </AccordionTrigger>
         <AccordionContent className="mt-2">
@@ -318,7 +317,6 @@ const renderMobileMenuItem = (item: MenuItem) => {
               to={subItem.url}
               className="flex select-none gap-4 rounded-md p-3 leading-none outline-none transition-colors hover:bg-[#FFD166] hover:text-gray-900 focus:bg-[#FFD166] focus:text-gray-900"
             >
-              {subItem.icon}
               <div>
                 <div className="text-sm font-semibold">{subItem.title}</div>
                 {subItem.description && (
@@ -335,7 +333,7 @@ const renderMobileMenuItem = (item: MenuItem) => {
   }
 
   return (
-    <Link key={item.title} to={item.url} className="font-semibold text-gray-900 hover:text-[#00C6A7]">
+    <Link key={item.title} to={item.url} className="font-bold text-black hover:text-black">
       {item.title}
     </Link>
   );

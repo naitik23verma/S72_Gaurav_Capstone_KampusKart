@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { FiPlus, FiCalendar, FiMapPin, FiSearch, FiAlertCircle, FiFileText, FiTag, FiMail, FiInfo, FiClock, FiUser, FiPhone } from 'react-icons/fi';
+import { FiPlus, FiCalendar, FiMapPin, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiClock, FiUser, FiPhone } from 'react-icons/fi';
 import { FaSearch } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
 import AIAutocomplete from './AIAutocomplete';
 import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
+import { FeatureModal } from './common/FeatureModal';
+import { ImageUpload, ImageFile } from './common/ImageUpload';
+import { validateMultipleRequired, validateEmail, validatePhone, validateUrl } from '../utils/formValidation';
 
 interface Event {
   _id: string;
@@ -276,8 +279,7 @@ const Events = () => {
     location: '' as string | undefined,
     status: 'Upcoming' as Event['status'],
     registerUrl: '',
-    image: undefined as File | undefined,
-    imagePreview: '',
+    images: [] as ImageFile[],
     operatingHours: '',
     contactInfo: {
       name: undefined as string | undefined,
@@ -383,8 +385,8 @@ const Events = () => {
       formData.append('operatingHours', newEvent.operatingHours);
       formData.append('contactInfo', JSON.stringify(newEvent.contactInfo));
       formData.append('mapLocation', JSON.stringify(newEvent.mapLocation || { building: undefined, floor: undefined, room: undefined, coordinates: undefined }));
-      if (newEvent.image) {
-        formData.append('image', newEvent.image);
+      if (newEvent.images.length > 0 && newEvent.images[0].file) {
+        formData.append('image', newEvent.images[0].file);
       }
       const response = await fetch(`${API_BASE}/api/events`, {
         method: 'POST',
@@ -407,8 +409,7 @@ const Events = () => {
         location: '', 
         status: 'Upcoming', 
         registerUrl: '', 
-        image: undefined, 
-        imagePreview: '',
+        images: [],
         operatingHours: '',
         contactInfo: { name: undefined, email: undefined, phone: undefined },
         mapLocation: { building: undefined, floor: undefined, room: undefined, coordinates: undefined }
@@ -427,8 +428,7 @@ const Events = () => {
       location: event.location || '',
       status: event.status,
       registerUrl: event.registerUrl || '',
-      image: undefined,
-      imagePreview: event.image?.url || '',
+      images: event.image?.url ? [{ url: event.image.url, public_id: event.image.public_id }] : [],
       operatingHours: event.operatingHours || '',
       contactInfo: {
         name: event.contactInfo?.name ?? undefined,
@@ -477,8 +477,8 @@ const Events = () => {
       formData.append('operatingHours', newEvent.operatingHours);
       formData.append('contactInfo', JSON.stringify(newEvent.contactInfo));
       formData.append('mapLocation', JSON.stringify(newEvent.mapLocation || { building: undefined, floor: undefined, room: undefined, coordinates: undefined }));
-      if (newEvent.image) {
-        formData.append('image', newEvent.image);
+      if (newEvent.images.length > 0 && newEvent.images[0].file) {
+        formData.append('image', newEvent.images[0].file);
       }
       const method = editingEvent ? 'PUT' : 'POST';
       const url = editingEvent ? `${API_BASE}/api/events/${editingEvent._id}` : `${API_BASE}/api/events`;
@@ -508,8 +508,7 @@ const Events = () => {
         location: '', 
         status: 'Upcoming', 
         registerUrl: '', 
-        image: undefined, 
-        imagePreview: '',
+        images: [],
         operatingHours: '',
         contactInfo: { name: undefined, email: undefined, phone: undefined },
         mapLocation: { building: undefined, floor: undefined, room: undefined, coordinates: undefined }
@@ -519,12 +518,6 @@ const Events = () => {
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setNewEvent(prev => ({ ...prev, image: file, imagePreview: URL.createObjectURL(file) }));
-    }
-  };
 
   const openEventDetailsModal = (event: Event) => {
     setSelectedEventForDetails(event);
@@ -686,31 +679,12 @@ const Events = () => {
         </div>
 
         {/* Add/Edit Event Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto relative">
-                              <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    {editingEvent ? 'Edit Event' : 'Add New Event'}
-                  </h2>
-                  <button
-                    onClick={() => { setIsModalOpen(false); setEditingEvent(null); setNewEvent({ title: '', description: '', date: '', location: '', status: 'Upcoming', registerUrl: '', image: undefined, imagePreview: '', operatingHours: '', contactInfo: { name: undefined, email: undefined, phone: undefined }, mapLocation: { building: undefined, floor: undefined, room: undefined, coordinates: undefined } }); }}
-                    aria-label="Close"
-                    className="bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="flex items-center text-red-700">
-                    <FiAlertCircle className="w-5 h-5 mr-2" />
-                    <span>{error}</span>
-                  </div>
-                </div>
-              )}
+        <FeatureModal
+          isOpen={isModalOpen}
+          onClose={closeEventModal}
+          title={editingEvent ? 'Edit Event' : 'Add New Event'}
+          error={error}
+        >
               <form onSubmit={editingEvent ? handleSaveEvent : handleAddEvent} className="space-y-8">
                 {/* Event Details Section */}
                 <div className="border-b pb-6 mb-6 bg-gray-50 rounded-lg p-6">
@@ -898,51 +872,19 @@ const Events = () => {
                   </div>
                 </div>
                 {/* Images Section */}
-                <div className="bg-gray-50 rounded-lg p-6">
-                  <h3 className="text-lg font-bold mb-4 text-gray-900">Image (Optional)</h3>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Event Image</label>
-                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                    <div className="space-y-1 text-center">
-                      <div className="flex text-sm text-gray-600">
-                        <label htmlFor="event-file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-[#3FA9F6] hover:text-blue-500 focus-within:outline-none">
-                          <span>Upload file</span>
-                          <input
-                            id="event-file-upload"
-                            type="file"
-                            accept="image/*"
-                            className="sr-only"
-                            onChange={handleImageChange}
-                            disabled={!!newEvent.image}
-                          />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
-                      </div>
-                      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB. Recommended size: 1200x800px. Add a high-quality image that represents your event.</p>
-                    </div>
-                  </div>
-                  {newEvent.imagePreview && (
-                    <div className="mt-2 flex gap-2">
-                      <div className="relative">
-                        <img src={newEvent.imagePreview} alt="Event Preview" className="h-28 w-28 object-cover rounded-md" />
-                        <button
-                          type="button"
-                          onClick={() => setNewEvent({ ...newEvent, image: undefined, imagePreview: '' })}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                          aria-label="Remove image"
-                        >
-                          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <ImageUpload
+                  images={newEvent.images}
+                  onImagesChange={(images) => setNewEvent({ ...newEvent, images })}
+                  maxImages={1}
+                  single={true}
+                  id="event-image-upload"
+                  label="Image"
+                  helpText="PNG, JPG, GIF up to 5MB. Recommended size: 1200x800px. Add a high-quality image that represents your event."
+                />
                 <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
                   <button
                     type="button"
-                    onClick={() => { setIsModalOpen(false); setEditingEvent(null); setNewEvent({ title: '', description: '', date: '', location: '', status: 'Upcoming', registerUrl: '', image: undefined, imagePreview: '', operatingHours: '', contactInfo: { name: undefined, email: undefined, phone: undefined }, mapLocation: { building: undefined, floor: undefined, room: undefined, coordinates: undefined } }); }}
+                    onClick={closeEventModal}
                     className="px-4 py-2 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
                   >
                     Cancel
@@ -955,9 +897,7 @@ const Events = () => {
                   </button>
                 </div>
               </form>
-            </div>
-          </div>
-        )}
+        </FeatureModal>
 
         {/* Event Details Modal */}
         {selectedEventForDetails && (

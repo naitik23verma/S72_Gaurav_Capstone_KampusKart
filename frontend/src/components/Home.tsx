@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiMap, FiSearch, FiCalendar, FiFileText, FiAlertCircle, FiHome, FiUsers } from 'react-icons/fi';
 import { FaComments } from 'react-icons/fa';
-import Navbar from './Navbar';
 
 const features = [
   {
@@ -73,7 +72,6 @@ const socials = [
 const Home = () => {
   return (
     <div className="relative min-h-screen bg-white font-sans overflow-hidden pt-16 md:pt-24">
-      <Navbar />
       {/* SVG Blobs for background */}
       <svg className="absolute left-[-120px] top-[-80px] w-[340px] h-[220px] -z-10" viewBox="0 0 340 220" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M60,40 Q120,0 200,60 T340,40 Q320,120 200,180 T60,180 Q0,120 60,40Z" fill="#FFD166"/></svg>
       <svg className="absolute right-[-120px] top-20 w-[320px] h-[200px] -z-10" viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M40,60 Q100,0 180,40 T320,60 Q300,140 180,180 T40,140 Q0,100 40,60Z" fill="#F05A25"/></svg>

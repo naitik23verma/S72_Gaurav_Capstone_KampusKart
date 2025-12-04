@@ -4,6 +4,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
 import AIAutocomplete from './AIAutocomplete';
 import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
+import { FeatureModal } from './common/FeatureModal';
+import { ImageUpload, ImageFile } from './common/ImageUpload';
+import { validateMultipleRequired } from '../utils/formValidation';
 
 interface Facility {
   _id: string;
@@ -37,13 +40,13 @@ const Facilities = () => {
   });
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [facilityImages, setFacilityImages] = useState<{ file?: File; previewUrl: string }[]>([]);
+  const [facilityImages, setFacilityImages] = useState<ImageFile[]>([]);
   const dragImage = useRef<number | null>(null);
   const dragOverImage = useRef<number | null>(null);
   const [editingFacility, setEditingFacility] = useState<Facility | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editFacility, setEditFacility] = useState<Facility | null>(null);
-  const [editFacilityImages, setEditFacilityImages] = useState<{ file?: File; previewUrl: string; public_id?: string; url?: string }[]>([]);
+  const [editFacilityImages, setEditFacilityImages] = useState<ImageFile[]>([]);
   const editDragImage = useRef<number | null>(null);
   const editDragOverImage = useRef<number | null>(null);
   const iconOptions = [
@@ -103,6 +106,20 @@ const Facilities = () => {
     };
     fetchFacilities();
   }, []);
+
+  const closeAddModal = () => {
+    setIsModalOpen(false);
+    setNewFacility({ name: '', description: '', location: '', type: 'Academic', icon: '🏫' });
+    setFacilityImages([]);
+    setFormError(null);
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingFacility(null);
+    setEditFacility(null);
+    setFormError(null);
+  };
 
   if (isLoading) {
     return (
@@ -256,41 +273,31 @@ const Facilities = () => {
             <div className="col-span-full text-center text-gray-400 py-12">No facilities found.</div>
           )}
         </div>
-        {/* Add Facility Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto relative">
-              {/* Close Button */}
-              <button
-                onClick={() => setIsModalOpen(false)}
-                aria-label="Close"
-                className="absolute top-4 right-4 bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
 
-              <div className="flex items-center gap-3 mb-6">
-                <FiPlus className="text-[#00C6A7] w-8 h-8" />
-                <h2 className="text-2xl font-bold text-gray-900">Add New Facility</h2>
-              </div>
-              {formError && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="flex items-center text-red-700">
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728" /></svg>
-                    <span>{formError}</span>
-                  </div>
-                </div>
-              )}
+        {/* Add Facility Modal */}
+        <FeatureModal
+          isOpen={isModalOpen}
+          onClose={closeAddModal}
+          title="Add New Facility"
+          error={formError}
+        >
               <form onSubmit={async e => {
                 e.preventDefault();
                 setAddLoading(true);
                 setFormError(null);
                 if (!token) return;
-                if (!newFacility.name.trim()) { setFormError('Name is required'); setAddLoading(false); return; }
-                if (!newFacility.description.trim()) { setFormError('Description is required'); setAddLoading(false); return; }
-                if (!newFacility.location.trim()) { setFormError('Location is required'); setAddLoading(false); return; }
+                // Validate required fields
+                const validation = validateMultipleRequired([
+                  { value: newFacility.name, name: 'Name' },
+                  { value: newFacility.description, name: 'Description' },
+                  { value: newFacility.location, name: 'Location' },
+                ]);
+                
+                if (!validation.isValid) {
+                  setFormError(validation.error);
+                  setAddLoading(false);
+                  return;
+                }
                 const formData = new FormData();
                 formData.append('name', newFacility.name);
                 formData.append('description', newFacility.description);
@@ -393,82 +400,17 @@ const Facilities = () => {
                     </div>
                   </div>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-6">
-                  <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Images <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg></h3>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Images</label>
-                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                    <div className="space-y-1 text-center">
-                      <div className="flex text-sm text-gray-600">
-                        <label htmlFor="facility-file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-[#3FA9F6] hover:text-blue-500 focus-within:outline-none">
-                          <span>Upload files</span>
-                          <input
-                            id="facility-file-upload"
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            className="sr-only"
-                            onChange={e => {
-                              if (e.target.files) {
-                                const filesArray = Array.from(e.target.files).slice(0, 5 - facilityImages.length);
-                                setFacilityImages([
-                                  ...facilityImages,
-                                  ...filesArray.map(file => ({ file, previewUrl: URL.createObjectURL(file) }))
-                                ]);
-                              }
-                            }}
-                            disabled={facilityImages.length >= 5}
-                          />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
-                      </div>
-                      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB each. Add clear images to help illustrate the facility.</p>
-                    </div>
-                  </div>
-                  {facilityImages.length > 0 && (
-                    <div className="mt-2 grid grid-cols-5 gap-2">
-                      {facilityImages.map((image, index) => (
-                        <div
-                          key={index}
-                          className="relative cursor-move"
-                          draggable
-                          onDragStart={() => { dragImage.current = index; }}
-                          onDragEnter={() => { dragOverImage.current = index; }}
-                          onDragEnd={() => {
-                            if (dragImage.current === null || dragOverImage.current === null) return;
-                            const newImages = [...facilityImages];
-                            const dragged = newImages.splice(dragImage.current, 1)[0];
-                            newImages.splice(dragOverImage.current, 0, dragged);
-                            setFacilityImages(newImages);
-                            dragImage.current = null;
-                            dragOverImage.current = null;
-                          }}
-                          onDragOver={e => e.preventDefault()}
-                        >
-                          <img
-                            src={image.previewUrl}
-                            alt={`Preview ${index + 1}`}
-                            className="h-28 w-28 object-cover rounded-md"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setFacilityImages(facilityImages.filter((_, i) => i !== index))}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                            aria-label={`Remove image ${index + 1}`}
-                          >
-                            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                              <line x1="18" y1="6" x2="6" y2="18" />
-                              <line x1="6" y1="6" x2="18" y2="18" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                {/* Images Section */}
+                <ImageUpload
+                  images={facilityImages}
+                  onImagesChange={setFacilityImages}
+                  maxImages={5}
+                  id="facility-image-upload"
+                />
                 <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
                   <button
                     type="button"
-                    onClick={() => setIsModalOpen(false)}
+                    onClick={closeAddModal}
                     className="px-4 py-2 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
                     disabled={addLoading}
                   >
@@ -493,36 +435,15 @@ const Facilities = () => {
                   </button>
                 </div>
               </form>
-            </div>
-          </div>
-        )}
-        {/* Edit Facility Modal */}
-        {isEditModalOpen && editFacility && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto relative">
-              {/* Close Button */}
-              <button
-                onClick={() => setIsEditModalOpen(false)}
-                aria-label="Close"
-                className="absolute top-4 right-4 bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+        </FeatureModal>
 
-              <div className="flex items-center gap-3 mb-6">
-                <FiEdit2 className="text-[#00C6A7] w-8 h-8" />
-                <h2 className="text-2xl font-bold text-gray-900">Edit Facility</h2>
-              </div>
-              {formError && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="flex items-center text-red-700">
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728" /></svg>
-                    <span>{formError}</span>
-                  </div>
-                </div>
-              )}
+        {/* Edit Facility Modal */}
+        <FeatureModal
+          isOpen={isEditModalOpen && !!editFacility}
+          onClose={closeEditModal}
+          title="Edit Facility"
+          error={formError}
+        >
               <form onSubmit={async e => {
                 e.preventDefault();
                 setEditLoading(true);
@@ -635,82 +556,17 @@ const Facilities = () => {
                     </div>
                   </div>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-6">
-                  <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Images <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg></h3>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Images</label>
-                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                    <div className="space-y-1 text-center">
-                      <div className="flex text-sm text-gray-600">
-                        <label htmlFor="edit-facility-file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-[#3FA9F6] hover:text-blue-500 focus-within:outline-none">
-                          <span>Upload files</span>
-                          <input
-                            id="edit-facility-file-upload"
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            className="sr-only"
-                            onChange={e => {
-                              if (e.target.files) {
-                                const filesArray = Array.from(e.target.files).slice(0, 5 - editFacilityImages.length);
-                                setEditFacilityImages([
-                                  ...editFacilityImages,
-                                  ...filesArray.map(file => ({ file, previewUrl: URL.createObjectURL(file) }))
-                                ]);
-                              }
-                            }}
-                            disabled={editFacilityImages.length >= 5}
-                          />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
-                      </div>
-                      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB each. Add clear images to help illustrate the facility.</p>
-                    </div>
-                  </div>
-                  {editFacilityImages.length > 0 && (
-                    <div className="mt-2 grid grid-cols-5 gap-2">
-                      {editFacilityImages.map((image, index) => (
-                        <div
-                          key={index}
-                          className="relative cursor-move"
-                          draggable
-                          onDragStart={() => { editDragImage.current = index; }}
-                          onDragEnter={() => { editDragOverImage.current = index; }}
-                          onDragEnd={() => {
-                            if (editDragImage.current === null || editDragOverImage.current === null) return;
-                            const newImages = [...editFacilityImages];
-                            const dragged = newImages.splice(editDragImage.current, 1)[0];
-                            newImages.splice(editDragOverImage.current, 0, dragged);
-                            setEditFacilityImages(newImages);
-                            editDragImage.current = null;
-                            editDragOverImage.current = null;
-                          }}
-                          onDragOver={e => e.preventDefault()}
-                        >
-                          <img
-                            src={image.previewUrl}
-                            alt={`Preview ${index + 1}`}
-                            className="h-28 w-28 object-cover rounded-md"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setEditFacilityImages(editFacilityImages.filter((_, i) => i !== index))}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                            aria-label={`Remove image ${index + 1}`}
-                          >
-                            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                              <line x1="18" y1="6" x2="6" y2="18" />
-                              <line x1="6" y1="6" x2="18" y2="18" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                {/* Images Section */}
+                <ImageUpload
+                  images={editFacilityImages}
+                  onImagesChange={setEditFacilityImages}
+                  maxImages={5}
+                  id="edit-facility-image-upload"
+                />
                 <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
                   <button
                     type="button"
-                    onClick={() => setIsEditModalOpen(false)}
+                    onClick={closeEditModal}
                     className="px-4 py-2 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
                     disabled={editLoading}
                   >
@@ -735,9 +591,8 @@ const Facilities = () => {
                   </button>
                 </div>
               </form>
-            </div>
-          </div>
-        )}
+        </FeatureModal>
+
         {/* Facility Details Modal */}
         {selectedFacility && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

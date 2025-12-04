@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { FiPlus, FiCalendar, FiSearch, FiAlertCircle, FiFileText, FiTag, FiMail, FiInfo, FiUser, FiPhone } from 'react-icons/fi';
+import { FiPlus, FiCalendar, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiUser, FiPhone } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
 import AIAutocomplete from './AIAutocomplete';
 import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
+import { FeatureModal } from './common/FeatureModal';
+import { ImageUpload, ImageFile } from './common/ImageUpload';
+import { validateMultipleRequired, validateEmail, validatePhone, validateUrl, validateDateRange } from '../utils/formValidation';
 
 interface ClubRecruitment {
   _id: string;
@@ -190,8 +193,7 @@ const ClubsRecruitment = () => {
     startDate: '',
     endDate: '',
     formUrl: '',
-    image: undefined as File | undefined,
-    imagePreview: '',
+    images: [] as ImageFile[],
     contactInfo: { name: '', email: '', phone: '' },
     status: 'Open' as 'Open' | 'Closed',
   });
@@ -254,8 +256,8 @@ const ClubsRecruitment = () => {
       formData.append('formUrl', newClub.formUrl);
       formData.append('status', newClub.status);
       formData.append('contactInfo', JSON.stringify(newClub.contactInfo));
-      if (newClub.image) {
-        formData.append('image', newClub.image);
+      if (newClub.images.length > 0 && newClub.images[0].file) {
+        formData.append('image', newClub.images[0].file);
       }
       const response = await fetch(`${API_BASE}/api/clubs`, {
         method: 'POST',
@@ -279,7 +281,7 @@ const ClubsRecruitment = () => {
         endDate: '',
         formUrl: '',
         image: undefined, 
-        imagePreview: '',
+        images: [],
         contactInfo: { name: '', email: '', phone: '' },
         status: 'Open',
       });
@@ -298,7 +300,7 @@ const ClubsRecruitment = () => {
       endDate: club.endDate.split('T')[0],
       formUrl: club.formUrl,
       image: undefined,
-      imagePreview: club.image?.url || '',
+      images: club.image?.url ? [{ url: club.image.url, public_id: club.image.public_id }] : [],
       contactInfo: club.contactInfo || { name: '', email: '', phone: '' },
       status: club.status,
     });
@@ -336,8 +338,8 @@ const ClubsRecruitment = () => {
       formData.append('formUrl', newClub.formUrl);
       formData.append('status', newClub.status);
       formData.append('contactInfo', JSON.stringify(newClub.contactInfo));
-      if (newClub.image) {
-        formData.append('image', newClub.image);
+      if (newClub.images.length > 0 && newClub.images[0].file) {
+        formData.append('image', newClub.images[0].file);
       }
       const response = await fetch(`${API_BASE}/api/clubs/${editingClub._id}`, {
         method: 'PUT',
@@ -352,30 +354,27 @@ const ClubsRecruitment = () => {
       }
       const savedClub = await response.json();
       setClubs(clubs.map(c => c._id === savedClub._id ? savedClub : c));
-      setIsModalOpen(false);
-      setEditingClub(null);
-      setNewClub({ 
-        title: '', 
-        description: '', 
-        clubName: '',
-        startDate: '',
-        endDate: '',
-        formUrl: '',
-        image: undefined, 
-        imagePreview: '',
-        contactInfo: { name: '', email: '', phone: '' },
-        status: 'Open',
-      });
+      closeClubModal();
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to save club recruitment');
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setNewClub(prev => ({ ...prev, image: file, imagePreview: URL.createObjectURL(file) }));
-    }
+  const closeClubModal = () => {
+    setIsModalOpen(false);
+    setEditingClub(null);
+    setNewClub({ 
+      title: '', 
+      description: '', 
+      clubName: '', 
+      startDate: '', 
+      endDate: '', 
+      formUrl: '', 
+      images: [],
+      contactInfo: { name: '', email: '', phone: '' }, 
+      status: 'Open' 
+    });
+    setError(null);
   };
 
   const openClubDetailsModal = (club: ClubRecruitment) => {
@@ -518,31 +517,12 @@ const ClubsRecruitment = () => {
           )}
         </div>
         {/* Add/Edit Club Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto relative">
-                              <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    {editingClub ? 'Edit Recruitment' : 'Add New Recruitment'}
-                  </h2>
-                  <button
-                    onClick={() => { setIsModalOpen(false); setEditingClub(null); setNewClub({ title: '', description: '', clubName: '', startDate: '', endDate: '', formUrl: '', image: undefined, imagePreview: '', contactInfo: { name: '', email: '', phone: '' }, status: 'Open' }); }}
-                    aria-label="Close"
-                    className="bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="flex items-center text-red-700">
-                    <FiAlertCircle className="w-5 h-5 mr-2" />
-                    <span>{error}</span>
-                  </div>
-                </div>
-              )}
+        <FeatureModal
+          isOpen={isModalOpen}
+          onClose={closeClubModal}
+          title={editingClub ? 'Edit Recruitment' : 'Add New Recruitment'}
+          error={error}
+        >
               <form onSubmit={editingClub ? handleSaveClub : handleAddClub} className="space-y-8">
                 <div className="border-b pb-6 mb-6 bg-gray-50 rounded-lg p-6">
                   <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Recruitment Details <FiInfo className="text-gray-400" title="Fill in the details of your club recruitment." /></h3>
@@ -676,51 +656,20 @@ const ClubsRecruitment = () => {
                     </div>
                   </div>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-6">
-                  <h3 className="text-lg font-bold mb-4 text-gray-900">Image (Optional)</h3>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment Image</label>
-                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                    <div className="space-y-1 text-center">
-                      <div className="flex text-sm text-gray-600">
-                        <label htmlFor="club-file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-[#3FA9F6] hover:text-blue-500 focus-within:outline-none">
-                          <span>Upload file</span>
-                          <input
-                            id="club-file-upload"
-                            type="file"
-                            accept="image/*"
-                            className="sr-only"
-                            onChange={handleImageChange}
-                            disabled={!!newClub.image}
-                          />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
-                      </div>
-                      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB. Recommended size: 1200x800px. Add a high-quality image that represents your club.</p>
-                    </div>
-                  </div>
-                  {newClub.imagePreview && (
-                    <div className="mt-2 flex gap-2">
-                      <div className="relative">
-                        <img src={newClub.imagePreview} alt="Club Preview" className="h-28 w-28 object-cover rounded-md" />
-                        <button
-                          type="button"
-                          onClick={() => setNewClub({ ...newClub, image: undefined, imagePreview: '' })}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                          aria-label="Remove image"
-                        >
-                          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                {/* Images Section */}
+                <ImageUpload
+                  images={newClub.images}
+                  onImagesChange={(images) => setNewClub({ ...newClub, images })}
+                  maxImages={1}
+                  single={true}
+                  id="club-image-upload"
+                  label="Image"
+                  helpText="PNG, JPG, GIF up to 5MB. Recommended size: 1200x800px. Add a high-quality image that represents your club."
+                />
                 <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
                   <button
                     type="button"
-                    onClick={() => { setIsModalOpen(false); setEditingClub(null); setNewClub({ title: '', description: '', clubName: '', startDate: '', endDate: '', formUrl: '', image: undefined, imagePreview: '', contactInfo: { name: '', email: '', phone: '' }, status: 'Open' }); }}
+                    onClick={closeClubModal}
                     className="px-4 py-2 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
                   >
                     Cancel
@@ -733,9 +682,7 @@ const ClubsRecruitment = () => {
                   </button>
                 </div>
               </form>
-            </div>
-          </div>
-        )}
+        </FeatureModal>
         {/* Club Details Modal */}
         {selectedClubForDetails && (
           <ClubDetails

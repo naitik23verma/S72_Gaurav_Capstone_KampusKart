@@ -103,14 +103,28 @@ app.use('/api/facilities', facilitiesRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/clubs', clubsRoutes);
 
-// Health check endpoint
+// Health check endpoint (used by keep-alive and monitoring services)
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ 
+  const isKeepAlive = req.headers['x-keep-alive'] === 'true';
+  const response = { 
     status: 'ok', 
     message: 'Server is running',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
-  });
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
+  };
+  
+  // Include keep-alive stats if this is a keep-alive ping
+  if (isKeepAlive) {
+    try {
+      const { getStats } = require('./cron/keepAlive');
+      response.keepAlive = getStats();
+    } catch (err) {
+      // Keep-alive not initialized yet
+    }
+  }
+  
+  res.status(200).json(response);
 });
 
 // Server startup status endpoint

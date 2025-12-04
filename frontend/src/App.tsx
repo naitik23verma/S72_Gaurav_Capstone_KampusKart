@@ -4,7 +4,6 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Login from './components/Login';
 import Signup from './components/Signup';
-import Header from './components/Header';
 import Landing from './components/Landing';
 import ForgotPassword from './components/ForgotPassword';
 import Home from './components/Home';

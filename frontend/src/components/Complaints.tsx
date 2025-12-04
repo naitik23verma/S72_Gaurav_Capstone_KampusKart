@@ -1,10 +1,13 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { FiPlus, FiEdit2, FiTrash2, FiX, FiAlertCircle, FiCheckCircle, FiUser, FiCalendar, FiTag, FiFileText, FiSearch, FiInfo } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiX, FiCheckCircle, FiUser, FiCalendar, FiTag, FiFileText, FiSearch, FiInfo } from 'react-icons/fi';
 import { format } from 'date-fns';
 import { API_BASE } from '../config';
 import AIAutocomplete from './AIAutocomplete';
 import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
+import { FeatureModal } from './common/FeatureModal';
+import { ImageUpload, ImageFile } from './common/ImageUpload';
+import { validateMultipleRequired } from '../utils/formValidation';
 
 interface Complaint {
   _id: string;
@@ -38,13 +41,7 @@ interface Complaint {
   images?: { url: string }[];
 }
 
-interface ModalImage {
-  file?: File;
-  previewUrl: string;
-  existing?: { public_id: string; url: string };
-  public_id?: string;
-  url?: string;
-}
+// Use ImageFile type from ImageUpload component
 
 const Complaints = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -65,7 +62,7 @@ const Complaints = () => {
   const [selectedComplaintForDetails, setSelectedComplaintForDetails] = useState<Complaint | null>(null);
   const [filterStatus, setFilterStatus] = useState<'All' | 'Open' | 'In Progress' | 'Resolved' | 'Closed'>('All');
   const [filterCategory, setFilterCategory] = useState<'all' | 'Academic' | 'Administrative' | 'Facilities' | 'IT' | 'Security' | 'Other'>('all');
-  const [images, setImages] = useState<ModalImage[]>([]);
+  const [images, setImages] = useState<ImageFile[]>([]);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
@@ -621,32 +618,12 @@ const Complaints = () => {
         </div>
 
         {/* Add/Edit Complaint Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 safe-top safe-bottom">
-            <div className="bg-white rounded-lg md:rounded-xl p-4 sm:p-6 md:p-8 max-w-2xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
-                              <div className="flex justify-between items-center mb-4 sm:mb-6">
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-                    {editingComplaint ? 'Edit Complaint' : 'Add New Complaint'}
-                  </h2>
-                  <button
-                    onClick={closeComplaintModal}
-                    aria-label="Close"
-                    className="bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg min-h-touch min-w-touch"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-
-              {formError && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="flex items-center text-red-700">
-                    <FiAlertCircle className="w-5 h-5 mr-2" />
-                    <span>{formError}</span>
-                  </div>
-                </div>
-              )}
+        <FeatureModal
+          isOpen={isModalOpen}
+          onClose={closeComplaintModal}
+          title={editingComplaint ? 'Edit Complaint' : 'Add New Complaint'}
+          error={formError}
+        >
 
               <form onSubmit={handleSaveComplaint} className="space-y-8">
                 {/* Complaint Details Section */}
@@ -776,69 +753,12 @@ const Complaints = () => {
                 </div>
 
                 {/* Images Section */}
-                <div className="bg-gray-50 rounded-lg p-6">
-                  <h3 className="text-lg font-bold mb-4 text-gray-900">Images (Optional, Max 5)</h3>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Images</label>
-                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                    <div className="space-y-1 text-center">
-                      <div className="flex text-sm text-gray-600">
-                        <label htmlFor="complaint-file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-[#3FA9F6] hover:text-blue-500 focus-within:outline-none">
-                          <span>Upload files</span>
-                          <input
-                            id="complaint-file-upload"
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            className="sr-only"
-                            onChange={e => {
-                              if (e.target.files) {
-                                const filesArray = Array.from(e.target.files).slice(0, 5 - images.length);
-                                setImages([
-                                  ...images,
-                                  ...filesArray.map(file => ({ file, previewUrl: URL.createObjectURL(file) }))
-                                ]);
-                              }
-                            }}
-                            disabled={images.length >= 5}
-                          />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
-                      </div>
-                      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB each. Add clear images to help illustrate the complaint.</p>
-                    </div>
-                  </div>
-                  {images.length > 0 && (
-                    <div className="mt-2 grid grid-cols-5 gap-2">
-                      {images.map((image, index) => (
-                        <div
-                          key={index}
-                          className="relative cursor-move"
-                          draggable
-                          onDragStart={() => handleDragStart(index)}
-                          onDragEnter={() => handleDragEnter(index)}
-                          onDragEnd={handleDragEnd}
-                          onDragOver={e => e.preventDefault()}
-                        >
-                          <img
-                            src={image.previewUrl}
-                            alt={`Preview ${index + 1}`}
-                            className="h-28 w-28 object-cover rounded-md"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setImages(images.filter((_, i) => i !== index))}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                          >
-                            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                              <line x1="18" y1="6" x2="6" y2="18" />
-                              <line x1="6" y1="6" x2="18" y2="18" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <ImageUpload
+                  images={images}
+                  onImagesChange={setImages}
+                  maxImages={5}
+                  id="complaint-image-upload"
+                />
 
                 <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
                   <button
@@ -868,9 +788,7 @@ const Complaints = () => {
                   </button>
                 </div>
               </form>
-            </div>
-          </div>
-        )}
+        </FeatureModal>
 
          {/* Complaint Details Modal */}
          {selectedComplaintForDetails && (

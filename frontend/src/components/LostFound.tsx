@@ -1,9 +1,12 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { FiSearch, FiX, FiClock, FiMapPin, FiUser, FiCalendar, FiMessageSquare, FiEdit2, FiTrash2, FiCheckCircle, FiInfo, FiTag, FiFileText, FiMail, FiAlertCircle } from 'react-icons/fi';
+import { FiSearch, FiX, FiClock, FiMapPin, FiUser, FiCalendar, FiMessageSquare, FiEdit2, FiTrash2, FiCheckCircle, FiInfo, FiTag, FiFileText, FiMail } from 'react-icons/fi';
 import { API_BASE } from '../config';
 import AIAutocomplete from './AIAutocomplete';
 import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
+import { FeatureModal } from './common/FeatureModal';
+import { ImageUpload, ImageFile } from './common/ImageUpload';
+import { validateMultipleRequired } from '../utils/formValidation';
 
 interface LostFoundItem {
   _id: string;
@@ -27,14 +30,7 @@ interface LostFoundItem {
   userName?: string;
 }
 
-// Define a type for images in the modal form state
-interface ModalImage {
-  file?: File;
-  previewUrl: string;
-  existing?: { public_id: string; url: string };
-  public_id?: string;
-  url?: string;
-}
+// Use ImageFile type from ImageUpload component
 
 const LostFound = () => {
   const [items, setItems] = useState<LostFoundItem[]>([]);
@@ -49,7 +45,7 @@ const LostFound = () => {
     location: '',
     date: '',
     contact: '',
-    images: [] as ModalImage[], // Update type to handle both new and existing images
+    images: [] as ImageFile[], // Use ImageFile type from ImageUpload component
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<LostFoundItem | null>(null);
@@ -483,56 +479,28 @@ const LostFound = () => {
             </svg>
           </div>
         )}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 safe-top safe-bottom">
-            <div className="bg-white rounded-lg md:rounded-xl p-4 sm:p-6 md:p-8 max-w-2xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
-                              <div className="flex justify-between items-center mb-4 sm:mb-6">
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-                    {editingItem ? 'Edit Item' : 'Add New Item'}
-                  </h2>
-                  <button
-                    onClick={closeItemModal}
-                    aria-label="Close"
-                    className="bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg min-h-touch min-w-touch"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-
-              {formError && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="flex items-center text-red-700">
-                    <FiAlertCircle className="w-5 h-5 mr-2" />
-                    <span>{formError}</span>
-                  </div>
-                </div>
-              )}
+        <FeatureModal
+          isOpen={isModalOpen}
+          onClose={closeItemModal}
+          title={editingItem ? 'Edit Item' : 'Add New Item'}
+          error={formError}
+        >
 
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 setLoading(true);
                 setFormError(null);
 
-                // Validate required fields
-                if (!newItem.title.trim()) {
-                  setFormError('Title is required');
-                  setLoading(false);
-                  return;
-                }
-                if (!newItem.description.trim()) {
-                  setFormError('Description is required');
-                  setLoading(false);
-                  return;
-                }
-                if (!newItem.date) {
-                  setFormError('Date is required');
-                  setLoading(false);
-                  return;
-                }
-                if (!newItem.contact.trim()) {
-                  setFormError('Contact information is required');
+                // Validate required fields using validation utilities
+                const validation = validateMultipleRequired([
+                  { value: newItem.title, name: 'Title' },
+                  { value: newItem.description, name: 'Description' },
+                  { value: newItem.date, name: 'Date' },
+                  { value: newItem.contact, name: 'Contact information' },
+                ]);
+                
+                if (!validation.isValid) {
+                  setFormError(validation.error);
                   setLoading(false);
                   return;
                 }
@@ -686,76 +654,12 @@ const LostFound = () => {
                 </div>
 
                 {/* Images Section */}
-                <div className="bg-gray-50 rounded-lg p-6">
-                  <h3 className="text-lg font-bold mb-4 text-gray-900">Images (Optional, Max 5)</h3>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Images</label>
-                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                    <div className="space-y-1 text-center">
-                      <div className="flex text-sm text-gray-600">
-                        <label
-                          htmlFor="file-upload"
-                          className="relative cursor-pointer bg-white rounded-md font-medium text-[#3FA9F6] hover:text-blue-500 focus-within:outline-none"
-                        >
-                          <span>Upload files</span>
-                          <input
-                            id="file-upload"
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            className="sr-only"
-                            onChange={(e) => {
-                              if (e.target.files) {
-                                const filesArray = Array.from(e.target.files).slice(0, 5 - newItem.images.length);
-                                setNewItem({
-                                  ...newItem,
-                                  images: [
-                                    ...newItem.images,
-                                    ...filesArray.map((file) => ({ file, previewUrl: URL.createObjectURL(file) }))
-                                  ]
-                                });
-                              }
-                            }}
-                            disabled={newItem.images.length >= 5}
-                          />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
-                      </div>
-                      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB each. Add clear images to help identify the item.</p>
-                    </div>
-                  </div>
-                  {newItem.images.length > 0 && (
-                    <div className="mt-2 grid grid-cols-5 gap-2">
-                      {newItem.images.map((image, index) => (
-                        <div
-                          key={index}
-                          className="relative cursor-move"
-                          draggable
-                          onDragStart={() => handleDragStart(index)}
-                          onDragEnter={() => handleDragEnter(index)}
-                          onDragEnd={handleDragEnd}
-                          onDragOver={e => e.preventDefault()}
-                        >
-                          <img
-                            src={image.previewUrl}
-                            alt={`Preview ${index + 1}`}
-                            className="h-28 w-28 object-cover rounded-md"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setNewItem({ ...newItem, images: newItem.images.filter((_, i) => i !== index) })}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                            aria-label={`Remove image ${index + 1}`}
-                          >
-                            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                              <line x1="18" y1="6" x2="6" y2="18" />
-                              <line x1="6" y1="6" x2="18" y2="18" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <ImageUpload
+                  images={newItem.images}
+                  onImagesChange={(images) => setNewItem({ ...newItem, images })}
+                  maxImages={5}
+                  id="lostfound-image-upload"
+                />
 
                 <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
                   <button
@@ -785,9 +689,7 @@ const LostFound = () => {
                   </button>
                 </div>
               </form>
-            </div>
-          </div>
-        )}
+        </FeatureModal>
       </main>
 
       {/* Item Details Modal */}

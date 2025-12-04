@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from './Navbar';
+import KampusKartNavbar from './KampusKartNavbar';
 
 const blobs = [
   // Top left yellow
@@ -63,7 +63,7 @@ const steps = [
 const Landing: React.FC = () => {
   return (
     <div className="relative min-h-screen bg-white font-sans overflow-hidden pt-16 md:pt-24">
-      <Navbar />
+      <KampusKartNavbar />
       {/* Large abstract blobs */}
       <svg className="absolute left-[-120px] top-[-80px] w-[240px] h-[160px] md:w-[340px] md:h-[220px] -z-10" viewBox="0 0 340 220" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M60,40 Q120,0 200,60 T340,40 Q320,120 200,180 T60,180 Q0,120 60,40Z" fill="#FFD166"/></svg>
       <svg className="absolute right-[-120px] top-20 w-[220px] h-[140px] md:w-[320px] md:h-[200px] -z-10" viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M40,60 Q100,0 180,40 T320,60 Q300,140 180,180 T40,140 Q0,100 40,60Z" fill="#F05A25"/></svg>

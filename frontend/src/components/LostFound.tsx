@@ -1,10 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-import Navbar from './Navbar';
 import { useAuth } from '../contexts/AuthContext';
 import { FiSearch, FiX, FiClock, FiMapPin, FiUser, FiCalendar, FiMessageSquare, FiEdit2, FiTrash2, FiCheckCircle, FiInfo, FiTag, FiFileText, FiMail, FiAlertCircle } from 'react-icons/fi';
-import SkeletonLoader from './SkeletonLoader';
-import UniversalLoader from './UniversalLoader';
-import { useDataLoading } from '../hooks/useLoading';
 import { API_BASE } from '../config';
 import AIAutocomplete from './AIAutocomplete';
 import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
@@ -42,7 +38,6 @@ interface ModalImage {
 
 const LostFound = () => {
   const [items, setItems] = useState<LostFoundItem[]>([]);
-  const { isLoading, error: loadingError, steps, startLoading, stopLoading, setError: setLoadingError } = useDataLoading();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { token, user } = useAuth();
@@ -161,9 +156,6 @@ const LostFound = () => {
 
   const fetchItems = async () => {
     try {
-      if (currentPage === 1) {
-        startLoading();
-      }
       setLoading(currentPage === 1);
       setError(null);
       const url = new URL(`${API_BASE}/api/lostfound`);
@@ -198,9 +190,6 @@ const LostFound = () => {
       console.error('Error fetching lost and found items:', err);
       setError(err.message || 'Failed to fetch lost and found items.');
     } finally {
-      if (currentPage === 1) {
-        stopLoading();
-      }
       setLoading(false);
       setIsFetchingMore(false);
     }
@@ -281,71 +270,50 @@ const LostFound = () => {
     );
   };
 
-  if (isLoading) {
-    return (
-      <UniversalLoader
-        variant="page"
-        title="Loading Lost & Found"
-        subtitle="Fetching lost and found items..."
-        showSteps={true}
-        steps={steps}
-        error={loadingError}
-        onRetry={() => window.location.reload()}
-        size="large"
-      />
-    );
-  }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col bg-white font-sans">
-        <Navbar />
-        <main className="flex-1 container mx-auto px-12 py-8 pt-24">
-          <h1 className="text-h2 font-extrabold text-black mb-6">Lost and Found</h1>
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-            <div className="h-10 bg-gray-200 rounded-full w-32 animate-pulse mb-4 sm:mb-0"></div>
-            <div className="w-full sm:w-1/3">
-              <div className="h-10 bg-gray-200 rounded-md animate-pulse"></div>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
-            <div className="h-10 bg-gray-200 rounded-md w-32 animate-pulse"></div>
-            <div className="h-10 bg-gray-200 rounded-md w-32 animate-pulse"></div>
-          </div>
-          <SkeletonLoader variant="lostfound" />
-        </main>
+      <div className="min-h-screen flex items-center justify-center bg-white font-sans">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00C6A7] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading lost and found items...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
-    return <div className="min-h-screen flex items-center justify-center bg-white font-sans"><p>Error: {error}</p></div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white font-sans">
+        <div className="text-center">
+          <p className="text-red-500">Error: {error}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white font-sans">
-      <Navbar />
-      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-20 sm:pt-24 md:pt-28">
+    <div className="min-h-screen bg-white font-sans">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-[100px]">
         {/* Top Bar: Heading + Add Button */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-black">Lost and Found</h1>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+          <h1 className="text-h2 font-extrabold text-black">Lost and Found</h1>
           <button
             onClick={openAddItemModal}
             aria-label="Add New Item"
-            className="flex items-center justify-center gap-2 px-5 py-3 sm:px-6 sm:py-3.5 rounded-full bg-black text-white font-bold text-base sm:text-lg shadow-lg hover:bg-[#00C6A7] active:bg-[#00C6A7] transition-all duration-200 min-h-touch w-full sm:w-auto"
+            className="flex items-center gap-2 px-6 py-3 rounded-full bg-black text-white font-bold text-lg shadow hover:bg-[#00C6A7] transition"
           >
-            <span className="text-xl sm:text-2xl">+</span>
-            <span>Add New Item</span>
+            + Add New Item
           </button>
         </div>
-        {/* Filter/Search Row - Enhanced Responsiveness */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 gap-4">
+        {/* Filter/Search Row */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
           {/* Filters */}
-          <div className="flex flex-col xs:flex-row gap-3 sm:gap-4 w-full lg:w-auto">
+          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
             <select
               value={filterType}
               onChange={e => setFilterType(e.target.value as 'all' | 'lost' | 'found')}
-              className="px-4 py-2.5 sm:py-3 rounded-lg bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] text-sm sm:text-base min-h-touch w-full xs:w-auto"
+              className="px-4 py-2 rounded-md bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
             >
               <option value="all">All Types</option>
               <option value="lost">Lost Items</option>
@@ -354,7 +322,7 @@ const LostFound = () => {
             <select
               value={filterResolved}
               onChange={e => setFilterResolved(e.target.value as 'all' | 'resolved' | 'unresolved')}
-              className="px-4 py-2.5 sm:py-3 rounded-lg bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] text-sm sm:text-base min-h-touch w-full xs:w-auto"
+              className="px-4 py-2 rounded-md bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
             >
               <option value="all">All Statuses</option>
               <option value="unresolved">Unresolved</option>
@@ -362,7 +330,7 @@ const LostFound = () => {
             </select>
           </div>
           {/* AI-Powered Search Bar */}
-          <div className="relative w-full lg:w-[400px] xl:w-[500px]">
+          <div className="relative w-full md:w-[500px]">
             <AIAutocomplete
               value={searchInput}
               onChange={(value) => {
@@ -503,25 +471,6 @@ const LostFound = () => {
                   )
                 )}
                 
-                {/* Debug logging for admin functionality */}
-                {(() => {
-                  const canEdit = token && user && item.user && (
-                    user._id === item.user._id || 
-                    user.id === item.user._id || 
-                    user.isAdmin
-                  );
-                  
-                  console.log('LostFound authorization check:', {
-                    user: user ? { _id: user._id, id: user.id, isAdmin: user.isAdmin, email: user.email } : null,
-                    itemUser: item.user ? { _id: item.user._id } : null,
-                    canEdit,
-                    userOwns: user && item.user ? user._id === item.user._id : false,
-                    userOwnsAlt: user && item.user && user.id ? user.id === item.user._id : false,
-                    isAdmin: user ? user.isAdmin : false
-                  });
-                  
-                  return null;
-                })()}
               </div>
             </div>
           ))}
@@ -544,9 +493,9 @@ const LostFound = () => {
                   <button
                     onClick={closeItemModal}
                     aria-label="Close"
-                    className="text-red-500 hover:text-red-700 active:text-red-800 transition-colors duration-200 p-2 -mr-2 min-h-touch min-w-touch"
+                    className="bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg min-h-touch min-w-touch"
                   >
-                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -849,9 +798,9 @@ const LostFound = () => {
             <button
               onClick={() => setSelectedItemForDetails(null)}
               aria-label="Close"
-              className="absolute top-2 right-2 sm:top-4 sm:right-4 text-red-500 hover:text-red-700 active:text-red-800 transition-colors duration-200 p-2 min-h-touch min-w-touch"
+              className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg min-h-touch min-w-touch"
             >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -948,16 +897,6 @@ const LostFound = () => {
                 )}
               </div>
             )}
-
-            {/* Close button at the bottom for larger screens/better UX */}
-            <div className="mt-4 sm:mt-6 text-center sm:text-right">
-              <button
-                onClick={() => setSelectedItemForDetails(null)}
-                className="px-6 py-3 sm:py-3.5 rounded-full font-bold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#009e87] transition-all duration-200 min-h-touch w-full sm:w-auto text-base sm:text-lg"
-              >
-                Close
-              </button>
-            </div>
           </div>
         </div>
       )}

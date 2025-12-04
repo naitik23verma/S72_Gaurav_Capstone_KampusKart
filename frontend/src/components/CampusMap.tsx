@@ -3,8 +3,6 @@ import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { GoogleMap, useLoadScript, InfoWindow, Marker, Libraries } from '@react-google-maps/api';
 import { FiSearch } from 'react-icons/fi';
 import debounce from 'lodash/debounce';
-import UniversalLoader from './UniversalLoader';
-import { useDataLoading } from '../hooks/useLoading';
 
 // Define libraries as a proper static constant with correct type
 const GOOGLE_MAPS_LIBRARIES: Libraries = ["places"];
@@ -47,7 +45,7 @@ interface Location {
 }
 
 const CampusMap: React.FC<CampusMapProps> = () => {
-  const { isLoading, error: loadingError, steps, startLoading, stopLoading, setError: setLoadingError } = useDataLoading();
+  const [isLoading, setIsLoading] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
@@ -57,6 +55,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   const [hasRequestedLocation, setHasRequestedLocation] = useState(false);
   const animationInProgress = useRef(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const zoomChangeListenerRef = useRef<google.maps.MapsEventListener | null>(null);
 
   const { isLoaded, loadError } = useGoogleMaps();
 
@@ -335,6 +334,17 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   // Optimize map load handler
   const onMapLoad = useCallback((map: google.maps.Map) => {
     setMapRef(map);
+    
+    // Add zoom change listener to close InfoWindow on zoom
+    if (zoomChangeListenerRef.current) {
+      google.maps.event.removeListener(zoomChangeListenerRef.current);
+    }
+    
+    zoomChangeListenerRef.current = google.maps.event.addListener(map, 'zoom_changed', () => {
+      // Close InfoWindow when zoom changes
+      setInfoWindowPosition(null);
+      setSelectedLocation(null);
+    });
   }, []);
 
   // Optimize recenter handler
@@ -369,41 +379,51 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   const isPanelOpen = window.innerWidth >= 768;
 
 
-  // Cleanup debounced function on unmount
+  // Cleanup debounced function and zoom listener on unmount
   useEffect(() => {
     const fn = debouncedSetSearchQuery;
     return () => {
       if (fn && typeof (fn as any).cancel === 'function') {
         (fn as any).cancel();
       }
+      // Cleanup zoom change listener
+      if (zoomChangeListenerRef.current) {
+        google.maps.event.removeListener(zoomChangeListenerRef.current);
+        zoomChangeListenerRef.current = null;
+      }
     };
   }, [debouncedSetSearchQuery]);
 
   if (loadError) {
     return (
-      <UniversalLoader
-        variant="page"
-        title="Map Loading Error"
-        subtitle="Failed to load Google Maps"
-        error="Unable to load the campus map. Please check your internet connection and try again."
-        onRetry={() => window.location.reload()}
-        size="large"
-      />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 mb-4">
+            <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Map Loading Error</h3>
+          <p className="text-gray-600 mb-4">Unable to load the campus map. Please check your internet connection and try again.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-6 py-2 bg-[#00C6A7] text-white rounded-lg font-semibold hover:bg-[#009e87] transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
     );
   }
 
   if (!isLoaded || isLoading) {
     return (
-      <UniversalLoader
-        variant="page"
-        title="Loading Campus Map"
-        subtitle="Initializing map components..."
-        showSteps={true}
-        steps={steps}
-        error={loadingError}
-        onRetry={() => window.location.reload()}
-        size="large"
-      />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00C6A7] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading campus map...</p>
+        </div>
+      </div>
     );
   }
 
@@ -460,8 +480,8 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                     {filteredLocations.map((location) => (
                       <li
                         key={location.id}
-                        className={`border-b border-gray-100 text-gray-800 cursor-pointer hover:bg-gray-50 p-2 rounded transition-all duration-200 ${
-                          selectedLocation?.id === location.id ? 'bg-blue-50 border-blue-200' : ''
+                        className={`border-b border-gray-100 text-gray-800 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors duration-150 ${
+                          selectedLocation?.id === location.id ? 'bg-[#00C6A7]/10 border-[#00C6A7]/30' : ''
                         }`}
                         onClick={() => {
                           handleLocationClick(location);
@@ -527,50 +547,80 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                     setSelectedLocation(null);
                   }}
                   options={{
-                    pixelOffset: new window.google.maps.Size(0, -30),
+                    pixelOffset: new window.google.maps.Size(0, -50),
                     maxWidth: window.innerWidth < 768 ? 280 : 380,
                     disableAutoPan: false
                   }}
                 >
-                  <div className="p-2 max-w-xs">
-                    {/* Header Section */}
-                    <div className="flex items-start justify-between mb-3 border-b border-gray-100 pb-2">
-                      <div className="flex-1">
-                        <h3 className="font-bold text-lg text-gray-800 mb-1 line-clamp-2">{selectedLocation.name}</h3>
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium">
+                  <div 
+                    className="p-0 max-w-xs bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200/50" 
+                    style={{ 
+                      margin: 0, 
+                      padding: 0,
+                      overflow: 'hidden',
+                      overflowY: 'hidden',
+                      overflowX: 'hidden'
+                    }}
+                  >
+                    {/* Header Section with Gradient */}
+                    <div className="bg-gradient-to-r from-[#00C6A7] to-[#009e87] p-3 relative" style={{ margin: 0, paddingTop: '12px', paddingBottom: '12px' }}>
+                      {/* Close Button */}
+                      <button
+                        onClick={() => {
+                          setInfoWindowPosition(null);
+                          setSelectedLocation(null);
+                        }}
+                        className="absolute top-1.5 right-1.5 p-1.5 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-200 flex-shrink-0 group"
+                        aria-label="Close"
+                        title="Close"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white group-hover:rotate-90 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                      
+                      <div className="pr-8">
+                        <h3 className="font-black text-base text-white mb-1.5 line-clamp-2 leading-tight">{selectedLocation.name}</h3>
+                        <span className="inline-flex items-center px-2.5 py-0.5 bg-white/20 backdrop-blur-sm text-white text-xs font-semibold rounded-full border border-white/30">
                           {selectedLocation.category}
                         </span>
                       </div>
                     </div>
 
+                    {/* Content Section */}
+                    <div className="p-3 space-y-3" style={{ overflow: 'hidden', overflowY: 'hidden', overflowX: 'hidden' }}>
                     {/* Description Section */}
-                    <div className="bg-gray-50 p-3 rounded-lg mb-3">
-                      <h4 className="text-sm font-semibold text-gray-700 mb-1">About this location</h4>
-                      <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">{selectedLocation.description}</p>
+                      <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 p-3 rounded-xl border border-gray-200/50">
+                        <div className="flex items-start gap-2 mb-1.5">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#00C6A7] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <h4 className="text-xs font-bold text-gray-900">About this location</h4>
+                        </div>
+                        <p className="text-xs text-gray-700 leading-relaxed line-clamp-3 pl-6">{selectedLocation.description}</p>
                     </div>
 
                     {/* Location Details Section */}
-                    <div className="space-y-1 mb-3">
-                      <div className="flex items-center text-sm text-gray-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <div className="flex items-center gap-2 px-2 py-1.5 bg-gray-50 rounded-lg border border-gray-200/50">
+                        <div className="flex items-center justify-center w-8 h-8 bg-[#00C6A7]/10 rounded-lg">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#00C6A7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        <span>Location ID: {selectedLocation.id}</span>
                       </div>
+                        <span className="text-sm font-medium text-gray-700">Location ID: <span className="text-[#00C6A7] font-bold">{selectedLocation.id}</span></span>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex gap-2">
+                      {/* Action Button */}
                       <button
-                        className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center gap-2 font-medium text-sm"
+                        className="w-full px-3 py-2.5 bg-gradient-to-r from-[#00C6A7] to-[#009e87] text-white rounded-xl hover:from-[#009e87] hover:to-[#008a75] transition-all duration-200 flex items-center justify-center gap-2 font-bold text-xs shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
                         onClick={() => {
                           const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedLocation.lat},${selectedLocation.lng}`;
                           window.open(url, '_blank');
                         }}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.293.707L6 18.414V5.586L3.707 3.293zM17.707 5.293L14 1.586v12.828l2.293 2.293A1 1 0 0018 16V6a1 1 0 00-.293-.707z" clipRule="evenodd" />
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                         </svg>
                         Get Directions
                       </button>
@@ -628,7 +678,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
               <button
                 type="submit"
                 aria-label="Search"
-                className="px-6 py-2 bg-[#00C6A7] text-white font-semibold hover:bg-[#009e87] transition-all duration-300 ease-in-out rounded-r-full transform hover:scale-105"
+                className="px-6 py-2 bg-[#00C6A7] text-white font-semibold hover:bg-[#009e87] transition-colors duration-150 rounded-r-full"
               >
                 Search
               </button>
@@ -639,7 +689,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                 {filteredLocations.map((location) => (
                   <li
                     key={location.id}
-                    className={`mb-2 pb-2 border-b border-gray-200 text-gray-800 cursor-pointer hover:bg-gray-100 p-2 rounded transition-all duration-300 ease-in-out transform hover:scale-105 ${
+                    className={`mb-2 pb-2 border-b border-gray-200 text-gray-800 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors duration-150 ${
                       selectedLocation?.id === location.id ? 'bg-blue-100' : ''
                     }`}
                     onClick={() => {

@@ -1,16 +1,29 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import Navbar from './Navbar';
 import { FiMapPin, FiSearch, FiHome, FiWifi, FiBookOpen, FiCoffee, FiPlus, FiEdit2, FiTag, FiCalendar, FiUser } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
-import UniversalLoader from './UniversalLoader';
-import { useDataLoading } from '../hooks/useLoading';
 import { API_BASE } from '../config';
 import AIAutocomplete from './AIAutocomplete';
 import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
 
+interface Facility {
+  _id: string;
+  name: string;
+  description: string;
+  location: string;
+  type: 'Academic' | 'Food' | 'Service' | 'Accommodation';
+  icon: string;
+  images?: { url: string; public_id?: string }[];
+  createdAt?: string;
+  createdBy?: {
+    _id: string;
+    name?: string;
+    email?: string;
+  };
+}
+
 const Facilities = () => {
   const { token, user } = useAuth();
-  const { isLoading, error: loadingError, steps, startLoading, stopLoading, setError: setLoadingError } = useDataLoading();
+  const [isLoading, setIsLoading] = useState(true);
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('All');
@@ -22,14 +35,14 @@ const Facilities = () => {
     type: 'Academic',
     icon: 'FiBookOpen',
   });
-  const [facilities, setFacilities] = useState([]);
+  const [facilities, setFacilities] = useState<Facility[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [facilityImages, setFacilityImages] = useState<{ file?: File; previewUrl: string }[]>([]);
   const dragImage = useRef<number | null>(null);
   const dragOverImage = useRef<number | null>(null);
-  const [editingFacility, setEditingFacility] = useState<any | null>(null);
+  const [editingFacility, setEditingFacility] = useState<Facility | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editFacility, setEditFacility] = useState<any | null>(null);
+  const [editFacility, setEditFacility] = useState<Facility | null>(null);
   const [editFacilityImages, setEditFacilityImages] = useState<{ file?: File; previewUrl: string; public_id?: string; url?: string }[]>([]);
   const editDragImage = useRef<number | null>(null);
   const editDragOverImage = useRef<number | null>(null);
@@ -39,7 +52,7 @@ const Facilities = () => {
     { value: 'FiWifi', label: 'Service', icon: <FiWifi className="text-blue-500 w-8 h-8" /> },
     { value: 'FiHome', label: 'Accommodation', icon: <FiHome className="text-purple-500 w-8 h-8" /> },
   ];
-  const [selectedFacility, setSelectedFacility] = useState<any | null>(null);
+  const [selectedFacility, setSelectedFacility] = useState<Facility | null>(null);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [addLoading, setAddLoading] = useState(false);
@@ -48,7 +61,7 @@ const Facilities = () => {
   // AI Autocomplete hook
   const preExistingStrings = useMemo(() => {
     const pool: string[] = [];
-    facilities.forEach((f: any) => {
+    facilities.forEach((f: Facility) => {
       if (f.name) pool.push(f.name);
       if (f.description) pool.push(f.description);
       if (f.location) pool.push(f.location);
@@ -77,7 +90,7 @@ const Facilities = () => {
 
   useEffect(() => {
     const fetchFacilities = async () => {
-      startLoading();
+      setIsLoading(true);
       try {
         const res = await fetch(`${API_BASE}/api/facilities`);
         const data = await res.json();
@@ -85,35 +98,30 @@ const Facilities = () => {
       } catch (err) {
         setError('Failed to load facilities');
       } finally {
-        stopLoading();
+        setIsLoading(false);
       }
     };
     fetchFacilities();
-  }, [startLoading, stopLoading]);
+  }, []);
 
   if (isLoading) {
     return (
-      <UniversalLoader
-        variant="page"
-        title="Loading Facilities"
-        subtitle="Fetching campus facilities..."
-        showSteps={true}
-        steps={steps}
-        error={loadingError}
-        onRetry={() => window.location.reload()}
-        size="large"
-      />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00C6A7] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading facilities...</p>
+        </div>
+      </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      <Navbar />
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-[100px]">
         {/* Top Bar: Heading + Add Button */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <h1 className="text-h2 font-extrabold text-black">Campus Facilities</h1>
-          {user?.email === 'gauravkhandelwal205@gmail.com' && (
+          {user?.isAdmin && (
             <button
               onClick={() => setIsModalOpen(true)}
               className="flex items-center gap-2 px-6 py-3 rounded-full bg-black text-white font-bold text-lg shadow hover:bg-[#00C6A7] transition"
@@ -165,7 +173,7 @@ const Facilities = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredFacilities.map(facility => (
             <div
-              key={facility._id || facility.id}
+              key={facility._id}
               className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden group"
               onClick={() => setSelectedFacility(facility)}
             >
@@ -230,7 +238,7 @@ const Facilities = () => {
                 </div>
 
                 {/* Action Buttons */}
-                {user?.email === 'gauravkhandelwal205@gmail.com' && (
+                {user?.isAdmin && (
                   <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t border-gray-100">
                     <button
                       onClick={(e) => { e.stopPropagation(); setEditingFacility(facility); setIsEditModalOpen(true); }}
@@ -256,9 +264,9 @@ const Facilities = () => {
               <button
                 onClick={() => setIsModalOpen(false)}
                 aria-label="Close"
-                className="absolute top-4 right-4 text-red-500 hover:text-red-700 transition-colors duration-200"
+                className="absolute top-4 right-4 bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -496,9 +504,9 @@ const Facilities = () => {
               <button
                 onClick={() => setIsEditModalOpen(false)}
                 aria-label="Close"
-                className="absolute top-4 right-4 text-red-500 hover:text-red-700 transition-colors duration-200"
+                className="absolute top-4 right-4 bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -738,9 +746,9 @@ const Facilities = () => {
               <button
                 onClick={() => setSelectedFacility(null)}
                 aria-label="Close"
-                className="absolute top-4 right-4 text-red-500 hover:text-red-700 transition-colors duration-200"
+                className="absolute top-4 right-4 bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -797,7 +805,7 @@ const Facilities = () => {
                 </div>
               </div>
               {/* Owner/Admin Actions */}
-              {user?.email === 'gauravkhandelwal205@gmail.com' && (
+              {user?.isAdmin && (
                 <div className="flex gap-2 pt-6">
                   <button
                     onClick={() => {
@@ -828,15 +836,6 @@ const Facilities = () => {
                   ><span className="truncate">Delete</span></button>
                 </div>
               )}
-              {/* Bottom Close Button */}
-              <div className="mt-6 text-right">
-                <button
-                  onClick={() => setSelectedFacility(null)}
-                  className="px-6 py-3 rounded-full font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition"
-                >
-                  Close
-                </button>
-              </div>
             </div>
           </div>
         )}

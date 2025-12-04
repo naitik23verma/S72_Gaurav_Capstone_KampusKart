@@ -1,9 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-import Navbar from './Navbar';
 import { useAuth } from '../contexts/AuthContext';
 import { FiPlus, FiEdit2, FiTrash2, FiX, FiAlertCircle, FiCheckCircle, FiUser, FiCalendar, FiTag, FiFileText, FiSearch, FiInfo } from 'react-icons/fi';
-import UniversalLoader from './UniversalLoader';
-import { useDataLoading } from '../hooks/useLoading';
 import { format } from 'date-fns';
 import { API_BASE } from '../config';
 import AIAutocomplete from './AIAutocomplete';
@@ -50,13 +47,10 @@ interface ModalImage {
 }
 
 const Complaints = () => {
-  const { isLoading, error: loadingError, steps, startLoading, stopLoading, setError: setLoadingError } = useDataLoading();
+  const [isLoading, setIsLoading] = useState(true);
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { token, user } = useAuth();
-  
-  // Debug: Log user object
-  console.log('Complaints component - User object:', user);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newComplaint, setNewComplaint] = useState({
     title: '',
@@ -124,9 +118,6 @@ const Complaints = () => {
   const fetchComplaints = async () => {
     if (!token) return;
     try {
-      if (currentPage === 1) {
-        startLoading();
-      }
       setError(null);
       const url = new URL(`${API_BASE}/api/complaints`);
       if (filterStatus !== 'All') {
@@ -157,7 +148,7 @@ const Complaints = () => {
       setError(err.message || 'Failed to fetch complaints.');
     } finally {
       if (currentPage === 1) {
-        stopLoading();
+        setIsLoading(false);
       }
       setIsFetchingMore(false);
     }
@@ -439,16 +430,12 @@ const Complaints = () => {
 
   if (isLoading && complaints.length === 0) {
     return (
-      <UniversalLoader
-        variant="page"
-        title="Loading Complaints"
-        subtitle="Fetching complaint data..."
-        showSteps={true}
-        steps={steps}
-        error={loadingError}
-        onRetry={() => window.location.reload()}
-        size="large"
-      />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00C6A7] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading complaints...</p>
+        </div>
+      </div>
     );
   }
 
@@ -457,29 +444,27 @@ const Complaints = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white font-sans">
-      <Navbar />
-      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-20 sm:pt-24 md:pt-28">
+    <div className="min-h-screen bg-white font-sans">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-[100px]">
         {/* Top Bar: Heading + Add Button */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-black">College Complaints</h1>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+          <h1 className="text-h2 font-extrabold text-black">College Complaints</h1>
           <button
             onClick={openAddComplaintModal}
             aria-label="Add Complaint"
-            className="flex items-center justify-center gap-2 px-5 py-3 sm:px-6 sm:py-3.5 rounded-full bg-black text-white font-bold text-base sm:text-lg shadow-lg hover:bg-[#00C6A7] active:bg-[#00C6A7] transition-all duration-200 min-h-touch w-full sm:w-auto"
+            className="flex items-center gap-2 px-6 py-3 rounded-full bg-black text-white font-bold text-lg shadow hover:bg-[#00C6A7] transition"
           >
-            <span className="text-xl sm:text-2xl">+</span>
-            <span>Add Complaint</span>
+            + Add Complaint
           </button>
         </div>
         {/* Filter/Search Row */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 gap-4">
-          <div className="flex flex-col xs:flex-row gap-3 sm:gap-4 w-full lg:w-auto">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
             {/* Filter by Category */}
             <select
               value={filterCategory}
-              onChange={e => setFilterCategory(e.target.value as any)}
-              className="px-4 py-2.5 sm:py-3 rounded-lg bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] text-sm sm:text-base min-h-touch w-full xs:w-auto"
+              onChange={e => setFilterCategory(e.target.value as 'all' | 'Academic' | 'Administrative' | 'Facilities' | 'IT' | 'Security' | 'Other')}
+              className="px-4 py-2 rounded-md bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
             >
               <option value="all">All Categories</option>
               <option value="Academic">Academic</option>
@@ -493,7 +478,7 @@ const Complaints = () => {
             <select
               value={filterStatus}
               onChange={e => setFilterStatus(e.target.value as 'all' | 'Open' | 'InProgress' | 'Resolved' | 'Closed')}
-              className="px-4 py-2.5 sm:py-3 rounded-lg bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] text-sm sm:text-base min-h-touch w-full xs:w-auto"
+              className="px-4 py-2 rounded-md bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
             >
               <option value="All">All Statuses</option>
               <option value="Open">Open</option>
@@ -503,7 +488,7 @@ const Complaints = () => {
             </select>
           </div>
           {/* AI-Powered Search Bar */}
-          <div className="relative w-full lg:w-[400px] xl:w-[500px]">
+          <div className="relative w-full md:w-[500px]">
             <AIAutocomplete
               value={searchInput}
               onChange={(value) => {
@@ -611,18 +596,6 @@ const Complaints = () => {
                     user.isAdmin
                   ) && !['Resolved', 'Closed'].includes(complaint.status);
                   
-                  // Debug logging for admin functionality
-                  console.log('Complaint authorization check:', {
-                    user: user ? { _id: user._id, id: user.id, isAdmin: user.isAdmin, email: user.email } : null,
-                    complaintUser: complaint.user ? { _id: complaint.user._id } : null,
-                    status: complaint.status,
-                    canEdit,
-                    userOwns: complaint.user._id === user._id,
-                    userOwnsAlt: user.id && complaint.user._id === user.id,
-                    isAdmin: user.isAdmin,
-                    statusOk: !['Resolved', 'Closed'].includes(complaint.status)
-                  });
-                  
                   return canEdit;
                 })() && (
                   <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t border-gray-100">
@@ -658,9 +631,9 @@ const Complaints = () => {
                   <button
                     onClick={closeComplaintModal}
                     aria-label="Close"
-                    className="text-red-500 hover:text-red-700 active:text-red-800 transition-colors duration-200 p-2 -mr-2 min-h-touch min-w-touch"
+                    className="bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg min-h-touch min-w-touch"
                   >
-                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -907,9 +880,9 @@ const Complaints = () => {
                   <button
                     onClick={() => setSelectedComplaintForDetails(null)}
                     aria-label="Close"
-                    className="absolute top-2 right-2 sm:top-4 sm:right-4 text-red-500 hover:text-red-700 active:text-red-800 transition-colors duration-200 p-2 min-h-touch min-w-touch"
+                    className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg min-h-touch min-w-touch"
                   >
-                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -974,16 +947,6 @@ const Complaints = () => {
                             </button>
                         </div>
                      )}
-
-                    {/* Close button at the bottom for larger screens/better UX */}
-                    <div className="mt-4 sm:mt-6 text-center sm:text-right">
-                        <button
-                            onClick={() => setSelectedComplaintForDetails(null)}
-                            className="px-6 py-3 sm:py-3.5 rounded-full font-bold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#009e87] transition-all duration-200 min-h-touch w-full sm:w-auto text-base sm:text-lg"
-                        >
-                            Close
-                        </button>
-                    </div>
                 </div>
             </div>
          )}

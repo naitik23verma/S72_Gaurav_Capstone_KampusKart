@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import Navbar from './Navbar';
 import { FiPlus, FiCalendar, FiSearch, FiAlertCircle, FiFileText, FiTag, FiMail, FiInfo, FiUser, FiPhone } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
-import UniversalLoader from './UniversalLoader';
-import { useDataLoading } from '../hooks/useLoading';
 import { API_BASE } from '../config';
 import AIAutocomplete from './AIAutocomplete';
 import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
@@ -52,9 +49,9 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
         <button
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-4 right-4 text-red-500 hover:text-red-700 transition-colors duration-200"
+          className="absolute top-4 right-4 bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -180,7 +177,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
 
 const ClubsRecruitment = () => {
   const { user, token } = useAuth();
-  const { isLoading, error: loadingError, steps, startLoading, stopLoading, setError: setLoadingError } = useDataLoading();
+  const [isLoading, setIsLoading] = useState(true);
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [clubs, setClubs] = useState<ClubRecruitment[]>([]);
@@ -200,6 +197,7 @@ const ClubsRecruitment = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const [selectedClubForDetails, setSelectedClubForDetails] = useState<ClubRecruitment | null>(null);
+  const [filterStatus, setFilterStatus] = useState<'all' | 'Open' | 'Closed'>('all');
 
   // AI Autocomplete hook
   const preExistingStrings = useMemo(() => {
@@ -231,7 +229,7 @@ const ClubsRecruitment = () => {
 
   const fetchClubs = async () => {
     try {
-      startLoading();
+      setIsLoading(true);
       const response = await fetch(`${API_BASE}/api/clubs`);
       if (!response.ok) throw new Error('Failed to fetch club recruitments');
       const data = await response.json();
@@ -239,7 +237,7 @@ const ClubsRecruitment = () => {
     } catch (error) {
       setError('Failed to load club recruitments');
     } finally {
-      stopLoading();
+      setIsLoading(false);
     }
   };
 
@@ -389,33 +387,29 @@ const ClubsRecruitment = () => {
   };
 
   const filteredClubs = clubs.filter(club =>
-    club.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    club.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    club.clubName.toLowerCase().includes(searchQuery.toLowerCase())
+    (filterStatus === 'all' || club.status === filterStatus) &&
+    (club.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+     club.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     club.clubName.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   if (isLoading) {
     return (
-      <UniversalLoader
-        variant="page"
-        title="Loading Club Recruitment"
-        subtitle="Fetching club recruitment data..."
-        showSteps={true}
-        steps={steps}
-        error={loadingError}
-        onRetry={() => window.location.reload()}
-        size="large"
-      />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00C6A7] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading club recruitment...</p>
+        </div>
+      </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      <Navbar />
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-[100px]">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <h1 className="text-h2 font-extrabold text-black">Clubs Recruitment</h1>
-          {user?.email === "gauravkhandelwal205@gmail.com" && (
+          {user?.isAdmin && (
             <button 
               onClick={() => setIsModalOpen(true)}
               className="flex items-center gap-2 px-6 py-3 rounded-full bg-black text-white font-bold text-lg shadow hover:bg-[#00C6A7] transition"
@@ -424,28 +418,42 @@ const ClubsRecruitment = () => {
             </button>
           )}
         </div>
-        {/* AI-Powered Search Bar */}
-        <div className="relative w-full md:w-[500px] mb-6">
-          <AIAutocomplete
-            value={searchInput}
-            onChange={(value) => {
-              setSearchInput(value);
-              handleAISearchInput(value);
-            }}
-            onSelect={(suggestion) => {
-              setSearchInput(suggestion.text);
-              setSearchQuery(suggestion.text);
-              handleSuggestionSelect(suggestion);
-            }}
-            placeholder="Search clubs"
-            className="w-full md:w-[500px]"
-            suggestions={suggestions}
-            isLoading={aiLoading}
-            disabled={false}
-            showSubmitButton
-            submitLabel="Search"
-            onSubmit={() => setSearchQuery(searchInput)}
-          />
+        {/* Filter/Search Row */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+            <select
+              value={filterStatus}
+              onChange={e => setFilterStatus(e.target.value as 'all' | 'Open' | 'Closed')}
+              className="px-4 py-2 rounded-md bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
+            >
+              <option value="all">All Statuses</option>
+              <option value="Open">Open</option>
+              <option value="Closed">Closed</option>
+            </select>
+          </div>
+          {/* AI-Powered Search Bar */}
+          <div className="relative w-full md:w-[500px]">
+            <AIAutocomplete
+              value={searchInput}
+              onChange={(value) => {
+                setSearchInput(value);
+                handleAISearchInput(value);
+              }}
+              onSelect={(suggestion) => {
+                setSearchInput(suggestion.text);
+                setSearchQuery(suggestion.text);
+                handleSuggestionSelect(suggestion);
+              }}
+              placeholder="Search clubs"
+              className="w-full md:w-[500px]"
+              suggestions={suggestions}
+              isLoading={aiLoading}
+              disabled={false}
+              showSubmitButton
+              submitLabel="Search"
+              onSubmit={() => setSearchQuery(searchInput)}
+            />
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredClubs.map(club => (
@@ -520,9 +528,9 @@ const ClubsRecruitment = () => {
                   <button
                     onClick={() => { setIsModalOpen(false); setEditingClub(null); setNewClub({ title: '', description: '', clubName: '', startDate: '', endDate: '', formUrl: '', image: undefined, imagePreview: '', contactInfo: { name: '', email: '', phone: '' }, status: 'Open' }); }}
                     aria-label="Close"
-                    className="text-red-500 hover:text-red-700 transition-colors duration-200"
+                    className="bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg"
                   >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>

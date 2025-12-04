@@ -8,7 +8,8 @@
     "dev": "nodemon server.js",
     "test": "jest",
     "lint": "eslint .",
-    "test-keep-alive": "node scripts/test-keep-alive.js"
+    "test-keep-alive": "node scripts/test-keep-alive.js",
+    "seed": "node scripts/seedData.js"
   },
   "keywords": [
     "campus",

@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom';
 import { FiMap, FiSearch, FiCalendar, FiFileText, FiAlertCircle, FiHome, FiUsers } from 'react-icons/fi';
 import { FaComments } from 'react-icons/fa';
 import Navbar from './Navbar';
-import UniversalLoader from './UniversalLoader';
-import { usePageLoading } from '../hooks/useLoading';
 
 const features = [
   {
@@ -73,34 +71,6 @@ const socials = [
 ];
 
 const Home = () => {
-  const { isLoading, error, steps, startLoading, stopLoading, setError } = usePageLoading();
-
-  useEffect(() => {
-    startLoading();
-    
-    // Simulate page loading
-    const timer = setTimeout(() => {
-      stopLoading();
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, [startLoading, stopLoading]);
-
-  if (isLoading) {
-    return (
-      <UniversalLoader
-        variant="page"
-        title="Loading Home"
-        subtitle="Preparing your campus dashboard..."
-        showSteps={true}
-        steps={steps}
-        error={error}
-        onRetry={() => window.location.reload()}
-        size="large"
-      />
-    );
-  }
-
   return (
     <div className="relative min-h-screen bg-white font-sans overflow-hidden pt-16 md:pt-24">
       <Navbar />

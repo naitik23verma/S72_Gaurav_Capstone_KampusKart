@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import Navbar from './Navbar';
 import { FiPlus, FiCalendar, FiMapPin, FiSearch, FiAlertCircle, FiFileText, FiTag, FiMail, FiInfo, FiClock, FiUser, FiPhone } from 'react-icons/fi';
 import { FaSearch } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
-import UniversalLoader from './UniversalLoader';
-import { useDataLoading } from '../hooks/useLoading';
 import { API_BASE } from '../config';
 import AIAutocomplete from './AIAutocomplete';
 import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
@@ -92,9 +89,9 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
                   <button
             onClick={onClose}
             aria-label="Close"
-            className="absolute top-4 right-4 text-red-500 hover:text-red-700 transition-colors duration-200"
+            className="absolute top-4 right-4 bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -294,7 +291,7 @@ const Events = () => {
       coordinates: undefined as { lat: number; lng: number } | undefined
     }
   });
-  const { isLoading, error: loadingError, steps, startLoading, stopLoading, setError: setLoadingError } = useDataLoading();
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedEventForDetails, setSelectedEventForDetails] = useState<Event | null>(null);
 
@@ -359,7 +356,7 @@ const Events = () => {
 
   const fetchEvents = async () => {
     try {
-      startLoading();
+      setIsLoading(true);
       const response = await fetch(`${API_BASE}/api/events`);
       if (!response.ok) throw new Error('Failed to fetch events');
       const data = await response.json();
@@ -368,7 +365,7 @@ const Events = () => {
       console.error('Error fetching events:', error);
       setError('Failed to load events');
     } finally {
-      stopLoading();
+      setIsLoading(false);
     }
   };
 
@@ -545,26 +542,21 @@ const Events = () => {
 
   if (isLoading) {
     return (
-      <UniversalLoader
-        variant="page"
-        title="Loading Events"
-        subtitle="Fetching campus events..."
-        showSteps={true}
-        steps={steps}
-        error={loadingError}
-        onRetry={() => window.location.reload()}
-        size="large"
-      />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00C6A7] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading events...</p>
+        </div>
+      </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      <Navbar />
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-[100px]">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <h1 className="text-h2 font-extrabold text-black">Campus Events</h1>
-          {user?.email === "gauravkhandelwal205@gmail.com" && (
+          {user?.isAdmin && (
             <button 
               onClick={() => setIsModalOpen(true)}
               className="flex items-center gap-2 px-6 py-3 rounded-full bg-black text-white font-bold text-lg shadow hover:bg-[#00C6A7] transition"
@@ -704,9 +696,9 @@ const Events = () => {
                   <button
                     onClick={() => { setIsModalOpen(false); setEditingEvent(null); setNewEvent({ title: '', description: '', date: '', location: '', status: 'Upcoming', registerUrl: '', image: undefined, imagePreview: '', operatingHours: '', contactInfo: { name: undefined, email: undefined, phone: undefined }, mapLocation: { building: undefined, floor: undefined, room: undefined, coordinates: undefined } }); }}
                     aria-label="Close"
-                    className="text-red-500 hover:text-red-700 transition-colors duration-200"
+                    className="bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg"
                   >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>

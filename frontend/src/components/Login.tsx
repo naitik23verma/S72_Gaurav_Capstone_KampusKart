@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
-import SkeletonLoader from './SkeletonLoader';
-import ServerWakeupLoader from './ServerWakeupLoader';
 
 // Use an image from the public folder
 const imageUrl = '/login-side.jpg'; // Place your image in the public folder as login-side.jpg
@@ -27,7 +25,6 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState('');
-  const [showServerWakeup, setShowServerWakeup] = useState(false);
   const navigate = useNavigate();
   const { login, loginWithGoogle } = useAuth();
 
@@ -67,35 +64,8 @@ const Login: React.FC = () => {
   };
 
   const handleGoogleLogin = () => {
-    setShowServerWakeup(true);
-  };
-
-  const handleServerReady = () => {
-    setShowServerWakeup(false);
     loginWithGoogle();
   };
-
-  const handleServerError = (error: string) => {
-    setShowServerWakeup(false);
-    setError('Server connection failed. Please try again.');
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white font-sans px-4">
-        <SkeletonLoader variant="login" />
-      </div>
-    );
-  }
-
-  if (showServerWakeup) {
-    return (
-      <ServerWakeupLoader
-        onServerReady={handleServerReady}
-        onError={handleServerError}
-      />
-    );
-  }
 
   return (
     <div className="min-h-screen w-screen h-screen flex font-sans bg-white">

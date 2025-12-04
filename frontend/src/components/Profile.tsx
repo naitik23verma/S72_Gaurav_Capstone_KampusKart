@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import UniversalLoader from './UniversalLoader';
-import { useDataLoading } from '../hooks/useLoading';
 import { FiUser, FiMail, FiPhone, FiMapPin, FiEdit2, FiSave, FiXCircle, FiUpload, FiAlertCircle, FiCheckCircle, FiCalendar, FiTag, FiBriefcase } from 'react-icons/fi'; // Importing icons including new ones
 import { API_BASE } from '../config';
 
@@ -30,7 +28,6 @@ const calculateCompletion = (profileData: any) => {
 
 const Profile = () => {
   const { user, token } = useAuth();
-  const { isLoading, error: loadingError, steps, startLoading, stopLoading, setError: setLoadingError } = useDataLoading();
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -90,7 +87,6 @@ const Profile = () => {
          return;
       }
       if (!pageLoading) setPageLoading(true);
-      startLoading();
 
       try {
         const response = await fetch(`${API_BASE}/api/profile`, {
@@ -121,7 +117,6 @@ const Profile = () => {
         setError('An error occurred while fetching profile data.');
       } finally {
         setPageLoading(false);
-        stopLoading();
       }
     };
     
@@ -227,18 +222,14 @@ const Profile = () => {
         setIsEditing(false);
     };
 
-  if (isLoading || pageLoading || !user) {
+  if (pageLoading || !user) {
     return (
-      <UniversalLoader
-        variant="page"
-        title="Loading Profile"
-        subtitle="Fetching your profile data..."
-        showSteps={true}
-        steps={steps}
-        error={loadingError}
-        onRetry={() => window.location.reload()}
-        size="large"
-      />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00C6A7] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading profile...</p>
+        </div>
+      </div>
     );
   }
 

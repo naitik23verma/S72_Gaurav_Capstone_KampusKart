@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { io } from 'socket.io-client';
 import { format } from 'date-fns';
@@ -202,7 +202,7 @@ const ChatWindow = () => {
         observerRef.current.disconnect();
       }
     };
-  }, [messages, hasMore, loading]);
+  }, [messages, hasMore, loading, loadMoreMessages]);
 
   const loadMoreMessages = async () => {
     try {

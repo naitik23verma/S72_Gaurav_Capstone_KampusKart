@@ -420,14 +420,4 @@ For support:
 2. Search through [existing issues](https://github.com/yourusername/KampusKart/issues)
 3. Create a new issue if needed
 
-## 👥 Authors
-
-- **KampusKart Team** - *Initial work*
-
-## 🙏 Acknowledgments
-
-- MIT ADT University for providing the platform
-- All contributors who have helped improve this project
-
-
 

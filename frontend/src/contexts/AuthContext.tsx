@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE, isProduction } from '../config';
+import { AppSkeleton } from '../components/common/AppSkeleton';
 
 interface User {
   _id: string;
@@ -402,7 +403,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Only render children after token check is complete
   if (initializing) {
-    return <div className="min-h-screen flex items-center justify-center text-lg font-semibold text-deep-purple-700">Loading...</div>;
+    return <AppSkeleton />;
   }
 
   return (

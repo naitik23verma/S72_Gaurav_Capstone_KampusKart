@@ -37,7 +37,18 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
 import { API_BASE } from '../../config';
-import { themeConfig } from '../../theme/themeConfig';
+import { ChatSkeleton } from '../common/SkeletonLoader';
+
+// Chat Color Theme Configuration
+// Using the same color scheme as buttons and other feature components
+const CHAT_THEME = {
+  primary: '#181818',        // Dark gray/black - matches button default bg
+  primaryHover: '#00C6A7',   // Teal - matches button hover state
+  primaryDark: '#009e87',    // Darker teal for gradients
+  primaryLight: '#00E6C4',   // Lighter teal
+  primaryRgba: 'rgba(0, 198, 167,', // For rgba colors - RGB values for #00C6A7
+  primaryDarkRgba: 'rgba(24, 24, 24,', // For rgba colors - RGB values for #181818
+};
 
 const ChatWindow = () => {
   const [messages, setMessages] = useState([]);
@@ -47,7 +58,6 @@ const ChatWindow = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [connectionStatus, setConnectionStatus] = useState('connecting');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [searchResults, setSearchResults] = useState([]);
@@ -64,6 +74,19 @@ const ChatWindow = () => {
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const observerRef = useRef(null);
+
+  const markMessageAsRead = useCallback(async (messageId) => {
+    try {
+      await fetch(`${API_BASE}/api/chat/messages/${messageId}/read`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+    } catch (error) {
+      console.error('Error marking message as read:', error);
+    }
+  }, []);
 
   useEffect(() => {
     // Initialize socket connection
@@ -93,7 +116,6 @@ const ChatWindow = () => {
         }
       }
       setLoading(false);
-      setConnectionStatus('connected');
       setError(null);
     });
 
@@ -101,20 +123,17 @@ const ChatWindow = () => {
     socketRef.current.on('connect_error', (error) => {
       console.error('Socket connection error:', error);
       setError('Failed to connect to chat server');
-      setConnectionStatus('error');
       setLoading(false);
     });
 
     socketRef.current.on('disconnect', (reason) => {
       console.log('Socket disconnected:', reason);
-      setConnectionStatus('disconnected');
       if (reason === 'io server disconnect') {
         setError('Connection lost. Please refresh the page.');
       }
     });
 
     socketRef.current.on('connect', () => {
-      setConnectionStatus('connected');
       setError(null);
     });
 
@@ -142,13 +161,13 @@ const ChatWindow = () => {
 
     // Listen for typing indicators
     socketRef.current.on('user-typing', (userData) => {
-      if (userData && userData._id !== user._id) {
+      if (userData && user && userData._id !== user._id) {
         setIsTyping(true);
       }
     });
 
     socketRef.current.on('user-stop-typing', (userData) => {
-      if (userData && userData._id !== user._id) {
+      if (userData && user && userData._id !== user._id) {
         setIsTyping(false);
       }
     });
@@ -172,9 +191,12 @@ const ChatWindow = () => {
     });
 
     return () => {
-      socketRef.current.disconnect();
+      if (socketRef.current) {
+        socketRef.current.removeAllListeners();
+        socketRef.current.disconnect();
+      }
     };
-  }, [user]);
+  }, [user, markMessageAsRead]);
 
   // Load more messages when scrolling up
   const loadMoreMessages = useCallback(async () => {
@@ -188,10 +210,17 @@ const ChatWindow = () => {
           },
         }
       );
+      if (!response.ok) {
+        throw new Error('Failed to load more messages');
+      }
       const data = await response.json();
-      setMessages((prev) => [...data.messages, ...prev]);
-      setPage((prev) => prev + 1);
-      setHasMore(data.pagination.page < data.pagination.pages);
+      if (data && data.messages && Array.isArray(data.messages)) {
+        setMessages((prev) => [...data.messages, ...prev]);
+        setPage((prev) => prev + 1);
+        if (data.pagination) {
+          setHasMore(data.pagination.page < data.pagination.pages);
+        }
+      }
     } catch (error) {
       console.error('Error loading more messages:', error);
     } finally {
@@ -281,7 +310,7 @@ const ChatWindow = () => {
   };
 
   const handleTyping = () => {
-    if (!socketRef.current) return;
+    if (!socketRef.current || !user) return;
     
     socketRef.current.emit('typing', {
       _id: user._id,
@@ -295,10 +324,12 @@ const ChatWindow = () => {
 
     // Set new timeout
     typingTimeoutRef.current = setTimeout(() => {
-      socketRef.current.emit('stop-typing', {
-        _id: user._id,
-        name: user.name,
-      });
+      if (socketRef.current && user) {
+        socketRef.current.emit('stop-typing', {
+          _id: user._id,
+          name: user.name,
+        });
+      }
     }, 1000);
   };
 
@@ -310,24 +341,29 @@ const ChatWindow = () => {
   const handleDeleteMessage = async () => {
     if (!selectedMessage) return;
     try {
-      await fetch(`${API_BASE}/api/chat/messages/${selectedMessage._id}`, {
+      const response = await fetch(`${API_BASE}/api/chat/messages/${selectedMessage._id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      setMessages((prev) =>
-        prev.filter((msg) => msg._id !== selectedMessage._id)
-      );
+      if (response.ok) {
+        setMessages((prev) =>
+          prev.filter((msg) => msg._id !== selectedMessage._id)
+        );
+      } else {
+        throw new Error('Failed to delete message');
+      }
     } catch (error) {
       console.error('Error deleting message:', error);
+    } finally {
+      setAnchorEl(null);
+      setSelectedMessage(null);
     }
-    setAnchorEl(null);
-    setSelectedMessage(null);
   };
 
   const handleEditMessage = async () => {
-    if (!selectedMessage || !editText.trim()) return;
+    if (!selectedMessage || !editText.trim() || !user) return;
     
     console.log('Editing message:', {
       messageId: selectedMessage._id,
@@ -348,14 +384,16 @@ const ChatWindow = () => {
       
       if (response.ok) {
         const updatedMessage = await response.json();
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg._id === selectedMessage._id ? { ...msg, ...updatedMessage } : msg
-          )
-        );
-        console.log('Message edited successfully');
+        if (updatedMessage) {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg._id === selectedMessage._id ? { ...msg, ...updatedMessage } : msg
+            )
+          );
+          console.log('Message edited successfully');
+        }
       } else {
-        const errorData = await response.text();
+        const errorData = await response.json().catch(() => ({ message: 'Failed to edit message' }));
         console.error('Failed to edit message:', response.status, response.statusText, errorData);
       }
     } catch (error) {
@@ -371,19 +409,6 @@ const ChatWindow = () => {
     setEditingMessage(message);
     setEditText(message.message);
     setAnchorEl(null);
-  };
-
-  const markMessageAsRead = async (messageId) => {
-    try {
-      await fetch(`${API_BASE}/api/chat/messages/${messageId}/read`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-    } catch (error) {
-      console.error('Error marking message as read:', error);
-    }
   };
 
   // Auto-scroll to latest message
@@ -431,11 +456,12 @@ const ChatWindow = () => {
         px: { xs: 2, sm: 3 },
         py: { xs: 1.5, sm: 2 },
         mb: 0,
-        background: 'linear-gradient(135deg, #00C6A7 0%, #009e87 100%)',
+        background: '#ffffff',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        boxShadow: '0 2px 12px rgba(0, 198, 167, 0.15)',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+        borderBottom: '1px solid #e5e7eb',
         position: 'relative',
         '&::after': {
           content: '""',
@@ -444,7 +470,7 @@ const ChatWindow = () => {
           left: 0,
           right: 0,
           height: '1px',
-          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+          background: 'linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.05), transparent)',
         }
       }}
     >
@@ -454,13 +480,12 @@ const ChatWindow = () => {
             width: { xs: 44, sm: 48 },
             height: { xs: 44, sm: 48 },
             borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.2)',
-            backdropFilter: 'blur(10px)',
+            background: '#f9fafb',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            border: '2px solid rgba(255, 255, 255, 0.3)',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+            border: '2px solid #e5e7eb',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
           }}
         >
           <Avatar
@@ -477,7 +502,7 @@ const ChatWindow = () => {
             variant="h6" 
             sx={{ 
               fontWeight: 800,
-              color: '#fff',
+              color: '#1f2937',
               fontSize: { xs: '1rem', sm: '1.25rem' },
               letterSpacing: '-0.02em',
               mb: 0.25,
@@ -503,7 +528,7 @@ const ChatWindow = () => {
             <Typography 
               variant="caption" 
               sx={{ 
-                color: 'rgba(255, 255, 255, 0.9)',
+                color: '#6b7280',
                 fontWeight: 500,
                 fontSize: '0.75rem',
               }}
@@ -520,6 +545,7 @@ const ChatWindow = () => {
   const renderMessage = (message) => {
     if (!message) return null;
     if (!message.sender) return null;
+    if (!user) return null;
     const isOwnMessage = message.sender._id === user._id;
     const hasReactions = message.reactions && message.reactions.length > 0;
     const isRead = message.readBy && message.readBy.some((r) => r.user._id === user._id);
@@ -543,36 +569,49 @@ const ChatWindow = () => {
             }
             alt={message.sender.name}
             sx={{ 
-              border: isOwnMessage ? '2px solid rgba(255, 255, 255, 0.3)' : '2px solid #e5e7eb',
+              border: isOwnMessage 
+                ? '3px solid rgba(0, 198, 167, 0.3)' 
+                : '3px solid #ffffff',
               width: { xs: 40, sm: 44 },
               height: { xs: 40, sm: 44 },
               boxShadow: isOwnMessage 
-                ? '0 2px 8px rgba(0, 198, 167, 0.2)' 
-                : '0 2px 4px rgba(0, 0, 0, 0.1)',
+                ? `0 4px 12px ${CHAT_THEME.primaryRgba}0.2), 0 0 0 1px rgba(0, 198, 167, 0.1) inset` 
+                : '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.02) inset',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': {
+                transform: 'scale(1.05)',
+                boxShadow: isOwnMessage 
+                  ? `0 6px 16px ${CHAT_THEME.primaryRgba}0.25), 0 0 0 1px rgba(0, 198, 167, 0.15) inset` 
+                  : '0 6px 16px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04) inset',
+              }
             }}
           />
         </ListItemAvatar>
         <Box 
           sx={{
-            bgcolor: isOwnMessage ? 'linear-gradient(135deg, #00C6A7 0%, #009e87 100%)' : '#ffffff',
-            background: isOwnMessage ? 'linear-gradient(135deg, #00C6A7 0%, #009e87 100%)' : '#ffffff',
-            border: isOwnMessage ? 'none' : '1px solid #e5e7eb',
+            bgcolor: isOwnMessage ? '#f0fdf4' : '#ffffff',
+            background: isOwnMessage 
+              ? 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)'
+              : 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)',
+            border: isOwnMessage 
+              ? '1px solid rgba(0, 198, 167, 0.2)' 
+              : '1px solid rgba(0, 0, 0, 0.06)',
             borderRadius: isOwnMessage ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
             p: { xs: 1.5, sm: 1.75 },
             minWidth: 120,
             maxWidth: { xs: '80%', sm: 420 },
             boxShadow: isOwnMessage 
-              ? '0 4px 12px rgba(0, 198, 167, 0.25)' 
-              : '0 2px 8px rgba(0, 0, 0, 0.06)',
+              ? '0 2px 8px rgba(0, 198, 167, 0.15), 0 0 0 1px rgba(0, 198, 167, 0.1) inset' 
+              : '0 2px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.02) inset',
             ml: isOwnMessage ? 0 : { xs: 0.5, sm: 1 },
             mr: isOwnMessage ? { xs: 0.5, sm: 1 } : 0,
             position: 'relative',
-            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             '&:hover': {
               boxShadow: isOwnMessage 
-                ? '0 6px 16px rgba(0, 198, 167, 0.35)' 
-                : '0 4px 12px rgba(0, 0, 0, 0.1)',
-              transform: 'translateY(-2px)'
+                ? '0 4px 16px rgba(0, 198, 167, 0.2), 0 0 0 1px rgba(0, 198, 167, 0.15) inset' 
+                : '0 4px 16px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04) inset',
+              transform: 'translateY(-2px)',
             }
           }}
         >
@@ -619,7 +658,7 @@ const ChatWindow = () => {
               variant="body2" 
               sx={{ 
                 wordBreak: 'break-word',
-                color: isOwnMessage ? '#ffffff' : '#1f2937',
+                color: '#1f2937',
                 fontSize: '0.9375rem',
                 lineHeight: 1.6,
                 fontWeight: 400,
@@ -632,7 +671,7 @@ const ChatWindow = () => {
                   variant="caption" 
                   sx={{ 
                     ml: 1,
-                    color: isOwnMessage ? 'rgba(255, 255, 255, 0.7)' : '#6b7280',
+                    color: '#6b7280',
                     fontSize: '0.75rem',
                     fontStyle: 'italic',
                   }}
@@ -668,26 +707,65 @@ const ChatWindow = () => {
             </Box>
           )}
           {hasReactions && (
-            <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', gap: 0.5, mt: 0.75, flexWrap: 'wrap' }}>
               {message.reactions.map((reaction, index) => (
                 <Tooltip key={index} title={reaction.user.name} placement="top">
-                  <Typography component="span" variant="caption" sx={{ bgcolor: '#f1f1f1', px: 0.5, borderRadius: 1, fontSize: 18 }}>
+                  <Typography 
+                    component="span" 
+                    variant="caption" 
+                    sx={{ 
+                      bgcolor: isOwnMessage ? 'rgba(0, 198, 167, 0.1)' : '#f1f5f9',
+                      backdropFilter: isOwnMessage ? 'blur(10px)' : 'none',
+                      px: 1,
+                      py: 0.25,
+                      borderRadius: '12px',
+                      fontSize: 16,
+                      border: isOwnMessage ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(0, 0, 0, 0.06)',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+                      transition: 'all 0.2s ease',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        transform: 'scale(1.1)',
+                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                      }
+                    }}
+                  >
                     {reaction.emoji}
                   </Typography>
                 </Tooltip>
               ))}
             </Box>
           )}
-          <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, gap: 1 }}>
-            <Typography variant="caption" color="text.secondary">
+          <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, gap: 1.5 }}>
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                color: isOwnMessage ? '#374151' : '#6b7280',
+                fontWeight: 500,
+                fontSize: '0.75rem',
+              }}
+            >
               {message.sender.name}
             </Typography>
-            <Typography variant="caption" color="text.disabled">
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                color: '#9ca3af',
+                fontSize: '0.7rem',
+              }}
+            >
               {format(new Date(message.timestamp), 'HH:mm')}
             </Typography>
             {isOwnMessage && (
-              <Typography variant="caption" color={isRead ? 'primary.main' : 'text.disabled'}>
-                {isRead ? 'Read' : 'Sent'}
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: isRead ? CHAT_THEME.primaryHover : '#9ca3af',
+                  fontSize: '0.7rem',
+                  fontWeight: isRead ? 600 : 400,
+                }}
+              >
+                {isRead ? '✓✓ Read' : '✓ Sent'}
               </Typography>
             )}
           </Box>
@@ -860,185 +938,14 @@ const ChatWindow = () => {
           zIndex: 10,
           display: 'flex',
           flexDirection: 'column',
-          bgcolor: '#212B36',
+          bgcolor: '#ffffff',
           overflow: 'hidden',
           height: '100vh',
           minHeight: 0,
           pt: '64px',
         }}
       >
-        {/* Chat Header during loading */}
-        <Paper
-          elevation={1}
-          sx={{
-            p: 2,
-            mb: 0,
-            bgcolor: '#fff',
-            borderRadius: '0 0 16px 16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderBottom: '1px solid #e0e0e0',
-            boxShadow: 'none',
-          }}
-        >
-          <Box display="flex" alignItems="center" gap={2}>
-            <Avatar
-              src={logoUrl}
-              sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}
-            />
-            <Box>
-              <Typography variant="h6" fontWeight={700} color="primary.main">
-                KampusKart Chat
-              </Typography>
-                          <Typography variant="caption" color="text.secondary">
-              {connectionStatus === 'connecting' ? 'Connecting...' : 
-               connectionStatus === 'connected' ? 'Connected' : 
-               connectionStatus === 'disconnected' ? 'Disconnected' : 'Connecting...'}
-            </Typography>
-            </Box>
-          </Box>
-        </Paper>
-
-        {/* Loading Content */}
-        <Box 
-          sx={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            p: 3,
-            gap: 3,
-          }}
-        >
-          {/* Animated Logo */}
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 2,
-            }}
-          >
-            <Box
-              sx={{
-                width: 80,
-                height: 80,
-                borderRadius: '50%',
-                bgcolor: themeConfig.colors.primary,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                animation: 'pulse 2s infinite',
-                '@keyframes pulse': {
-                  '0%': {
-                    transform: 'scale(1)',
-                    opacity: 1,
-                  },
-                  '50%': {
-                    transform: 'scale(1.1)',
-                    opacity: 0.7,
-                  },
-                  '100%': {
-                    transform: 'scale(1)',
-                    opacity: 1,
-                  },
-                },
-              }}
-            >
-              <img 
-                src={logoUrl} 
-                alt="KampusKart" 
-                style={{ 
-                  width: '50px', 
-                  height: '50px',
-                  filter: 'brightness(0) invert(1)',
-                }} 
-              />
-            </Box>
-            
-            <Typography variant="h6" fontWeight={600} sx={{ color: themeConfig.colors.primary }}>
-              Loading Chat
-            </Typography>
-            
-            <Typography variant="body2" sx={{ color: themeConfig.colors.text.secondary }} textAlign="center">
-              Connecting to chat server...
-            </Typography>
-          </Box>
-
-          {/* Progress Indicator */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-            <CircularProgress 
-              size={40} 
-              thickness={4}
-              sx={{ 
-                color: themeConfig.colors.primary,
-                '& .MuiCircularProgress-circle': {
-                  strokeLinecap: 'round',
-                },
-              }}
-            />
-            <Typography variant="caption" sx={{ color: themeConfig.colors.text.secondary }}>
-              Establishing connection
-            </Typography>
-          </Box>
-
-          {/* Loading Steps */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, maxWidth: 300 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <CircularProgress 
-                size={16} 
-                sx={{ 
-                  color: connectionStatus === 'connected' ? themeConfig.colors.success : 
-                         connectionStatus === 'error' ? themeConfig.colors.error : themeConfig.colors.primary 
-                }} 
-              />
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: connectionStatus === 'connected' ? themeConfig.colors.success : 
-                         connectionStatus === 'error' ? themeConfig.colors.error : themeConfig.colors.text.secondary
-                }}
-              >
-                {connectionStatus === 'connected' ? 'Connected to server' :
-                 connectionStatus === 'error' ? 'Connection failed' : 'Connecting to server'}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <CircularProgress 
-                size={16} 
-                sx={{ 
-                  color: connectionStatus === 'connected' ? themeConfig.colors.success : themeConfig.colors.primary 
-                }} 
-              />
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: connectionStatus === 'connected' ? themeConfig.colors.success : themeConfig.colors.text.secondary
-                }}
-              >
-                {connectionStatus === 'connected' ? 'Messages loaded' : 'Loading messages'}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <CircularProgress 
-                size={16} 
-                sx={{ 
-                  color: connectionStatus === 'connected' ? themeConfig.colors.success : themeConfig.colors.text.light 
-                }} 
-              />
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: connectionStatus === 'connected' ? themeConfig.colors.success : themeConfig.colors.text.light
-                }}
-              >
-                {connectionStatus === 'connected' ? 'Real-time features ready' : 'Setting up real-time features'}
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
+        <ChatSkeleton messageCount={8} />
       </Box>
     );
   }
@@ -1054,11 +961,22 @@ const ChatWindow = () => {
       display: 'flex',
       flexDirection: 'column',
       bgcolor: '#fafafa',
-      background: 'linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%)',
+      background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e8f4f0 100%)',
       overflow: 'hidden',
       height: '100vh',
       minHeight: 0,
       pt: '64px', // Use padding-top instead of top positioning
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundImage: 'none',
+        pointerEvents: 'none',
+        zIndex: 0,
+      }
     }}>
       <ChatHeader />
       {/* Messages */}
@@ -1071,25 +989,48 @@ const ChatWindow = () => {
         bgcolor: 'transparent',
         border: 'none',
         boxShadow: 'none',
+        position: 'relative',
+        zIndex: 1,
         '&::-webkit-scrollbar': {
-          width: '6px',
+          width: '8px',
         },
         '&::-webkit-scrollbar-track': {
-          background: 'transparent',
+          background: 'rgba(0, 0, 0, 0.02)',
+          borderRadius: '10px',
         },
         '&::-webkit-scrollbar-thumb': {
-          background: '#d1d5db',
+          background: `linear-gradient(180deg, ${CHAT_THEME.primaryHover} 0%, ${CHAT_THEME.primaryDark} 100%)`,
           borderRadius: '10px',
+          border: '2px solid transparent',
+          backgroundClip: 'padding-box',
           '&:hover': {
-            background: '#9ca3af',
+            background: `linear-gradient(180deg, ${CHAT_THEME.primaryDark} 0%, ${CHAT_THEME.primaryDark} 100%)`,
+            backgroundClip: 'padding-box',
           },
         },
       }}>
         {loading && messages.length > 0 && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <CircularProgress size={20} sx={{ color: 'primary.main' }} />
-              <Typography variant="caption" color="text.secondary">
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1.5,
+              px: 2,
+              py: 1,
+              bgcolor: `${CHAT_THEME.primaryRgba}0.05)`,
+              borderRadius: '12px',
+              border: `1px solid ${CHAT_THEME.primaryRgba}0.1)`,
+            }}>
+              <CircularProgress 
+                size={18} 
+                sx={{ 
+                  color: CHAT_THEME.primary,
+                  '& .MuiCircularProgress-circle': {
+                    strokeLinecap: 'round',
+                  }
+                }} 
+              />
+              <Typography variant="caption" sx={{ color: CHAT_THEME.primary, fontWeight: 500, fontSize: '0.8rem' }}>
                 Loading more messages...
               </Typography>
             </Box>
@@ -1123,13 +1064,27 @@ const ChatWindow = () => {
             sx={{ 
               p: 1.5, 
               mb: 1.5, 
-              bgcolor: '#f3f4f6',
-              borderRadius: '12px',
-              border: '1px solid #e5e7eb',
+              bgcolor: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
+              background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
+              borderRadius: '14px',
+              border: `1px solid ${CHAT_THEME.primaryRgba}0.2)`,
+              boxShadow: `0 2px 8px ${CHAT_THEME.primaryRgba}0.1)`,
+              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: '4px',
+                background: `linear-gradient(180deg, ${CHAT_THEME.primaryHover} 0%, ${CHAT_THEME.primaryDark} 100%)`,
+                borderRadius: '2px 0 0 2px',
+              }
             }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-              <Typography variant="caption" sx={{ color: '#6b7280', fontWeight: 600 }}>
+              <Typography variant="caption" sx={{ color: CHAT_THEME.primary, fontWeight: 700, fontSize: '0.75rem', ml: 1 }}>
                 Replying to {replyTo.sender.name}
               </Typography>
               <IconButton 
@@ -1137,26 +1092,76 @@ const ChatWindow = () => {
                 onClick={() => setReplyTo(null)}
                 sx={{ 
                   color: '#6b7280',
-                  '&:hover': { bgcolor: '#e5e7eb' }
+                  width: 28,
+                  height: 28,
+                  '&:hover': { 
+                    bgcolor: `${CHAT_THEME.primaryRgba}0.1)`,
+                    color: CHAT_THEME.primary,
+                    transform: 'rotate(90deg)',
+                  },
+                  transition: 'all 0.2s ease',
                 }}
               >
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Box>
-            <Typography variant="body2" noWrap sx={{ color: '#374151' }}>
+            <Typography variant="body2" noWrap sx={{ color: '#374151', ml: 1, fontSize: '0.875rem' }}>
               {replyTo.message}
             </Typography>
           </Paper>
         )}
         {/* Typing Indicator */}
         {isTyping && (
-          <Box sx={{ px: 2, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Box sx={{ display: 'flex', gap: 0.5 }}>
-              <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#00C6A7', animation: 'bounce 1.4s infinite', '@keyframes bounce': { '0%, 60%, 100%': { transform: 'translateY(0)' }, '30%': { transform: 'translateY(-10px)' } } }} />
-              <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#00C6A7', animation: 'bounce 1.4s infinite 0.2s', '@keyframes bounce': { '0%, 60%, 100%': { transform: 'translateY(0)' }, '30%': { transform: 'translateY(-10px)' } } }} />
-              <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#00C6A7', animation: 'bounce 1.4s infinite 0.4s', '@keyframes bounce': { '0%, 60%, 100%': { transform: 'translateY(0)' }, '30%': { transform: 'translateY(-10px)' } } }} />
+          <Box sx={{ 
+            px: 2, 
+            mb: 1.5, 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 1.5,
+            py: 1,
+            bgcolor: `${CHAT_THEME.primaryRgba}0.05)`,
+            borderRadius: '12px',
+            border: `1px solid ${CHAT_THEME.primaryRgba}0.1)`,
+          }}>
+            <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+              <Box sx={{ 
+                width: 8, 
+                height: 8, 
+                borderRadius: '50%', 
+                bgcolor: CHAT_THEME.primary, 
+                boxShadow: `0 2px 4px ${CHAT_THEME.primaryRgba}0.3)`,
+                animation: 'bounce 1.4s infinite',
+                '@keyframes bounce': { 
+                  '0%, 60%, 100%': { transform: 'translateY(0) scale(1)' }, 
+                  '30%': { transform: 'translateY(-8px) scale(1.1)' } 
+                } 
+              }} />
+              <Box sx={{ 
+                width: 8, 
+                height: 8, 
+                borderRadius: '50%', 
+                bgcolor: CHAT_THEME.primary, 
+                boxShadow: `0 2px 4px ${CHAT_THEME.primaryRgba}0.3)`,
+                animation: 'bounce 1.4s infinite 0.2s',
+                '@keyframes bounce': { 
+                  '0%, 60%, 100%': { transform: 'translateY(0) scale(1)' }, 
+                  '30%': { transform: 'translateY(-8px) scale(1.1)' } 
+                } 
+              }} />
+              <Box sx={{ 
+                width: 8, 
+                height: 8, 
+                borderRadius: '50%', 
+                bgcolor: CHAT_THEME.primary, 
+                boxShadow: `0 2px 4px ${CHAT_THEME.primaryRgba}0.3)`,
+                animation: 'bounce 1.4s infinite 0.4s',
+                '@keyframes bounce': { 
+                  '0%, 60%, 100%': { transform: 'translateY(0) scale(1)' }, 
+                  '30%': { transform: 'translateY(-8px) scale(1.1)' } 
+                } 
+              }} />
             </Box>
-            <Typography variant="caption" sx={{ color: '#6b7280', fontWeight: 500 }}>
+            <Typography variant="caption" sx={{ color: CHAT_THEME.primary, fontWeight: 600, fontSize: '0.8rem' }}>
               Someone is typing...
             </Typography>
           </Box>
@@ -1171,14 +1176,33 @@ const ChatWindow = () => {
             display: 'flex',
             alignItems: 'flex-end',
             gap: { xs: 0.75, sm: 1 },
-            boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.08)',
-            borderRadius: '20px',
-            border: '1px solid #e5e7eb',
+            boxShadow: '0 -4px 24px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02)',
+            borderRadius: '24px',
+            border: '1px solid rgba(0, 0, 0, 0.08)',
             bgcolor: '#ffffff',
-            transition: 'all 0.2s ease',
+            background: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            position: 'relative',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              inset: 0,
+              borderRadius: 'inherit',
+              padding: '1px',
+              background: `linear-gradient(135deg, ${CHAT_THEME.primaryRgba}0.1), ${CHAT_THEME.primaryRgba}0.05))`,
+              WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+              WebkitMaskComposite: 'xor',
+              maskComposite: 'exclude',
+              opacity: 0,
+              transition: 'opacity 0.3s ease',
+            },
             '&:focus-within': {
-              boxShadow: '0 -4px 24px rgba(0, 198, 167, 0.15)',
-              borderColor: '#00C6A7',
+              boxShadow: `0 -6px 32px ${CHAT_THEME.primaryRgba}0.2), 0 0 0 1px ${CHAT_THEME.primaryRgba}0.3)`,
+              borderColor: CHAT_THEME.primary,
+              transform: 'translateY(-2px)',
+              '&::before': {
+                opacity: 1,
+              }
             }
           }}
         >
@@ -1194,11 +1218,15 @@ const ChatWindow = () => {
             size="small"
             sx={{ 
               color: '#6b7280',
+              width: 40,
+              height: 40,
+              borderRadius: '12px',
               '&:hover': { 
-                bgcolor: '#f3f4f6',
-                color: '#00C6A7',
+                bgcolor: `${CHAT_THEME.primaryRgba}0.1)`,
+                color: CHAT_THEME.primary,
+                transform: 'rotate(45deg) scale(1.1)',
               },
-              transition: 'all 0.2s ease',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
             <AttachFileIcon />
@@ -1208,11 +1236,16 @@ const ChatWindow = () => {
             size="small"
             sx={{ 
               color: '#6b7280',
+              width: 40,
+              height: 40,
+              borderRadius: '12px',
+              bgcolor: showEmojiPicker ? `${CHAT_THEME.primaryRgba}0.15)` : 'transparent',
               '&:hover': { 
-                bgcolor: '#f3f4f6',
-                color: '#00C6A7',
+                bgcolor: `${CHAT_THEME.primaryRgba}0.1)`,
+                color: CHAT_THEME.primary,
+                transform: 'scale(1.1)',
               },
-              transition: 'all 0.2s ease',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
             <EmojiEmotionsIcon />
@@ -1233,9 +1266,42 @@ const ChatWindow = () => {
           {attachments.length > 0 && (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1, px: 2 }}>
               {attachments.map((file, idx) => (
-                <Paper key={idx} sx={{ display: 'flex', alignItems: 'center', p: 0.5, bgcolor: '#e3f2fd' }}>
-                  <Typography variant="caption" sx={{ mr: 1 }}>{file.name}</Typography>
-                  <IconButton size="small" onClick={() => setAttachments(attachments.filter((_, i) => i !== idx))}>
+                <Paper 
+                  key={idx} 
+                  sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    p: 0.75, 
+                    px: 1.25,
+                    bgcolor: 'linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%)',
+                    background: 'linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%)',
+                    borderRadius: '12px',
+                    border: '1px solid ${CHAT_THEME.primaryRgba} 0.2)',
+                    boxShadow: '0 2px 6px ${CHAT_THEME.primaryRgba} 0.1)',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 4px 12px ${CHAT_THEME.primaryRgba} 0.15)',
+                    }
+                  }}
+                >
+                  <Typography variant="caption" sx={{ mr: 1, color: '#0369a1', fontWeight: 500, fontSize: '0.75rem' }}>
+                    {file.name}
+                  </Typography>
+                  <IconButton 
+                    size="small" 
+                    onClick={() => setAttachments(attachments.filter((_, i) => i !== idx))}
+                    sx={{
+                      width: 20,
+                      height: 20,
+                      color: '#0369a1',
+                      '&:hover': {
+                        bgcolor: 'rgba(3, 105, 161, 0.1)',
+                        transform: 'rotate(90deg)',
+                      },
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
                     <DeleteIcon fontSize="small" />
                   </IconButton>
                 </Paper>
@@ -1254,23 +1320,35 @@ const ChatWindow = () => {
             size="small"
             sx={{
               '& .MuiOutlinedInput-root': {
-                borderRadius: '12px',
-                bgcolor: '#f9fafb',
+                borderRadius: '16px',
+                bgcolor: 'rgba(0, 0, 0, 0.02)',
                 fontSize: '0.9375rem',
+                transition: 'all 0.2s ease',
                 '& fieldset': {
                   borderColor: 'transparent',
+                },
+                '&:hover': {
+                  bgcolor: 'rgba(0, 0, 0, 0.03)',
                 },
                 '&:hover fieldset': {
                   borderColor: 'transparent',
                 },
+                '&.Mui-focused': {
+                  bgcolor: `${CHAT_THEME.primaryRgba}0.05)`,
+                },
                 '&.Mui-focused fieldset': {
-                  borderColor: '#00C6A7',
+                  borderColor: `${CHAT_THEME.primaryRgba}0.3)`,
                   borderWidth: '1px',
                 },
               },
               '& .MuiInputBase-input': {
                 py: 1.25,
                 px: 1.5,
+                color: '#1f2937',
+                '&::placeholder': {
+                  color: '#9ca3af',
+                  opacity: 1,
+                },
               },
             }}
             inputProps={{ style: { fontSize: '0.9375rem' } }}
@@ -1282,14 +1360,14 @@ const ChatWindow = () => {
               width: { xs: 40, sm: 44 },
               height: { xs: 40, sm: 44 },
               background: (newMessage.trim() !== '' || attachments.length > 0) && !sendingMessage
-                ? 'linear-gradient(135deg, #00C6A7 0%, #009e87 100%)'
+                ? CHAT_THEME.primary
                 : '#e5e7eb',
               color: (newMessage.trim() !== '' || attachments.length > 0) && !sendingMessage
                 ? '#ffffff'
                 : '#9ca3af',
               '&:hover': {
                 background: (newMessage.trim() !== '' || attachments.length > 0) && !sendingMessage
-                  ? 'linear-gradient(135deg, #009e87 0%, #008a75 100%)'
+                  ? CHAT_THEME.primaryHover
                   : '#d1d5db',
                 transform: 'scale(1.05)',
               },
@@ -1299,7 +1377,7 @@ const ChatWindow = () => {
               },
               transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
               boxShadow: (newMessage.trim() !== '' || attachments.length > 0) && !sendingMessage
-                ? '0 4px 12px rgba(0, 198, 167, 0.3)'
+                ? '0 4px 12px ${CHAT_THEME.primaryRgba} 0.3)'
                 : 'none',
             }}
           >
@@ -1326,7 +1404,7 @@ const ChatWindow = () => {
           }
         }}
       >
-        {selectedMessage?.sender._id === user._id && (
+        {selectedMessage?.sender._id === user?._id && (
           <>
             <MenuItem 
               onClick={() => {

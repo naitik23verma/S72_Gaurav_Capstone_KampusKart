@@ -7,6 +7,7 @@ import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { validateMultipleRequired } from '../utils/formValidation';
+import { PageSkeleton } from './common/SkeletonLoader';
 
 interface LostFoundItem {
   _id: string;
@@ -172,17 +173,24 @@ const LostFound = () => {
           'Authorization': `Bearer ${token}`,
         },
       });
-      const data = await response.json();
       if (!response.ok) {
-        const errorMessage = data.message || `Error fetching items: ${response.statusText}`;
-        throw new Error(errorMessage);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Error fetching items: ${response.statusText}`);
       }
-      if (currentPage === 1) {
-        setItems(data.items);
+      const data = await response.json();
+      if (data && Array.isArray(data.items)) {
+        if (currentPage === 1) {
+          setItems(data.items);
+        } else {
+          setItems(prev => [...prev, ...data.items]);
+        }
+        if (data.totalPages !== undefined) {
+          setTotalPages(data.totalPages);
+        }
       } else {
-        setItems(prev => [...prev, ...data.items]);
+        setItems([]);
+        setTotalPages(1);
       }
-      setTotalPages(data.totalPages);
     } catch (err: any) {
       console.error('Error fetching lost and found items:', err);
       setError(err.message || 'Failed to fetch lost and found items.');
@@ -269,14 +277,7 @@ const LostFound = () => {
 
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white font-sans">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00C6A7] mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading lost and found items...</p>
-        </div>
-      </div>
-    );
+    return <PageSkeleton contentType="cards4col" itemCount={8} filterCount={2} showAddButton={true} />;
   }
 
   if (error) {

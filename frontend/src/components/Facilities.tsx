@@ -7,6 +7,7 @@ import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { validateMultipleRequired } from '../utils/formValidation';
+import { PageSkeleton } from './common/SkeletonLoader';
 
 interface Facility {
   _id: string;
@@ -98,10 +99,18 @@ const Facilities = () => {
       setIsLoading(true);
       try {
         const res = await fetch(`${API_BASE}/api/facilities`);
+        if (!res.ok) {
+          throw new Error('Failed to fetch facilities');
+        }
         const data = await res.json();
-        setFacilities(data);
+        if (Array.isArray(data)) {
+          setFacilities(data);
+        } else {
+          setFacilities([]);
+        }
       } catch (err) {
         setError('Failed to load facilities');
+        setFacilities([]);
       } finally {
         setIsLoading(false);
       }
@@ -124,14 +133,7 @@ const Facilities = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00C6A7] mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading facilities...</p>
-        </div>
-      </div>
-    );
+    return <PageSkeleton contentType="cards" itemCount={6} filterCount={1} showAddButton={user?.isAdmin} />;
   }
 
   return (

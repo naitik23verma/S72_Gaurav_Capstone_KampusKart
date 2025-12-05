@@ -8,6 +8,7 @@ import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { validateMultipleRequired, validateEmail, validatePhone, validateUrl, validateDateRange } from '../utils/formValidation';
+import { PageSkeleton } from './common/SkeletonLoader';
 
 interface ClubRecruitment {
   _id: string;
@@ -235,9 +236,14 @@ const ClubsRecruitment = () => {
       const response = await fetch(`${API_BASE}/api/clubs`);
       if (!response.ok) throw new Error('Failed to fetch club recruitments');
       const data = await response.json();
-      setClubs(data);
+      if (Array.isArray(data)) {
+        setClubs(data);
+      } else {
+        setClubs([]);
+      }
     } catch (error) {
       setError('Failed to load club recruitments');
+      setClubs([]);
     } finally {
       setIsLoading(false);
     }
@@ -393,14 +399,7 @@ const ClubsRecruitment = () => {
   );
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00C6A7] mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading club recruitment...</p>
-        </div>
-      </div>
-    );
+    return <PageSkeleton contentType="cards" itemCount={6} filterCount={1} showAddButton={user?.isAdmin} />;
   }
 
   return (

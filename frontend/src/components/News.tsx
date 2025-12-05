@@ -7,6 +7,7 @@ import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { validateMultipleRequired } from '../utils/formValidation';
+import { PageSkeleton } from './common/SkeletonLoader';
 
 interface NewsItem {
   _id: string;
@@ -72,10 +73,15 @@ const News = () => {
       const response = await fetch(`${API_BASE}/api/news`);
       if (!response.ok) throw new Error('Failed to fetch news');
       const data = await response.json();
-      setNews(data);
+      if (Array.isArray(data)) {
+        setNews(data);
+      } else {
+        setNews([]);
+      }
     } catch (error) {
       console.error('Error fetching news:', error);
       setError('Failed to load news');
+      setNews([]);
     } finally {
       setIsLoading(false);
     }
@@ -201,14 +207,7 @@ const News = () => {
   );
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00C6A7] mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading news...</p>
-        </div>
-      </div>
-    );
+    return <PageSkeleton contentType="cards" itemCount={6} filterCount={1} showAddButton={user?.isAdmin} />;
   }
 
   return (

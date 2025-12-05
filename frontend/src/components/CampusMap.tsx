@@ -1,8 +1,9 @@
 /// <reference types="vite/client" />
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { GoogleMap, useLoadScript, InfoWindow, Marker, Libraries } from '@react-google-maps/api';
-import { FiSearch } from 'react-icons/fi';
-import debounce from 'lodash/debounce';
+import AIAutocomplete from './AIAutocomplete';
+import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
+import { MapSkeleton } from './common/SkeletonLoader';
 
 // Define libraries as a proper static constant with correct type
 const GOOGLE_MAPS_LIBRARIES: Libraries = ["places"];
@@ -54,7 +55,6 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   const [infoWindowPosition, setInfoWindowPosition] = useState<google.maps.LatLng | null>(null);
   const [hasRequestedLocation, setHasRequestedLocation] = useState(false);
   const animationInProgress = useRef(false);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const zoomChangeListenerRef = useRef<google.maps.MapsEventListener | null>(null);
 
   const { isLoaded, loadError } = useGoogleMaps();
@@ -247,16 +247,29 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   const [mapCenter, setMapCenter] = useState(universityLocation);
   const [mapZoom, setMapZoom] = useState(16);
 
-  // Debounced search handler
-  const debouncedSetSearchQuery = useMemo(
-    () => {
-      const debouncedFn = debounce((value: string) => {
-        setSearchQuery(value);
-      }, 300);
-      return debouncedFn;
-    },
-    []
-  );
+  // AI Autocomplete hook - prepare pre-existing strings from locations
+  const preExistingStrings = useMemo(() => {
+    const pool: string[] = [];
+    locations.forEach((location) => {
+      if (location.name) pool.push(location.name);
+      if (location.description) pool.push(location.description);
+      if (location.category) pool.push(location.category);
+    });
+    return Array.from(new Set(pool.map(s => s.trim()).filter(Boolean)));
+  }, [locations]);
+
+  const {
+    suggestions,
+    isLoading: aiLoading,
+    error: aiError,
+    handleInputChange: handleAISearchInput,
+    handleSuggestionSelect,
+    clearSuggestions
+  } = useAIAutocomplete({
+    context: { section: 'campus-map' },
+    debounceMs: 300,
+    preExistingStrings
+  });
 
   // Memoize filtered locations
   const filteredLocations = useMemo(() => {
@@ -266,26 +279,6 @@ const CampusMap: React.FC<CampusMapProps> = () => {
       location.description?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [locations, searchQuery]);
-
-  // Handle search input change
-  const handleSearchInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchInput(e.target.value);
-    debouncedSetSearchQuery(e.target.value);
-    // setIsPanelOpen(true); // Panel logic is changing
-  }, [debouncedSetSearchQuery]);
-
-  // Handle search focus
-  const handleSearchFocus = useCallback(() => {
-    setIsSearchFocused(true);
-  }, []);
-
-  // Handle search blur
-  const handleSearchBlur = useCallback(() => {
-    // Delay to allow click on list items before setting focused to false
-    setTimeout(() => {
-      setIsSearchFocused(false);
-    }, 200);
-  }, []);
 
   // Optimize marker click handler
   const handleMarkerClick = useCallback((location: Location) => {
@@ -379,20 +372,16 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   const isPanelOpen = window.innerWidth >= 768;
 
 
-  // Cleanup debounced function and zoom listener on unmount
+  // Cleanup zoom listener on unmount
   useEffect(() => {
-    const fn = debouncedSetSearchQuery;
     return () => {
-      if (fn && typeof (fn as any).cancel === 'function') {
-        (fn as any).cancel();
-      }
       // Cleanup zoom change listener
       if (zoomChangeListenerRef.current) {
         google.maps.event.removeListener(zoomChangeListenerRef.current);
         zoomChangeListenerRef.current = null;
       }
     };
-  }, [debouncedSetSearchQuery]);
+  }, []);
 
   if (loadError) {
     return (
@@ -417,14 +406,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   }
 
   if (!isLoaded || isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00C6A7] mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading campus map...</p>
-        </div>
-      </div>
-    );
+    return <MapSkeleton />;
   }
 
   return (
@@ -444,64 +426,37 @@ const CampusMap: React.FC<CampusMapProps> = () => {
         {/* Map Container - Full width on mobile, 2/3 on desktop */}
         <div className="w-full md:w-2/3 h-full relative">
           <div className="bg-white shadow-lg overflow-hidden h-full relative">
-            {/* Mobile Search Bar and Dropdown - Visible on mobile only, positioned over map */}
+            {/* Mobile Search Bar - Visible on mobile only, positioned over map */}
             <div className="md:hidden absolute top-2 left-3 right-3 z-10">
-              <form
-                className="relative w-full flex border border-gray-300 overflow-hidden shadow-lg focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-[#00C6A7] transition-all duration-300 rounded-full bg-white box-border"
-                onSubmit={e => { e.preventDefault(); setSearchQuery(searchInput); }}
-              >
-                <div className="relative flex items-center flex-1">
-                  <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search campus locations..."
-                    className="block w-full pl-10 pr-4 py-2.5 bg-white text-black outline-none text-base border-none rounded-l-full"
-                    value={searchInput}
-                    onChange={handleSearchInputChange}
-                    onFocus={handleSearchFocus}
-                    onBlur={handleSearchBlur}
-                    aria-label="Search locations"
-                    onClick={() => setIsSearchFocused(true)}
-                  />
-                </div>
-                <button
-                  type="submit"
-                  aria-label="Search"
-                  className="px-4 py-2.5 bg-[#00C6A7] text-white font-semibold hover:bg-[#009e87] transition-all duration-300 ease-in-out rounded-r-full flex items-center justify-center"
-                >
-                  <FiSearch className="h-4 w-4" />
-                </button>
-              </form>
-
-              {/* Mobile Locations Dropdown */}
-              {isSearchFocused && filteredLocations.length > 0 && (
-                <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 shadow-xl rounded-lg mt-1 max-h-48 overflow-y-auto z-20">
-                  <ul className="space-y-1 p-2">
-                    {filteredLocations.map((location) => (
-                      <li
-                        key={location.id}
-                        className={`border-b border-gray-100 text-gray-800 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors duration-150 ${
-                          selectedLocation?.id === location.id ? 'bg-[#00C6A7]/10 border-[#00C6A7]/30' : ''
-                        }`}
-                        onClick={() => {
-                          handleLocationClick(location);
-                          setIsSearchFocused(false);
-                        }}
-                      >
-                        <div className="flex items-start gap-2">
-                          <div className="flex-1 min-w-0">
-                            <span className="font-semibold text-sm block truncate">{location.id}. {location.name}</span>
-                            <p className="text-xs text-gray-600 mt-1 line-clamp-1">{location.description}</p>
-                          </div>
-                          <span className="text-xs bg-gray-100 px-2 py-1 rounded-full flex-shrink-0 whitespace-nowrap">
-                            {location.category}
-                          </span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <AIAutocomplete
+                value={searchInput}
+                onChange={(value) => {
+                  setSearchInput(value);
+                  handleAISearchInput(value);
+                }}
+                onSelect={(suggestion) => {
+                  setSearchInput(suggestion.text);
+                  setSearchQuery(suggestion.text);
+                  handleSuggestionSelect(suggestion);
+                  // Find and navigate to matching location if found
+                  const matchingLocation = locations.find(loc =>
+                    loc.name.toLowerCase().includes(suggestion.text.toLowerCase()) ||
+                    loc.description?.toLowerCase().includes(suggestion.text.toLowerCase()) ||
+                    loc.category?.toLowerCase().includes(suggestion.text.toLowerCase())
+                  );
+                  if (matchingLocation) {
+                    handleLocationClick(matchingLocation);
+                  }
+                }}
+                placeholder="Search campus locations..."
+                className="w-full"
+                suggestions={suggestions}
+                isLoading={aiLoading}
+                disabled={false}
+                showSubmitButton
+                submitLabel="Search"
+                onSubmit={() => setSearchQuery(searchInput)}
+              />
             </div>
 
             <GoogleMap
@@ -661,28 +616,37 @@ const CampusMap: React.FC<CampusMapProps> = () => {
           <div className={`bg-white shadow-lg p-3 md:p-4 md:flex-grow transition-all duration-300 ease-in-out opacity-100 h-full overflow-y-auto`}>
             <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-3 md:mb-4">Campus Locations</h2>
             {/* Desktop Search Bar - Visible on desktop only */}
-            <form className="hidden md:flex relative mb-6 w-full border border-gray-300 overflow-hidden shadow-sm focus-within:ring-1 focus-within:ring-black focus-within:border-black transition-all duration-300 rounded-full" onSubmit={e => { e.preventDefault(); setSearchQuery(searchInput); }}>
-              <div className="relative flex items-center flex-1">
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search locations..."
-                  className="block w-full pl-10 pr-4 py-2 bg-white text-black outline-none text-lg border-none rounded-l-full"
-                  value={searchInput}
-                  onChange={handleSearchInputChange}
-                  onFocus={handleSearchFocus}
-                  onBlur={handleSearchBlur}
-                  aria-label="Search locations"
-                />
-              </div>
-              <button
-                type="submit"
-                aria-label="Search"
-                className="px-6 py-2 bg-[#00C6A7] text-white font-semibold hover:bg-[#009e87] transition-colors duration-150 rounded-r-full"
-              >
-                Search
-              </button>
-            </form>
+            <div className="hidden md:block mb-6 w-full">
+              <AIAutocomplete
+                value={searchInput}
+                onChange={(value) => {
+                  setSearchInput(value);
+                  handleAISearchInput(value);
+                }}
+                onSelect={(suggestion) => {
+                  setSearchInput(suggestion.text);
+                  setSearchQuery(suggestion.text);
+                  handleSuggestionSelect(suggestion);
+                  // Find and navigate to matching location if found
+                  const matchingLocation = locations.find(loc =>
+                    loc.name.toLowerCase().includes(suggestion.text.toLowerCase()) ||
+                    loc.description?.toLowerCase().includes(suggestion.text.toLowerCase()) ||
+                    loc.category?.toLowerCase().includes(suggestion.text.toLowerCase())
+                  );
+                  if (matchingLocation) {
+                    handleLocationClick(matchingLocation);
+                  }
+                }}
+                placeholder="Search locations..."
+                className="w-full"
+                suggestions={suggestions}
+                isLoading={aiLoading}
+                disabled={false}
+                showSubmitButton
+                submitLabel="Search"
+                onSubmit={() => setSearchQuery(searchInput)}
+              />
+            </div>
             {/* Locations List - Always in panel on desktop, hidden on mobile */}
             <div className="hidden md:block transition-all duration-300 ease-in-out opacity-100">
               <ul className="space-y-2">

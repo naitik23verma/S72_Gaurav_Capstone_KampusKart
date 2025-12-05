@@ -16,14 +16,27 @@ const requiredEnvVars = [
 
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
-if (missingEnvVars.length > 0) {
-  console.error('❌ Missing required environment variables:');
-  missingEnvVars.forEach(varName => console.error(`   - ${varName}`));
+// Only exit in production if critical vars are missing
+// In CI/CD, allow missing vars (they'll be set by the platform)
+const criticalVars = ['JWT_SECRET', 'MONGODB_URI'];
+const missingCritical = criticalVars.filter(varName => !process.env[varName]);
+
+if (missingCritical.length > 0 && process.env.NODE_ENV === 'production' && !process.env.CI) {
+  console.error('❌ Missing critical environment variables:');
+  missingCritical.forEach(varName => console.error(`   - ${varName}`));
   console.error('Please check your .env file and ensure all required variables are set.');
   process.exit(1);
 }
 
-console.log('✅ All required environment variables are configured');
+if (missingEnvVars.length > 0 && !process.env.CI) {
+  console.warn('⚠️ Missing optional environment variables:');
+  missingEnvVars.forEach(varName => console.warn(`   - ${varName}`));
+  console.warn('Some features may not work correctly.');
+}
+
+if (!process.env.CI) {
+  console.log('✅ Environment variables validated');
+}
 
 const express = require('express');
 const mongoose = require('mongoose');

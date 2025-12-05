@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { FiUser, FiMail, FiPhone, FiMapPin, FiEdit2, FiSave, FiXCircle, FiUpload, FiAlertCircle, FiCheckCircle, FiCalendar, FiTag, FiBriefcase } from 'react-icons/fi'; // Importing icons including new ones
 import { API_BASE } from '../config';
+import { ProfileSkeleton } from './common/SkeletonLoader';
 
 // Helper function to format date for display
 const formatDate = (dateString: string | null | undefined) => {
@@ -22,7 +23,10 @@ const formatDate = (dateString: string | null | undefined) => {
 // Helper function to calculate profile completion percentage
 const calculateCompletion = (profileData: any) => {
     const fields = ['name', 'email', 'phone', 'gender', 'dateOfBirth', 'major', 'program', 'yearOfStudy'];
-    const filledFields = fields.filter(field => profileData[field] && profileData[field].trim() !== '');
+    const filledFields = fields.filter(field => {
+        const value = profileData[field];
+        return value && typeof value === 'string' && value.trim() !== '';
+    });
     return Math.round((filledFields.length / fields.length) * 100);
 };
 
@@ -86,7 +90,7 @@ const Profile = () => {
          setPageLoading(false);
          return;
       }
-      if (!pageLoading) setPageLoading(true);
+      setPageLoading(true);
 
       try {
         const response = await fetch(`${API_BASE}/api/profile`, {
@@ -94,8 +98,13 @@ const Profile = () => {
             'Authorization': `Bearer ${token}`,
           },
         });
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          setError(errorData.message || 'Failed to fetch profile data.');
+          return;
+        }
         const data = await response.json();
-        if (response.ok) {
+        if (data) {
           const fetchedData = {
              name: data.name || '',
              email: data.email || '',
@@ -109,8 +118,6 @@ const Profile = () => {
           };
           setProfileData(fetchedData);
           setInitialProfileData(fetchedData);
-        } else {
-          setError(data.message || 'Failed to fetch profile data.');
         }
       } catch (err: any) {
         console.error('Error fetching profile data:', err);
@@ -223,14 +230,7 @@ const Profile = () => {
     };
 
   if (pageLoading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00C6A7] mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading profile...</p>
-        </div>
-      </div>
-    );
+    return <ProfileSkeleton />;
   }
 
   return (

@@ -12,7 +12,7 @@ yarn.lock
 
 # Production builds
 /build
-/dist
+# /dist - Keep dist for Netlify deployment
 *.log
 
 # Environment files
@@ -123,7 +123,8 @@ out
 
 # Nuxt.js
 .nuxt
-dist
+# dist - Commented out to allow Netlify deployment
+# dist
 
 # Gatsby files
 .cache/

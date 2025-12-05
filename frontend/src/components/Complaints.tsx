@@ -8,6 +8,7 @@ import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { validateMultipleRequired } from '../utils/formValidation';
+import { PageSkeleton } from './common/SkeletonLoader';
 
 interface Complaint {
   _id: string;
@@ -131,16 +132,24 @@ const Complaints = () => {
           'Authorization': `Bearer ${token}`,
         },
       });
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch complaints.');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to fetch complaints.');
       }
-      if (currentPage === 1) {
-        setComplaints(data.complaints);
+      const data = await response.json();
+      if (data && Array.isArray(data.complaints)) {
+        if (currentPage === 1) {
+          setComplaints(data.complaints);
+        } else {
+          setComplaints(prev => [...prev, ...data.complaints]);
+        }
+        if (data.totalPages !== undefined) {
+          setTotalPages(data.totalPages);
+        }
       } else {
-        setComplaints(prev => [...prev, ...data.complaints]);
+        setComplaints([]);
+        setTotalPages(1);
       }
-      setTotalPages(data.totalPages);
     } catch (err: any) {
       console.error('Error fetching complaints:', err);
       setError(err.message || 'Failed to fetch complaints.');
@@ -427,14 +436,7 @@ const Complaints = () => {
   };
 
   if (isLoading && complaints.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00C6A7] mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading complaints...</p>
-        </div>
-      </div>
-    );
+    return <PageSkeleton contentType="cards4col" itemCount={8} filterCount={2} showAddButton={true} />;
   }
 
   if (error) {

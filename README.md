@@ -18,7 +18,13 @@ KampusKart is a comprehensive campus portal for MIT ADT University, providing st
 - [Getting Started](#-getting-started)
 - [Installation](#-installation)
 - [Usage](#-usage)
+- [Testing](#-testing)
+- [Project Structure](#-project-structure)
+- [Security](#-security)
+- [Deployment](#-deployment)
+- [CI/CD](#cicd)
 - [Contributing](#-contributing)
+- [License](#-license)
 
 ## 🚀 Features
 
@@ -57,6 +63,23 @@ KampusKart is a comprehensive campus portal for MIT ADT University, providing st
 - Search functionality
 - Anonymous contact system
 
+### 💬 Global Chat
+- Real-time messaging
+- Message reactions and replies
+- File attachments
+- Typing indicators
+- Online user status
+
+### 🎓 Clubs & Recruitment
+- Club information and applications
+- Recruitment postings
+- Application tracking
+
+### 👤 User Profile
+- Profile management
+- Profile completion tracking
+- Image uploads
+
 ## ⚙️ Tech Stack
 
 ### Frontend
@@ -86,6 +109,7 @@ KampusKart is a comprehensive campus portal for MIT ADT University, providing st
 - **Jest** - Testing framework
 - **Nodemon** - Development server
 - **Git** - Version control
+- **GitHub Actions** - CI/CD pipelines
 
 ## 🛠️ Getting Started
 
@@ -117,7 +141,7 @@ KampusKart is a comprehensive campus portal for MIT ADT University, providing st
 
 4. Environment Configuration:
 
-   Create `.env` files in both `frontend` and `backend` directories. You can use the `.env.example` files as templates:
+   Create `.env` files in both `frontend` and `backend` directories.
    
    **Frontend** (`frontend/.env`):
    ```env
@@ -126,10 +150,13 @@ KampusKart is a comprehensive campus portal for MIT ADT University, providing st
    
    **Backend** (`backend/.env`):
    ```env
+   # Required
    PORT=5000
    MONGODB_URI=your_mongodb_connection_string
    JWT_SECRET=your_jwt_secret_minimum_32_characters
    NODE_ENV=development
+   
+   # Optional (for full functionality)
    CLOUDINARY_CLOUD_NAME=your_cloud_name
    CLOUDINARY_API_KEY=your_api_key
    CLOUDINARY_API_SECRET=your_api_secret
@@ -141,6 +168,8 @@ KampusKart is a comprehensive campus portal for MIT ADT University, providing st
    EMAIL_PASS=your_app_specific_password
    GOOGLE_MAPS_API_KEY=your_google_maps_api_key
    ```
+   
+   **Note**: The backend will run with only critical variables (`JWT_SECRET`, `MONGODB_URI`) in production. Optional variables enable additional features.
 
 ## 📖 Usage
 
@@ -171,11 +200,29 @@ The application will be available at:
    ```
    The production build will be in the `frontend/dist` directory.
 
-2. Start the production server:
+2. Preview the production build:
+   ```bash
+   npm run preview
+   ```
+
+3. Start the production server:
    ```bash
    cd backend
    npm start
    ```
+
+### Linting
+
+Run linting for both frontend and backend:
+```bash
+# Frontend
+cd frontend
+npm run lint
+
+# Backend
+cd backend
+npm run lint
+```
 
 ## 🧪 Testing
 
@@ -189,25 +236,43 @@ npm test
 
 ```
 KampusKart/
-├── frontend/          # React frontend application
+├── frontend/                    # React frontend application
 │   ├── src/
-│   │   ├── components/    # React components
-│   │   ├── contexts/       # React contexts
-│   │   ├── hooks/          # Custom React hooks
-│   │   ├── services/       # API services
-│   │   └── utils/          # Utility functions
-│   ├── public/        # Static assets
-│   └── dist/          # Production build output
-├── backend/           # Node.js backend server
-│   ├── config/        # Configuration files
-│   ├── cron/          # Scheduled tasks
-│   ├── middleware/    # Express middleware
-│   ├── models/        # Mongoose models
-│   ├── routes/        # API routes
-│   ├── scripts/       # Utility scripts
-│   ├── tests/         # Test files
-│   └── utils/         # Utility functions
-└── .github/           # GitHub Actions workflows
+│   │   ├── components/          # React components
+│   │   │   ├── common/          # Reusable components (FeatureModal, SkeletonLoader, etc.)
+│   │   │   ├── Chat/            # Chat components
+│   │   │   └── ui/              # UI primitives (shadcn)
+│   │   ├── contexts/            # React contexts (Auth, Theme)
+│   │   ├── hooks/               # Custom React hooks
+│   │   ├── services/            # API services
+│   │   ├── utils/               # Utility functions
+│   │   ├── theme/               # Theme configuration
+│   │   └── config.js            # Frontend configuration
+│   ├── public/                  # Static assets
+│   ├── dist/                   # Production build output
+│   ├── netlify.toml            # Netlify configuration
+│   └── vite.config.ts          # Vite configuration
+├── backend/                     # Node.js backend server
+│   ├── config/                  # Configuration files
+│   │   ├── cloudinary.js        # Cloudinary setup
+│   │   └── passport.js          # Passport.js configuration
+│   ├── cron/                    # Scheduled tasks
+│   │   ├── keepAlive.js         # Keep-alive service
+│   │   └── deleteItems.js       # Cleanup tasks
+│   ├── middleware/              # Express middleware
+│   │   ├── auth.js              # Authentication
+│   │   └── validation.js        # Input validation
+│   ├── models/                  # Mongoose models
+│   ├── routes/                  # API routes
+│   ├── scripts/                 # Utility scripts
+│   ├── tests/                   # Test files
+│   ├── utils/                   # Utility functions
+│   ├── server.js                # Main server file
+│   └── Procfile                 # Render deployment config
+└── .github/
+    └── workflows/               # GitHub Actions workflows
+        ├── ci.yml               # Continuous Integration
+        └── cd.yml               # Continuous Deployment
 ```
 
 ## 🔒 Security
@@ -217,22 +282,115 @@ KampusKart/
 - API routes are protected with authentication middleware
 - Rate limiting is implemented to prevent abuse
 - Input validation is performed on all user inputs
+- CORS is configured for allowed origins only
+- Password hashing using bcrypt
+- Secure file upload handling
+- XSS protection
+- SQL injection prevention (MongoDB with parameterized queries)
 
 ## 🚀 Deployment
 
 The project is configured for deployment on:
-- **Frontend**: Netlify
-- **Backend**: Render
+- **Frontend**: Netlify ([https://kampuskart.netlify.app/](https://kampuskart.netlify.app/))
+- **Backend**: Render ([https://s72-gaurav-capstone.onrender.com](https://s72-gaurav-capstone.onrender.com))
 
-GitHub Actions workflows are set up for CI/CD. See `.github/workflows/` for details.
+### Automatic Deployment (CI/CD)
+
+The project uses GitHub Actions for automated CI/CD:
+
+- **CI Workflow** (`.github/workflows/ci.yml`): Runs on every push/PR
+  - Frontend: Linting and production build
+  - Backend: Linting and tests
+  
+- **CD Workflow** (`.github/workflows/cd.yml`): Runs on push to `main`/`master`
+  - Frontend: Automatic deployment to Netlify
+  - Backend: Automatic deployment to Render
+
+### Manual Deployment
+
+#### Frontend (Netlify)
+1. Build the frontend: `cd frontend && npm run build`
+2. Deploy the `dist` folder to Netlify
+3. Configure environment variables in Netlify dashboard:
+   - `VITE_GOOGLE_MAPS_API_KEY`
+
+#### Backend (Render)
+1. Connect your GitHub repository to Render
+2. Configure environment variables in Render dashboard
+3. Set build command: `npm install`
+4. Set start command: `npm start`
+5. The server will automatically deploy on push to main branch
+
+### Required Environment Variables for Production
+
+**Frontend (Netlify):**
+- `VITE_GOOGLE_MAPS_API_KEY` - Google Maps API key
+
+**Backend (Render):**
+- `JWT_SECRET` - JWT secret key (required)
+- `MONGODB_URI` - MongoDB connection string (required)
+- `CLOUDINARY_CLOUD_NAME` - Cloudinary cloud name (optional)
+- `CLOUDINARY_API_KEY` - Cloudinary API key (optional)
+- `CLOUDINARY_API_SECRET` - Cloudinary API secret (optional)
+- `GOOGLE_CLIENT_ID` - Google OAuth client ID (optional)
+- `GOOGLE_CLIENT_SECRET` - Google OAuth client secret (optional)
+- `EMAIL_USER` - Email service user (optional)
+- `EMAIL_PASS` - Email service password (optional)
+
+## 🔄 CI/CD
+
+### GitHub Actions Workflows
+
+The project includes automated CI/CD pipelines:
+
+#### Continuous Integration (CI)
+- **Triggers**: Push and Pull Requests to `main`, `master`, or `develop`
+- **Frontend Job**:
+  - Installs dependencies
+  - Runs ESLint
+  - Builds production bundle
+- **Backend Job**:
+  - Installs dependencies
+  - Runs ESLint
+  - Runs tests
+
+#### Continuous Deployment (CD)
+- **Triggers**: Push to `main` or `master` branches
+- **Frontend Deployment**:
+  - Builds production bundle
+  - Deploys to Netlify
+- **Backend Deployment**:
+  - Triggers Render deployment
+
+### Required GitHub Secrets
+
+For workflows to function, configure these secrets in GitHub Settings:
+
+- `VITE_GOOGLE_MAPS_API_KEY` - Google Maps API key
+- `NETLIFY_AUTH_TOKEN` - Netlify authentication token
+- `NETLIFY_SITE_ID` - Netlify site ID
+- `RENDER_SERVICE_ID` - Render service ID
+- `RENDER_API_KEY` - Render API key
+
+### 24/7 Uptime
+
+The backend includes a keep-alive service to prevent Render from spinning down the server on free tier. This ensures the API remains available 24/7.
+
+## ✨ Recent Improvements
+
+- ✅ Skeleton loaders for all pages (improved loading UX)
+- ✅ Enhanced error handling across all components
+- ✅ Improved null safety and type checking
+- ✅ Production-ready CI/CD workflows
+- ✅ Optimized build configuration
+- ✅ Better environment variable handling
+- ✅ Enhanced chat UI with modern design
+- ✅ Comprehensive form validation
+- ✅ Reusable component library
 
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
 ## 🤝 Contributing
 
@@ -245,6 +403,15 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 5. Open a Pull Request
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+### Development Guidelines
+
+- Follow the existing code style
+- Write meaningful commit messages
+- Add tests for new features
+- Update documentation as needed
+- Ensure all linting passes
+- Test locally before submitting PR
 
 ## 📞 Support
 

@@ -801,14 +801,14 @@ const Complaints = () => {
                   <button
                     onClick={() => setSelectedComplaintForDetails(null)}
                     aria-label="Close"
-                    className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg min-h-touch min-w-touch"
+                    className="absolute top-4 right-4 z-10 bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg flex items-center justify-center w-10 h-10"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
 
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-10 sm:pr-12">{selectedComplaintForDetails.title}</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12 sm:pr-14">{selectedComplaintForDetails.title}</h2>
 
                     {/* Images Section - Moved Up */}
                     {selectedComplaintForDetails.images && selectedComplaintForDetails.images.length > 0 && (

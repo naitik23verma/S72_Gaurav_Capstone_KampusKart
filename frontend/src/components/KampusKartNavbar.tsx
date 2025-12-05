@@ -1,11 +1,10 @@
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Navbar1 } from '../components/ui/shadcnblocks-com-navbar1';
 
 const KampusKartNavbar: React.FC = () => {
   const { user, token, logout } = useAuth();
-  const location = useLocation();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -13,8 +12,8 @@ const KampusKartNavbar: React.FC = () => {
     navigate('/login');
   };
 
-  // Full menu structure - same for both authenticated and unauthenticated
-  const fullMenuItems = [
+  // Menu structure - same for both authenticated and unauthenticated
+  const menuItems = [
     {
       title: "Home",
       url: token && user ? "/home" : "/",
@@ -78,16 +77,10 @@ const KampusKartNavbar: React.FC = () => {
     },
   ];
 
-  const menuItems = fullMenuItems;
-
   const mobileExtraLinks = token && user ? [
     { name: "Profile", url: "/profile" },
     { name: "Settings", url: "/profile" },
-    { name: "Help", url: "/help" },
-    { name: "About", url: "/about" },
   ] : [
-    { name: "About", url: "/about" },
-    { name: "Help", url: "/help" },
     { name: "Contact", url: "/contact" },
     { name: "Terms", url: "/terms" },
   ];

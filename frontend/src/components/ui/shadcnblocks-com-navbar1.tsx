@@ -1,5 +1,5 @@
 import React from "react";
-import { Book, Menu, Sunset, Trees, Zap } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import {
@@ -19,7 +19,9 @@ import {
 } from "./navigation-menu";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -29,12 +31,11 @@ interface MenuItem {
   title: string;
   url: string;
   description?: string;
-  icon?: React.ReactElement;
   items?: MenuItem[];
 }
 
 interface Navbar1Props {
-  logo?: {
+  logo: {
     url: string;
     src: string;
     alt: string;
@@ -56,103 +57,20 @@ interface Navbar1Props {
       onClick?: () => void;
     };
   };
-  themeToggle?: React.ReactNode;
 }
 
 const Navbar1 = ({
-  logo = {
-    url: "https://www.shadcnblocks.com",
-    src: "https://www.shadcnblocks.com/images/block/block-1.svg",
-    alt: "logo",
-    title: "Shadcnblocks.com",
-  },
-  menu = [
-    { title: "Home", url: "#" },
-    {
-      title: "Products",
-      url: "#",
-      items: [
-        {
-          title: "Blog",
-          description: "The latest industry news, updates, and info",
-          icon: <Book className="size-5 shrink-0" />,
-          url: "#",
-        },
-        {
-          title: "Company",
-          description: "Our mission is to innovate and empower the world",
-          icon: <Trees className="size-5 shrink-0" />,
-          url: "#",
-        },
-        {
-          title: "Careers",
-          description: "Browse job listing and discover our workspace",
-          icon: <Sunset className="size-5 shrink-0" />,
-          url: "#",
-        },
-        {
-          title: "Support",
-          description:
-            "Get in touch with our support team or visit our community forums",
-          icon: <Zap className="size-5 shrink-0" />,
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Resources",
-      url: "#",
-      items: [
-        {
-          title: "Help Center",
-          description: "Get all the answers you need right here",
-          icon: <Zap className="size-5 shrink-0" />,
-          url: "#",
-        },
-        {
-          title: "Contact Us",
-          description: "We are here to help you with any questions you have",
-          icon: <Sunset className="size-5 shrink-0" />,
-          url: "#",
-        },
-        {
-          title: "Status",
-          description: "Check the current status of our services and APIs",
-          icon: <Trees className="size-5 shrink-0" />,
-          url: "#",
-        },
-        {
-          title: "Terms of Service",
-          description: "Our terms and conditions for using our services",
-          icon: <Book className="size-5 shrink-0" />,
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Pricing",
-      url: "#",
-    },
-    {
-      title: "Blog",
-      url: "#",
-    },
-  ],
-  mobileExtraLinks = [
-    { name: "Press", url: "#" },
-    { name: "Contact", url: "#" },
-    { name: "Imprint", url: "#" },
-    { name: "Sitemap", url: "#" },
-  ],
+  logo,
+  menu = [],
+  mobileExtraLinks = [],
   auth = {
     login: { text: "Log in", url: "#" },
     signup: { text: "Sign up", url: "#" },
   },
-  themeToggle,
 }: Navbar1Props) => {
   return (
-    <section className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md w-full border-b border-gray-100" style={{ overflowX: 'hidden', overflowY: 'visible', overflow: 'visible' }}>
-      <div className="max-w-7xl mx-auto px-4 py-[0.8625rem]" style={{ overflow: 'visible' }}>
+    <section className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md w-full border-b border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 py-[0.8625rem]">
         <nav className="hidden justify-between lg:flex">
           <div className="flex items-center gap-6">
             <Link to={logo.url} className="flex items-center gap-2">
@@ -168,7 +86,6 @@ const Navbar1 = ({
             </div>
           </div>
           <div className="flex gap-2 items-center">
-            {themeToggle}
             <Button asChild variant="outline" size="sm" className="text-black bg-white border border-gray-300 hover:bg-[#FFD166] hover:text-black hover:border-[#FFD166] transition-colors">
               <Link to={auth.login.url}>{auth.login.text}</Link>
             </Button>
@@ -191,13 +108,17 @@ const Navbar1 = ({
             </Link>
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Menu className="size-4" />
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  className="border-2 border-gray-300 bg-white hover:bg-[#00C6A7] hover:border-[#00C6A7] hover:text-white transition-all duration-200 shadow-sm hover:shadow-md"
+                >
+                  <Menu className="size-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent className="overflow-y-auto">
-                  <SheetHeader>
-                    <SheetTitle>
+              <SheetContent className="overflow-y-auto bg-white">
+                  <SheetHeader className="pb-4 border-b border-gray-200">
+                    <SheetTitle className="text-left">
                       <Link to={logo.url} className="flex items-center gap-2">
                         <img src={logo.src} className="w-8" alt={logo.alt} />
                         <span className="text-lg font-extrabold text-black tracking-tight">
@@ -205,45 +126,52 @@ const Navbar1 = ({
                         </span>
                       </Link>
                     </SheetTitle>
+                    <SheetDescription className="sr-only">
+                      Navigation menu
+                    </SheetDescription>
                   </SheetHeader>
-                <div className="my-6 flex flex-col gap-6">
+                <div className="my-6 flex flex-col gap-5">
                   <Accordion
                     type="single"
                     collapsible
-                    className="flex w-full flex-col gap-4"
+                    className="flex w-full flex-col gap-2 bg-white"
                   >
                     {menu.map((item) => renderMobileMenuItem(item))}
                   </Accordion>
-                  <div className="border-t py-4">
-                    <div className="grid grid-cols-2 justify-start">
-                      {mobileExtraLinks.map((link, idx) => (
-                        <Link
-                          key={idx}
-                          to={link.url}
-                          className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold text-black bg-white transition-colors hover:bg-[#FFD166] hover:text-black hover:shadow-sm"
-                        >
-                          {link.name}
-                        </Link>
-                      ))}
+                  {mobileExtraLinks.length > 0 && (
+                    <div className="border-t border-gray-200 pt-5">
+                      <div className="grid grid-cols-2 gap-2">
+                        {mobileExtraLinks.map((link, idx) => (
+                          <SheetClose key={idx} asChild>
+                            <Link
+                              to={link.url}
+                              className="inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold text-black bg-gray-50 border border-gray-200 transition-all hover:bg-[#FFD166] hover:text-black hover:border-[#FFD166] hover:shadow-sm"
+                            >
+                              {link.name}
+                            </Link>
+                          </SheetClose>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                    <div className="flex flex-col gap-3">
-                      {themeToggle && (
-                        <div className="pb-2 border-b mb-2">
-                          {themeToggle}
-                        </div>
-                      )}
-                      <Button asChild variant="outline" className="text-black bg-white border border-gray-300 hover:bg-[#FFD166] hover:text-black hover:border-[#FFD166] transition-colors">
-                        <Link to={auth.login.url}>{auth.login.text}</Link>
-                      </Button>
+                  )}
+                    <div className="flex flex-col gap-3 pt-2">
+                      <SheetClose asChild>
+                        <Button asChild variant="outline" className="w-full text-black bg-white border-2 border-gray-300 hover:bg-[#FFD166] hover:text-black hover:border-[#FFD166] transition-colors font-bold">
+                          <Link to={auth.login.url}>{auth.login.text}</Link>
+                        </Button>
+                      </SheetClose>
                       {auth.signup.onClick ? (
-                        <Button onClick={auth.signup.onClick} className="bg-[#181818] text-white hover:bg-[#00C6A7] hover:text-white transition-colors shadow-sm hover:shadow-md">
-                          {auth.signup.text}
-                        </Button>
+                        <SheetClose asChild>
+                          <Button onClick={auth.signup.onClick} className="w-full bg-[#00C6A7] text-white hover:bg-[#009e87] hover:text-white transition-colors shadow-sm hover:shadow-md font-bold">
+                            {auth.signup.text}
+                          </Button>
+                        </SheetClose>
                       ) : (
-                        <Button asChild className="bg-[#181818] text-white hover:bg-[#00C6A7] hover:text-white transition-colors shadow-sm hover:shadow-md">
-                          <Link to={auth.signup.url}>{auth.signup.text}</Link>
-                        </Button>
+                        <SheetClose asChild>
+                          <Button asChild className="w-full bg-[#00C6A7] text-white hover:bg-[#009e87] hover:text-white transition-colors shadow-sm hover:shadow-md font-bold">
+                            <Link to={auth.signup.url}>{auth.signup.text}</Link>
+                          </Button>
+                        </SheetClose>
                       )}
                     </div>
                 </div>
@@ -262,7 +190,7 @@ const renderMenuItem = (item: MenuItem) => {
       <NavigationMenuItem key={item.title} className="text-black">
         <NavigationMenuTrigger className="text-black font-bold bg-gray-50 hover:bg-[#00C6A7] hover:text-white data-[state=open]:bg-[#00C6A7] data-[state=open]:text-white transition-colors rounded-full px-4 py-2">{item.title}</NavigationMenuTrigger>
         <NavigationMenuContent>
-          <ul className="w-80 p-3 bg-white" style={{ overflow: 'hidden', overflowY: 'hidden', overflowX: 'hidden' }}>
+          <ul className="w-80 p-3 bg-white">
             {item.items.map((subItem) => (
               <li key={subItem.title}>
                 <NavigationMenuLink asChild>
@@ -307,36 +235,44 @@ const renderMenuItem = (item: MenuItem) => {
 const renderMobileMenuItem = (item: MenuItem) => {
   if (item.items) {
     return (
-      <AccordionItem key={item.title} value={item.title} className="border-b-0">
-        <AccordionTrigger className="py-0 font-bold hover:no-underline text-black hover:text-[#00C6A7] data-[state=open]:text-[#00C6A7] transition-colors">
+      <AccordionItem key={item.title} value={item.title} className="border-b border-gray-200 last:border-b-0">
+        <AccordionTrigger className="py-3 px-3 font-bold hover:no-underline text-gray-900 bg-white hover:bg-gray-50 hover:text-[#00C6A7] data-[state=open]:text-[#00C6A7] data-[state=open]:bg-gray-50 transition-all rounded-lg">
           {item.title}
         </AccordionTrigger>
-        <AccordionContent className="mt-2">
-          {item.items.map((subItem) => (
-            <Link
-              key={subItem.title}
-              to={subItem.url}
-              className="flex select-none gap-4 rounded-md p-3 leading-none outline-none transition-colors hover:bg-[#FFD166] hover:text-black focus:bg-[#FFD166] focus:text-black"
-            >
-              <div>
-                <div className="text-sm font-semibold">{subItem.title}</div>
-                {subItem.description && (
-                  <p className="text-sm leading-snug text-gray-600">
-                    {subItem.description}
-                  </p>
-                )}
-              </div>
-            </Link>
-          ))}
+        <AccordionContent className="mt-1 pb-2">
+          <div className="flex flex-col gap-1">
+            {item.items.map((subItem) => (
+              <SheetClose key={subItem.title} asChild>
+                <Link
+                  to={subItem.url}
+                  className="flex select-none gap-3 rounded-lg p-3 leading-none outline-none transition-all bg-white hover:bg-[#FFD166] hover:text-black focus:bg-[#FFD166] focus:text-black active:bg-[#FFD166]"
+                >
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-gray-900">{subItem.title}</div>
+                    {subItem.description && (
+                      <p className="text-xs leading-snug text-gray-600 mt-1">
+                        {subItem.description}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              </SheetClose>
+            ))}
+          </div>
         </AccordionContent>
       </AccordionItem>
     );
   }
 
   return (
-    <Link key={item.title} to={item.url} className="font-bold text-black hover:text-[#00C6A7] transition-colors">
-      {item.title}
-    </Link>
+    <SheetClose key={item.title} asChild>
+      <Link 
+        to={item.url} 
+        className="block py-3 px-3 font-bold text-gray-900 bg-white hover:text-[#00C6A7] hover:bg-gray-50 transition-all rounded-lg border-b border-gray-200 last:border-b-0"
+      >
+        {item.title}
+      </Link>
+    </SheetClose>
   );
 };
 

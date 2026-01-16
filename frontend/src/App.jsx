@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import Items from './pages/Items';
 import ItemDetail from './pages/ItemDetail';
 import ItemForm from './pages/ItemForm';
+import Profile from './pages/Profile';
 import './App.css';
 
 /**
@@ -28,6 +29,7 @@ const Navigation = () => {
           
           {isAuthenticated ? (
             <>
+              <Link to="/profile" className="nav-link">Profile</Link>
               <span className="nav-user">Hello, {user?.name}</span>
               <button onClick={logout} className="btn btn-sm">
                 Logout
@@ -68,6 +70,7 @@ function App() {
               <Route path="/items/new" element={<ItemForm />} />
               <Route path="/items/:id" element={<ItemDetail />} />
               <Route path="/items/:id/edit" element={<ItemForm />} />
+              <Route path="/profile" element={<Profile />} />
             </Routes>
           </main>
 

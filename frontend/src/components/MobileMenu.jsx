@@ -69,6 +69,9 @@ const MobileMenu = () => {
 
               {isAuthenticated ? (
                 <>
+                  <Link to="/profile" className="mobile-menu-link" onClick={closeMenu}>
+                    👤 Profile
+                  </Link>
                   <Link to="/items/new" className="mobile-menu-link" onClick={closeMenu}>
                     ➕ Post Item
                   </Link>

@@ -1541,3 +1541,388 @@ body {
     gap: 2px;
   }
 }
+
+/* Profile Page */
+.profile-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.profile-header {
+  background: white;
+  padding: 32px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  margin-bottom: 32px;
+  border: 1px solid var(--gray-100);
+}
+
+.profile-info {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--primary-50);
+}
+
+.profile-avatar-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--primary-500);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: 700;
+  border: 4px solid var(--primary-50);
+}
+
+.profile-details h1 {
+  font-size: 30px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--gray-900);
+}
+
+.profile-email {
+  font-size: 16px;
+  color: var(--gray-600);
+  margin-bottom: 8px;
+}
+
+.profile-role {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--primary-50);
+  color: var(--primary-700);
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* Statistics Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: white;
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--gray-100);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all var(--transition);
+}
+
+.stat-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.stat-icon {
+  font-size: 40px;
+  line-height: 1;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--gray-900);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+/* My Items Section */
+.my-items-section {
+  background: white;
+  padding: 32px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--gray-100);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.section-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid var(--gray-200);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tab {
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--gray-600);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  margin-bottom: -2px;
+}
+
+.tab:hover {
+  color: var(--primary-500);
+  background: var(--primary-50);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.tab.active {
+  color: var(--primary-500);
+  border-bottom-color: var(--primary-500);
+}
+
+/* My Items List */
+.my-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.my-item-card {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition);
+  background: var(--gray-50);
+}
+
+.my-item-card:hover {
+  border-color: var(--primary-200);
+  box-shadow: var(--shadow-sm);
+  background: white;
+}
+
+.my-item-image {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  flex-shrink: 0;
+}
+
+.my-item-image-placeholder {
+  width: 120px;
+  height: 120px;
+  background: var(--gray-100);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  flex-shrink: 0;
+}
+
+.my-item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.my-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.my-item-header h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.my-item-badges {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.my-item-description {
+  font-size: 14px;
+  color: var(--gray-600);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.my-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--gray-600);
+}
+
+.my-item-meta .meta-item {
+  display: flex;
+  gap: 4px;
+}
+
+.my-item-meta strong {
+  color: var(--gray-700);
+}
+
+.my-item-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+/* Responsive - Profile */
+@media (max-width: 768px) {
+  .profile-header {
+    padding: 20px;
+  }
+
+  .profile-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .profile-avatar,
+  .profile-avatar-placeholder {
+    width: 80px;
+    height: 80px;
+    font-size: 36px;
+  }
+
+  .profile-details h1 {
+    font-size: 24px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .stat-icon {
+    font-size: 32px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+  }
+
+  .my-items-section {
+    padding: 20px;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .section-header .btn {
+    width: 100%;
+  }
+
+  .tabs {
+    gap: 4px;
+  }
+
+  .tab {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .my-item-card {
+    flex-direction: column;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .my-item-image,
+  .my-item-image-placeholder {
+    width: 100%;
+    height: 200px;
+  }
+
+  .my-item-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .my-item-actions {
+    flex-direction: column;
+  }
+
+  .my-item-actions .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-details h1 {
+    font-size: 20px;
+  }
+
+  .my-item-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

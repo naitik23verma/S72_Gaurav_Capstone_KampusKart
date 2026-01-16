@@ -2,8 +2,8 @@
 
 Express.js REST API for KampusKart campus community platform.
 
-**Day**: 6 of 30  
-**Status**: Initial setup complete  
+**Day**: 8 of 30  
+**Status**: GET API implemented  
 **Database**: MongoDB with Mongoose
 
 ---
@@ -46,11 +46,17 @@ backend/
 ├── config/
 │   └── database.js       # MongoDB connection
 ├── models/
-│   └── User.js           # User schema
-├── controllers/          # Business logic (coming soon)
-├── routes/               # API routes (coming soon)
+│   ├── User.js           # User schema
+│   └── LostFound.js      # Lost & Found schema
+├── controllers/
+│   ├── userController.js      # User operations
+│   └── lostFoundController.js # Lost & Found operations
+├── routes/
+│   ├── userRoutes.js          # User API routes
+│   └── lostFoundRoutes.js     # Lost & Found API routes
 ├── middleware/           # Auth, validation (coming soon)
 ├── server.js             # Entry point
+├── seed-data.js          # Database seeding script
 ├── package.json          # Dependencies
 ├── .env.example          # Environment template
 └── .gitignore
@@ -82,6 +88,34 @@ backend/
 - Automatic timestamps
 - Password comparison method
 - JSON serialization (excludes password)
+
+### LostFound Model
+
+```javascript
+{
+  _id: ObjectId,
+  title: String (required, 5-100 chars),
+  description: String (required, 10-500 chars),
+  category: String (enum: wallet, keys, phone, documents, electronics, clothing, books, bags, other),
+  status: String (enum: open, resolved, default: open),
+  type: String (enum: lost, found),
+  imageURL: String (optional),
+  location: String (max 100 chars),
+  lastSeenDate: Date (optional),
+  contactInfo: String (max 100 chars),
+  createdBy: ObjectId (ref: User),
+  isActive: Boolean (default: true),
+  createdAt: Date (auto),
+  updatedAt: Date (auto)
+}
+```
+
+**Features**:
+- Category and status validation
+- User reference with population
+- Virtual itemId field (LF-XXXXXXXX)
+- Indexed for fast queries
+- Static methods for common queries
 
 ---
 
@@ -136,10 +170,60 @@ Body: { email, password }
 Response: { success, message, data: user }
 ```
 
-### Coming Soon (Day 8+)
-- GET /api/lost-found - Get all items
+### Lost & Found Operations
+
+#### Get All Items
+```
+GET /api/lost-found
+Query: ?category=wallet&status=open&type=lost&search=phone&limit=20&page=1
+Response: { success, count, total, page, pages, data: items[] }
+```
+
+#### Get Recent Items
+```
+GET /api/lost-found/recent
+Query: ?limit=10
+Response: { success, count, data: items[] }
+```
+
+#### Get Statistics
+```
+GET /api/lost-found/statistics
+Response: { success, data: { total, open, resolved, lost, found, newToday } }
+```
+
+#### Get Items by Category
+```
+GET /api/lost-found/category/:category
+Query: ?limit=10
+Response: { success, count, data: items[] }
+```
+
+#### Get Items by Status
+```
+GET /api/lost-found/status/:status
+Query: ?limit=10
+Response: { success, count, data: items[] }
+```
+
+#### Get Items by User
+```
+GET /api/lost-found/user/:userId
+Query: ?limit=10
+Response: { success, count, data: items[] }
+```
+
+#### Get Single Item
+```
+GET /api/lost-found/:id
+Response: { success, data: item }
+```
+
+### Coming Soon (Day 9+)
 - POST /api/lost-found - Create item
-- And more...
+- PUT /api/lost-found/:id - Update item
+- DELETE /api/lost-found/:id - Delete item
+- Authentication & authorization
 
 ---
 
@@ -179,13 +263,16 @@ npm start
 # Start with nodemon (development)
 npm run dev
 
+# Seed database with test data
+npm run seed
+
 # Run tests (coming soon)
 npm test
 ```
 
 ---
 
-## ✅ Day 6-7 Checklist
+## ✅ Day 6-8 Checklist
 
 ### Day 6
 - [x] Initialize npm project
@@ -210,14 +297,26 @@ npm test
 - [x] Test database read (get user)
 - [x] Verify password hashing works
 
+### Day 8
+- [x] Create LostFound model
+- [x] Implement getAllLostFound with filters
+- [x] Implement getLostFoundById
+- [x] Implement getItemsByUser
+- [x] Implement getRecentItems
+- [x] Implement getItemsByCategory
+- [x] Implement getItemsByStatus
+- [x] Implement getStatistics
+- [x] Create lost-found routes (7 GET endpoints)
+- [x] Create seed-data.js script
+- [x] Test all GET endpoints
+
 ---
 
-## 🚀 Next Steps (Day 8)
+## 🚀 Next Steps (Day 9)
 
-- Create LostFound model
-- Implement GET API for lost & found items
-- Create lost-found routes
-- Test API endpoints
+- Implement POST API for creating items
+- Add validation middleware
+- Test create operations
 
 ---
 

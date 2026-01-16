@@ -17,12 +17,19 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Import routes
+const userRoutes = require('./routes/userRoutes');
+
 // Basic route for testing
 app.get('/', (req, res) => {
   res.json({
     message: 'Welcome to KampusKart API',
     version: '1.0.0',
-    status: 'running'
+    status: 'running',
+    endpoints: {
+      health: '/api/health',
+      testUsers: '/api/test/users'
+    }
   });
 });
 
@@ -34,6 +41,9 @@ app.get('/api/health', (req, res) => {
     uptime: process.uptime()
   });
 });
+
+// Mount routes
+app.use('/api/test/users', userRoutes);
 
 // 404 handler
 app.use((req, res) => {

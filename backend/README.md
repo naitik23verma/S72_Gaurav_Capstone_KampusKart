@@ -2,8 +2,8 @@
 
 Express.js REST API for KampusKart campus community platform.
 
-**Day**: 9 of 30  
-**Status**: POST/PUT/DELETE API implemented  
+**Day**: 10 of 30  
+**Status**: JWT Authentication implemented  
 **Database**: MongoDB with Mongoose
 
 ---
@@ -49,12 +49,15 @@ backend/
 │   ├── User.js           # User schema
 │   └── LostFound.js      # Lost & Found schema
 ├── controllers/
+│   ├── authController.js      # Authentication operations
 │   ├── userController.js      # User operations
 │   └── lostFoundController.js # Lost & Found operations
 ├── routes/
+│   ├── authRoutes.js          # Auth API routes
 │   ├── userRoutes.js          # User API routes
 │   └── lostFoundRoutes.js     # Lost & Found API routes
-├── middleware/           # Auth, validation (coming soon)
+├── middleware/
+│   └── auth.js                # JWT authentication & authorization
 ├── server.js             # Entry point
 ├── seed-data.js          # Database seeding script
 ├── package.json          # Dependencies
@@ -133,6 +136,37 @@ Response: { status: 'OK', timestamp, uptime }
 ```
 GET /
 Response: { message, version, status, endpoints }
+```
+
+### Authentication
+
+#### Register
+```
+POST /api/auth/register
+Body: { name, email, password, role }
+Response: { success, message, data: { user, token } }
+```
+
+#### Login
+```
+POST /api/auth/login
+Body: { email, password }
+Response: { success, message, data: { user, token } }
+```
+
+#### Get Current User
+```
+GET /api/auth/me
+Headers: Authorization: Bearer TOKEN
+Response: { success, data: user }
+```
+
+#### Update Profile
+```
+PUT /api/auth/profile
+Headers: Authorization: Bearer TOKEN
+Body: { name, avatar }
+Response: { success, message, data: user }
 ```
 
 ### User Operations (Test Routes)
@@ -222,6 +256,7 @@ Response: { success, data: item }
 #### Create Item
 ```
 POST /api/lost-found
+Headers: Authorization: Bearer TOKEN
 Body: {
   title: String (required, 5-100 chars),
   description: String (required, 10-500 chars),
@@ -230,28 +265,31 @@ Body: {
   location: String (optional),
   lastSeenDate: Date (optional),
   contactInfo: String (optional),
-  imageURL: String (optional),
-  createdBy: ObjectId (required)
+  imageURL: String (optional)
 }
 Response: { success, message, data: item }
+Note: createdBy is automatically set to authenticated user
 ```
 
 #### Update Item
 ```
 PUT /api/lost-found/:id
+Headers: Authorization: Bearer TOKEN
 Body: { fields to update }
 Response: { success, message, data: item }
+Note: Only item owner can update
 ```
 
 #### Delete Item
 ```
 DELETE /api/lost-found/:id
+Headers: Authorization: Bearer TOKEN
 Response: { success, message, data: item }
+Note: Only item owner can delete (soft delete)
 ```
 
-### Coming Soon (Day 10+)
-- Authentication middleware
-- Authorization (owner-only updates/deletes)
+### Coming Soon (Day 11+)
+- Google OAuth integration
 - Image upload to Cloudinary
 
 ---
@@ -301,7 +339,7 @@ npm test
 
 ---
 
-## ✅ Day 6-9 Checklist
+## ✅ Day 6-10 Checklist
 
 ### Day 6
 - [x] Initialize npm project
@@ -351,13 +389,26 @@ npm test
 - [x] Test PUT endpoint (update item)
 - [x] Test DELETE endpoint (soft delete)
 
+### Day 10
+- [x] Create auth middleware (protect, authorize)
+- [x] Create auth controller (register, login, getMe, updateProfile)
+- [x] Create auth routes
+- [x] Implement JWT token generation
+- [x] Protect POST /api/lost-found route
+- [x] Protect PUT /api/lost-found/:id route
+- [x] Protect DELETE /api/lost-found/:id route
+- [x] Add owner-only authorization for update/delete
+- [x] Test registration
+- [x] Test login
+- [x] Test protected routes
+
 ---
 
-## 🚀 Next Steps (Day 10)
+## 🚀 Next Steps (Day 11)
 
-- Implement JWT authentication
-- Create auth middleware
-- Protect routes with authentication
+- Implement Google OAuth
+- Add passport.js
+- Create OAuth callback routes
 
 ---
 

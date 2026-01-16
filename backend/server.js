@@ -18,6 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Import routes
+const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const lostFoundRoutes = require('./routes/lostFoundRoutes');
 
@@ -29,6 +30,7 @@ app.get('/', (req, res) => {
     status: 'running',
     endpoints: {
       health: '/api/health',
+      auth: '/api/auth',
       testUsers: '/api/test/users',
       lostFound: '/api/lost-found'
     }
@@ -45,6 +47,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Mount routes
+app.use('/api/auth', authRoutes);
 app.use('/api/test/users', userRoutes);
 app.use('/api/lost-found', lostFoundRoutes);
 

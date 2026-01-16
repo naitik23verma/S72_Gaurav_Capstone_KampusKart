@@ -12,6 +12,7 @@ const {
   updateLostFound,
   deleteLostFound
 } = require('../controllers/lostFoundController');
+const { protect } = require('../middleware/auth');
 
 /**
  * Lost & Found Routes
@@ -215,10 +216,10 @@ router.get('/:id', async (req, res) => {
 /**
  * @route   POST /api/lost-found
  * @desc    Create new lost & found item
- * @body    title, description, category, type, location, lastSeenDate, contactInfo, createdBy
- * @access  Public (should be protected in production)
+ * @body    title, description, category, type, location, lastSeenDate, contactInfo
+ * @access  Private
  */
-router.post('/', async (req, res) => {
+router.post('/', protect, async (req, res) => {
   try {
     const {
       title,
@@ -228,19 +229,18 @@ router.post('/', async (req, res) => {
       location,
       lastSeenDate,
       contactInfo,
-      imageURL,
-      createdBy
+      imageURL
     } = req.body;
 
     // Validate required fields
-    if (!title || !description || !category || !type || !createdBy) {
+    if (!title || !description || !category || !type) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide all required fields: title, description, category, type, createdBy'
+        message: 'Please provide all required fields: title, description, category, type'
       });
     }
 
-    // Create item
+    // Create item with authenticated user as creator
     const item = await createLostFound({
       title,
       description,
@@ -250,7 +250,7 @@ router.post('/', async (req, res) => {
       lastSeenDate,
       contactInfo,
       imageURL,
-      createdBy
+      createdBy: req.user._id // Use authenticated user
     });
 
     res.status(201).json({
@@ -268,20 +268,18 @@ router.post('/', async (req, res) => {
 
 /**
  * @route   PUT /api/lost-found/:id
- * @desc    Update lost & found item
+ * @desc    Update lost & found item (owner only)
  * @param   id - Item's MongoDB ObjectId
  * @body    Fields to update
- * @access  Public (should be protected in production)
+ * @access  Private
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', protect, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
 
-    // Don't allow updating createdBy
-    delete updateData.createdBy;
-
-    const item = await updateLostFound(id, updateData);
+    // Get the item first to check ownership
+    const item = await getLostFoundById(id);
 
     if (!item) {
       return res.status(404).json({
@@ -290,10 +288,23 @@ router.put('/:id', async (req, res) => {
       });
     }
 
+    // Check if user is the owner
+    if (item.createdBy._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to update this item'
+      });
+    }
+
+    // Don't allow updating createdBy
+    delete updateData.createdBy;
+
+    const updatedItem = await updateLostFound(id, updateData);
+
     res.json({
       success: true,
       message: 'Item updated successfully',
-      data: item
+      data: updatedItem
     });
   } catch (error) {
     res.status(400).json({
@@ -305,13 +316,14 @@ router.put('/:id', async (req, res) => {
 
 /**
  * @route   DELETE /api/lost-found/:id
- * @desc    Delete lost & found item (soft delete)
+ * @desc    Delete lost & found item (owner only, soft delete)
  * @param   id - Item's MongoDB ObjectId
- * @access  Public (should be protected in production)
+ * @access  Private
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', protect, async (req, res) => {
   try {
-    const item = await deleteLostFound(req.params.id);
+    // Get the item first to check ownership
+    const item = await getLostFoundById(req.params.id);
 
     if (!item) {
       return res.status(404).json({
@@ -320,10 +332,20 @@ router.delete('/:id', async (req, res) => {
       });
     }
 
+    // Check if user is the owner
+    if (item.createdBy._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to delete this item'
+      });
+    }
+
+    const deletedItem = await deleteLostFound(req.params.id);
+
     res.json({
       success: true,
       message: 'Item deleted successfully',
-      data: item
+      data: deletedItem
     });
   } catch (error) {
     res.status(400).json({

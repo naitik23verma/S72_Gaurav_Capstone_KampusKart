@@ -2,8 +2,8 @@
 
 Express.js REST API for KampusKart campus community platform.
 
-**Day**: 11 of 30  
-**Status**: Google OAuth implemented  
+**Day**: 12 of 30  
+**Status**: Image Upload (Cloudinary) implemented  
 **Database**: MongoDB with Mongoose
 
 ---
@@ -44,20 +44,25 @@ Server will run on `http://localhost:5000`
 ```
 backend/
 ├── config/
-│   └── database.js       # MongoDB connection
+│   ├── database.js       # MongoDB connection
+│   ├── passport.js       # Passport OAuth configuration
+│   └── cloudinary.js     # Cloudinary configuration
 ├── models/
 │   ├── User.js           # User schema
 │   └── LostFound.js      # Lost & Found schema
 ├── controllers/
 │   ├── authController.js      # Authentication operations
 │   ├── userController.js      # User operations
-│   └── lostFoundController.js # Lost & Found operations
+│   ├── lostFoundController.js # Lost & Found operations
+│   └── uploadController.js    # Image upload operations
 ├── routes/
 │   ├── authRoutes.js          # Auth API routes
 │   ├── userRoutes.js          # User API routes
-│   └── lostFoundRoutes.js     # Lost & Found API routes
+│   ├── lostFoundRoutes.js     # Lost & Found API routes
+│   └── uploadRoutes.js        # Upload API routes
 ├── middleware/
-│   └── auth.js                # JWT authentication & authorization
+│   ├── auth.js                # JWT authentication & authorization
+│   └── upload.js              # Multer file upload configuration
 ├── server.js             # Entry point
 ├── seed-data.js          # Database seeding script
 ├── package.json          # Dependencies
@@ -303,9 +308,29 @@ Response: { success, message, data: item }
 Note: Only item owner can delete (soft delete)
 ```
 
-### Coming Soon (Day 11+)
-- Google OAuth integration
-- Image upload to Cloudinary
+### Image Upload
+
+#### Upload Image
+```
+POST /api/upload
+Headers: 
+  Authorization: Bearer TOKEN
+  Content-Type: multipart/form-data
+Body: FormData with 'image' field
+Response: { success, message, data: { url, publicId, width, height, format, size } }
+Note: Max file size 5MB, formats: jpeg, jpg, png, gif, webp
+```
+
+#### Delete Image
+```
+DELETE /api/upload/:publicId
+Headers: Authorization: Bearer TOKEN
+Param: publicId (URL encoded Cloudinary public ID)
+Response: { success, message }
+```
+
+### Coming Soon (Day 13+)
+- Backend deployment to Render/Railway
 
 ---
 
@@ -315,6 +340,7 @@ Note: Only item owner can delete (soft delete)
 - **Database**: MongoDB with Mongoose 8.0+
 - **Authentication**: JWT (jsonwebtoken) + Google OAuth (passport)
 - **Password Hashing**: bcryptjs
+- **Image Upload**: Cloudinary + Multer
 - **Environment**: dotenv
 - **CORS**: cors middleware
 - **OAuth**: passport, passport-google-oauth20
@@ -336,6 +362,9 @@ FRONTEND_URL=http://localhost:5173
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 ```
 
 ---
@@ -421,25 +450,28 @@ npm test
 - [x] Test login
 - [x] Test protected routes
 
-### Day 11
-- [x] Install passport and passport-google-oauth20
-- [x] Create passport configuration
-- [x] Add googleId field to User model
-- [x] Implement Google OAuth strategy
-- [x] Create OAuth routes (google, google/callback)
-- [x] Add googleCallback controller function
-- [x] Initialize passport in server.js
-- [x] Update .env.example with OAuth variables
-- [x] Test Google OAuth flow
-- [x] Handle OAuth user creation/login
+### Day 12
+- [x] Install cloudinary, multer, streamifier
+- [x] Create Cloudinary configuration
+- [x] Create multer upload middleware
+- [x] Implement uploadToCloudinary function
+- [x] Create upload controller (uploadImage, deleteImage)
+- [x] Create upload routes
+- [x] Protect upload routes with authentication
+- [x] Add file type validation (images only)
+- [x] Add file size limit (5MB)
+- [x] Add image transformation (resize, optimize)
+- [x] Update .env.example with Cloudinary variables
+- [x] Test image upload
+- [x] Test image delete
 
 ---
 
-## 🚀 Next Steps (Day 12)
+## 🚀 Next Steps (Day 13)
 
-- Implement image upload to Cloudinary
-- Add multer for file handling
-- Create upload routes
+- Deploy backend to Render or Railway
+- Configure production environment variables
+- Test deployed API
 
 ---
 

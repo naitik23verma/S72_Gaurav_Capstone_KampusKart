@@ -1156,3 +1156,577 @@ After soft delete:
 
 **Created**: Day 9 of 30-day sprint  
 **Last Updated**: January 16, 2026
+
+
+---
+
+# Authentication Tests (Day 10)
+
+Test JWT authentication and protected routes.
+
+---
+
+## Prerequisites
+
+1. Server running: `npm run dev`
+2. MongoDB connected
+3. Terminal or Postman ready
+
+---
+
+## Test Endpoints
+
+### 1. Register New User
+
+**Request**:
+```bash
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Alice Johnson",
+    "email": "alice@campus.edu",
+    "password": "password123",
+    "role": "student"
+  }'
+```
+
+**Expected Response**:
+```json
+{
+  "success": true,
+  "message": "User registered successfully",
+  "data": {
+    "user": {
+      "_id": "...",
+      "name": "Alice Johnson",
+      "email": "alice@campus.edu",
+      "role": "student",
+      "avatar": null,
+      "createdAt": "2026-01-16T..."
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
+
+**Note**: Save the token for subsequent requests!
+
+---
+
+### 2. Register - Duplicate Email
+
+**Request**:
+```bash
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Alice Duplicate",
+    "email": "alice@campus.edu",
+    "password": "password456"
+  }'
+```
+
+**Expected Response**:
+```json
+{
+  "success": false,
+  "message": "User with this email already exists"
+}
+```
+
+---
+
+### 3. Register - Missing Fields
+
+**Request**:
+```bash
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Bob"
+  }'
+```
+
+**Expected Response**:
+```json
+{
+  "success": false,
+  "message": "Please provide name, email, and password"
+}
+```
+
+---
+
+### 4. Login
+
+**Request**:
+```bash
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "alice@campus.edu",
+    "password": "password123"
+  }'
+```
+
+**Expected Response**:
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "user": {
+      "_id": "...",
+      "name": "Alice Johnson",
+      "email": "alice@campus.edu",
+      "role": "student",
+      "avatar": null,
+      "createdAt": "2026-01-16T..."
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
+
+---
+
+### 5. Login - Wrong Password
+
+**Request**:
+```bash
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "alice@campus.edu",
+    "password": "wrongpassword"
+  }'
+```
+
+**Expected Response**:
+```json
+{
+  "success": false,
+  "message": "Invalid email or password"
+}
+```
+
+---
+
+### 6. Login - Non-existent User
+
+**Request**:
+```bash
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "nonexistent@campus.edu",
+    "password": "password123"
+  }'
+```
+
+**Expected Response**:
+```json
+{
+  "success": false,
+  "message": "Invalid email or password"
+}
+```
+
+---
+
+### 7. Get Current User (Protected Route)
+
+**Request**:
+```bash
+# Replace YOUR_TOKEN with the token from register/login
+curl http://localhost:5000/api/auth/me \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+**Expected Response**:
+```json
+{
+  "success": true,
+  "data": {
+    "_id": "...",
+    "name": "Alice Johnson",
+    "email": "alice@campus.edu",
+    "role": "student",
+    "avatar": null,
+    "isActive": true,
+    "createdAt": "2026-01-16T...",
+    "updatedAt": "2026-01-16T..."
+  }
+}
+```
+
+---
+
+### 8. Get Current User - No Token
+
+**Request**:
+```bash
+curl http://localhost:5000/api/auth/me
+```
+
+**Expected Response**:
+```json
+{
+  "success": false,
+  "message": "Not authorized, no token"
+}
+```
+
+---
+
+### 9. Get Current User - Invalid Token
+
+**Request**:
+```bash
+curl http://localhost:5000/api/auth/me \
+  -H "Authorization: Bearer invalid_token_here"
+```
+
+**Expected Response**:
+```json
+{
+  "success": false,
+  "message": "Not authorized, token failed"
+}
+```
+
+---
+
+### 10. Update Profile (Protected Route)
+
+**Request**:
+```bash
+curl -X PUT http://localhost:5000/api/auth/profile \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Alice J. Updated",
+    "avatar": "https://example.com/avatar.jpg"
+  }'
+```
+
+**Expected Response**:
+```json
+{
+  "success": true,
+  "message": "Profile updated successfully",
+  "data": {
+    "_id": "...",
+    "name": "Alice J. Updated",
+    "email": "alice@campus.edu",
+    "role": "student",
+    "avatar": "https://example.com/avatar.jpg",
+    "updatedAt": "2026-01-16T..."
+  }
+}
+```
+
+---
+
+## Protected Lost & Found Routes
+
+### 11. Create Item (Protected)
+
+**Request**:
+```bash
+curl -X POST http://localhost:5000/api/lost-found \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Lost Red Notebook",
+    "description": "Red spiral notebook with class notes. Lost in lecture hall 3.",
+    "category": "books",
+    "type": "lost",
+    "location": "Lecture Hall 3"
+  }'
+```
+
+**Expected Response**:
+```json
+{
+  "success": true,
+  "message": "Item created successfully",
+  "data": {
+    "_id": "...",
+    "title": "Lost Red Notebook",
+    "description": "Red spiral notebook with class notes...",
+    "category": "books",
+    "type": "lost",
+    "status": "open",
+    "location": "Lecture Hall 3",
+    "createdBy": {
+      "_id": "...",
+      "name": "Alice Johnson",
+      "email": "alice@campus.edu",
+      "role": "student"
+    },
+    "createdAt": "2026-01-16T..."
+  }
+}
+```
+
+**Note**: createdBy is automatically set to the authenticated user!
+
+---
+
+### 12. Create Item - No Token
+
+**Request**:
+```bash
+curl -X POST http://localhost:5000/api/lost-found \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Test Item",
+    "description": "This should fail without token",
+    "category": "other",
+    "type": "lost"
+  }'
+```
+
+**Expected Response**:
+```json
+{
+  "success": false,
+  "message": "Not authorized, no token"
+}
+```
+
+---
+
+### 13. Update Item (Owner Only)
+
+**Request**:
+```bash
+# First, create an item and save its ID
+# Then update it with the same user's token
+
+curl -X PUT http://localhost:5000/api/lost-found/ITEM_ID \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "resolved",
+    "description": "Updated: Found my notebook!"
+  }'
+```
+
+**Expected Response**:
+```json
+{
+  "success": true,
+  "message": "Item updated successfully",
+  "data": {
+    "_id": "...",
+    "status": "resolved",
+    "description": "Updated: Found my notebook!",
+    "updatedAt": "2026-01-16T..."
+  }
+}
+```
+
+---
+
+### 14. Update Item - Not Owner
+
+**Request**:
+```bash
+# Register a second user
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Bob Smith",
+    "email": "bob@campus.edu",
+    "password": "password123"
+  }'
+
+# Try to update Alice's item with Bob's token
+curl -X PUT http://localhost:5000/api/lost-found/ALICE_ITEM_ID \
+  -H "Authorization: Bearer BOB_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "resolved"
+  }'
+```
+
+**Expected Response**:
+```json
+{
+  "success": false,
+  "message": "Not authorized to update this item"
+}
+```
+
+---
+
+### 15. Delete Item (Owner Only)
+
+**Request**:
+```bash
+curl -X DELETE http://localhost:5000/api/lost-found/ITEM_ID \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+**Expected Response**:
+```json
+{
+  "success": true,
+  "message": "Item deleted successfully",
+  "data": {
+    "_id": "...",
+    "isActive": false,
+    "updatedAt": "2026-01-16T..."
+  }
+}
+```
+
+---
+
+### 16. Delete Item - Not Owner
+
+**Request**:
+```bash
+curl -X DELETE http://localhost:5000/api/lost-found/ALICE_ITEM_ID \
+  -H "Authorization: Bearer BOB_TOKEN"
+```
+
+**Expected Response**:
+```json
+{
+  "success": false,
+  "message": "Not authorized to delete this item"
+}
+```
+
+---
+
+## Complete Test Sequence
+
+```bash
+# 1. Register user
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Test User",
+    "email": "test@campus.edu",
+    "password": "test123",
+    "role": "student"
+  }'
+# Save the token from response
+
+# 2. Login
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@campus.edu",
+    "password": "test123"
+  }'
+
+# 3. Get current user
+TOKEN="paste_token_here"
+curl http://localhost:5000/api/auth/me \
+  -H "Authorization: Bearer $TOKEN"
+
+# 4. Update profile
+curl -X PUT http://localhost:5000/api/auth/profile \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Test User Updated"
+  }'
+
+# 5. Create item (protected)
+curl -X POST http://localhost:5000/api/lost-found \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Test Lost Item",
+    "description": "Testing authentication",
+    "category": "other",
+    "type": "lost"
+  }'
+# Save the item ID
+
+# 6. Update own item
+ITEM_ID="paste_item_id_here"
+curl -X PUT http://localhost:5000/api/lost-found/$ITEM_ID \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "resolved"
+  }'
+
+# 7. Delete own item
+curl -X DELETE http://localhost:5000/api/lost-found/$ITEM_ID \
+  -H "Authorization: Bearer $TOKEN"
+
+# 8. Try to create without token (should fail)
+curl -X POST http://localhost:5000/api/lost-found \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Should Fail",
+    "description": "No token provided",
+    "category": "other",
+    "type": "lost"
+  }'
+```
+
+---
+
+## Verification Checklist
+
+- [ ] Can register new user
+- [ ] Receives JWT token on registration
+- [ ] Cannot register duplicate email
+- [ ] Validation works for missing fields
+- [ ] Can login with correct credentials
+- [ ] Receives JWT token on login
+- [ ] Cannot login with wrong password
+- [ ] Cannot login with non-existent email
+- [ ] Can access protected route with valid token
+- [ ] Cannot access protected route without token
+- [ ] Cannot access protected route with invalid token
+- [ ] Can update own profile
+- [ ] Can create item (createdBy auto-set)
+- [ ] Cannot create item without token
+- [ ] Can update own item
+- [ ] Cannot update other user's item
+- [ ] Can delete own item
+- [ ] Cannot delete other user's item
+- [ ] Token expires after configured time
+- [ ] Password is hashed in database
+
+---
+
+## JWT Token Structure
+
+Decoded token payload:
+```json
+{
+  "id": "user_mongodb_id",
+  "iat": 1705420800,
+  "exp": 1706025600
+}
+```
+
+---
+
+## Security Features
+
+1. **Password Hashing**: bcrypt with 10 rounds
+2. **JWT Tokens**: Signed with secret, 7-day expiration
+3. **Protected Routes**: Require valid token
+4. **Owner Authorization**: Only owners can update/delete
+5. **No Password in Responses**: Password excluded from all responses
+6. **Token Verification**: Validates signature and expiration
+7. **User Status Check**: Inactive users cannot authenticate
+
+---
+
+**All tests passing = Authentication working! ✅**
+
+**Created**: Day 10 of 30-day sprint  
+**Last Updated**: January 16, 2026

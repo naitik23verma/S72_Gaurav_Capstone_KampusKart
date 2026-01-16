@@ -339,3 +339,400 @@ After running all tests, MongoDB should contain:
 
 **Created**: Day 7 of 30-day sprint  
 **Last Updated**: January 16, 2026
+
+
+---
+
+# Lost & Found API Tests (Day 8)
+
+Test the Lost & Found GET operations.
+
+---
+
+## Prerequisites
+
+1. Server running: `npm run dev`
+2. Database seeded: `npm run seed`
+3. Terminal or Postman ready
+
+---
+
+## Seed Database First
+
+```bash
+npm run seed
+```
+
+This creates:
+- 3 users (student, faculty, admin)
+- 10 lost & found items (mix of lost/found, open/resolved)
+
+---
+
+## Test Endpoints
+
+### 1. Get All Items
+
+**Request**:
+```bash
+curl http://localhost:5000/api/lost-found
+```
+
+**Expected Response**:
+```json
+{
+  "success": true,
+  "count": 10,
+  "total": 10,
+  "page": 1,
+  "pages": 1,
+  "data": [
+    {
+      "_id": "...",
+      "title": "Lost Brown Leather Wallet",
+      "description": "Brown leather wallet with multiple cards inside...",
+      "category": "wallet",
+      "type": "lost",
+      "status": "open",
+      "location": "Near Library",
+      "lastSeenDate": "2026-01-15T00:00:00.000Z",
+      "createdBy": {
+        "_id": "...",
+        "name": "John Doe",
+        "email": "john@campus.edu",
+        "role": "student"
+      },
+      "isActive": true,
+      "createdAt": "2026-01-16T...",
+      "updatedAt": "2026-01-16T...",
+      "itemId": "LF-XXXXXXXX"
+    }
+  ]
+}
+```
+
+---
+
+### 2. Get All Items with Filters
+
+**Filter by Category**:
+```bash
+curl http://localhost:5000/api/lost-found?category=wallet
+```
+
+**Filter by Status**:
+```bash
+curl http://localhost:5000/api/lost-found?status=open
+```
+
+**Filter by Type**:
+```bash
+curl http://localhost:5000/api/lost-found?type=lost
+```
+
+**Search by Text**:
+```bash
+curl http://localhost:5000/api/lost-found?search=phone
+```
+
+**Pagination**:
+```bash
+curl http://localhost:5000/api/lost-found?limit=5&page=1
+curl http://localhost:5000/api/lost-found?limit=5&page=2
+```
+
+**Combined Filters**:
+```bash
+curl "http://localhost:5000/api/lost-found?category=electronics&status=open&type=lost"
+```
+
+---
+
+### 3. Get Recent Items
+
+**Request**:
+```bash
+curl http://localhost:5000/api/lost-found/recent
+```
+
+**With Limit**:
+```bash
+curl http://localhost:5000/api/lost-found/recent?limit=5
+```
+
+**Expected Response**:
+```json
+{
+  "success": true,
+  "count": 5,
+  "data": [
+    {
+      "_id": "...",
+      "title": "Found Wireless Earbuds",
+      "description": "White wireless earbuds in charging case...",
+      "category": "electronics",
+      "type": "found",
+      "status": "open",
+      "createdBy": {
+        "_id": "...",
+        "name": "Admin User",
+        "email": "admin@campus.edu",
+        "role": "admin"
+      },
+      "createdAt": "2026-01-16T..."
+    }
+  ]
+}
+```
+
+---
+
+### 4. Get Statistics
+
+**Request**:
+```bash
+curl http://localhost:5000/api/lost-found/statistics
+```
+
+**Expected Response**:
+```json
+{
+  "success": true,
+  "data": {
+    "total": 10,
+    "open": 8,
+    "resolved": 2,
+    "lost": 5,
+    "found": 5,
+    "newToday": 10
+  }
+}
+```
+
+---
+
+### 5. Get Items by Category
+
+**Request**:
+```bash
+curl http://localhost:5000/api/lost-found/category/wallet
+curl http://localhost:5000/api/lost-found/category/electronics
+curl http://localhost:5000/api/lost-found/category/keys
+```
+
+**Expected Response**:
+```json
+{
+  "success": true,
+  "count": 2,
+  "data": [
+    {
+      "_id": "...",
+      "title": "Lost MacBook Pro",
+      "category": "electronics",
+      "type": "lost",
+      "status": "open"
+    },
+    {
+      "_id": "...",
+      "title": "Found Wireless Earbuds",
+      "category": "electronics",
+      "type": "found",
+      "status": "open"
+    }
+  ]
+}
+```
+
+---
+
+### 6. Get Items by Status
+
+**Request**:
+```bash
+curl http://localhost:5000/api/lost-found/status/open
+curl http://localhost:5000/api/lost-found/status/resolved
+```
+
+**Expected Response**:
+```json
+{
+  "success": true,
+  "count": 8,
+  "data": [
+    {
+      "_id": "...",
+      "title": "Lost Brown Leather Wallet",
+      "status": "open"
+    }
+  ]
+}
+```
+
+---
+
+### 7. Get Items by User
+
+**Request** (replace USER_ID with actual ID from seed data):
+```bash
+# First, get a user ID from the users endpoint
+curl http://localhost:5000/api/test/users
+
+# Then use that ID
+curl http://localhost:5000/api/lost-found/user/USER_ID
+```
+
+**Expected Response**:
+```json
+{
+  "success": true,
+  "count": 3,
+  "data": [
+    {
+      "_id": "...",
+      "title": "Lost Brown Leather Wallet",
+      "createdBy": "USER_ID"
+    }
+  ]
+}
+```
+
+---
+
+### 8. Get Single Item by ID
+
+**Request** (replace ITEM_ID with actual ID):
+```bash
+# First, get an item ID from the list
+curl http://localhost:5000/api/lost-found
+
+# Then get that specific item
+curl http://localhost:5000/api/lost-found/ITEM_ID
+```
+
+**Expected Response**:
+```json
+{
+  "success": true,
+  "data": {
+    "_id": "ITEM_ID",
+    "title": "Lost Brown Leather Wallet",
+    "description": "Brown leather wallet with multiple cards inside...",
+    "category": "wallet",
+    "type": "lost",
+    "status": "open",
+    "location": "Near Library",
+    "lastSeenDate": "2026-01-15T00:00:00.000Z",
+    "createdBy": {
+      "_id": "...",
+      "name": "John Doe",
+      "email": "john@campus.edu",
+      "role": "student"
+    },
+    "isActive": true,
+    "createdAt": "2026-01-16T...",
+    "updatedAt": "2026-01-16T...",
+    "itemId": "LF-XXXXXXXX"
+  }
+}
+```
+
+---
+
+## Complete Test Sequence
+
+```bash
+# 1. Seed database
+npm run seed
+
+# 2. Get all items
+curl http://localhost:5000/api/lost-found
+
+# 3. Get recent items
+curl http://localhost:5000/api/lost-found/recent?limit=5
+
+# 4. Get statistics
+curl http://localhost:5000/api/lost-found/statistics
+
+# 5. Filter by category
+curl http://localhost:5000/api/lost-found?category=electronics
+
+# 6. Filter by status
+curl http://localhost:5000/api/lost-found?status=open
+
+# 7. Filter by type
+curl http://localhost:5000/api/lost-found?type=lost
+
+# 8. Search by text
+curl http://localhost:5000/api/lost-found?search=wallet
+
+# 9. Test pagination
+curl http://localhost:5000/api/lost-found?limit=3&page=1
+curl http://localhost:5000/api/lost-found?limit=3&page=2
+
+# 10. Get by category endpoint
+curl http://localhost:5000/api/lost-found/category/wallet
+
+# 11. Get by status endpoint
+curl http://localhost:5000/api/lost-found/status/open
+
+# 12. Combined filters
+curl "http://localhost:5000/api/lost-found?category=electronics&status=open&type=found"
+```
+
+---
+
+## Verification Checklist
+
+- [ ] Seed script runs successfully
+- [ ] Can get all items
+- [ ] Category filter works
+- [ ] Status filter works
+- [ ] Type filter works
+- [ ] Search filter works
+- [ ] Pagination works (limit & page)
+- [ ] Recent items endpoint works
+- [ ] Statistics endpoint works
+- [ ] Get by category endpoint works
+- [ ] Get by status endpoint works
+- [ ] Get by user endpoint works
+- [ ] Get single item works
+- [ ] User population works (createdBy field)
+- [ ] Virtual itemId field appears
+- [ ] Combined filters work
+- [ ] 404 error for invalid item ID
+
+---
+
+## Categories Available
+
+- wallet
+- keys
+- phone
+- documents
+- electronics
+- clothing
+- books
+- bags
+- other
+
+---
+
+## Status Values
+
+- open
+- resolved
+
+---
+
+## Type Values
+
+- lost
+- found
+
+---
+
+**All tests passing = GET API working! ✅**
+
+**Created**: Day 8 of 30-day sprint  
+**Last Updated**: January 16, 2026

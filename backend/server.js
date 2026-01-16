@@ -19,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Import routes
 const userRoutes = require('./routes/userRoutes');
+const lostFoundRoutes = require('./routes/lostFoundRoutes');
 
 // Basic route for testing
 app.get('/', (req, res) => {
@@ -28,7 +29,8 @@ app.get('/', (req, res) => {
     status: 'running',
     endpoints: {
       health: '/api/health',
-      testUsers: '/api/test/users'
+      testUsers: '/api/test/users',
+      lostFound: '/api/lost-found'
     }
   });
 });
@@ -44,6 +46,7 @@ app.get('/api/health', (req, res) => {
 
 // Mount routes
 app.use('/api/test/users', userRoutes);
+app.use('/api/lost-found', lostFoundRoutes);
 
 // 404 handler
 app.use((req, res) => {

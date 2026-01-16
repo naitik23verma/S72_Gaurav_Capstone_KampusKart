@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import MobileMenu from './components/MobileMenu';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -40,6 +41,8 @@ const Navigation = () => {
               </Link>
             </>
           )}
+          
+          <MobileMenu />
         </div>
       </div>
     </nav>

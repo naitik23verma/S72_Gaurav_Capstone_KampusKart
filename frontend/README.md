@@ -2,9 +2,10 @@
 
 React frontend for KampusKart campus community platform.
 
-**Day**: 14 of 30  
-**Status**: Initial setup complete  
-**Framework**: React 18 + Vite
+**Day**: 16 of 30  
+**Status**: Deployed to Production  
+**Framework**: React 18 + Vite  
+**Deployment**: Netlify/Vercel
 
 ---
 
@@ -244,14 +245,45 @@ The app uses a configured Axios instance (`src/config/api.js`) that:
 
 ---
 
+## 🌐 Deployment
+
+### Production URL
+```
+https://kampuskart.netlify.app
+(or your custom domain)
+```
+
+### Quick Deploy
+
+**Netlify:**
+1. Connect GitHub repository
+2. Set base directory: `frontend`
+3. Build command: `npm run build`
+4. Publish directory: `frontend/dist`
+5. Add environment variables
+6. Deploy!
+
+**Vercel:**
+1. Import GitHub repository
+2. Set root directory: `frontend`
+3. Framework: Vite
+4. Add environment variables
+5. Deploy!
+
+See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for complete instructions.
+
+---
+
 ## 📚 Resources
 
 - [React Documentation](https://react.dev/)
 - [Vite Documentation](https://vitejs.dev/)
 - [React Router Documentation](https://reactrouter.com/)
 - [Axios Documentation](https://axios-http.com/)
+- [Netlify Documentation](https://docs.netlify.com/)
+- [Vercel Documentation](https://vercel.com/docs)
 
 ---
 
 **Created**: Day 14 of 30-day sprint  
-**Last Updated**: January 16, 2026
+**Last Updated**: January 17, 2026

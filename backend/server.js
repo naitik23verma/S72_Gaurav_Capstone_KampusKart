@@ -25,6 +25,7 @@ app.use(passport.initialize());
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const lostFoundRoutes = require('./routes/lostFoundRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 
 // Basic route for testing
 app.get('/', (req, res) => {
@@ -36,7 +37,8 @@ app.get('/', (req, res) => {
       health: '/api/health',
       auth: '/api/auth',
       testUsers: '/api/test/users',
-      lostFound: '/api/lost-found'
+      lostFound: '/api/lost-found',
+      upload: '/api/upload'
     }
   });
 });
@@ -54,6 +56,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/test/users', userRoutes);
 app.use('/api/lost-found', lostFoundRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // 404 handler
 app.use((req, res) => {

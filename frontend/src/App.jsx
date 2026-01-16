@@ -4,6 +4,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Items from './pages/Items';
+import ItemDetail from './pages/ItemDetail';
+import ItemForm from './pages/ItemForm';
 import './App.css';
 
 /**
@@ -60,6 +62,9 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/items" element={<Items />} />
+              <Route path="/items/new" element={<ItemForm />} />
+              <Route path="/items/:id" element={<ItemDetail />} />
+              <Route path="/items/:id/edit" element={<ItemForm />} />
             </Routes>
           </main>
 

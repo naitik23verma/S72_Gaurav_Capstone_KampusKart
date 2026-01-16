@@ -87,7 +87,7 @@ backend/
 
 ## 🔌 API Endpoints
 
-### Current Endpoints
+### Health & Status
 
 #### Health Check
 ```
@@ -98,12 +98,45 @@ Response: { status: 'OK', timestamp, uptime }
 #### Root
 ```
 GET /
-Response: { message, version, status }
+Response: { message, version, status, endpoints }
 ```
 
-### Coming Soon (Day 7+)
-- POST /api/auth/register - User registration
-- POST /api/auth/login - User login
+### User Operations (Test Routes)
+
+#### Create User
+```
+POST /api/test/users/create
+Body: { name, email, password, role }
+Response: { success, message, data: user }
+```
+
+#### Get All Users
+```
+GET /api/test/users
+Query: ?limit=10
+Response: { success, count, data: users[] }
+```
+
+#### Get User by ID
+```
+GET /api/test/users/:id
+Response: { success, data: user }
+```
+
+#### Get User by Email
+```
+GET /api/test/users/email/:email
+Response: { success, data: user }
+```
+
+#### Verify Password
+```
+POST /api/test/users/verify
+Body: { email, password }
+Response: { success, message, data: user }
+```
+
+### Coming Soon (Day 8+)
 - GET /api/lost-found - Get all items
 - POST /api/lost-found - Create item
 - And more...
@@ -152,8 +185,9 @@ npm test
 
 ---
 
-## ✅ Day 6 Checklist
+## ✅ Day 6-7 Checklist
 
+### Day 6
 - [x] Initialize npm project
 - [x] Install dependencies
 - [x] Create .env.example
@@ -164,14 +198,26 @@ npm test
 - [x] Add health check endpoint
 - [x] Test server startup
 
+### Day 7
+- [x] Create user controller
+- [x] Implement createUser function
+- [x] Implement getUserByEmail function
+- [x] Implement getUserById function
+- [x] Implement getAllUsers function
+- [x] Implement verifyUserPassword function
+- [x] Create user routes
+- [x] Test database write (create user)
+- [x] Test database read (get user)
+- [x] Verify password hashing works
+
 ---
 
-## 🚀 Next Steps (Day 7)
+## 🚀 Next Steps (Day 8)
 
-- Create user controller
-- Implement CRUD operations
-- Test database read/write
-- Create test routes
+- Create LostFound model
+- Implement GET API for lost & found items
+- Create lost-found routes
+- Test API endpoints
 
 ---
 

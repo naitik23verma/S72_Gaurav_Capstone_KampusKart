@@ -1,0 +1,47 @@
+meta {
+  name: Delete Image
+  type: http
+  seq: 2
+}
+
+delete {
+  url: {{apiUrl}}/upload/kampuskart%2Fimage123
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  # Delete Image
+  
+  Delete an image from Cloudinary.
+  
+  ## Headers
+  - `Authorization`: Bearer {token}
+  
+  ## URL Parameters
+  - `publicId`: Cloudinary public ID (URL encoded)
+  
+  ## Example
+  If public ID is `kampuskart/image123`, URL encode it:
+  `/api/upload/kampuskart%2Fimage123`
+  
+  ## Response
+  - `success`: Boolean
+  - `message`: Success message
+  
+  ## Status Codes
+  - 200: Image deleted successfully
+  - 400: Invalid public ID
+  - 401: Not authenticated
+  - 404: Image not found
+}
+
+tests {
+  test("Status code is 200 or 404", function() {
+    expect([200, 404]).to.include(res.getStatus());
+  });
+}

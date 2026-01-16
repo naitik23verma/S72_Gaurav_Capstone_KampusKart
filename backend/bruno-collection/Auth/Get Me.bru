@@ -1,0 +1,42 @@
+meta {
+  name: Get Me
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{apiUrl}}/auth/me
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  # Get Current User
+  
+  Get the currently authenticated user's profile.
+  
+  ## Headers
+  - `Authorization`: Bearer {token}
+  
+  ## Response
+  - `success`: Boolean
+  - `data`: User object with all profile information
+  
+  ## Status Codes
+  - 200: Success
+  - 401: Not authenticated or invalid token
+}
+
+tests {
+  test("Status code is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Response has user data", function() {
+    expect(res.getBody().data).to.be.an('object');
+  });
+}

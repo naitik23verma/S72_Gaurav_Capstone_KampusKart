@@ -1,0 +1,50 @@
+meta {
+  name: Get Item by ID
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{apiUrl}}/lost-found/6789abcd1234567890abcdef
+  body: none
+  auth: none
+}
+
+docs {
+  # Get Single Item
+  
+  Retrieve a specific lost & found item by its ID.
+  
+  ## URL Parameters
+  - `id`: MongoDB ObjectId of the item
+  
+  ## Response
+  - `success`: Boolean
+  - `data`: Item object with full details including creator info
+  
+  ## Item Object
+  - `_id`: Item ID
+  - `title`: Item title
+  - `description`: Detailed description
+  - `category`: Item category
+  - `type`: "lost" or "found"
+  - `status`: "open" or "resolved"
+  - `location`: Where item was lost/found
+  - `lastSeenDate`: Date item was last seen
+  - `contactInfo`: Contact information
+  - `imageURL`: Image URL (if uploaded)
+  - `createdBy`: User object (name, email, avatar)
+  - `createdAt`: Creation timestamp
+  - `updatedAt`: Last update timestamp
+  
+  ## Status Codes
+  - 200: Success
+  - 404: Item not found
+  - 400: Invalid ID format
+}
+
+tests {
+  test("Status code is 200 or 404", function() {
+    expect([200, 404]).to.include(res.getStatus());
+  });
+}

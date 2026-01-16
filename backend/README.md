@@ -2,8 +2,8 @@
 
 Express.js REST API for KampusKart campus community platform.
 
-**Day**: 10 of 30  
-**Status**: JWT Authentication implemented  
+**Day**: 11 of 30  
+**Status**: Google OAuth implemented  
 **Database**: MongoDB with Mongoose
 
 ---
@@ -77,6 +77,7 @@ backend/
   name: String (required, max 100 chars),
   email: String (required, unique, lowercase),
   passwordHash: String (required, min 8 chars, hashed),
+  googleId: String (optional, unique, for OAuth users),
   role: String (enum: ['student', 'faculty', 'admin'], default: 'student'),
   avatar: String (optional),
   isActive: Boolean (default: true),
@@ -88,6 +89,7 @@ backend/
 **Features**:
 - Password hashing with bcrypt (10 rounds)
 - Email validation with regex
+- Google OAuth support
 - Automatic timestamps
 - Password comparison method
 - JSON serialization (excludes password)
@@ -167,6 +169,19 @@ PUT /api/auth/profile
 Headers: Authorization: Bearer TOKEN
 Body: { name, avatar }
 Response: { success, message, data: user }
+```
+
+#### Google OAuth Login
+```
+GET /api/auth/google
+Redirects to Google OAuth consent screen
+```
+
+#### Google OAuth Callback
+```
+GET /api/auth/google/callback
+Handles OAuth callback and redirects to frontend with token
+Redirect: {FRONTEND_URL}/auth/callback?token=JWT_TOKEN
 ```
 
 ### User Operations (Test Routes)
@@ -298,10 +313,11 @@ Note: Only item owner can delete (soft delete)
 
 - **Framework**: Express.js 4.18+
 - **Database**: MongoDB with Mongoose 8.0+
-- **Authentication**: JWT (jsonwebtoken)
+- **Authentication**: JWT (jsonwebtoken) + Google OAuth (passport)
 - **Password Hashing**: bcryptjs
 - **Environment**: dotenv
 - **CORS**: cors middleware
+- **OAuth**: passport, passport-google-oauth20
 - **Dev Tool**: nodemon
 
 ---
@@ -317,6 +333,9 @@ MONGODB_URI=mongodb://localhost:27017/kampuskart
 JWT_SECRET=your_secret_key
 JWT_EXPIRE=7d
 FRONTEND_URL=http://localhost:5173
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
 ```
 
 ---
@@ -402,13 +421,25 @@ npm test
 - [x] Test login
 - [x] Test protected routes
 
+### Day 11
+- [x] Install passport and passport-google-oauth20
+- [x] Create passport configuration
+- [x] Add googleId field to User model
+- [x] Implement Google OAuth strategy
+- [x] Create OAuth routes (google, google/callback)
+- [x] Add googleCallback controller function
+- [x] Initialize passport in server.js
+- [x] Update .env.example with OAuth variables
+- [x] Test Google OAuth flow
+- [x] Handle OAuth user creation/login
+
 ---
 
-## 🚀 Next Steps (Day 11)
+## 🚀 Next Steps (Day 12)
 
-- Implement Google OAuth
-- Add passport.js
-- Create OAuth callback routes
+- Implement image upload to Cloudinary
+- Add multer for file handling
+- Create upload routes
 
 ---
 

@@ -30,6 +30,11 @@ const userSchema = new mongoose.Schema(
       minlength: [8, 'Password must be at least 8 characters'],
       select: false // Don't return password by default
     },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true // Allows null values to be non-unique
+    },
     role: {
       type: String,
       enum: ['student', 'faculty', 'admin'],

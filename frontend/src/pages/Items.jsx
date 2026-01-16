@@ -40,8 +40,8 @@ const Items = () => {
     <div className="items-page">
       <div className="page-header">
         <h1>Lost & Found Items</h1>
-        <Link to="/items/create" className="btn btn-primary">
-          Report Item
+        <Link to="/items/new" className="btn btn-primary">
+          Post Item
         </Link>
       </div>
 

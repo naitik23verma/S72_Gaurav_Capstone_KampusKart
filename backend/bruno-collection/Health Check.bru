@@ -1,0 +1,22 @@
+meta {
+  name: Health Check
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{apiUrl}}/health
+  body: none
+  auth: none
+}
+
+docs {
+  # Health Check
+  
+  Check if the API server is running and healthy.
+  
+  ## Response
+  - `status`: Server status (OK)
+  - `timestamp`: Current server time
+  - `uptime`: Server uptime in seconds
+}

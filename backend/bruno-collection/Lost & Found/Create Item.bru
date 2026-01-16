@@ -1,0 +1,75 @@
+meta {
+  name: Create Item
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{apiUrl}}/lost-found
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "title": "Lost iPhone 13",
+    "description": "Black iPhone 13 with blue case. Lost near library.",
+    "category": "Electronics",
+    "type": "lost",
+    "location": "Main Library, 2nd Floor",
+    "lastSeenDate": "2026-01-17T14:30:00Z",
+    "contactInfo": "john@example.com",
+    "imageURL": "https://res.cloudinary.com/example/image.jpg"
+  }
+}
+
+docs {
+  # Create Lost & Found Item
+  
+  Create a new lost or found item report.
+  
+  ## Headers
+  - `Authorization`: Bearer {token}
+  
+  ## Request Body
+  - `title` (required): Item title (max 100 chars)
+  - `description` (required): Detailed description
+  - `category` (required): Item category
+  - `type` (required): "lost" or "found"
+  - `location` (optional): Where item was lost/found
+  - `lastSeenDate` (optional): ISO 8601 date string
+  - `contactInfo` (optional): Contact information
+  - `imageURL` (optional): Cloudinary image URL
+  
+  ## Categories
+  Electronics, Clothing, Books, Keys, Accessories, Documents, Sports, Other
+  
+  ## Response
+  - `success`: Boolean
+  - `message`: Success message
+  - `data`: Created item object
+  
+  ## Notes
+  - User must be authenticated
+  - Item is automatically assigned to authenticated user
+  - Status defaults to "open"
+  
+  ## Status Codes
+  - 201: Item created successfully
+  - 400: Validation error
+  - 401: Not authenticated
+}
+
+tests {
+  test("Status code is 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+  
+  test("Response has item data", function() {
+    expect(res.getBody().data).to.be.an('object');
+  });
+}

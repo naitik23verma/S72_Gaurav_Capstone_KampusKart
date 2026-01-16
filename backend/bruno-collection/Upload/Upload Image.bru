@@ -1,0 +1,66 @@
+meta {
+  name: Upload Image
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{apiUrl}}/upload
+  body: multipartForm
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:multipart-form {
+  image: @file(/path/to/image.jpg)
+}
+
+docs {
+  # Upload Image
+  
+  Upload an image to Cloudinary.
+  
+  ## Headers
+  - `Authorization`: Bearer {token}
+  - `Content-Type`: multipart/form-data
+  
+  ## Request Body (multipart/form-data)
+  - `image` (required): Image file
+  
+  ## Supported Formats
+  - JPEG, PNG, GIF, WebP
+  - Max size: 10MB
+  
+  ## Response
+  - `success`: Boolean
+  - `message`: Success message
+  - `data`: Object with image details
+    - `url`: Cloudinary URL
+    - `publicId`: Cloudinary public ID
+    - `format`: Image format
+    - `width`: Image width
+    - `height`: Image height
+  
+  ## Notes
+  - User must be authenticated
+  - Images are stored in Cloudinary
+  - Use the returned URL in item creation/update
+  
+  ## Status Codes
+  - 200: Image uploaded successfully
+  - 400: No file provided or invalid file
+  - 401: Not authenticated
+}
+
+tests {
+  test("Status code is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Response has image URL", function() {
+    expect(res.getBody().data.url).to.be.a('string');
+  });
+}

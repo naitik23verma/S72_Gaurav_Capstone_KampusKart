@@ -1,0 +1,65 @@
+meta {
+  name: Update Item
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{apiUrl}}/lost-found/6789abcd1234567890abcdef
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "status": "resolved",
+    "description": "Updated description - item has been found!"
+  }
+}
+
+docs {
+  # Update Lost & Found Item
+  
+  Update an existing item. Only the item owner can update.
+  
+  ## Headers
+  - `Authorization`: Bearer {token}
+  
+  ## URL Parameters
+  - `id`: MongoDB ObjectId of the item
+  
+  ## Request Body
+  Any fields to update (partial update supported):
+  - `title`: Updated title
+  - `description`: Updated description
+  - `status`: "open" or "resolved"
+  - `location`: Updated location
+  - `contactInfo`: Updated contact info
+  - `imageURL`: Updated image URL
+  
+  ## Authorization
+  - Only the item creator can update
+  - Returns 403 if user is not the owner
+  
+  ## Response
+  - `success`: Boolean
+  - `message`: Success message
+  - `data`: Updated item object
+  
+  ## Status Codes
+  - 200: Item updated successfully
+  - 400: Validation error
+  - 401: Not authenticated
+  - 403: Not authorized (not the owner)
+  - 404: Item not found
+}
+
+tests {
+  test("Status code is 200, 403, or 404", function() {
+    expect([200, 403, 404]).to.include(res.getStatus());
+  });
+}

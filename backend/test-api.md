@@ -736,3 +736,423 @@ curl "http://localhost:5000/api/lost-found?category=electronics&status=open&type
 
 **Created**: Day 8 of 30-day sprint  
 **Last Updated**: January 16, 2026
+
+
+---
+
+# Lost & Found POST/PUT/DELETE Tests (Day 9)
+
+Test the Lost & Found create, update, and delete operations.
+
+---
+
+## Prerequisites
+
+1. Server running: `npm run dev`
+2. Database seeded: `npm run seed`
+3. Get a user ID from seed data for testing
+
+---
+
+## Get User ID for Testing
+
+```bash
+# Get all users to find a user ID
+curl http://localhost:5000/api/test/users
+
+# Copy one of the _id values to use as createdBy
+```
+
+---
+
+## Test Endpoints
+
+### 1. Create Item (POST)
+
+**Request**:
+```bash
+curl -X POST http://localhost:5000/api/lost-found \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Lost Blue Backpack",
+    "description": "Blue backpack with laptop inside. Lost near the library on Jan 16. Has a red patch on the front pocket.",
+    "category": "bags",
+    "type": "lost",
+    "location": "Near Library",
+    "lastSeenDate": "2026-01-16",
+    "contactInfo": "john@campus.edu",
+    "createdBy": "USER_ID_HERE"
+  }'
+```
+
+**Expected Response**:
+```json
+{
+  "success": true,
+  "message": "Item created successfully",
+  "data": {
+    "_id": "...",
+    "title": "Lost Blue Backpack",
+    "description": "Blue backpack with laptop inside...",
+    "category": "bags",
+    "type": "lost",
+    "status": "open",
+    "location": "Near Library",
+    "lastSeenDate": "2026-01-16T00:00:00.000Z",
+    "contactInfo": "john@campus.edu",
+    "createdBy": {
+      "_id": "...",
+      "name": "John Doe",
+      "email": "john@campus.edu",
+      "role": "student"
+    },
+    "isActive": true,
+    "createdAt": "2026-01-16T...",
+    "updatedAt": "2026-01-16T...",
+    "itemId": "LF-XXXXXXXX"
+  }
+}
+```
+
+---
+
+### 2. Create Item - Validation Error
+
+**Request (Missing Required Fields)**:
+```bash
+curl -X POST http://localhost:5000/api/lost-found \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Lost Item"
+  }'
+```
+
+**Expected Response**:
+```json
+{
+  "success": false,
+  "message": "Please provide all required fields: title, description, category, type, createdBy"
+}
+```
+
+---
+
+### 3. Create Item - Invalid Category
+
+**Request**:
+```bash
+curl -X POST http://localhost:5000/api/lost-found \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Lost Something",
+    "description": "This is a test item with invalid category",
+    "category": "invalid_category",
+    "type": "lost",
+    "createdBy": "USER_ID_HERE"
+  }'
+```
+
+**Expected Response**:
+```json
+{
+  "success": false,
+  "message": "invalid_category is not a valid category"
+}
+```
+
+---
+
+### 4. Update Item (PUT)
+
+**Request**:
+```bash
+# First, get an item ID
+curl http://localhost:5000/api/lost-found
+
+# Then update that item
+curl -X PUT http://localhost:5000/api/lost-found/ITEM_ID_HERE \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "resolved",
+    "description": "Updated description - item has been found!"
+  }'
+```
+
+**Expected Response**:
+```json
+{
+  "success": true,
+  "message": "Item updated successfully",
+  "data": {
+    "_id": "...",
+    "title": "Lost Blue Backpack",
+    "description": "Updated description - item has been found!",
+    "status": "resolved",
+    "updatedAt": "2026-01-16T..."
+  }
+}
+```
+
+---
+
+### 5. Update Item - Change Status to Resolved
+
+**Request**:
+```bash
+curl -X PUT http://localhost:5000/api/lost-found/ITEM_ID_HERE \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "resolved"
+  }'
+```
+
+**Expected Response**:
+```json
+{
+  "success": true,
+  "message": "Item updated successfully",
+  "data": {
+    "_id": "...",
+    "status": "resolved",
+    "updatedAt": "2026-01-16T..."
+  }
+}
+```
+
+---
+
+### 6. Update Item - Not Found
+
+**Request**:
+```bash
+curl -X PUT http://localhost:5000/api/lost-found/000000000000000000000000 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "resolved"
+  }'
+```
+
+**Expected Response**:
+```json
+{
+  "success": false,
+  "message": "Item not found"
+}
+```
+
+---
+
+### 7. Delete Item (Soft Delete)
+
+**Request**:
+```bash
+curl -X DELETE http://localhost:5000/api/lost-found/ITEM_ID_HERE
+```
+
+**Expected Response**:
+```json
+{
+  "success": true,
+  "message": "Item deleted successfully",
+  "data": {
+    "_id": "...",
+    "title": "Lost Blue Backpack",
+    "isActive": false,
+    "updatedAt": "2026-01-16T..."
+  }
+}
+```
+
+---
+
+### 8. Verify Soft Delete
+
+**Request** (Try to get deleted item):
+```bash
+# Get all items - deleted item should not appear
+curl http://localhost:5000/api/lost-found
+
+# Try to get deleted item by ID - should still return it
+curl http://localhost:5000/api/lost-found/DELETED_ITEM_ID
+```
+
+**Note**: Soft deleted items (isActive: false) are filtered out from list queries but can still be retrieved by ID.
+
+---
+
+## Complete Test Sequence
+
+```bash
+# 1. Get a user ID
+curl http://localhost:5000/api/test/users
+# Copy a user _id
+
+# 2. Create a new item
+curl -X POST http://localhost:5000/api/lost-found \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Test Lost Item",
+    "description": "This is a test item for API testing purposes",
+    "category": "other",
+    "type": "lost",
+    "location": "Test Location",
+    "createdBy": "PASTE_USER_ID_HERE"
+  }'
+# Copy the returned item _id
+
+# 3. Get the created item
+curl http://localhost:5000/api/lost-found/ITEM_ID
+
+# 4. Update the item
+curl -X PUT http://localhost:5000/api/lost-found/ITEM_ID \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "resolved",
+    "description": "Updated test item - now resolved"
+  }'
+
+# 5. Verify update
+curl http://localhost:5000/api/lost-found/ITEM_ID
+
+# 6. Delete the item
+curl -X DELETE http://localhost:5000/api/lost-found/ITEM_ID
+
+# 7. Verify deletion (should not appear in list)
+curl http://localhost:5000/api/lost-found
+
+# 8. Try to get deleted item by ID (should still work)
+curl http://localhost:5000/api/lost-found/ITEM_ID
+```
+
+---
+
+## Test Different Categories
+
+```bash
+# Create items in different categories
+categories=("wallet" "keys" "phone" "documents" "electronics" "clothing" "books" "bags" "other")
+
+for category in "${categories[@]}"; do
+  curl -X POST http://localhost:5000/api/lost-found \
+    -H "Content-Type: application/json" \
+    -d "{
+      \"title\": \"Test $category Item\",
+      \"description\": \"Testing $category category\",
+      \"category\": \"$category\",
+      \"type\": \"lost\",
+      \"createdBy\": \"USER_ID_HERE\"
+    }"
+done
+```
+
+---
+
+## Validation Tests
+
+### Test 1: Title Too Short
+```bash
+curl -X POST http://localhost:5000/api/lost-found \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Lost",
+    "description": "This title is too short",
+    "category": "other",
+    "type": "lost",
+    "createdBy": "USER_ID_HERE"
+  }'
+# Expected: Error - Title must be at least 5 characters
+```
+
+### Test 2: Description Too Short
+```bash
+curl -X POST http://localhost:5000/api/lost-found \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Lost Item",
+    "description": "Short",
+    "category": "other",
+    "type": "lost",
+    "createdBy": "USER_ID_HERE"
+  }'
+# Expected: Error - Description must be at least 10 characters
+```
+
+### Test 3: Invalid Type
+```bash
+curl -X POST http://localhost:5000/api/lost-found \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Test Item",
+    "description": "Testing invalid type",
+    "category": "other",
+    "type": "invalid",
+    "createdBy": "USER_ID_HERE"
+  }'
+# Expected: Error - invalid is not a valid type
+```
+
+---
+
+## Verification Checklist
+
+- [ ] Can create item with all required fields
+- [ ] Can create item with optional fields
+- [ ] Validation works for required fields
+- [ ] Validation works for title length (5-100)
+- [ ] Validation works for description length (10-500)
+- [ ] Validation works for category enum
+- [ ] Validation works for type enum (lost/found)
+- [ ] Can update item
+- [ ] Can update status to resolved
+- [ ] Can update multiple fields at once
+- [ ] Cannot update createdBy field
+- [ ] Can delete item (soft delete)
+- [ ] Deleted items don't appear in list
+- [ ] Deleted items can still be retrieved by ID
+- [ ] 404 error for non-existent item
+- [ ] User population works in responses
+- [ ] Virtual itemId field appears
+- [ ] Timestamps update correctly
+
+---
+
+## Expected Database State
+
+After creating a test item:
+
+```javascript
+// kampuskart.lostfounds collection
+{
+  _id: ObjectId("..."),
+  title: "Test Lost Item",
+  description: "This is a test item for API testing purposes",
+  category: "other",
+  status: "open",
+  type: "lost",
+  location: "Test Location",
+  imageURL: null,
+  lastSeenDate: null,
+  contactInfo: null,
+  createdBy: ObjectId("..."),
+  isActive: true,
+  createdAt: ISODate("2026-01-16T..."),
+  updatedAt: ISODate("2026-01-16T...")
+}
+```
+
+After soft delete:
+
+```javascript
+{
+  // ... same fields ...
+  isActive: false,  // Changed to false
+  updatedAt: ISODate("2026-01-16T...")  // Updated timestamp
+}
+```
+
+---
+
+**All tests passing = POST/PUT/DELETE API working! ✅**
+
+**Created**: Day 9 of 30-day sprint  
+**Last Updated**: January 16, 2026

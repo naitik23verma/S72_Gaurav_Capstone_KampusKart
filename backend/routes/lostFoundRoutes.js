@@ -7,7 +7,10 @@ const {
   getRecentItems,
   getItemsByCategory,
   getItemsByStatus,
-  getStatistics
+  getStatistics,
+  createLostFound,
+  updateLostFound,
+  deleteLostFound
 } = require('../controllers/lostFoundController');
 
 /**
@@ -199,6 +202,127 @@ router.get('/:id', async (req, res) => {
     
     res.json({
       success: true,
+      data: item
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+/**
+ * @route   POST /api/lost-found
+ * @desc    Create new lost & found item
+ * @body    title, description, category, type, location, lastSeenDate, contactInfo, createdBy
+ * @access  Public (should be protected in production)
+ */
+router.post('/', async (req, res) => {
+  try {
+    const {
+      title,
+      description,
+      category,
+      type,
+      location,
+      lastSeenDate,
+      contactInfo,
+      imageURL,
+      createdBy
+    } = req.body;
+
+    // Validate required fields
+    if (!title || !description || !category || !type || !createdBy) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide all required fields: title, description, category, type, createdBy'
+      });
+    }
+
+    // Create item
+    const item = await createLostFound({
+      title,
+      description,
+      category,
+      type,
+      location,
+      lastSeenDate,
+      contactInfo,
+      imageURL,
+      createdBy
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Item created successfully',
+      data: item
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+/**
+ * @route   PUT /api/lost-found/:id
+ * @desc    Update lost & found item
+ * @param   id - Item's MongoDB ObjectId
+ * @body    Fields to update
+ * @access  Public (should be protected in production)
+ */
+router.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    // Don't allow updating createdBy
+    delete updateData.createdBy;
+
+    const item = await updateLostFound(id, updateData);
+
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        message: 'Item not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Item updated successfully',
+      data: item
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+/**
+ * @route   DELETE /api/lost-found/:id
+ * @desc    Delete lost & found item (soft delete)
+ * @param   id - Item's MongoDB ObjectId
+ * @access  Public (should be protected in production)
+ */
+router.delete('/:id', async (req, res) => {
+  try {
+    const item = await deleteLostFound(req.params.id);
+
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        message: 'Item not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Item deleted successfully',
       data: item
     });
   } catch (error) {

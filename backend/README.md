@@ -2,8 +2,8 @@
 
 Express.js REST API for KampusKart campus community platform.
 
-**Day**: 8 of 30  
-**Status**: GET API implemented  
+**Day**: 9 of 30  
+**Status**: POST/PUT/DELETE API implemented  
 **Database**: MongoDB with Mongoose
 
 ---
@@ -219,11 +219,40 @@ GET /api/lost-found/:id
 Response: { success, data: item }
 ```
 
-### Coming Soon (Day 9+)
-- POST /api/lost-found - Create item
-- PUT /api/lost-found/:id - Update item
-- DELETE /api/lost-found/:id - Delete item
-- Authentication & authorization
+#### Create Item
+```
+POST /api/lost-found
+Body: {
+  title: String (required, 5-100 chars),
+  description: String (required, 10-500 chars),
+  category: String (required, enum),
+  type: String (required, 'lost' or 'found'),
+  location: String (optional),
+  lastSeenDate: Date (optional),
+  contactInfo: String (optional),
+  imageURL: String (optional),
+  createdBy: ObjectId (required)
+}
+Response: { success, message, data: item }
+```
+
+#### Update Item
+```
+PUT /api/lost-found/:id
+Body: { fields to update }
+Response: { success, message, data: item }
+```
+
+#### Delete Item
+```
+DELETE /api/lost-found/:id
+Response: { success, message, data: item }
+```
+
+### Coming Soon (Day 10+)
+- Authentication middleware
+- Authorization (owner-only updates/deletes)
+- Image upload to Cloudinary
 
 ---
 
@@ -272,7 +301,7 @@ npm test
 
 ---
 
-## ✅ Day 6-8 Checklist
+## ✅ Day 6-9 Checklist
 
 ### Day 6
 - [x] Initialize npm project
@@ -310,13 +339,25 @@ npm test
 - [x] Create seed-data.js script
 - [x] Test all GET endpoints
 
+### Day 9
+- [x] Implement createLostFound function
+- [x] Implement updateLostFound function
+- [x] Implement deleteLostFound function (soft delete)
+- [x] Add POST /api/lost-found route
+- [x] Add PUT /api/lost-found/:id route
+- [x] Add DELETE /api/lost-found/:id route
+- [x] Add validation for required fields
+- [x] Test POST endpoint (create item)
+- [x] Test PUT endpoint (update item)
+- [x] Test DELETE endpoint (soft delete)
+
 ---
 
-## 🚀 Next Steps (Day 9)
+## 🚀 Next Steps (Day 10)
 
-- Implement POST API for creating items
-- Add validation middleware
-- Test create operations
+- Implement JWT authentication
+- Create auth middleware
+- Protect routes with authentication
 
 ---
 

@@ -176,6 +176,63 @@ const getStatistics = async () => {
   }
 };
 
+/**
+ * Create new lost & found item
+ * @param {Object} itemData - Item data
+ * @returns {Promise<Object>} Created item
+ */
+const createLostFound = async (itemData) => {
+  try {
+    const item = await LostFound.create(itemData);
+    
+    // Populate creator info
+    await item.populate('createdBy', 'name email role avatar');
+    
+    return item;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Update lost & found item
+ * @param {string} id - Item's MongoDB ObjectId
+ * @param {Object} updateData - Data to update
+ * @returns {Promise<Object|null>} Updated item or null
+ */
+const updateLostFound = async (id, updateData) => {
+  try {
+    const item = await LostFound.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true, runValidators: true }
+    ).populate('createdBy', 'name email role avatar');
+    
+    return item;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Delete lost & found item (soft delete)
+ * @param {string} id - Item's MongoDB ObjectId
+ * @returns {Promise<Object|null>} Deleted item or null
+ */
+const deleteLostFound = async (id) => {
+  try {
+    const item = await LostFound.findByIdAndUpdate(
+      id,
+      { isActive: false },
+      { new: true }
+    );
+    
+    return item;
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   getAllLostFound,
   getLostFoundById,
@@ -183,5 +240,8 @@ module.exports = {
   getRecentItems,
   getItemsByCategory,
   getItemsByStatus,
-  getStatistics
+  getStatistics,
+  createLostFound,
+  updateLostFound,
+  deleteLostFound
 };

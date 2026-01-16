@@ -2,9 +2,10 @@
 
 Express.js REST API for KampusKart campus community platform.
 
-**Day**: 12 of 30  
-**Status**: Image Upload (Cloudinary) implemented  
-**Database**: MongoDB with Mongoose
+**Day**: 13 of 30  
+**Status**: Deployed to Production  
+**Database**: MongoDB with Mongoose  
+**Deployment**: Render (or Railway/Heroku)
 
 ---
 
@@ -450,30 +451,63 @@ npm test
 - [x] Test login
 - [x] Test protected routes
 
-### Day 12
-- [x] Install cloudinary, multer, streamifier
-- [x] Create Cloudinary configuration
-- [x] Create multer upload middleware
-- [x] Implement uploadToCloudinary function
-- [x] Create upload controller (uploadImage, deleteImage)
-- [x] Create upload routes
-- [x] Protect upload routes with authentication
-- [x] Add file type validation (images only)
-- [x] Add file size limit (5MB)
-- [x] Add image transformation (resize, optimize)
-- [x] Update .env.example with Cloudinary variables
-- [x] Test image upload
-- [x] Test image delete
+### Day 13
+- [x] Create deployment guide (Render, Railway, Heroku)
+- [x] Create render.yaml for easy deployment
+- [x] Setup MongoDB Atlas database
+- [x] Configure production environment variables
+- [x] Deploy backend to Render
+- [x] Test deployed API endpoints
+- [x] Update Google OAuth redirect URIs
+- [x] Configure CORS for production
+- [x] Verify all endpoints working
+- [x] Setup monitoring and logs
 
 ---
 
-## 🚀 Next Steps (Day 13)
+## 🚀 Next Steps (Day 14)
 
-- Deploy backend to Render or Railway
-- Configure production environment variables
-- Test deployed API
+- Initialize React frontend
+- Setup Vite project
+- Configure routing
+- Create basic layout
 
 ---
 
 **Created**: Day 6 of 30-day sprint  
 **Last Updated**: January 16, 2026
+
+---
+
+## 🌐 Deployment
+
+### Production URL
+```
+https://kampuskart-backend.onrender.com
+```
+
+### Quick Deploy to Render
+
+1. Push code to GitHub
+2. Connect repository to Render
+3. Configure environment variables
+4. Deploy automatically
+
+See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for complete instructions.
+
+### Environment Variables Required
+
+```env
+NODE_ENV=production
+PORT=10000
+MONGODB_URI=mongodb+srv://...
+JWT_SECRET=your_secret
+JWT_EXPIRE=7d
+FRONTEND_URL=https://your-frontend.netlify.app
+GOOGLE_CLIENT_ID=your_client_id
+GOOGLE_CLIENT_SECRET=your_client_secret
+GOOGLE_CALLBACK_URL=https://your-backend.onrender.com/api/auth/google/callback
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```

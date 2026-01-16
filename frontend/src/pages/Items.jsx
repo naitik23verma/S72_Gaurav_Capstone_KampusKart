@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../config/api';
+import { ItemsGridSkeleton } from '../components/LoadingSkeleton';
 
 /**
  * Items Page
@@ -29,7 +30,17 @@ const Items = () => {
   };
 
   if (loading) {
-    return <div className="loading">Loading items...</div>;
+    return (
+      <div className="items-page">
+        <div className="page-header">
+          <h1>Lost & Found Items</h1>
+          <Link to="/items/new" className="btn btn-primary">
+            Post Item
+          </Link>
+        </div>
+        <ItemsGridSkeleton count={6} />
+      </div>
+    );
   }
 
   if (error) {

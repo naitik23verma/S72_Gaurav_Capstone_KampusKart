@@ -212,9 +212,31 @@ const updateProfile = async (req, res) => {
   }
 };
 
+/**
+ * Google OAuth callback handler
+ * @route GET /api/auth/google/callback
+ */
+const googleCallback = async (req, res) => {
+  try {
+    // User is attached by passport
+    const user = req.user;
+
+    // Generate JWT token
+    const token = generateToken(user._id);
+
+    // Redirect to frontend with token
+    const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.redirect(`${frontendURL}/auth/callback?token=${token}`);
+  } catch (error) {
+    const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.redirect(`${frontendURL}/auth/callback?error=${error.message}`);
+  }
+};
+
 module.exports = {
   register,
   login,
   getMe,
-  updateProfile
+  updateProfile,
+  googleCallback
 };

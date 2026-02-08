@@ -2,16 +2,63 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/User');
 
-/**
- * Passport Google OAuth Configuration
- */
+// Determine the callback URL based on environment
+const getCallbackURL = () => {
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://s72-gaurav-capstone.onrender.com/api/auth/google/callback';
+  }
+  return 'http://localhost:5000/api/auth/google/callback';
+};
 
-// Serialize user for session
+// Log the callback URL for debugging
+console.log('Google OAuth Callback URL:', getCallbackURL());
+
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: getCallbackURL(),
+      proxy: true // Add this to handle proxy settings
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        console.log('Google OAuth profile:', profile);
+        
+        // Check if user already exists
+        let user = await User.findOne({ googleId: profile.id });
+
+        if (!user) {
+          // Check if user exists with the same email
+          user = await User.findOne({ email: profile.emails[0].value });
+
+          if (user) {
+            // Link Google account to existing user
+            user.googleId = profile.id;
+            await user.save();
+          } else {
+            // Create new user
+            user = await User.create({
+              googleId: profile.id,
+              email: profile.emails[0].value,
+              name: profile.displayName,
+            });
+          }
+        }
+
+        return done(null, user);
+      } catch (error) {
+        console.error('Google OAuth error:', error);
+        return done(error, null);
+      }
+    }
+  )
+);
+
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
-// Deserialize user from session
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await User.findById(id);
@@ -21,44 +68,4 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// Google OAuth Strategy
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL || '/api/auth/google/callback'
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        // Check if user already exists
-        let user = await User.findOne({ email: profile.emails[0].value.toLowerCase() });
-
-        if (user) {
-          // User exists, update OAuth info if needed
-          if (!user.googleId) {
-            user.googleId = profile.id;
-            await user.save();
-          }
-          return done(null, user);
-        }
-
-        // Create new user from Google profile
-        user = await User.create({
-          googleId: profile.id,
-          name: profile.displayName,
-          email: profile.emails[0].value.toLowerCase(),
-          avatar: profile.photos[0]?.value || null,
-          passwordHash: Math.random().toString(36).slice(-8), // Random password for OAuth users
-          role: 'student' // Default role
-        });
-
-        done(null, user);
-      } catch (error) {
-        done(error, null);
-      }
-    }
-  )
-);
-
-module.exports = passport;
+module.exports = passport; 

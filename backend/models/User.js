@@ -1,100 +1,92 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-/**
- * User Schema
- * Represents a user in the KampusKart system
- */
-const userSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: [true, 'Please provide a name'],
-      trim: true,
-      maxlength: [100, 'Name cannot be more than 100 characters']
-    },
-    email: {
-      type: String,
-      required: [true, 'Please provide an email'],
-      unique: true,
-      lowercase: true,
-      trim: true,
-      match: [
-        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-        'Please provide a valid email'
-      ]
-    },
-    passwordHash: {
-      type: String,
-      required: [true, 'Please provide a password'],
-      minlength: [8, 'Password must be at least 8 characters'],
-      select: false // Don't return password by default
-    },
-    googleId: {
-      type: String,
-      unique: true,
-      sparse: true // Allows null values to be non-unique
-    },
-    role: {
-      type: String,
-      enum: ['student', 'faculty', 'admin'],
-      default: 'student'
-    },
-    avatar: {
-      type: String,
-      default: null
-    },
-    isActive: {
-      type: Boolean,
-      default: true
+// Email validation function
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const userSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true,
+    validate: {
+      validator: validateEmail,
+      message: 'Please provide a valid email address'
     }
   },
-  {
-    timestamps: true // Adds createdAt and updatedAt automatically
-  }
-);
+  password: {
+    type: String,
+    required: function() {
+      return !this.googleId; // Password is required only if not using Google auth
+    },
+    minlength: 6
+  },
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
+  phone: {
+    type: String,
+    trim: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  resetPasswordOTP: String,
+  resetPasswordExpires: Date,
+  profilePicture: {
+    url: String,
+    public_id: String,
+  },
+  major: {
+    type: String,
+    trim: true,
+  },
+  yearOfStudy: {
+    type: String, // Changed to String to accommodate year interval
+    trim: true,
+  },
+  gender: {
+    type: String,
+    trim: true,
+  },
+  dateOfBirth: {
+    type: Date,
+  },
+  program: {
+    type: String,
+    trim: true,
+  },
+});
 
-/**
- * Hash password before saving
- * Only hash if password is modified
- */
-userSchema.pre('save', async function (next) {
-  // Only hash the password if it has been modified (or is new)
-  if (!this.isModified('passwordHash')) {
-    return next();
-  }
-
+// Hash password before saving
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  
   try {
-    // Generate salt
     const salt = await bcrypt.genSalt(10);
-    // Hash password
-    this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
+    this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
     next(error);
   }
 });
 
-/**
- * Method to compare password for login
- * @param {string} enteredPassword - Password to check
- * @returns {Promise<boolean>} - True if password matches
- */
-userSchema.methods.comparePassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.passwordHash);
+// Method to compare password
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
-/**
- * Method to get user object without sensitive data
- * @returns {Object} - User object without password
- */
-userSchema.methods.toJSON = function () {
-  const user = this.toObject();
-  delete user.passwordHash;
-  delete user.__v;
-  return user;
-};
-
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+module.exports = mongoose.model('User', userSchema); 

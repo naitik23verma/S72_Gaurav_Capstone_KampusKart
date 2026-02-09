@@ -79,12 +79,14 @@ const LostFound = () => {
   // AI Autocomplete hook
   const preExistingStrings = useMemo(() => {
     const pool: string[] = [];
-    items.forEach((i: LostFoundItem | null) => {
-      if (!i) return;
-      if (i.title) pool.push(i.title);
-      if (i.location) pool.push(i.location);
-      if (i.description) pool.push(i.description);
-    });
+    if (Array.isArray(items)) {
+      items.forEach((i: LostFoundItem | null) => {
+        if (!i) return;
+        if (i.title) pool.push(i.title);
+        if (i.location) pool.push(i.location);
+        if (i.description) pool.push(i.description);
+      });
+    }
     return Array.from(new Set(pool.map(s => s.trim()).filter(Boolean)));
   }, [items]);
 

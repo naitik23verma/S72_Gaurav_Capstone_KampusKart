@@ -205,12 +205,14 @@ const ClubsRecruitment = () => {
   // AI Autocomplete hook
   const preExistingStrings = useMemo(() => {
     const pool: string[] = [];
-    clubs.forEach(c => {
-      if (c.title) pool.push(c.title);
-      if (c.description) pool.push(c.description);
-      if (c.clubName) pool.push(c.clubName);
-    });
-    return Array.from(new Set(pool.map(s => s.trim()).filter(Boolean)));
+    if (Array.isArray(clubs)) {
+      clubs.forEach(c => {
+        if (c && c.title) pool.push(c.title);
+        if (c && c.description) pool.push(c.description);
+        if (c && c.clubName) pool.push(c.clubName);
+      });
+    }
+    return Array.from(new Set(pool.map(s => s?.trim()).filter(Boolean)));
   }, [clubs]);
 
   const {

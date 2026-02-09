@@ -161,13 +161,13 @@ const ChatWindow = () => {
 
     // Listen for typing indicators
     socketRef.current.on('user-typing', (userData) => {
-      if (userData && user && userData._id !== user._id) {
+      if (userData && user && (userData._id !== user._id && userData.id !== user.id)) {
         setIsTyping(true);
       }
     });
 
     socketRef.current.on('user-stop-typing', (userData) => {
-      if (userData && user && userData._id !== user._id) {
+      if (userData && user && (userData._id !== user._id && userData.id !== user.id)) {
         setIsTyping(false);
       }
     });
@@ -365,11 +365,14 @@ const ChatWindow = () => {
   const handleEditMessage = async () => {
     if (!selectedMessage || !editText.trim() || !user) return;
     
+    const userId = user._id || user.id;
+    const senderId = selectedMessage.sender?._id || selectedMessage.sender?.id;
+    
     console.log('Editing message:', {
       messageId: selectedMessage._id,
-      currentUser: user._id,
-      messageSender: selectedMessage.sender._id,
-      isOwnMessage: selectedMessage.sender._id === user._id
+      currentUser: userId,
+      messageSender: senderId,
+      isOwnMessage: senderId === userId
     });
     
     try {
@@ -546,9 +549,13 @@ const ChatWindow = () => {
     if (!message) return null;
     if (!message.sender) return null;
     if (!user) return null;
-    const isOwnMessage = message.sender._id === user._id;
-    const hasReactions = message.reactions && message.reactions.length > 0;
-    const isRead = message.readBy && message.readBy.some((r) => r.user._id === user._id);
+    // Safely check sender ID
+    const senderId = message.sender?._id || message.sender?.id;
+    const userId = user?._id || user?.id;
+    if (!senderId || !userId) return null;
+    const isOwnMessage = senderId === userId;
+    const hasReactions = message.reactions && Array.isArray(message.reactions) && message.reactions.length > 0;
+    const isRead = message.readBy && Array.isArray(message.readBy) && message.readBy.some((r) => r?.user?._id === userId || r?.user?.id === userId);
     return (
       <ListItem
         key={message._id}
@@ -709,7 +716,7 @@ const ChatWindow = () => {
           {hasReactions && (
             <Box sx={{ display: 'flex', gap: 0.5, mt: 0.75, flexWrap: 'wrap' }}>
               {message.reactions.map((reaction, index) => (
-                <Tooltip key={index} title={reaction.user.name} placement="top">
+                <Tooltip key={index} title={reaction?.user?.name || 'Unknown'} placement="top">
                   <Typography 
                     component="span" 
                     variant="caption" 
@@ -772,7 +779,7 @@ const ChatWindow = () => {
         </Box>
 
         {/* Action Button for Own Messages */}
-        {isOwnMessage && (
+        {isOwnMessage && user && (
           <IconButton
             size="small"
             onClick={(e) => handleMessageActions(message, e)}
@@ -1037,10 +1044,12 @@ const ChatWindow = () => {
           </Box>
         )}
         <List sx={{ p: 0 }}>
-          {messages.map((message) => (
-            <React.Fragment key={message._id}>
-              {renderMessage(message)}
-            </React.Fragment>
+          {Array.isArray(messages) && messages.map((message) => (
+            message && message._id ? (
+              <React.Fragment key={message._id}>
+                {renderMessage(message)}
+              </React.Fragment>
+            ) : null
           ))}
           <div ref={messagesEndRef} />
         </List>
@@ -1404,7 +1413,7 @@ const ChatWindow = () => {
           }
         }}
       >
-        {selectedMessage?.sender._id === user?._id && (
+        {selectedMessage && user && (selectedMessage.sender?._id === user._id || selectedMessage.sender?.id === user.id) && (
           <>
             <MenuItem 
               onClick={() => {

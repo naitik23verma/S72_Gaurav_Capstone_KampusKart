@@ -250,12 +250,14 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   // AI Autocomplete hook - prepare pre-existing strings from locations
   const preExistingStrings = useMemo(() => {
     const pool: string[] = [];
-    locations.forEach((location) => {
-      if (location.name) pool.push(location.name);
-      if (location.description) pool.push(location.description);
-      if (location.category) pool.push(location.category);
-    });
-    return Array.from(new Set(pool.map(s => s.trim()).filter(Boolean)));
+    if (Array.isArray(locations)) {
+      locations.forEach((location) => {
+        if (location && location.name) pool.push(location.name);
+        if (location && location.description) pool.push(location.description);
+        if (location && location.category) pool.push(location.category);
+      });
+    }
+    return Array.from(new Set(pool.map(s => s?.trim()).filter(Boolean)));
   }, [locations]);
 
   const {
@@ -273,10 +275,13 @@ const CampusMap: React.FC<CampusMapProps> = () => {
 
   // Memoize filtered locations
   const filteredLocations = useMemo(() => {
+    if (!Array.isArray(locations)) return [];
     return locations.filter(location =>
-      location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      location.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      location.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      location && (
+        location.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        location.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        location.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
     );
   }, [locations, searchQuery]);
 
@@ -517,26 +522,26 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                       overflowX: 'hidden'
                     }}
                   >
-                    {/* Header Section with Gradient */}
-                    <div className="bg-gradient-to-r from-[#00C6A7] to-[#009e87] p-3 relative" style={{ margin: 0, paddingTop: '12px', paddingBottom: '12px' }}>
+                    {/* Header Section */}
+                    <div className="bg-white p-3 relative border-b border-gray-200" style={{ margin: 0, paddingTop: '12px', paddingBottom: '12px' }}>
                       {/* Close Button */}
                       <button
                         onClick={() => {
                           setInfoWindowPosition(null);
                           setSelectedLocation(null);
                         }}
-                        className="absolute top-1.5 right-1.5 p-1.5 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-200 flex-shrink-0 group"
+                        className="absolute top-1.5 right-1.5 p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 transition-all duration-200 flex-shrink-0 group"
                         aria-label="Close"
                         title="Close"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white group-hover:rotate-90 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-600 group-hover:rotate-90 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                       
                       <div className="pr-8">
-                        <h3 className="font-black text-base text-white mb-1.5 line-clamp-2 leading-tight">{selectedLocation.name}</h3>
-                        <span className="inline-flex items-center px-2.5 py-0.5 bg-white/20 backdrop-blur-sm text-white text-xs font-semibold rounded-full border border-white/30">
+                        <h3 className="font-black text-base text-gray-900 mb-1.5 line-clamp-2 leading-tight">{selectedLocation.name}</h3>
+                        <span className="inline-flex items-center px-2.5 py-0.5 bg-[#00C6A7] text-white text-xs font-semibold rounded-full">
                           {selectedLocation.category}
                         </span>
                       </div>

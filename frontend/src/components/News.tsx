@@ -42,12 +42,14 @@ const News = () => {
   // AI Autocomplete hook
   const preExistingStrings = useMemo(() => {
     const pool: string[] = [];
-    news.forEach(n => {
-      if (n.title) pool.push(n.title);
-      if (n.description) pool.push(n.description);
-      if (n.category) pool.push(n.category);
-    });
-    return Array.from(new Set(pool.map(s => s.trim()).filter(Boolean)));
+    if (Array.isArray(news)) {
+      news.forEach(n => {
+        if (n && n.title) pool.push(n.title);
+        if (n && n.description) pool.push(n.description);
+        if (n && n.category) pool.push(n.category);
+      });
+    }
+    return Array.from(new Set(pool.map(s => s?.trim()).filter(Boolean)));
   }, [news]);
 
   const {

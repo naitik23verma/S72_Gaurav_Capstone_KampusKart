@@ -75,8 +75,8 @@ const extractPublicIdFromUrl = (url) => {
 // Get recent chat messages with pagination
 router.get('/messages', auth, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50;
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50));
     const skip = (page - 1) * limit;
 
     const messages = await Chat.find({ isDeleted: false })

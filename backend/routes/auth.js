@@ -273,8 +273,7 @@ router.post('/reset-password', async (req, res) => {
     }
 
     // Secure OTP comparison to mitigate timing attacks
-    const isOtpValid = crypto.timingSafeEqual(Buffer.from(user.resetPasswordOTP), Buffer.from(otp));
-    if (!isOtpValid) {
+    if (!user.resetPasswordOTP || user.resetPasswordOTP !== otp) {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
     }
 

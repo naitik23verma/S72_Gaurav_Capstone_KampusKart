@@ -49,7 +49,7 @@ router.get('/', protect, async (req, res) => {
       query.status = status;
     }
 
-    if (search) {
+    if (search && typeof search === 'string') {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } },
@@ -59,8 +59,8 @@ router.get('/', protect, async (req, res) => {
     // Exclude deleted complaints
     query.isDeleted = { $ne: true };
 
-    const parsedPage = parseInt(page, 10);
-    const parsedLimit = parseInt(limit, 10);
+    const parsedPage = Math.max(1, parseInt(page, 10) || 1);
+    const parsedLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 9));
     const skip = (parsedPage - 1) * parsedLimit;
 
     const totalItems = await Complaint.countDocuments(query);

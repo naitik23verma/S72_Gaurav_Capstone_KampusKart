@@ -65,14 +65,16 @@ const Facilities = () => {
   // AI Autocomplete hook
   const preExistingStrings = useMemo(() => {
     const pool: string[] = [];
-    facilities.forEach((f: Facility | null) => {
-      if (!f) return;
-      if (f.name) pool.push(f.name);
-      if (f.description) pool.push(f.description);
-      if (f.location) pool.push(f.location);
-      if (f.type) pool.push(f.type);
-    });
-    return Array.from(new Set(pool.map(s => s.trim()).filter(Boolean)));
+    if (Array.isArray(facilities)) {
+      facilities.forEach((f: Facility | null) => {
+        if (!f) return;
+        if (f.name) pool.push(f.name);
+        if (f.description) pool.push(f.description);
+        if (f.location) pool.push(f.location);
+        if (f.type) pool.push(f.type);
+      });
+    }
+    return Array.from(new Set(pool.map(s => s?.trim()).filter(Boolean)));
   }, [facilities]);
 
   const {
@@ -88,11 +90,15 @@ const Facilities = () => {
     preExistingStrings
   });
 
-  const filteredFacilities = facilities.filter(facility =>
-    facility &&
-    (filterType === 'All' || facility?.type === filterType) &&
-    ((facility.name?.toLowerCase()?.includes(searchQuery.toLowerCase()) ?? false) || (facility.description?.toLowerCase()?.includes(searchQuery.toLowerCase()) ?? false))
-  );
+  const filteredFacilities = useMemo(() => {
+    if (!Array.isArray(facilities)) return [];
+    return facilities.filter(facility =>
+      facility &&
+      (filterType === 'All' || facility?.type === filterType) &&
+      ((facility.name?.toLowerCase()?.includes(searchQuery.toLowerCase()) ?? false) || 
+       (facility.description?.toLowerCase()?.includes(searchQuery.toLowerCase()) ?? false))
+    );
+  }, [facilities, filterType, searchQuery]);
 
   useEffect(() => {
     const fetchFacilities = async () => {

@@ -226,6 +226,7 @@ button:focus-visible {
   margin: 0 !important;
   overflow: hidden !important;
   top: 0 !important;
+  box-shadow: none !important;
 }
 
 .gm-style .gm-style-iw-d {
@@ -235,6 +236,7 @@ button:focus-visible {
   max-height: none !important;
   padding: 0 !important;
   margin: 0 !important;
+  box-shadow: none !important;
 }
 
 .gm-style .gm-style-iw-t {
@@ -254,11 +256,13 @@ button:focus-visible {
 .gm-style .gm-style-iw-t::before {
   display: none !important;
   content: none !important;
+  background: none !important;
 }
 
 .gm-style .gm-style-iw-t::after {
   display: none !important;
   content: none !important;
+  background: none !important;
 }
 
 /* Hide default InfoWindow close button */
@@ -287,6 +291,8 @@ button:focus-visible {
   top: 0 !important;
   margin-top: 0 !important;
   padding-top: 0 !important;
+  filter: none !important;
+  box-shadow: none !important;
 }
 
 /* Remove white bar from InfoWindow close button area */
@@ -301,12 +307,16 @@ button:focus-visible {
 .gm-style-iw-t,
 .gm-style-iw {
   background: transparent !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 /* Remove any default background from InfoWindow that creates white bar */
 .gm-style .gm-style-iw-c {
   background-color: transparent !important;
   background: transparent !important;
+  box-shadow: none !important;
 }
 
 /* Ensure the InfoWindow content starts at the very top */
@@ -314,4 +324,21 @@ button:focus-visible {
   margin-top: 0 !important;
   padding-top: 0 !important;
   top: 0 !important;
+}
+
+/* Remove any overlay or shadow effects */
+.gm-style .gm-style-iw-c::before,
+.gm-style .gm-style-iw-c::after,
+.gm-style .gm-style-iw-d::before,
+.gm-style .gm-style-iw-d::after {
+  display: none !important;
+  content: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove the tip/pointer shadow and background */
+.gm-style .gm-style-iw-tc::after {
+  background: white !important;
+  box-shadow: none !important;
 }

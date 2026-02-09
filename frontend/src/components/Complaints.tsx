@@ -79,14 +79,16 @@ const Complaints = () => {
   // AI Autocomplete hook
   const preExistingStrings = useMemo(() => {
     const pool: string[] = [];
-    complaints.forEach((c: Complaint | null) => {
-      if (!c) return;
-      if (c.title) pool.push(c.title);
-      if (c.description) pool.push(c.description);
-      if (c.category) pool.push(c.category);
-      if (c.department) pool.push(c.department);
-    });
-    return Array.from(new Set(pool.map(s => s.trim()).filter(Boolean)));
+    if (Array.isArray(complaints)) {
+      complaints.forEach((c: Complaint | null) => {
+        if (!c) return;
+        if (c.title) pool.push(c.title);
+        if (c.description) pool.push(c.description);
+        if (c.category) pool.push(c.category);
+        if (c.department) pool.push(c.department);
+      });
+    }
+    return Array.from(new Set(pool.map(s => s?.trim()).filter(Boolean)));
   }, [complaints]);
 
   const {

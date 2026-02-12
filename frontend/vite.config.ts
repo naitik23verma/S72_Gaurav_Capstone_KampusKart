@@ -14,7 +14,14 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    assetsInlineLimit: 0, // Don't inline assets, keep them as separate files
+    rollupOptions: {
+      output: {
+        assetFileNames: 'assets/[name].[hash][extname]',
+      },
+    },
   },
+  publicDir: 'public', // Explicitly set public directory
   server: {
     port: 3000,
   },

@@ -6,11 +6,25 @@ import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon } from '@heroicons/
 // Use an image from the public folder
 const imageUrl = '/login-side.jpg'; // Place your image in the public folder as login-side.jpg
 
-const RightPanel: React.FC = () => (
-  <div className="hidden md:flex flex-1 items-center justify-center bg-black/10">
-    <img src={imageUrl} alt="Panel" className="object-cover w-full h-full" />
-  </div>
-);
+const RightPanel: React.FC = () => {
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.error('Failed to load image:', imageUrl);
+    console.error('Current location:', window.location.href);
+    e.currentTarget.style.display = 'none';
+  };
+
+  return (
+    <div className="hidden md:flex flex-1 items-center justify-center bg-black/10">
+      <img 
+        src={imageUrl} 
+        alt="Panel" 
+        className="object-cover w-full h-full"
+        onError={handleImageError}
+        onLoad={() => console.log('Image loaded successfully:', imageUrl)}
+      />
+    </div>
+  );
+};
 
 const validateEmail = (email: string) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

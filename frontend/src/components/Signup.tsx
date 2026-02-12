@@ -6,11 +6,25 @@ import axios from 'axios';
 
 const imageUrl = '/login-side.jpg';
 
-const RightPanel: React.FC = () => (
-  <div className="hidden md:flex flex-1 items-center justify-center bg-black/10">
-    <img src={imageUrl} alt="Panel" className="object-cover w-full h-full" />
-  </div>
-);
+const RightPanel: React.FC = () => {
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.error('Failed to load image:', imageUrl);
+    console.error('Current location:', window.location.href);
+    e.currentTarget.style.display = 'none';
+  };
+
+  return (
+    <div className="hidden md:flex flex-1 items-center justify-center bg-black/10">
+      <img 
+        src={imageUrl} 
+        alt="Panel" 
+        className="object-cover w-full h-full"
+        onError={handleImageError}
+        onLoad={() => console.log('Image loaded successfully:', imageUrl)}
+      />
+    </div>
+  );
+};
 
 const accent = 'from-deep-purple-500 to-hot-pink-500';
 const accentText = 'text-deep-purple-600';

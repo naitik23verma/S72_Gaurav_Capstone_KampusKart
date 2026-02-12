@@ -14,14 +14,21 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
-    assetsInlineLimit: 0, // Don't inline assets, keep them as separate files
+    assetsInlineLimit: 0,
+    copyPublicDir: true,
     rollupOptions: {
       output: {
-        assetFileNames: 'assets/[name].[hash][extname]',
+        assetFileNames: (assetInfo) => {
+          // Keep images at root level, not in assets folder
+          if (assetInfo.name && /\.(png|jpe?g|svg|gif|ico)$/i.test(assetInfo.name)) {
+            return '[name][extname]';
+          }
+          return 'assets/[name]-[hash][extname]';
+        },
       },
     },
   },
-  publicDir: 'public', // Explicitly set public directory
+  publicDir: 'public',
   server: {
     port: 3000,
   },

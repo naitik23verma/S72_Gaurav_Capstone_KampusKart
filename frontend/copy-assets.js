@@ -1,9 +1,13 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 console.log('\n========================================');
 console.log('Copying public assets to dist folder...');
 console.log('========================================\n');
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const publicDir = path.join(__dirname, 'public');
 const distDir = path.join(__dirname, 'dist');

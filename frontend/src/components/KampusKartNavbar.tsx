@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { SimpleHeader } from '../components/ui/simple-header';
+import { Navbar1 } from '../components/ui/shadcnblocks-com-navbar1';
 
 const KampusKartNavbar: React.FC = () => {
   const { user, token, logout } = useAuth();
@@ -15,62 +15,67 @@ const KampusKartNavbar: React.FC = () => {
   // Menu structure - same for both authenticated and unauthenticated
   const menuItems = [
     {
-      label: "Home",
-      href: token && user ? "/home" : "/",
-    },
-    {
-      label: "Features",
-      href: "#",
+      title: "Features",
+      url: "#",
       items: [
         {
-          label: "Lost & Found",
-          href: token && user ? "/lostfound" : "/login",
+          title: "Lost & Found",
+          description: "Report or find lost items on campus",
+          url: token && user ? "/lostfound" : "/login",
         },
         {
-          label: "Complaints",
-          href: token && user ? "/complaints" : "/login",
+          title: "Complaints",
+          description: "Submit and track campus complaints",
+          url: token && user ? "/complaints" : "/login",
         },
         {
-          label: "Events",
-          href: token && user ? "/events" : "/login",
+          title: "Events",
+          description: "Discover and join campus events",
+          url: token && user ? "/events" : "/login",
         },
         {
-          label: "Clubs",
-          href: token && user ? "/clubs-recruitment" : "/login",
+          title: "Clubs Recruitment",
+          description: "Join student clubs and organizations",
+          url: token && user ? "/clubs-recruitment" : "/login",
         },
         {
-          label: "News",
-          href: token && user ? "/news" : "/login",
+          title: "News",
+          description: "Stay updated with campus news",
+          url: token && user ? "/news" : "/login",
         },
         {
-          label: "Facilities",
-          href: token && user ? "/facilities" : "/login",
+          title: "Facilities",
+          description: "Explore campus facilities",
+          url: token && user ? "/facilities" : "/login",
         },
       ],
     },
     {
-      label: "Campus",
-      href: "#",
+      title: "Campus",
+      url: "#",
       items: [
         {
-          label: "Campus Map",
-          href: token && user ? "/campus-map" : "/login",
+          title: "Campus Map",
+          description: "Navigate the campus with interactive map",
+          url: token && user ? "/campus-map" : "/login",
         },
         {
-          label: "Chat",
-          href: token && user ? "/chat" : "/login",
-        },
-        {
-          label: "Profile",
-          href: token && user ? "/profile" : "/login",
+          title: "Chat",
+          description: "Connect with students and staff",
+          url: token && user ? "/chat" : "/login",
         },
       ],
     },
   ];
 
+  const mobileExtraLinks = token && user ? [
+    { name: "Profile", url: "/profile" },
+    { name: "Chat", url: "/chat" },
+  ] : [];
+
   const authConfig = token && user ? {
     login: { 
-      text: user.name || "Profile", 
+      text: "Profile", 
       url: "/profile" 
     },
     signup: { 
@@ -93,7 +98,7 @@ const KampusKartNavbar: React.FC = () => {
   const logoUrl = token && user ? "/home" : "/";
 
   return (
-    <SimpleHeader
+    <Navbar1
       logo={{
         url: logoUrl,
         src: "/Logo.png",
@@ -101,6 +106,7 @@ const KampusKartNavbar: React.FC = () => {
         title: "KampusKart",
       }}
       menu={menuItems}
+      mobileExtraLinks={mobileExtraLinks}
       auth={authConfig}
     />
   );

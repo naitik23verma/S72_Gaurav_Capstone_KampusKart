@@ -70,8 +70,8 @@ const Navbar1 = ({
 }: Navbar1Props) => {
   return (
     <section className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md w-full border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 py-3 lg:py-[0.8625rem]">
-        <nav className="hidden justify-between lg:flex">
+      <div className="max-w-7xl mx-auto px-4 py-3 lg:py-3.5">
+        <nav className="hidden justify-between lg:flex items-center">
           <div className="flex items-center gap-6">
             <Link to={logo.url} className="flex items-center gap-2 focus:outline-none rounded-lg px-1" aria-label="Go to home page">
               <img src={logo.src} className="w-8 h-8" alt={logo.alt} />
@@ -192,7 +192,7 @@ const renderMenuItem = (item: MenuItem) => {
       <NavigationMenuItem key={item.title} className="text-black">
         <NavigationMenuTrigger className="text-black font-bold bg-gray-50 hover:bg-[#00C6A7] hover:text-white data-[state=open]:bg-[#00C6A7] data-[state=open]:text-white transition-colors rounded-full px-4 py-2 focus:outline-none" aria-label={`${item.title} menu`}>{item.title}</NavigationMenuTrigger>
         <NavigationMenuContent>
-          <ul className="w-80 p-3 bg-white">
+          <ul className="w-80 p-3 bg-white shadow-lg border border-gray-100 rounded-lg">
             {item.items.map((subItem) => (
               <li key={subItem.title}>
                 <NavigationMenuLink asChild>
@@ -202,11 +202,11 @@ const renderMenuItem = (item: MenuItem) => {
                     aria-label={`Go to ${subItem.title}`}
                   >
                     <div>
-                      <div className="text-sm font-semibold">
+                      <div className="text-sm font-semibold text-gray-900">
                         {subItem.title}
                       </div>
                       {subItem.description && (
-                        <p className="text-sm leading-snug text-gray-600">
+                        <p className="text-sm leading-snug text-gray-600 mt-1">
                           {subItem.description}
                         </p>
                       )}

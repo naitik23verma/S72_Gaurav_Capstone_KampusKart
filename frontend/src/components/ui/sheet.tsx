@@ -53,22 +53,20 @@ interface SheetContentProps
 
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
-  SheetContentProps & { showClose?: boolean }
->(({ side = "right", className, children, showClose = true, ...props }, ref) => (
+  SheetContentProps
+>(({ side = "right", className, children, ...props }, ref) => (
   <SheetPortal>
     <SheetOverlay />
     <SheetPrimitive.Content
       ref={ref}
-      className={cn(sheetVariants({ side }), "bg-white flex flex-col", className)}
+      className={cn(sheetVariants({ side }), "bg-white", className)}
       {...props}
     >
       {children}
-      {showClose && (
-        <SheetPrimitive.Close className="absolute right-4 top-4 rounded-lg w-10 h-10 flex items-center justify-center bg-[#00C6A7] text-white hover:bg-[#009e87] transition-colors focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:ring-offset-2 disabled:pointer-events-none shadow-md hover:shadow-lg">
-          <X className="h-5 w-5 flex-shrink-0" />
-          <span className="sr-only">Close</span>
-        </SheetPrimitive.Close>
-      )}
+      <SheetPrimitive.Close className="absolute right-4 top-4 rounded-lg w-10 h-10 flex items-center justify-center bg-[#00C6A7] text-white hover:bg-[#009e87] transition-colors focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:ring-offset-2 disabled:pointer-events-none shadow-md hover:shadow-lg">
+        <X className="h-5 w-5 flex-shrink-0" />
+        <span className="sr-only">Close</span>
+      </SheetPrimitive.Close>
     </SheetPrimitive.Content>
   </SheetPortal>
 ))
@@ -94,7 +92,7 @@ const SheetFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "mt-auto flex flex-col gap-2 p-4 bg-muted/30 border-t",
+      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
       className,
     )}
     {...props}

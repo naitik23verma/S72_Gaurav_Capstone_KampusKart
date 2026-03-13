@@ -102,8 +102,8 @@ const Navbar1 = ({
         </nav>
         <div className="block lg:hidden">
           <div className="flex items-center justify-between">
-            <Link to={logo.url} className="flex items-center gap-2 py-1 focus:outline-none rounded-lg px-1" aria-label="Go to home page">
-              <img src={logo.src} className="w-8 h-8" alt={logo.alt} />
+            <Link to={logo.url} className="flex items-center gap-2.5 py-1 focus:outline-none rounded-lg px-1" aria-label="Go to home page">
+              <img src={logo.src} className="w-9 h-9" alt={logo.alt} />
               <span className="text-xl font-extrabold text-black tracking-tight">{logo.title}</span>
             </Link>
             <Sheet>
@@ -111,42 +111,48 @@ const Navbar1 = ({
                 <Button 
                   variant="outline" 
                   size="icon"
-                  className="h-11 w-11 border-2 border-gray-300 bg-white hover:bg-[#00C6A7] hover:border-[#00C6A7] hover:text-white transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none"
+                  className="h-12 w-12 border-2 border-gray-300 bg-white hover:bg-[#00C6A7] hover:border-[#00C6A7] hover:text-white transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none rounded-xl"
                   aria-label="Open navigation menu"
                 >
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent className="overflow-y-auto bg-white w-[90vw] sm:w-[420px] max-w-md p-0">
-                  <SheetHeader className="px-6 pt-6 pb-4 border-b border-gray-200 bg-gradient-to-r from-[#00C6A7] to-[#009e87]">
+              <SheetContent className="overflow-y-auto bg-gradient-to-b from-white to-gray-50 w-[85vw] sm:w-[380px] p-0 border-l-4 border-[#00C6A7]">
+                  <SheetHeader className="px-6 pt-8 pb-6 border-b-2 border-gray-100 bg-white">
                     <SheetTitle className="text-left">
                       <Link to={logo.url} className="flex items-center gap-3 focus:outline-none rounded-lg px-1" aria-label="Go to home page">
-                        <img src={logo.src} className="w-10 h-10" alt={logo.alt} />
-                        <span className="text-xl font-extrabold text-white tracking-tight">
-                          {logo.title}
-                        </span>
+                        <div className="w-12 h-12 bg-gradient-to-br from-[#00C6A7] to-[#009e87] rounded-xl flex items-center justify-center shadow-md">
+                          <img src={logo.src} className="w-8 h-8" alt={logo.alt} />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-2xl font-extrabold text-black tracking-tight">
+                            {logo.title}
+                          </span>
+                          <span className="text-xs text-gray-500 font-medium">Campus Management</span>
+                        </div>
                       </Link>
                     </SheetTitle>
                     <SheetDescription className="sr-only">
                       Navigation menu for KampusKart
                     </SheetDescription>
                   </SheetHeader>
-                <div className="px-4 py-6 flex flex-col gap-6">
+                <div className="px-5 py-6 flex flex-col gap-5">
                   <Accordion
                     type="single"
                     collapsible
-                    className="flex w-full flex-col gap-2 bg-white"
+                    className="flex w-full flex-col gap-3 bg-transparent"
                   >
                     {menu.map((item) => renderMobileMenuItem(item))}
                   </Accordion>
                   {mobileExtraLinks.length > 0 && (
-                    <div className="border-t border-gray-200 pt-5">
+                    <div className="border-t-2 border-gray-200 pt-5 mt-2">
+                      <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-1">Quick Access</h3>
                       <div className="grid grid-cols-2 gap-3">
                         {mobileExtraLinks.map((link, idx) => (
                           <SheetClose key={idx} asChild>
                             <Link
                               to={link.url}
-                              className="inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 py-3 text-sm font-bold text-black bg-gray-50 border-2 border-gray-200 transition-all hover:bg-[#FFD166] hover:text-black hover:border-[#FFD166] hover:shadow-sm active:scale-95 focus:outline-none"
+                              className="inline-flex h-14 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 py-3 text-sm font-bold text-gray-700 bg-white border-2 border-gray-200 transition-all hover:bg-[#FFD166] hover:text-black hover:border-[#FFD166] hover:shadow-md active:scale-95 focus:outline-none shadow-sm"
                               aria-label={`Go to ${link.name}`}
                             >
                               {link.name}
@@ -156,21 +162,21 @@ const Navbar1 = ({
                       </div>
                     </div>
                   )}
-                    <div className="flex flex-col gap-3 pt-2 border-t border-gray-200">
+                    <div className="flex flex-col gap-3 pt-5 mt-2 border-t-2 border-gray-200">
                       <SheetClose asChild>
-                        <Button asChild variant="outline" className="w-full h-12 text-base text-black bg-white border-2 border-gray-300 hover:bg-[#FFD166] hover:text-black hover:border-[#FFD166] transition-colors font-bold rounded-xl active:scale-95 focus:outline-none">
+                        <Button asChild variant="outline" className="w-full h-14 text-base text-gray-700 bg-white border-2 border-gray-300 hover:bg-[#FFD166] hover:text-black hover:border-[#FFD166] transition-colors font-bold rounded-xl active:scale-95 focus:outline-none shadow-sm hover:shadow-md">
                           <Link to={auth.login.url}>{auth.login.text}</Link>
                         </Button>
                       </SheetClose>
                       {auth.signup.onClick ? (
                         <SheetClose asChild>
-                          <Button onClick={auth.signup.onClick} className="w-full h-12 text-base bg-[#00C6A7] text-white hover:bg-[#009e87] hover:text-white transition-colors shadow-sm hover:shadow-md font-bold rounded-xl active:scale-95 focus:outline-none" aria-label={auth.signup.text}>
+                          <Button onClick={auth.signup.onClick} className="w-full h-14 text-base bg-gradient-to-r from-[#00C6A7] to-[#009e87] text-white hover:from-[#009e87] hover:to-[#008a75] transition-all shadow-md hover:shadow-lg font-bold rounded-xl active:scale-95 focus:outline-none" aria-label={auth.signup.text}>
                             {auth.signup.text}
                           </Button>
                         </SheetClose>
                       ) : (
                         <SheetClose asChild>
-                          <Button asChild className="w-full h-12 text-base bg-[#00C6A7] text-white hover:bg-[#009e87] hover:text-white transition-colors shadow-sm hover:shadow-md font-bold rounded-xl active:scale-95 focus:outline-none">
+                          <Button asChild className="w-full h-14 text-base bg-gradient-to-r from-[#00C6A7] to-[#009e87] text-white hover:from-[#009e87] hover:to-[#008a75] transition-all shadow-md hover:shadow-lg font-bold rounded-xl active:scale-95 focus:outline-none">
                             <Link to={auth.signup.url}>{auth.signup.text}</Link>
                           </Button>
                         </SheetClose>
@@ -239,23 +245,23 @@ const renderMenuItem = (item: MenuItem) => {
 const renderMobileMenuItem = (item: MenuItem) => {
   if (item.items) {
     return (
-      <AccordionItem key={item.title} value={item.title} className="border-b border-gray-200 last:border-b-0">
-        <AccordionTrigger className="py-4 px-4 font-bold hover:no-underline text-gray-900 bg-white hover:bg-gray-50 hover:text-[#00C6A7] data-[state=open]:text-[#00C6A7] data-[state=open]:bg-gray-50 transition-all rounded-xl text-base focus:outline-none" aria-label={`${item.title} menu`}>
+      <AccordionItem key={item.title} value={item.title} className="border-none">
+        <AccordionTrigger className="py-4 px-5 font-bold hover:no-underline text-gray-900 bg-white hover:bg-gradient-to-r hover:from-[#00C6A7]/10 hover:to-[#009e87]/10 hover:text-[#00C6A7] data-[state=open]:text-[#00C6A7] data-[state=open]:bg-gradient-to-r data-[state=open]:from-[#00C6A7]/10 data-[state=open]:to-[#009e87]/10 transition-all rounded-xl text-base focus:outline-none shadow-sm border-2 border-gray-100 hover:border-[#00C6A7]/30 data-[state=open]:border-[#00C6A7]/30" aria-label={`${item.title} menu`}>
           {item.title}
         </AccordionTrigger>
-        <AccordionContent className="mt-2 pb-2">
-          <div className="flex flex-col gap-2">
+        <AccordionContent className="mt-3 pb-2">
+          <div className="flex flex-col gap-2.5 pl-2">
             {item.items.map((subItem) => (
               <SheetClose key={subItem.title} asChild>
                 <Link
                   to={subItem.url}
-                  className="flex select-none gap-3 rounded-xl p-4 leading-none outline-none transition-all bg-white hover:bg-[#FFD166] hover:text-black active:bg-[#FFD166] active:scale-95 border border-gray-100 hover:border-[#FFD166] min-h-[60px]"
+                  className="flex select-none gap-3 rounded-xl p-4 leading-none outline-none transition-all bg-white hover:bg-gradient-to-r hover:from-[#FFD166] hover:to-[#FFD166]/80 hover:text-black active:scale-95 border-2 border-gray-100 hover:border-[#FFD166] min-h-[68px] shadow-sm hover:shadow-md"
                   aria-label={`Go to ${subItem.title}`}
                 >
                   <div className="flex-1">
-                    <div className="text-base font-semibold text-gray-900">{subItem.title}</div>
+                    <div className="text-base font-bold text-gray-900 mb-1">{subItem.title}</div>
                     {subItem.description && (
-                      <p className="text-sm leading-snug text-gray-600 mt-1">
+                      <p className="text-xs leading-snug text-gray-600">
                         {subItem.description}
                       </p>
                     )}
@@ -273,7 +279,7 @@ const renderMobileMenuItem = (item: MenuItem) => {
     <SheetClose key={item.title} asChild>
       <Link 
         to={item.url} 
-        className="block py-4 px-4 font-bold text-gray-900 bg-white hover:text-[#00C6A7] hover:bg-gray-50 transition-all rounded-xl border-b border-gray-200 last:border-b-0 text-base min-h-[56px] flex items-center active:scale-95 focus:outline-none"
+        className="block py-4 px-5 font-bold text-gray-900 bg-white hover:bg-gradient-to-r hover:from-[#00C6A7]/10 hover:to-[#009e87]/10 hover:text-[#00C6A7] transition-all rounded-xl text-base min-h-[56px] flex items-center active:scale-95 focus:outline-none shadow-sm border-2 border-gray-100 hover:border-[#00C6A7]/30"
         aria-label={`Go to ${item.title}`}
       >
         {item.title}

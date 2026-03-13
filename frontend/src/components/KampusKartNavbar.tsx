@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { SimpleHeader } from './ui/simple-header';
+import { SimpleHeader } from '../components/ui/simple-header';
 
 const KampusKartNavbar: React.FC = () => {
   const { user, token, logout } = useAuth();
@@ -12,27 +12,59 @@ const KampusKartNavbar: React.FC = () => {
     navigate('/login');
   };
 
-  // Menu links - same for both authenticated and unauthenticated
-  const links = [
+  // Menu structure - same for both authenticated and unauthenticated
+  const menuItems = [
     {
       label: "Home",
       href: token && user ? "/home" : "/",
     },
     {
       label: "Features",
-      href: token && user ? "/home#features" : "/#features",
+      href: "#",
+      items: [
+        {
+          label: "Lost & Found",
+          href: token && user ? "/lostfound" : "/login",
+        },
+        {
+          label: "Complaints",
+          href: token && user ? "/complaints" : "/login",
+        },
+        {
+          label: "Events",
+          href: token && user ? "/events" : "/login",
+        },
+        {
+          label: "Clubs",
+          href: token && user ? "/clubs-recruitment" : "/login",
+        },
+        {
+          label: "News",
+          href: token && user ? "/news" : "/login",
+        },
+        {
+          label: "Facilities",
+          href: token && user ? "/facilities" : "/login",
+        },
+      ],
     },
     {
-      label: "Campus Map",
-      href: token && user ? "/campus-map" : "/login",
-    },
-    {
-      label: "Lost & Found",
-      href: token && user ? "/lostfound" : "/login",
-    },
-    {
-      label: "Events",
-      href: token && user ? "/events" : "/login",
+      label: "Campus",
+      href: "#",
+      items: [
+        {
+          label: "Campus Map",
+          href: token && user ? "/campus-map" : "/login",
+        },
+        {
+          label: "Chat",
+          href: token && user ? "/chat" : "/login",
+        },
+        {
+          label: "Profile",
+          href: token && user ? "/profile" : "/login",
+        },
+      ],
     },
   ];
 
@@ -68,7 +100,7 @@ const KampusKartNavbar: React.FC = () => {
         alt: "KampusKart Logo",
         title: "KampusKart",
       }}
-      links={links}
+      menu={menuItems}
       auth={authConfig}
     />
   );

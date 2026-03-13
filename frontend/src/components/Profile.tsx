@@ -232,8 +232,8 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fafbfc] font-sans">
-      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-[100px]">
+    <div className="min-h-screen flex flex-col bg-white font-sans overflow-x-hidden">
+      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
         <div className="max-w-3xl mx-auto">
           <div className="mb-8 flex flex-col items-center">
             <div className="w-full flex flex-col items-center">
@@ -316,7 +316,7 @@ const Profile = () => {
                           name="name"
                           value={profileData.name}
                           onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-[#232323] text-white border-none rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#444] placeholder-gray-400"
+                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
                           placeholder="Your full name"
                           disabled={!isEditing}
                           aria-label="Full Name"
@@ -337,7 +337,7 @@ const Profile = () => {
                           name="email"
                           value={profileData.email}
                           onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-[#232323] text-white border-none rounded-md shadow-sm cursor-not-allowed placeholder-gray-400 sm:text-sm"
+                          className="w-full px-10 py-2 bg-gray-100 text-gray-500 border border-gray-300 rounded-md shadow-sm cursor-not-allowed placeholder-gray-400 sm:text-sm"
                           placeholder="Your email address"
                           disabled
                           aria-label="Email"
@@ -356,7 +356,7 @@ const Profile = () => {
                           name="phone"
                           value={profileData.phone}
                           onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-[#232323] text-white border-none rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#444] placeholder-gray-400"
+                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
                           placeholder="Your phone number"
                           disabled={!isEditing}
                           aria-label="Phone"
@@ -374,7 +374,7 @@ const Profile = () => {
                           name="gender"
                           value={profileData.gender}
                           onChange={handleSelectChange}
-                          className="w-full px-10 py-2 bg-[#232323] text-white border-none rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#444]"
+                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7]"
                           disabled={!isEditing}
                           aria-label="Gender"
                         >
@@ -398,10 +398,9 @@ const Profile = () => {
                           name="dateOfBirth"
                           value={profileData.dateOfBirth}
                           onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-[#232323] text-white border-none rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#444] placeholder-gray-400"
+                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
                           disabled={!isEditing}
                           aria-label="Date of Birth"
-                          style={{ colorScheme: 'dark' }}
                         />
                       </div>
                       <p className="text-xs text-gray-400 mt-1">Format: YYYY-MM-DD</p>
@@ -427,7 +426,7 @@ const Profile = () => {
                           name="major"
                           value={profileData.major}
                           onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-[#232323] text-white border-none rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#444] placeholder-gray-400"
+                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
                           placeholder="e.g., Computer Science"
                           disabled={!isEditing}
                           aria-label="Major/Department"
@@ -446,7 +445,7 @@ const Profile = () => {
                           name="program"
                           value={profileData.program}
                           onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-[#232323] text-white border-none rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#444] placeholder-gray-400"
+                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
                           placeholder="e.g., Bachelor of Science"
                           disabled={!isEditing}
                           aria-label="Program"
@@ -465,7 +464,7 @@ const Profile = () => {
                           name="yearOfStudy"
                           value={profileData.yearOfStudy}
                           onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-[#232323] text-white border-none rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#444] placeholder-gray-400"
+                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
                           placeholder="e.g., 2024 - 2028"
                           disabled={!isEditing}
                           aria-label="Year Interval"
@@ -584,7 +583,7 @@ const Profile = () => {
                   <button
                     type="button"
                     onClick={() => setIsEditing(true)}
-                    className="px-6 py-2 rounded-full text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition"
+                    className="px-6 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition"
                   >
                     Edit Profile
                   </button>

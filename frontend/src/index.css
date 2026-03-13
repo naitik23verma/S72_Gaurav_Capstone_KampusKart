@@ -13,6 +13,21 @@ html, body, #root {
   font-family: 'Work Sans', ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Hide scrollbar but keep scroll functionality */
+html {
+  overflow-y: scroll;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+body {
+  overflow-x: hidden;
+}
+
 :root {
   line-height: 1.5;
   font-weight: 400;
@@ -341,4 +356,46 @@ button:focus-visible {
 .gm-style .gm-style-iw-tc::after {
   background: white !important;
   box-shadow: none !important;
+}
+
+/* Custom Date Picker Styling - Light Theme */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.5) brightness(1.2);
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-datetime-edit {
+  color: #374151;
+}
+
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  color: #374151;
+}
+
+input[type="date"]::-webkit-datetime-edit-text {
+  color: #6b7280;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: #374151;
+}
+
+input[type="date"]::-webkit-inner-spin-button {
+  display: none;
+}
+
+input[type="date"]::-webkit-clear-button {
+  display: none;
+}
+
+/* Firefox date picker styling */
+input[type="date"] {
+  color-scheme: light;
+}
+
+/* Ensure date input placeholder is visible */
+input[type="date"]:invalid::-webkit-datetime-edit {
+  color: #9ca3af;
 }

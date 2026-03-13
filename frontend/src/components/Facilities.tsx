@@ -144,16 +144,16 @@ const Facilities = () => {
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-[100px]">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
         {/* Top Bar: Heading + Add Button */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <h1 className="text-h2 font-extrabold text-black">Campus Facilities</h1>
           {user?.isAdmin && (
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 rounded-full bg-black text-white font-bold text-lg shadow hover:bg-[#00C6A7] transition"
+              className="flex items-center gap-2 px-6 py-3 rounded-full bg-[#181818] text-white font-bold text-lg shadow hover:bg-[#00C6A7] transition"
             >
-              + Add New Item
+              + Add Facility
             </button>
           )}
         </div>
@@ -213,7 +213,7 @@ const Facilities = () => {
                       alt={facility?.name || 'Facility'}
                       className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-300"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-50">

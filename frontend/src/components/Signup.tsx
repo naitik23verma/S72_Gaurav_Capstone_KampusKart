@@ -26,11 +26,10 @@ const RightPanel: React.FC = () => {
   );
 };
 
-const accent = 'from-deep-purple-500 to-hot-pink-500';
-const accentText = 'text-deep-purple-600';
-const accentBtn = 'bg-gradient-to-r from-deep-purple-500 to-hot-pink-500';
-const accentBtnHover = 'hover:from-hot-pink-500 hover:to-deep-purple-500';
-const accentFocus = 'focus:ring-deep-purple-400';
+const accentText = 'text-[#00C6A7]';
+const accentBtn = 'bg-[#00C6A7]';
+const accentBtnHover = 'hover:bg-[#009e87]';
+const accentFocus = 'focus:ring-[#00C6A7]';
 
 const validatePassword = (password: string) => {
   const minLength = 8;
@@ -254,7 +253,7 @@ const Signup: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex justify-center py-3 px-4 rounded-full text-lg font-semibold text-white bg-[#181818] shadow-lg hover:bg-[#00C6A7] hover:text-white transition mobile-touch-friendly mobile-no-hover mobile-active-feedback ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full flex justify-center py-3 px-4 rounded-lg text-lg font-semibold text-white bg-[#181818] shadow-lg hover:bg-[#00C6A7] hover:text-white transition mobile-touch-friendly mobile-no-hover mobile-active-feedback ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               style={{ boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)' }}
             >
               {loading ? 'Creating account...' : 'Sign up'}
@@ -272,7 +271,7 @@ const Signup: React.FC = () => {
             <button
               type="button"
               onClick={handleGoogleSignup}
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-full text-lg font-semibold text-black bg-white border border-[#E0E0E0] hover:bg-[#FFD166] hover:text-black transition"
+              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg text-lg font-semibold text-black bg-white border border-[#E0E0E0] hover:bg-[#FFD166] hover:text-black transition"
             >
               <img src="/google-icon.svg" alt="Google" className="w-5 h-5" />
               Sign up with Google

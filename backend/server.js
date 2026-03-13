@@ -237,15 +237,24 @@ io.use((socket, next) => {
     return next(new Error('Authentication error: token required'));
   }
 
+  // Validate JWT_SECRET is configured
+  if (!process.env.JWT_SECRET) {
+    console.error('JWT_SECRET not configured for Socket.IO authentication');
+    return next(new Error('Server configuration error'));
+  }
+
   try {
     const jwt = require('jsonwebtoken');
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     socket.userId = decoded.userId;
+    next();
   } catch (err) {
+    console.error('Socket.IO authentication error:', err.message);
+    if (err.name === 'TokenExpiredError') {
+      return next(new Error('Authentication error: token expired'));
+    }
     return next(new Error('Authentication error: invalid token'));
   }
-
-  next();
 });
 
 io.on('connection', (socket) => {
@@ -357,4 +366,25 @@ io.on('connection', (socket) => {
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+});
+
+// Global error handlers
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Log to error tracking service in production
+  if (process.env.NODE_ENV === 'production') {
+    // TODO: Send to error tracking service (e.g., Sentry)
+  }
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  // Log to error tracking service in production
+  if (process.env.NODE_ENV === 'production') {
+    // TODO: Send to error tracking service (e.g., Sentry)
+  }
+  // Give the server time to finish current requests before exiting
+  setTimeout(() => {
+    process.exit(1);
+  }, 1000);
 }); 

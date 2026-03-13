@@ -69,7 +69,6 @@ const KampusKartNavbar: React.FC = () => {
   ];
 
   const mobileExtraLinks = token && user ? [
-    { name: "Profile", url: "/profile" },
     { name: "Chat", url: "/chat" },
   ] : [];
 

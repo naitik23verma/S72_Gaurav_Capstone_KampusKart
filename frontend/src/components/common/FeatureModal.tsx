@@ -42,14 +42,14 @@ export const FeatureModal: React.FC<FeatureModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex justify-between items-center mb-4 sm:mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+        <div className="flex justify-between items-start mb-4 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 pr-12">
             {title}
           </h2>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg min-h-touch min-w-touch"
+            className="bg-[#181818] hover:bg-[#00C6A7] text-white rounded-lg p-2.5 transition-all duration-200 shadow-lg min-h-touch min-w-touch flex-shrink-0 flex items-center justify-center"
           >
             <FiX className="w-5 h-5" />
           </button>

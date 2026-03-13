@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { FiPlus, FiCalendar, FiMapPin, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiClock, FiUser, FiPhone } from 'react-icons/fi';
+import { FiPlus, FiCalendar, FiMapPin, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiClock, FiUser, FiPhone, FiCheckCircle } from 'react-icons/fi';
 import { FaSearch } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
@@ -80,7 +80,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
         textColorClass = 'text-gray-800';
     }
     return (
-      <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${bgColorClass} ${textColorClass}`}>
+      <span className={`px-2.5 py-0.5 rounded-lg text-xs font-medium ${bgColorClass} ${textColorClass}`}>
         {status}
       </span>
     );
@@ -88,20 +88,20 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl p-8 max-w-3xl w-full mx-auto max-h-[90vh] overflow-y-auto relative">
+      <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
         {/* Close Button */}
                   <button
             onClick={onClose}
             aria-label="Close"
-            className="absolute top-4 right-4 bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg"
+            className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] text-white rounded-lg p-2.5 transition-all duration-200 shadow-lg flex items-center justify-center w-10 h-10"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
 
         {/* Title */}
-        <h2 className="text-2xl font-bold text-gray-900 mb-4 pr-8">{event.title}</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12 sm:pr-14">{event.title}</h2>
 
         {/* Content: Image and Details side-by-side */}
         <div className="flex flex-col md:flex-row gap-8">
@@ -214,18 +214,18 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
           )}
 
           {isAdmin && (
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex gap-3">
               <button
                 onClick={() => onEdit?.(event)}
-                className="flex-1 px-3 py-3 sm:py-2 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors duration-200 min-w-0"
+                className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 flex items-center"
               >
-                <span className="truncate">Edit Event</span>
+                <FiEdit2 className="mr-1" /> Edit Event
               </button>
               <button
                 onClick={() => onDelete?.(event._id)}
-                className="flex-1 px-3 py-3 sm:py-2 rounded-full text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 transition-colors duration-200 min-w-0"
+                className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 flex items-center"
               >
-                <span className="truncate">Delete Event</span>
+                <FiTrash2 className="mr-1" /> Delete Event
               </button>
             </div>
           )}
@@ -235,29 +235,27 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
       {/* Zoomed Image Modal */}
       {zoomedImage && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[60] p-4" 
+          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[60] p-4" 
           onClick={closeZoomedImageModal}
         >
-          <div className="relative max-w-[90vw] max-h-[90vh]">
-            <img 
-              src={zoomedImage} 
-              alt="Zoomed" 
-              className="max-h-[90vh] max-w-full rounded-lg shadow-2xl object-contain"
-              onClick={(e) => e.stopPropagation()}
-            />
-            
-            {/* Close Button */}
-            <button
-              onClick={closeZoomedImageModal}
-              aria-label="Close zoomed image"
-              className="absolute top-4 right-4 bg-white/30 backdrop-blur-sm rounded-full p-2 text-white hover:bg-white/50 transition-colors duration-200 z-50"
-            >
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          </div>
+          <img 
+            src={zoomedImage} 
+            alt="Zoomed" 
+            className="max-h-[90vh] max-w-full lg:max-w-[80vw] rounded-lg shadow-2xl object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+          
+          {/* Close Button */}
+          <button
+            onClick={closeZoomedImageModal}
+            aria-label="Close zoomed image"
+            className="absolute top-4 right-4 bg-white/30 backdrop-blur-sm rounded-lg p-2 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+          >
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
         </div>
       )}
     </div>
@@ -297,6 +295,8 @@ const Events = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedEventForDetails, setSelectedEventForDetails] = useState<Event | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // AI Autocomplete hook
   const preExistingStrings = useMemo(() => {
@@ -321,6 +321,77 @@ const Events = () => {
     debounceMs: 300,
     preExistingStrings
   });
+
+  // Auto-hide success message after 3 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => setSuccessMessage(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  // Field validation functions
+  const validateField = (fieldName: string, value: string): string | null => {
+    switch (fieldName) {
+      case 'title':
+        if (!value.trim()) return 'Title is required';
+        if (value.trim().length < 3) return 'Title must be at least 3 characters';
+        if (value.trim().length > 100) return 'Title must be less than 100 characters';
+        return null;
+      
+      case 'description':
+        if (!value.trim()) return 'Description is required';
+        if (value.trim().length < 10) return 'Description must be at least 10 characters';
+        if (value.trim().length > 1000) return 'Description must be less than 1000 characters';
+        return null;
+      
+      case 'location':
+        if (!value.trim()) return 'Location is required';
+        if (value.trim().length < 3) return 'Location must be at least 3 characters';
+        if (value.trim().length > 200) return 'Location must be less than 200 characters';
+        return null;
+      
+      case 'date':
+        if (!value) return 'Date is required';
+        const selectedDate = new Date(value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (selectedDate < today) return 'Event date cannot be in the past';
+        return null;
+      
+      case 'contactEmail':
+        if (value.trim()) {
+          const emailValidation = validateEmail(value);
+          if (!emailValidation.isValid) return emailValidation.error || 'Invalid email format';
+        }
+        return null;
+      
+      case 'contactPhone':
+        if (value.trim()) {
+          const phoneValidation = validatePhone(value);
+          if (!phoneValidation.isValid) return phoneValidation.error || 'Invalid phone format';
+        }
+        return null;
+      
+      case 'registerUrl':
+        if (value.trim()) {
+          const urlValidation = validateUrl(value);
+          if (!urlValidation.isValid) return urlValidation.error || 'Invalid URL format';
+        }
+        return null;
+      
+      default:
+        return null;
+    }
+  };
+
+  const handleFieldBlur = (fieldName: string, value: string) => {
+    const error = validateField(fieldName, value);
+    setFieldErrors(prev => ({
+      ...prev,
+      [fieldName]: error || ''
+    }));
+  };
 
   const renderStatus = (status: Event['status']) => {
     let bgColorClass;
@@ -347,7 +418,7 @@ const Events = () => {
         textColorClass = 'text-gray-800';
     }
     return (
-      <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${bgColorClass} ${textColorClass}`}>
+      <span className={`text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm ${bgColorClass} ${textColorClass}`}>
         {status}
       </span>
     );
@@ -472,15 +543,45 @@ const Events = () => {
   const handleSaveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) return;
+    
+    setIsLoading(true);
+    setError(null);
+    setFieldErrors({});
+
+    // Validate all fields
+    const errors: {[key: string]: string} = {};
+    const titleError = validateField('title', newEvent.title);
+    const descError = validateField('description', newEvent.description);
+    const locationError = validateField('location', newEvent.location || '');
+    const dateError = validateField('date', newEvent.date);
+    const emailError = newEvent.contactInfo.email ? validateField('contactEmail', newEvent.contactInfo.email) : null;
+    const phoneError = newEvent.contactInfo.phone ? validateField('contactPhone', newEvent.contactInfo.phone) : null;
+    const urlError = newEvent.registerUrl ? validateField('registerUrl', newEvent.registerUrl) : null;
+
+    if (titleError) errors.title = titleError;
+    if (descError) errors.description = descError;
+    if (locationError) errors.location = locationError;
+    if (dateError) errors.date = dateError;
+    if (emailError) errors.contactEmail = emailError;
+    if (phoneError) errors.contactPhone = phoneError;
+    if (urlError) errors.registerUrl = urlError;
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setError('Please fix the errors below');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const formData = new FormData();
-      formData.append('title', newEvent.title);
-      formData.append('description', newEvent.description);
+      formData.append('title', newEvent.title.trim());
+      formData.append('description', newEvent.description.trim());
       formData.append('date', newEvent.date);
-      formData.append('location', newEvent.location || '');
+      formData.append('location', newEvent.location?.trim() || '');
       formData.append('status', newEvent.status);
-      formData.append('registerUrl', newEvent.registerUrl);
-      formData.append('operatingHours', newEvent.operatingHours);
+      formData.append('registerUrl', newEvent.registerUrl.trim());
+      formData.append('operatingHours', newEvent.operatingHours.trim());
       formData.append('contactInfo', JSON.stringify(newEvent.contactInfo));
       formData.append('mapLocation', JSON.stringify(newEvent.mapLocation || { building: undefined, floor: undefined, room: undefined, coordinates: undefined }));
       if (newEvent.images.length > 0 && newEvent.images[0].file) {
@@ -495,32 +596,37 @@ const Events = () => {
         },
         body: formData
       });
+      
+      const data = await response.json();
+      
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to save event');
+        // Handle validation errors from backend
+        if (data.details && Array.isArray(data.details)) {
+          const backendErrors: {[key: string]: string} = {};
+          data.details.forEach((err: any) => {
+            backendErrors[err.field] = err.message;
+          });
+          setFieldErrors(backendErrors);
+          setError(data.message || 'Validation failed');
+        } else {
+          throw new Error(data.message || 'Failed to save event');
+        }
+        setIsLoading(false);
+        return;
       }
-      const savedEvent = await response.json();
+      
       if (editingEvent) {
-        setEvents(events.map(e => e._id === savedEvent._id ? savedEvent : e));
+        setEvents(events.map(e => e._id === data._id ? data : e));
+        setSuccessMessage('Event updated successfully!');
       } else {
-        setEvents([savedEvent, ...events]);
+        setEvents([data, ...events]);
+        setSuccessMessage('Event added successfully!');
       }
-      setIsModalOpen(false);
-      setEditingEvent(null);
-      setNewEvent({ 
-        title: '', 
-        description: '', 
-        date: '', 
-        location: '', 
-        status: 'Upcoming', 
-        registerUrl: '', 
-        images: [],
-        operatingHours: '',
-        contactInfo: { name: undefined, email: undefined, phone: undefined },
-        mapLocation: { building: undefined, floor: undefined, room: undefined, coordinates: undefined }
-      });
+      closeEventModal();
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to save event');
+      setError(error instanceof Error ? error.message : 'Failed to save event. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -549,6 +655,7 @@ const Events = () => {
       mapLocation: { building: undefined, floor: undefined, room: undefined, coordinates: undefined }
     });
     setError(null);
+    setFieldErrors({});
   };
 
   const filteredEvents = events.filter(event =>
@@ -564,13 +671,20 @@ const Events = () => {
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-[100px]">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
+        {/* Success Message Banner */}
+        {successMessage && (
+          <div className="mb-6 bg-green-50 border-2 border-green-200 rounded-lg p-4 flex items-center gap-3 animate-fade-in">
+            <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+            <p className="text-green-800 font-medium">{successMessage}</p>
+          </div>
+        )}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <h1 className="text-h2 font-extrabold text-black">Campus Events</h1>
           {user?.isAdmin && (
             <button 
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 rounded-full bg-black text-white font-bold text-lg shadow hover:bg-[#00C6A7] transition"
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg shadow hover:bg-[#00C6A7] transition"
             >
               + Add New Event
             </button>
@@ -579,17 +693,24 @@ const Events = () => {
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4 px-4 md:px-0">
           <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-            <select 
-              value={filterStatus} 
-              onChange={e => setFilterStatus(e.target.value as 'all' | 'upcoming' | 'ongoing' | 'past')}
-              className="px-4 py-2 rounded-md bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
-            >
+            <div className="relative">
+              <select 
+                value={filterStatus} 
+                onChange={e => setFilterStatus(e.target.value as 'all' | 'upcoming' | 'ongoing' | 'past')}
+                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
+              >
               <option value="all">All Statuses</option>
               <option value="upcoming">Upcoming</option>
               <option value="ongoing">Ongoing</option>
               <option value="completed">Completed</option>
               <option value="cancelled">Cancelled</option>
             </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
           </div>
           {/* AI-Powered Search Bar */}
           <div className="relative w-full md:w-[500px]">
@@ -620,11 +741,11 @@ const Events = () => {
           {filteredEvents.map(event => (
             <div 
               key={event._id} 
-              className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden group"
+              className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden group"
               onClick={() => openEventDetailsModal(event)}
             >
               {/* Image Section with Overlay */}
-              <div className="relative h-60 sm:h-80 overflow-hidden">
+              <div className="relative h-64 sm:h-80 overflow-hidden">
                 {event.image?.url ? (
                   <>
                     <img 
@@ -632,7 +753,7 @@ const Events = () => {
                       alt={event.title} 
                       className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300" 
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-50">
@@ -649,24 +770,22 @@ const Events = () => {
               </div>
 
               {/* Content Section */}
-              <div className="p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">{event.title}</h2>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-3">{event.description}</p>
+              <div className="p-4 sm:p-5 md:p-6">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{event.title}</h2>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{event.description}</p>
 
                 {/* Meta Info Row */}
                 <div className="space-y-3 pt-4 border-t border-gray-100">
                   <div className="flex items-center text-sm text-gray-500">
-                    <FiCalendar className="mr-2 flex-shrink-0 text-gray-400" />
-                    <span className="font-medium text-gray-900">
-                      {new Date(event.date).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      })}
-                    </span>
+                    <FiCalendar className="mr-2 flex-shrink-0" />
+                    <span>{new Date(event.date).toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}</span>
                   </div>
                   <div className="flex items-center text-sm text-gray-500">
-                    <FiMapPin className="mr-2 flex-shrink-0 text-gray-400" />
+                    <FiMapPin className="mr-2 flex-shrink-0" />
                     <span className="truncate">{event.location}</span>
                   </div>
                 </div>
@@ -715,7 +834,7 @@ const Events = () => {
                           type="text"
                           value={newEvent.title}
                           onChange={e => setNewEvent({...newEvent, title: e.target.value})}
-                          className="w-full px-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                          className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                           placeholder="Enter event title (e.g., Annual Tech Symposium 2024)"
                           required
                           aria-label="Event Title"
@@ -725,15 +844,23 @@ const Events = () => {
                       <p className="text-xs text-gray-500 mt-1">Give a short, descriptive title for the event.</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Date <FiCalendar className="inline text-gray-400" /></label>
-                      <input
-                        type="date"
-                        value={newEvent.date}
-                        onChange={e => setNewEvent({...newEvent, date: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
-                        required
-                        aria-label="Event Date"
-                      />
+                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                        Date <FiCalendar className="inline text-gray-400" />
+                      </label>
+                      <div className="relative cursor-pointer" onClick={(e) => {
+                        const input = e.currentTarget.querySelector('input[type="date"]') as HTMLInputElement;
+                        if (input) input.showPicker?.();
+                      }}>
+                        <FiCalendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
+                        <input
+                          type="date"
+                          value={newEvent.date}
+                          onChange={e => setNewEvent({...newEvent, date: e.target.value})}
+                          className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm cursor-pointer [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                          required
+                          aria-label="Event Date"
+                        />
+                      </div>
                       <p className="text-xs text-gray-500 mt-1">When will the event take place?</p>
                     </div>
                   </div>
@@ -743,7 +870,7 @@ const Events = () => {
                       <textarea
                         value={newEvent.description}
                         onChange={e => setNewEvent({...newEvent, description: e.target.value})}
-                        className="w-full px-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         rows={4}
                         placeholder="Provide a detailed description of the event. Include key highlights, agenda, target audience, and any special requirements."
                         required
@@ -761,7 +888,7 @@ const Events = () => {
                           type="text"
                           value={newEvent.location}
                           onChange={e => setNewEvent({...newEvent, location: e.target.value})}
-                          className="w-full px-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                          className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                           placeholder="Enter venue details (e.g., Main Auditorium, Block A, Floor 3)"
                           required
                           aria-label="Event Location"
@@ -775,7 +902,7 @@ const Events = () => {
                       <select
                         value={newEvent.status}
                         onChange={e => setNewEvent({...newEvent, status: e.target.value as Event['status']})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         required
                         aria-label="Event Status"
                       >
@@ -794,7 +921,7 @@ const Events = () => {
                         type="url"
                         value={newEvent.registerUrl}
                         onChange={e => setNewEvent({...newEvent, registerUrl: e.target.value})}
-                        className="w-full px-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         placeholder="https://forms.google.com/..."
                         aria-label="Register URL"
                       />
@@ -809,7 +936,7 @@ const Events = () => {
                         type="text"
                         value={newEvent.operatingHours}
                         onChange={e => setNewEvent({...newEvent, operatingHours: e.target.value})}
-                        className="w-full px-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         placeholder="e.g., 9:00 AM - 5:00 PM"
                         aria-label="Operating Hours"
                       />
@@ -825,7 +952,7 @@ const Events = () => {
                           type="text"
                           value={newEvent.contactInfo.name}
                           onChange={e => setNewEvent({...newEvent, contactInfo: {...newEvent.contactInfo, name: e.target.value}})}
-                          className="w-full px-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                          className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                           placeholder="Contact Person Name"
                           aria-label="Contact Name"
                         />
@@ -835,7 +962,7 @@ const Events = () => {
                           type="email"
                           value={newEvent.contactInfo.email}
                           onChange={e => setNewEvent({...newEvent, contactInfo: {...newEvent.contactInfo, email: e.target.value}})}
-                          className="w-full px-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                          className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                           placeholder="contact@example.com"
                           aria-label="Contact Email"
                         />
@@ -845,7 +972,7 @@ const Events = () => {
                           type="tel"
                           value={newEvent.contactInfo.phone}
                           onChange={e => setNewEvent({...newEvent, contactInfo: {...newEvent.contactInfo, phone: e.target.value}})}
-                          className="w-full px-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                          className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                           placeholder="+1 (555) 123-4567"
                           aria-label="Contact Phone"
                         />
@@ -860,7 +987,7 @@ const Events = () => {
                           type="text"
                           value={newEvent.mapLocation.building}
                           onChange={e => setNewEvent({...newEvent, mapLocation: {...newEvent.mapLocation, building: e.target.value}})}
-                          className="w-full px-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                          className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                           placeholder="Building Name"
                           aria-label="Building"
                         />
@@ -870,7 +997,7 @@ const Events = () => {
                           type="text"
                           value={newEvent.mapLocation.floor}
                           onChange={e => setNewEvent({...newEvent, mapLocation: {...newEvent.mapLocation, floor: e.target.value}})}
-                          className="w-full px-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                          className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                           placeholder="Floor"
                           aria-label="Floor"
                         />
@@ -880,7 +1007,7 @@ const Events = () => {
                           type="text"
                           value={newEvent.mapLocation.room}
                           onChange={e => setNewEvent({...newEvent, mapLocation: {...newEvent.mapLocation, room: e.target.value}})}
-                          className="w-full px-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                          className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                           placeholder="Room Number"
                           aria-label="Room"
                         />
@@ -903,13 +1030,13 @@ const Events = () => {
                   <button
                     type="button"
                     onClick={closeEventModal}
-                    className="px-4 py-2 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-full text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C7A7] transition"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition"
                   >
                     {editingEvent ? 'Save Changes' : 'Add Event'}
                   </button>

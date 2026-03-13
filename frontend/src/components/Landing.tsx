@@ -62,14 +62,15 @@ const steps = [
 
 const Landing: React.FC = () => {
   return (
-    <div className="relative min-h-screen bg-white font-sans overflow-hidden pt-16 md:pt-24">
+    <>
       <KampusKartNavbar />
-      {/* Large abstract blobs */}
-      <svg className="absolute left-[-120px] top-[-80px] w-[240px] h-[160px] md:w-[340px] md:h-[220px] -z-10" viewBox="0 0 340 220" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M60,40 Q120,0 200,60 T340,40 Q320,120 200,180 T60,180 Q0,120 60,40Z" fill="#FFD166"/></svg>
-      <svg className="absolute right-[-120px] top-20 w-[220px] h-[140px] md:w-[320px] md:h-[200px] -z-10" viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M40,60 Q100,0 180,40 T320,60 Q300,140 180,180 T40,140 Q0,100 40,60Z" fill="#F05A25"/></svg>
-      <svg className="absolute left-[-100px] bottom-[-80px] w-[200px] h-[120px] md:w-[300px] md:h-[180px] -z-10" viewBox="0 0 300 180" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M60,40 Q120,0 200,60 T300,40 Q280,120 200,160 T60,160 Q0,120 60,40Z" fill="#00C6A7"/></svg>
-      {/* Hero */}
-      <section className="flex flex-col items-center justify-center min-h-[60vh] pt-24 md:pt-36 pb-8 md:pb-16 px-4">
+      <div className="relative min-h-screen bg-white font-sans overflow-hidden pt-28">
+        {/* Large abstract blobs */}
+        <svg className="absolute left-[-120px] top-[-80px] w-[240px] h-[160px] md:w-[340px] md:h-[220px] -z-10" viewBox="0 0 340 220" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M60,40 Q120,0 200,60 T340,40 Q320,120 200,180 T60,180 Q0,120 60,40Z" fill="#FFD166"/></svg>
+        <svg className="absolute right-[-120px] top-20 w-[220px] h-[140px] md:w-[320px] md:h-[200px] -z-10" viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M40,60 Q100,0 180,40 T320,60 Q300,140 180,180 T40,140 Q0,100 40,60Z" fill="#F05A25"/></svg>
+        <svg className="absolute left-[-100px] bottom-[-80px] w-[200px] h-[120px] md:w-[300px] md:h-[180px] -z-10" viewBox="0 0 300 180" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M60,40 Q120,0 200,60 T300,40 Q280,120 200,160 T60,160 Q0,120 60,40Z" fill="#00C6A7"/></svg>
+        {/* Hero */}
+        <section className="flex flex-col items-center justify-center min-h-[60vh] pt-24 md:pt-36 pb-8 md:pb-16 px-4">
         <h1 className="text-3xl md:text-h1 font-extrabold text-center text-black mb-4 md:mb-6 leading-tight" style={{ fontWeight: 900, letterSpacing: '-0.02em', lineHeight: '1.05' }}>Don't make campus life awkward</h1>
         <p className="text-base md:text-lg text-center text-gray-500 mb-6 md:mb-10 max-w-2xl">No more missing out on campus events, updates, or connections. KampusKart makes it easy to discover, connect, and manage your campus life—all in one place.</p>
         <Link to="/signup" className="mt-2 px-8 md:px-10 py-3 md:py-4 rounded-full font-bold text-white bg-[#181818] shadow-lg hover:bg-[#00C6A7] hover:text-white transition text-base md:text-lg">Sign up</Link>
@@ -105,6 +106,7 @@ const Landing: React.FC = () => {
         <div className="text-xs md:text-body">&copy; {new Date().getFullYear()} KampusKart. All rights reserved.</div>
       </footer>
     </div>
+    </>
   );
 };
 

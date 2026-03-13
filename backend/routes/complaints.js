@@ -88,7 +88,7 @@ router.get('/', protect, async (req, res) => {
 // @desc    Create a new complaint
 // @route   POST /api/complaints
 // @access  Private
-router.post('/', protect, sanitizeInput, validateComplaint, upload.array('images', 5), async (req, res) => {
+router.post('/', protect, upload.array('images', 5), sanitizeInput, validateComplaint, async (req, res) => {
   const { title, description, category, priority, department } = req.body;
 
   if (!title || !description) {

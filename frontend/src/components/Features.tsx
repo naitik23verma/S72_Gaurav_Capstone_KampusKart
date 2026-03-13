@@ -44,7 +44,7 @@ const features = [
 const Features: React.FC = () => {
   return (
     <div className="min-h-screen bg-white font-sans">
-      <main className="container mx-auto px-12 py-8 pt-[100px]">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
         <h1 className="text-h2 font-extrabold text-black mb-8">Features</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           {features.map((feature) => (

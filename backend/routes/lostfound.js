@@ -86,7 +86,7 @@ const itemRateLimiter = rateLimit({
 });
 
 // Create a new lost or found item
-router.post('/', authMiddleware, sanitizeInput, validateLostFoundItem, itemRateLimiter, upload.array('images', 5), async (req, res) => {
+router.post('/', authMiddleware, itemRateLimiter, upload.array('images', 5), sanitizeInput, validateLostFoundItem, async (req, res) => {
   try {
     const { type, title, description, location, date, contact } = req.body;
     const userId = req.user.id; // Assuming user ID is available from auth middleware

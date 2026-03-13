@@ -269,16 +269,29 @@ router.post('/reset-password', async (req, res) => {
 
     // Check if OTP is valid and not expired
     const now = Date.now();
-    if (!user.resetPasswordOTP || user.resetPasswordExpires < now) {
+    if (!user.resetPasswordOTP || !user.resetPasswordExpires || user.resetPasswordExpires < now) {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
     }
 
     // Secure OTP comparison using timing-safe compare
     const hashedProvidedOtp = crypto.createHash('sha256').update(otp).digest('hex');
-    const otpMatch = user.resetPasswordOTP && 
-      user.resetPasswordOTP.length === hashedProvidedOtp.length &&
-      crypto.timingSafeEqual(Buffer.from(user.resetPasswordOTP), Buffer.from(hashedProvidedOtp));
-    if (!otpMatch) {
+    
+    // Ensure both buffers are the same length before comparison
+    if (!user.resetPasswordOTP || user.resetPasswordOTP.length !== hashedProvidedOtp.length) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+    
+    try {
+      const otpMatch = crypto.timingSafeEqual(
+        Buffer.from(user.resetPasswordOTP, 'hex'), 
+        Buffer.from(hashedProvidedOtp, 'hex')
+      );
+      
+      if (!otpMatch) {
+        return res.status(400).json({ message: 'Invalid or expired OTP' });
+      }
+    } catch (compareError) {
+      console.error('OTP comparison error:', compareError);
       return res.status(400).json({ message: 'Invalid or expired OTP' });
     }
 

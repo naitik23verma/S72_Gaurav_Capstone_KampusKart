@@ -75,6 +75,8 @@ const Complaints = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const itemsPerPage = 9;
   const observer = useRef<IntersectionObserver | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // AI Autocomplete hook
   const preExistingStrings = useMemo(() => {
@@ -103,6 +105,43 @@ const Complaints = () => {
     debounceMs: 300,
     preExistingStrings
   });
+
+  // Auto-hide success message after 3 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => setSuccessMessage(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  // Field validation functions
+  const validateField = (fieldName: string, value: string): string | null => {
+    switch (fieldName) {
+      case 'title':
+        if (!value.trim()) return 'Title is required';
+        if (value.trim().length < 5) return 'Title must be at least 5 characters';
+        if (value.trim().length > 100) return 'Title must be less than 100 characters';
+        return null;
+      
+      case 'description':
+        if (!value.trim()) return 'Description is required';
+        if (value.trim().length < 10) return 'Description must be at least 10 characters';
+        if (value.trim().length > 1000) return 'Description must be less than 1000 characters';
+        return null;
+      
+      default:
+        return null;
+    }
+  };
+
+  const handleFieldBlur = (fieldName: string, value: string) => {
+    const error = validateField(fieldName, value);
+    setFieldErrors(prev => ({
+      ...prev,
+      [fieldName]: error || ''
+    }));
+  };
+
   const lastComplaintRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (isFetchingMore) return;
@@ -123,6 +162,9 @@ const Complaints = () => {
       const url = new URL(`${API_BASE}/api/complaints`);
       if (filterStatus !== 'All') {
         url.searchParams.append('status', filterStatus);
+      }
+      if (filterCategory !== 'all') {
+        url.searchParams.append('category', filterCategory);
       }
       if (searchQuery.trim()) {
         url.searchParams.append('search', searchQuery.trim());
@@ -165,12 +207,12 @@ const Complaints = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filterStatus, searchQuery]);
+  }, [filterStatus, filterCategory, searchQuery]);
 
   useEffect(() => {
     fetchComplaints();
     // eslint-disable-next-line
-  }, [token, filterStatus, searchQuery, currentPage]);
+  }, [token, filterStatus, filterCategory, searchQuery, currentPage]);
 
   const openAddComplaintModal = () => {
     setEditingComplaint(null);
@@ -220,6 +262,7 @@ const Complaints = () => {
       status: 'Open' as Complaint['status'],
     });
     setFormError(null);
+    setFieldErrors({});
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -243,9 +286,19 @@ const Complaints = () => {
     e.preventDefault();
     setIsSubmitting(true);
     setFormError(null);
+    setFieldErrors({});
 
-    if (!newComplaint.title.trim() || !newComplaint.description.trim()) {
-      setFormError('Title and description are required.');
+    // Validate all fields
+    const errors: {[key: string]: string} = {};
+    const titleError = validateField('title', newComplaint.title);
+    const descError = validateField('description', newComplaint.description);
+
+    if (titleError) errors.title = titleError;
+    if (descError) errors.description = descError;
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setFormError('Please fix the errors below');
       setIsSubmitting(false);
       return;
     }
@@ -287,17 +340,29 @@ const Complaints = () => {
       if (response.ok) {
         if (editingComplaint) {
           setComplaints(complaints.map(comp => comp._id === editingComplaint._id ? data : comp));
+          setSuccessMessage('Complaint updated successfully!');
         } else {
           setComplaints([data, ...complaints]);
+          setSuccessMessage('Complaint submitted successfully!');
         }
         closeComplaintModal();
         setImages([]);
       } else {
-        setFormError(data.message || 'Failed to save complaint.');
+        // Handle validation errors from backend
+        if (data.details && Array.isArray(data.details)) {
+          const backendErrors: {[key: string]: string} = {};
+          data.details.forEach((err: any) => {
+            backendErrors[err.field] = err.message;
+          });
+          setFieldErrors(backendErrors);
+          setFormError(data.message || 'Validation failed');
+        } else {
+          setFormError(data.message || 'Failed to save complaint.');
+        }
       }
     } catch (err: any) {
       console.error('Error saving complaint:', err);
-      setFormError('An error occurred while saving the complaint.');
+      setFormError('An error occurred while saving the complaint. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -334,13 +399,13 @@ const Complaints = () => {
   const renderStatus = (status: Complaint['status']) => {
     switch (status) {
       case 'Open':
-        return <span className="text-xs px-2 py-1 rounded-full bg-red-100 text-red-800">Open</span>;
+        return <span className="text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm bg-red-100 text-red-800">Open</span>;
       case 'In Progress':
-        return <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">In Progress</span>;
+        return <span className="text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm bg-yellow-100 text-yellow-800">In Progress</span>;
       case 'Resolved':
-        return <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">Resolved</span>;
+        return <span className="text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm bg-green-100 text-green-800">Resolved</span>;
       case 'Closed':
-        return <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-800">Closed</span>;
+        return <span className="text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm bg-gray-100 text-gray-800">Closed</span>;
       default:
         return null;
     }
@@ -374,7 +439,7 @@ const Complaints = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">{complaint.title}</h3>
-          <span className={`px-3 py-1 rounded-full text-sm ${getStatusColor(complaint.status)}`}>
+          <span className={`px-3 py-1 rounded-lg text-sm ${getStatusColor(complaint.status)}`}>
             {complaint.status}
           </span>
         </div>
@@ -447,50 +512,72 @@ const Complaints = () => {
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-[100px]">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
+        {/* Success Message Banner */}
+        {successMessage && (
+          <div className="mb-6 bg-green-50 border-2 border-green-200 rounded-lg p-4 flex items-center gap-3 animate-fade-in">
+            <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+            <p className="text-green-800 font-medium">{successMessage}</p>
+          </div>
+        )}
+        
         {/* Top Bar: Heading + Add Button */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <h1 className="text-h2 font-extrabold text-black">College Complaints</h1>
           <button
             onClick={openAddComplaintModal}
             aria-label="Add Complaint"
-            className="flex items-center gap-2 px-6 py-3 rounded-full bg-black text-white font-bold text-lg shadow hover:bg-[#00C6A7] transition"
+            className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg shadow hover:bg-[#00C6A7] transition"
           >
             + Add Complaint
           </button>
         </div>
         {/* Filter/Search Row */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
             {/* Filter by Category */}
-            <select
-              value={filterCategory}
-              onChange={e => setFilterCategory(e.target.value as 'all' | 'Academic' | 'Administrative' | 'Facilities' | 'IT' | 'Security' | 'Other')}
-              className="px-4 py-2 rounded-md bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
-            >
-              <option value="all">All Categories</option>
-              <option value="Academic">Academic</option>
-              <option value="Administrative">Administrative</option>
-              <option value="Facilities">Facilities</option>
-              <option value="IT">IT</option>
-              <option value="Security">Security</option>
-              <option value="Other">Other</option>
-            </select>
+            <div className="relative">
+              <select
+                value={filterCategory}
+                onChange={e => setFilterCategory(e.target.value as 'all' | 'Academic' | 'Administrative' | 'Facilities' | 'IT' | 'Security' | 'Other')}
+                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
+              >
+                <option value="all">All Categories</option>
+                <option value="Academic">Academic</option>
+                <option value="Administrative">Administrative</option>
+                <option value="Facilities">Facilities</option>
+                <option value="IT">IT</option>
+                <option value="Security">Security</option>
+                <option value="Other">Other</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
             {/* Filter by Status */}
-            <select
-              value={filterStatus}
-              onChange={e => setFilterStatus(e.target.value as 'all' | 'Open' | 'InProgress' | 'Resolved' | 'Closed')}
-              className="px-4 py-2 rounded-md bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
-            >
-              <option value="All">All Statuses</option>
-              <option value="Open">Open</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Resolved">Resolved</option>
-              <option value="Closed">Closed</option>
-            </select>
+            <div className="relative">
+              <select
+                value={filterStatus}
+                onChange={e => setFilterStatus(e.target.value as 'all' | 'Open' | 'InProgress' | 'Resolved' | 'Closed')}
+                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
+              >
+                <option value="All">All Statuses</option>
+                <option value="Open">Open</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+                <option value="Closed">Closed</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
           {/* AI-Powered Search Bar */}
-          <div className="relative w-full md:w-[500px]">
+          <div className="relative w-full lg:w-[520px]">
             <AIAutocomplete
               value={searchInput}
               onChange={(value) => {
@@ -514,16 +601,16 @@ const Complaints = () => {
           </div>
         </div>
         {/* Card Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {complaints.filter(complaint => complaint).map((complaint, idx) => (
             <div
               key={complaint._id}
               ref={idx === complaints.length - 1 ? lastComplaintRef : undefined}
-              className="bg-white rounded-xl shadow-sm hover:shadow-lg active:shadow-md transition-all duration-300 border border-gray-100 overflow-hidden group cursor-pointer"
+              className="bg-white rounded-lg shadow-sm hover:shadow-lg active:shadow-md transition-all duration-300 border border-gray-100 overflow-hidden group cursor-pointer"
               onClick={() => setSelectedComplaintForDetails(complaint)}
             >
               {/* Image Section with Overlay */}
-              <div className="relative h-48 xs:h-56 sm:h-64 md:h-72 lg:h-80 overflow-hidden">
+              <div className="relative h-64 sm:h-80 overflow-hidden">
                 {complaint.images && complaint.images.length > 0 ? (
                   <>
                     <img
@@ -531,7 +618,7 @@ const Complaints = () => {
                       alt={complaint.title}
                       className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-300"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-50">
@@ -544,7 +631,7 @@ const Complaints = () => {
                 )}
                 {/* Status and Priority Badges */}
                 <div className="absolute top-4 right-4 flex flex-col gap-2">
-                  <span className={`text-xs px-3 py-1.5 rounded-full font-medium shadow-sm ${
+                  <span className={`text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm ${
                     complaint.status === 'Open' ? 'bg-red-100 text-red-800' :
                     complaint.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' :
                     complaint.status === 'Resolved' ? 'bg-green-100 text-green-800' :
@@ -552,7 +639,7 @@ const Complaints = () => {
                   }`}>
                     {complaint.status}
                   </span>
-                  <span className={`text-xs px-3 py-1.5 rounded-full font-medium shadow-sm ${
+                  <span className={`text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm ${
                     complaint.priority === 'Urgent' ? 'bg-red-100 text-red-800' :
                     complaint.priority === 'High' ? 'bg-orange-100 text-orange-800' :
                     complaint.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
@@ -643,8 +730,14 @@ const Complaints = () => {
                           type="text"
                           name="title"
                           value={newComplaint.title}
-                          onChange={handleInputChange}
-                          className={`w-full px-10 py-2 border ${!newComplaint.title.trim() && formError ? 'border-red-400' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm`}
+                          onChange={(e) => {
+                            handleInputChange(e);
+                            if (fieldErrors.title) {
+                              setFieldErrors(prev => ({...prev, title: ''}));
+                            }
+                          }}
+                          onBlur={(e) => handleFieldBlur('title', e.target.value)}
+                          className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.title ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
                           placeholder="e.g. Mess Food Issue, Hostel Cleanliness"
                           required
                           aria-label="Complaint Title"
@@ -652,7 +745,7 @@ const Complaints = () => {
                         <FiTag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                       </div>
                       <p className="text-xs text-gray-500 mt-1">Give a short, descriptive title for the complaint.</p>
-                      {!newComplaint.title.trim() && formError && <p className="text-xs text-red-500 mt-1">Title is required.</p>}
+                      {fieldErrors.title && <p className="text-xs text-red-500 mt-1">{fieldErrors.title}</p>}
                     </div>
 
                     {/* Category */}
@@ -662,7 +755,7 @@ const Complaints = () => {
                         name="category"
                         value={newComplaint.category}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         required
                         aria-label="Complaint Category"
                       >
@@ -683,7 +776,7 @@ const Complaints = () => {
                         name="priority"
                         value={newComplaint.priority}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         required
                         aria-label="Complaint Priority"
                       >
@@ -703,7 +796,7 @@ const Complaints = () => {
                         name="department"
                         value={newComplaint.department}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         required
                         aria-label="Assigned Department"
                       >
@@ -724,7 +817,7 @@ const Complaints = () => {
                           name="status"
                           value={newComplaint.status || editingComplaint.status}
                           onChange={(e) => setNewComplaint({ ...newComplaint, status: e.target.value as Complaint['status'] })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         >
                           <option value="Open">Open</option>
                           <option value="In Progress">In Progress</option>
@@ -743,8 +836,14 @@ const Complaints = () => {
                       <textarea
                         name="description"
                         value={newComplaint.description}
-                        onChange={handleInputChange}
-                        className={`w-full px-10 py-2 border ${!newComplaint.description.trim() && formError ? 'border-red-400' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm`}
+                        onChange={(e) => {
+                          handleInputChange(e);
+                          if (fieldErrors.description) {
+                            setFieldErrors(prev => ({...prev, description: ''}));
+                          }
+                        }}
+                        onBlur={(e) => handleFieldBlur('description', e.target.value)}
+                        className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
                         rows={4}
                         placeholder="Describe the issue, any relevant details, etc."
                         required
@@ -753,7 +852,7 @@ const Complaints = () => {
                       <FiFileText className="absolute left-3 top-3 text-gray-400" />
                     </div>
                     <p className="text-xs text-gray-500 mt-1">Provide details to help address the complaint.</p>
-                    {!newComplaint.description.trim() && formError && <p className="text-xs text-red-500 mt-1">Description is required.</p>}
+                    {fieldErrors.description && <p className="text-xs text-red-500 mt-1">{fieldErrors.description}</p>}
                   </div>
                 </div>
 
@@ -769,7 +868,7 @@ const Complaints = () => {
                   <button
                     type="button"
                     onClick={closeComplaintModal}
-                    className="px-4 py-2 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
                     disabled={isSubmitting}
                   >
                     Cancel
@@ -777,7 +876,7 @@ const Complaints = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`px-4 py-2 rounded-full text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {isSubmitting ? (
                       <span className="flex items-center">
@@ -798,15 +897,15 @@ const Complaints = () => {
          {/* Complaint Details Modal */}
          {selectedComplaintForDetails && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 safe-top safe-bottom">
-                <div className="bg-white rounded-xl shadow-xl p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
+                <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
                   {/* Close Button */}
                   <button
                     onClick={() => setSelectedComplaintForDetails(null)}
                     aria-label="Close"
-                    className="absolute top-4 right-4 z-10 bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg flex items-center justify-center w-10 h-10"
+                    className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] text-white rounded-lg p-2.5 transition-all duration-200 shadow-lg flex items-center justify-center w-10 h-10"
                   >
                     <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
 
@@ -820,7 +919,7 @@ const Complaints = () => {
                             key={index}
                             src={image.url}
                             alt={`${selectedComplaintForDetails.title} image ${index + 1}`}
-                            className="w-full h-48 sm:h-56 md:h-64 object-cover rounded-md cursor-zoom-in hover:opacity-90 active:opacity-75 transition-opacity duration-200"
+                            className="w-full h-48 sm:h-56 md:h-64 object-cover rounded-lg cursor-zoom-in hover:opacity-90 active:opacity-75 transition-opacity duration-200"
                             onClick={() => setZoomedImage(image.url)}
                           />
                         ))}
@@ -855,18 +954,18 @@ const Complaints = () => {
                          user.isAdmin) && 
                         !['Resolved', 'Closed'].includes(selectedComplaintForDetails.status)
                      ) && (
-                        <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-6">
+                        <div className="flex gap-3 mt-6">
                             <button
                                 onClick={() => { setSelectedComplaintForDetails(null); openEditComplaintModal(selectedComplaintForDetails); }}
-                                className="flex-1 sm:flex-none px-4 py-3 sm:py-2.5 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 active:bg-gray-100 flex items-center justify-center min-h-touch"
+                                className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 flex items-center"
                             >
-                                <FiEdit2 className="mr-1.5 sm:mr-1" /> Edit
+                                <FiEdit2 className="mr-1" /> Edit
                             </button>
                             <button
                                 onClick={() => handleDeleteComplaint(selectedComplaintForDetails._id)}
-                                className="flex-1 sm:flex-none px-4 py-3 sm:py-2.5 rounded-full text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 active:bg-red-700 flex items-center justify-center min-h-touch"
+                                className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 flex items-center"
                             >
-                                <FiTrash2 className="mr-1.5 sm:mr-1" /> Delete
+                                <FiTrash2 className="mr-1" /> Delete
                             </button>
                         </div>
                      )}
@@ -876,7 +975,7 @@ const Complaints = () => {
 
          {/* Zoomed Image Modal */}
          {zoomedImage && selectedComplaintForDetails && selectedComplaintForDetails.images && selectedComplaintForDetails.images.length > 0 && (
-           <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 safe-top safe-bottom" onClick={() => setZoomedImage(null)}>
+           <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[60] p-4 safe-top safe-bottom" onClick={() => setZoomedImage(null)}>
              {/* Image */}
              <img 
                src={zoomedImage} 
@@ -890,7 +989,7 @@ const Complaints = () => {
                <>
                  {/* Previous Button */}
                  <button
-                   className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white/30 backdrop-blur-sm rounded-full p-2.5 sm:p-3 text-white hover:bg-white/50 active:bg-white/60 transition-colors duration-200 z-50 min-h-touch min-w-touch"
+                   className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/30 backdrop-blur-sm rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
                    onClick={(e) => {
                      e.stopPropagation();
                      const currentIndex = selectedComplaintForDetails.images.findIndex(img => img.url === zoomedImage);
@@ -899,13 +998,13 @@ const Complaints = () => {
                    }}
                    aria-label="Previous image"
                  >
-                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 sm:w-6 sm:h-6">
+                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                    </svg>
                  </button>
                  {/* Next Button */}
                  <button
-                   className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white/30 backdrop-blur-sm rounded-full p-2.5 sm:p-3 text-white hover:bg-white/50 active:bg-white/60 transition-colors duration-200 z-50 min-h-touch min-w-touch"
+                   className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/30 backdrop-blur-sm rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
                    onClick={(e) => {
                      e.stopPropagation();
                      const currentIndex = selectedComplaintForDetails.images.findIndex(img => img.url === zoomedImage);
@@ -914,7 +1013,7 @@ const Complaints = () => {
                    }}
                    aria-label="Next image"
                  >
-                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 sm:w-6 sm:h-6">
+                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                    </svg>
                  </button>
@@ -925,9 +1024,9 @@ const Complaints = () => {
               <button
                onClick={() => setZoomedImage(null)}
                aria-label="Close zoomed image"
-               className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-white/30 backdrop-blur-sm rounded-full p-2.5 sm:p-3 text-white hover:bg-white/50 active:bg-white/60 transition-colors duration-200 z-50 min-h-touch min-w-touch"
+               className="absolute top-4 right-4 bg-white/30 backdrop-blur-sm rounded-lg p-2 text-white hover:bg-white/50 transition-colors duration-200 z-50"
              >
-               <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                  <line x1="18" y1="6" x2="6" y2="18" />
                  <line x1="6" y1="6" x2="18" y2="18" />
                </svg>

@@ -1,4 +1,3 @@
-import React from "react";
 import { Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -69,13 +68,13 @@ const Navbar1 = ({
   },
 }: Navbar1Props) => {
   return (
-    <section className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md w-full border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 py-3 lg:py-3.5">
+    <section className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md w-full border-b-2 border-gray-100 transition-shadow duration-300">
+      <div className="max-w-7xl mx-auto px-6 py-4">
         <nav className="hidden justify-between lg:flex items-center">
           <div className="flex items-center gap-6">
-            <Link to={logo.url} className="flex items-center gap-2 focus:outline-none rounded-lg px-1" aria-label="Go to home page">
-              <img src={logo.src} className="w-8 h-8" alt={logo.alt} />
-              <span className="text-lg font-extrabold text-black tracking-tight">{logo.title}</span>
+            <Link to={logo.url} className="flex items-center gap-2.5 focus:outline-none rounded-lg transition-transform duration-200 hover:scale-105" aria-label="Go to home page">
+              <img src={logo.src} className="w-8 h-8 transition-transform duration-200" alt={logo.alt} />
+              <span className="text-xl font-extrabold text-black tracking-tight">{logo.title}</span>
             </Link>
             <div className="flex items-center">
               <NavigationMenu>
@@ -85,51 +84,46 @@ const Navbar1 = ({
               </NavigationMenu>
             </div>
           </div>
-          <div className="flex gap-2 items-center">
-            <Button asChild variant="outline" size="sm" className="text-black bg-white border border-gray-300 hover:bg-[#FFD166] hover:text-black hover:border-[#FFD166] transition-colors focus:outline-none">
+          <div className="flex gap-3 items-center">
+            <Button asChild variant="outline" className="h-10 px-4 text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400 transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 rounded-lg hover:shadow-sm">
               <Link to={auth.login.url}>{auth.login.text}</Link>
             </Button>
             {auth.signup.onClick ? (
-              <Button size="sm" onClick={auth.signup.onClick} className="bg-[#181818] text-white hover:bg-[#00C6A7] hover:text-white transition-colors shadow-sm hover:shadow-md focus:outline-none" aria-label={auth.signup.text}>
+              <Button onClick={auth.signup.onClick} className="h-10 px-4 text-sm font-semibold bg-gray-900 text-white hover:bg-gray-800 transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 rounded-lg border-0 hover:shadow-md hover:scale-105 active:scale-95" aria-label={auth.signup.text}>
                 {auth.signup.text}
               </Button>
             ) : (
-              <Button asChild size="sm" className="bg-[#181818] text-white hover:bg-[#00C6A7] hover:text-white transition-colors shadow-sm hover:shadow-md focus:outline-none">
+              <Button asChild className="h-10 px-4 text-sm font-semibold bg-gray-900 text-white hover:bg-gray-800 transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 rounded-lg border-0 hover:shadow-md hover:scale-105 active:scale-95">
                 <Link to={auth.signup.url}>{auth.signup.text}</Link>
               </Button>
             )}
           </div>
         </nav>
         <div className="block lg:hidden">
-          <div className="flex items-center justify-between">
-            <Link to={logo.url} className="flex items-center gap-2.5 py-1 focus:outline-none rounded-lg px-1" aria-label="Go to home page">
-              <img src={logo.src} className="w-9 h-9" alt={logo.alt} />
+          <div className="flex items-center justify-between h-10">
+            <Link to={logo.url} className="flex items-center gap-2.5 focus:outline-none rounded-lg transition-transform duration-200 hover:scale-105" aria-label="Go to home page">
+              <img src={logo.src} className="w-8 h-8 transition-transform duration-200" alt={logo.alt} />
               <span className="text-xl font-extrabold text-black tracking-tight">{logo.title}</span>
             </Link>
             <Sheet>
               <SheetTrigger asChild>
                 <Button 
-                  variant="outline" 
+                  variant="ghost" 
                   size="icon"
-                  className="h-12 w-12 border-2 border-gray-300 bg-white hover:bg-[#00C6A7] hover:border-[#00C6A7] hover:text-white transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none rounded-xl"
+                  className="h-9 w-9 bg-transparent hover:bg-gray-100 transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 rounded-lg p-0 hover:scale-110 active:scale-95"
                   aria-label="Open navigation menu"
                 >
-                  <Menu className="h-6 w-6" />
+                  <Menu className="h-5 w-5 text-black transition-transform duration-200" strokeWidth={2} />
                 </Button>
               </SheetTrigger>
-              <SheetContent className="overflow-y-auto bg-gradient-to-b from-white to-gray-50 w-[85vw] sm:w-[380px] p-0 border-l-4 border-[#00C6A7]">
-                  <SheetHeader className="px-6 pt-8 pb-6 border-b-2 border-gray-100 bg-white">
-                    <SheetTitle className="text-left">
-                      <Link to={logo.url} className="flex items-center gap-3 focus:outline-none rounded-lg px-1" aria-label="Go to home page">
-                        <div className="w-12 h-12 bg-gradient-to-br from-[#00C6A7] to-[#009e87] rounded-xl flex items-center justify-center shadow-md">
-                          <img src={logo.src} className="w-8 h-8" alt={logo.alt} />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-2xl font-extrabold text-black tracking-tight">
-                            {logo.title}
-                          </span>
-                          <span className="text-xs text-gray-500 font-medium">Campus Management</span>
-                        </div>
+              <SheetContent className="bg-white w-[85vw] sm:w-[380px] p-0 border-l-2 border-gray-200 animate-in slide-in-from-right duration-300">
+                  <SheetHeader className="px-6 border-b-2 border-gray-100 min-h-[72px] flex flex-row items-center justify-start">
+                    <SheetTitle className="text-left flex-1">
+                      <Link to={logo.url} className="flex items-center gap-2.5 focus:outline-none rounded-lg transition-transform duration-200 hover:scale-105" aria-label="Go to home page">
+                        <img src={logo.src} className="w-8 h-8 transition-transform duration-200" alt={logo.alt} />
+                        <span className="text-xl font-extrabold text-black tracking-tight">
+                          {logo.title}
+                        </span>
                       </Link>
                     </SheetTitle>
                     <SheetDescription className="sr-only">
@@ -140,19 +134,19 @@ const Navbar1 = ({
                   <Accordion
                     type="single"
                     collapsible
-                    className="flex w-full flex-col gap-3 bg-transparent"
+                    className="flex w-full flex-col gap-3 bg-transparent [&_[data-state=open]]:animate-accordion-down [&_[data-state=closed]]:animate-accordion-up"
                   >
                     {menu.map((item) => renderMobileMenuItem(item))}
                   </Accordion>
                   {mobileExtraLinks.length > 0 && (
-                    <div className="border-t-2 border-gray-200 pt-5 mt-2">
-                      <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-1">Quick Access</h3>
-                      <div className="grid grid-cols-2 gap-3">
+                    <div className="border-t border-gray-200 pt-4 mt-2 animate-in fade-in-50 duration-300">
+                      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-1">Quick Access</h3>
+                      <div className="flex flex-col gap-2">
                         {mobileExtraLinks.map((link, idx) => (
                           <SheetClose key={idx} asChild>
                             <Link
                               to={link.url}
-                              className="inline-flex h-14 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 py-3 text-sm font-bold text-gray-700 bg-white border-2 border-gray-200 transition-all hover:bg-[#FFD166] hover:text-black hover:border-[#FFD166] hover:shadow-md active:scale-95 focus:outline-none shadow-sm"
+                              className="inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 py-3 text-sm font-semibold text-gray-700 bg-white border border-gray-200 transition-all duration-200 ease-in-out hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300 active:scale-98 focus:outline-none focus:ring-0 hover:shadow-sm"
                               aria-label={`Go to ${link.name}`}
                             >
                               {link.name}
@@ -162,21 +156,21 @@ const Navbar1 = ({
                       </div>
                     </div>
                   )}
-                    <div className="flex flex-col gap-3 pt-5 mt-2 border-t-2 border-gray-200">
+                    <div className="flex flex-col gap-2 pt-4 mt-2 border-t border-gray-200 animate-in fade-in-50 duration-300">
                       <SheetClose asChild>
-                        <Button asChild variant="outline" className="w-full h-14 text-base text-gray-700 bg-white border-2 border-gray-300 hover:bg-[#FFD166] hover:text-black hover:border-[#FFD166] transition-colors font-bold rounded-xl active:scale-95 focus:outline-none shadow-sm hover:shadow-md">
+                        <Button asChild variant="outline" className="w-full h-11 text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400 transition-all duration-200 ease-in-out rounded-lg active:scale-98 focus:outline-none focus:ring-0 hover:shadow-sm">
                           <Link to={auth.login.url}>{auth.login.text}</Link>
                         </Button>
                       </SheetClose>
                       {auth.signup.onClick ? (
                         <SheetClose asChild>
-                          <Button onClick={auth.signup.onClick} className="w-full h-14 text-base bg-gradient-to-r from-[#00C6A7] to-[#009e87] text-white hover:from-[#009e87] hover:to-[#008a75] transition-all shadow-md hover:shadow-lg font-bold rounded-xl active:scale-95 focus:outline-none" aria-label={auth.signup.text}>
+                          <Button onClick={auth.signup.onClick} className="w-full h-11 text-sm font-semibold bg-gray-900 text-white hover:bg-gray-800 transition-all duration-200 ease-in-out rounded-lg active:scale-98 focus:outline-none focus:ring-0 hover:shadow-md" aria-label={auth.signup.text}>
                             {auth.signup.text}
                           </Button>
                         </SheetClose>
                       ) : (
                         <SheetClose asChild>
-                          <Button asChild className="w-full h-14 text-base bg-gradient-to-r from-[#00C6A7] to-[#009e87] text-white hover:from-[#009e87] hover:to-[#008a75] transition-all shadow-md hover:shadow-lg font-bold rounded-xl active:scale-95 focus:outline-none">
+                          <Button asChild className="w-full h-11 text-sm font-semibold bg-gray-900 text-white hover:bg-gray-800 transition-all duration-200 ease-in-out rounded-lg active:scale-98 focus:outline-none focus:ring-0 hover:shadow-md">
                             <Link to={auth.signup.url}>{auth.signup.text}</Link>
                           </Button>
                         </SheetClose>
@@ -196,14 +190,14 @@ const renderMenuItem = (item: MenuItem) => {
   if (item.items) {
     return (
       <NavigationMenuItem key={item.title} className="text-black">
-        <NavigationMenuTrigger className="text-black font-bold bg-gray-50 hover:bg-[#00C6A7] hover:text-white data-[state=open]:bg-[#00C6A7] data-[state=open]:text-white transition-colors rounded-full px-4 py-2 focus:outline-none" aria-label={`${item.title} menu`}>{item.title}</NavigationMenuTrigger>
+        <NavigationMenuTrigger className="text-gray-700 font-semibold bg-transparent hover:bg-gray-100 hover:text-gray-900 data-[state=open]:bg-gray-100 data-[state=open]:text-gray-900 focus:bg-gray-100 focus:text-gray-900 transition-colors rounded-lg px-4 py-2 border-0 focus:outline-none focus:ring-0 [&>svg]:text-gray-700 data-[state=open]:[&>svg]:text-gray-900" aria-label={`${item.title} menu`}>{item.title}</NavigationMenuTrigger>
         <NavigationMenuContent>
-          <ul className="w-80 p-3 bg-white shadow-lg border border-gray-100 rounded-lg">
+          <ul className="w-80 p-2 bg-white shadow-xl border border-gray-200 rounded-lg">
             {item.items.map((subItem) => (
               <li key={subItem.title}>
                 <NavigationMenuLink asChild>
                   <Link
-                    className="flex select-none gap-4 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-[#FFD166] hover:text-black"
+                    className="flex select-none gap-3 rounded-lg p-3 leading-none no-underline outline-none transition-all duration-200 ease-in-out hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-0 focus:ring-0 hover:scale-[1.02] active:scale-[0.98]"
                     to={subItem.url}
                     aria-label={`Go to ${subItem.title}`}
                   >
@@ -212,7 +206,7 @@ const renderMenuItem = (item: MenuItem) => {
                         {subItem.title}
                       </div>
                       {subItem.description && (
-                        <p className="text-sm leading-snug text-gray-600 mt-1">
+                        <p className="text-xs leading-snug text-gray-600 mt-1">
                           {subItem.description}
                         </p>
                       )}
@@ -232,7 +226,7 @@ const renderMenuItem = (item: MenuItem) => {
       <NavigationMenuLink asChild>
         <Link
           to={item.url}
-          className="group inline-flex h-10 w-max items-center justify-center rounded-full px-4 py-2 text-sm font-bold text-black bg-gray-50 transition-colors hover:bg-[#00C6A7] hover:text-white focus:outline-none"
+          className="group inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-gray-700 bg-transparent border-0 transition-all duration-200 ease-in-out hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-0 hover:scale-105 active:scale-95"
           aria-label={`Go to ${item.title}`}
         >
           {item.title}
@@ -246,22 +240,22 @@ const renderMobileMenuItem = (item: MenuItem) => {
   if (item.items) {
     return (
       <AccordionItem key={item.title} value={item.title} className="border-none">
-        <AccordionTrigger className="py-4 px-5 font-bold hover:no-underline text-gray-900 bg-white hover:bg-gradient-to-r hover:from-[#00C6A7]/10 hover:to-[#009e87]/10 hover:text-[#00C6A7] data-[state=open]:text-[#00C6A7] data-[state=open]:bg-gradient-to-r data-[state=open]:from-[#00C6A7]/10 data-[state=open]:to-[#009e87]/10 transition-all rounded-xl text-base focus:outline-none shadow-sm border-2 border-gray-100 hover:border-[#00C6A7]/30 data-[state=open]:border-[#00C6A7]/30" aria-label={`${item.title} menu`}>
+        <AccordionTrigger className="py-3 px-4 font-semibold hover:no-underline !text-gray-700 bg-white hover:!bg-gray-100 hover:!text-gray-900 data-[state=open]:!text-gray-900 data-[state=open]:!bg-gray-50 transition-all duration-300 ease-in-out rounded-lg text-sm focus:outline-none focus:ring-0 border border-gray-200 hover:border-gray-300 data-[state=open]:border-gray-300 [&>svg]:!text-gray-700 data-[state=open]:[&>svg]:!text-gray-900 [&>svg]:transition-transform [&>svg]:duration-300 [&>svg]:ease-in-out" aria-label={`${item.title} menu`}>
           {item.title}
         </AccordionTrigger>
-        <AccordionContent className="mt-3 pb-2">
-          <div className="flex flex-col gap-2.5 pl-2">
+        <AccordionContent className="mt-2 pb-2 transition-all duration-300 ease-in-out">
+          <div className="flex flex-col gap-2 pl-2">
             {item.items.map((subItem) => (
               <SheetClose key={subItem.title} asChild>
                 <Link
                   to={subItem.url}
-                  className="flex select-none gap-3 rounded-xl p-4 leading-none outline-none transition-all bg-white hover:bg-gradient-to-r hover:from-[#FFD166] hover:to-[#FFD166]/80 hover:text-black active:scale-95 border-2 border-gray-100 hover:border-[#FFD166] min-h-[68px] shadow-sm hover:shadow-md"
+                  className="flex select-none gap-3 rounded-lg p-3 leading-none outline-none transition-all duration-200 ease-in-out bg-white hover:bg-gray-100 !text-gray-700 hover:!text-gray-900 active:scale-98 border border-gray-200 hover:border-gray-300 focus:ring-0 focus:!text-gray-900"
                   aria-label={`Go to ${subItem.title}`}
                 >
                   <div className="flex-1">
-                    <div className="text-base font-bold text-gray-900 mb-1">{subItem.title}</div>
+                    <div className="text-sm font-semibold !text-gray-900 mb-1">{subItem.title}</div>
                     {subItem.description && (
-                      <p className="text-xs leading-snug text-gray-600">
+                      <p className="text-xs leading-snug !text-gray-600">
                         {subItem.description}
                       </p>
                     )}
@@ -279,7 +273,7 @@ const renderMobileMenuItem = (item: MenuItem) => {
     <SheetClose key={item.title} asChild>
       <Link 
         to={item.url} 
-        className="block py-4 px-5 font-bold text-gray-900 bg-white hover:bg-gradient-to-r hover:from-[#00C6A7]/10 hover:to-[#009e87]/10 hover:text-[#00C6A7] transition-all rounded-xl text-base min-h-[56px] flex items-center active:scale-95 focus:outline-none shadow-sm border-2 border-gray-100 hover:border-[#00C6A7]/30"
+        className="block py-3 px-4 font-semibold !text-gray-700 bg-white hover:bg-gray-100 hover:!text-gray-900 transition-all duration-200 ease-in-out rounded-lg text-sm h-11 flex items-center active:scale-98 focus:outline-none focus:ring-0 border border-gray-200 hover:border-gray-300 focus:!text-gray-900"
         aria-label={`Go to ${item.title}`}
       >
         {item.title}

@@ -140,7 +140,7 @@ export const PageSkeleton: React.FC<{
 }) => {
   return (
     <div className="min-h-screen bg-white font-sans">
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-[100px]">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         {showHeader && (
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
             <Skeleton height="40px" width="300px" />
@@ -174,7 +174,7 @@ export const PageSkeleton: React.FC<{
 export const ProfileSkeleton: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#fafbfc] font-sans">
-      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-[100px]">
+      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         <div className="max-w-3xl mx-auto">
           <div className="mb-8 flex flex-col items-center">
             <div className="w-full flex flex-col items-center">

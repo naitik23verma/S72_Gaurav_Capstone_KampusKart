@@ -157,8 +157,8 @@ const AIAutocomplete: React.FC<AIAutocompleteProps> = ({
 
   return (
     <div className={`relative ${className}`} ref={wrapperRef}>
-      <div className="relative w-full rounded-full border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 overflow-hidden">
-        <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+      <div className="relative w-full rounded-xl border-2 border-gray-200 bg-white shadow-sm hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
+        <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
         <input
           ref={inputRef}
           type="text"
@@ -168,14 +168,14 @@ const AIAutocomplete: React.FC<AIAutocompleteProps> = ({
           onFocus={() => { decideDropdownDirection(); if (suggestions.length > 0) setIsOpen(true); }}
           placeholder={placeholder}
           disabled={disabled}
-          className="w-full pl-10 pr-24 sm:pr-32 py-3 sm:py-2.5 bg-transparent text-black outline-none text-base sm:text-sm border-none"
+          className="flex-1 pl-12 pr-3 py-3.5 bg-transparent text-gray-700 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-xl"
         />
         {showSubmitButton && (
           <button
             type="button"
             onClick={() => onSubmit && onSubmit()}
             disabled={disabled || isLoading}
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-10 sm:h-9 px-3.5 sm:px-4 rounded-full bg-[#00C6A7] text-white font-semibold text-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-xl rounded-l-none"
             aria-label={submitLabel}
           >
             {isLoading ? (
@@ -193,26 +193,26 @@ const AIAutocomplete: React.FC<AIAutocompleteProps> = ({
       {isOpen && suggestions.length > 0 && (
         <div
           ref={dropdownRef}
-          className={`${openUpward ? 'bottom-full mb-1' : 'top-full mt-1'} absolute z-50 w-full bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg shadow-lg max-h-[50vh] sm:max-h-64 overflow-auto`}
+          className={`${openUpward ? 'bottom-full mb-2' : 'top-full mt-2'} absolute z-50 w-full bg-white border-2 border-gray-200 rounded-xl shadow-xl max-h-[50vh] sm:max-h-80 overflow-auto`}
         >
           {suggestions.map((suggestion, index) => (
             <div
               key={suggestion.id}
               onClick={() => handleSuggestionClick(suggestion)}
-              className={`flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors ${index === highlightedIndex ? 'bg-blue-50' : ''}`}
+              className={`flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${index === highlightedIndex ? 'bg-[#00C6A7]/5 border-l-4 border-l-[#00C6A7]' : ''}`}
             >
-              <div className="flex items-center space-x-2 flex-1 min-w-0">
+              <div className="flex items-center space-x-3 flex-1 min-w-0">
                 {getSuggestionIcon(suggestion.type)}
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-900 line-clamp-1">{suggestion.text}</div>
+                  <div className="text-sm font-semibold text-gray-900 line-clamp-1">{suggestion.text}</div>
                   {suggestion.category && (
-                    <div className="text-[10px] text-gray-500">{suggestion.category}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{suggestion.category}</div>
                   )}
                 </div>
               </div>
               <div className="flex items-center space-x-2">
                 {typeof suggestion.confidence === 'number' && (
-                  <span className="text-[10px] text-gray-400">{Math.round(suggestion.confidence * 100)}%</span>
+                  <span className="text-xs text-gray-400 font-medium">{Math.round(suggestion.confidence * 100)}%</span>
                 )}
                 {getSuggestionBadge(suggestion.type)}
               </div>

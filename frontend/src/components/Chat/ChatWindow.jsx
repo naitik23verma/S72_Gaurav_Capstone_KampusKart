@@ -44,7 +44,7 @@ import { ChatSkeleton } from '../common/SkeletonLoader';
 const CHAT_THEME = {
   primary: '#181818',        // Dark gray/black - matches button default bg
   primaryHover: '#00C6A7',   // Teal - matches button hover state
-  primaryDark: '#009e87',    // Darker teal for gradients
+  primaryDark: '#009e87',    // Darker teal
   primaryLight: '#00E6C4',   // Lighter teal
   primaryRgba: 'rgba(0, 198, 167,', // For rgba colors - RGB values for #00C6A7
   primaryDarkRgba: 'rgba(24, 24, 24,', // For rgba colors - RGB values for #181818
@@ -465,7 +465,7 @@ const ChatWindow = () => {
           left: 0,
           right: 0,
           height: '1px',
-          background: 'linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.05), transparent)',
+          background: 'rgba(0, 0, 0, 0.05)',
         }
       }}
     >
@@ -589,9 +589,6 @@ const ChatWindow = () => {
         <Box 
           sx={{
             bgcolor: isOwnMessage ? '#f0fdf4' : '#ffffff',
-            background: isOwnMessage 
-              ? 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)'
-              : 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)',
             border: isOwnMessage 
               ? '1px solid rgba(0, 198, 167, 0.2)' 
               : '1px solid rgba(0, 0, 0, 0.06)',
@@ -827,7 +824,7 @@ const ChatWindow = () => {
           overflow: 'hidden',
           height: '100vh',
           minHeight: 0,
-          pt: '64px',
+          pt: '72px', // Padding to match navbar height
         }}
       >
         {/* Chat Header during error */}
@@ -941,7 +938,7 @@ const ChatWindow = () => {
           overflow: 'hidden',
           height: '100vh',
           minHeight: 0,
-          pt: '64px',
+          pt: '72px', // Padding to match navbar height
         }}
       >
         <ChatSkeleton messageCount={8} />
@@ -960,11 +957,10 @@ const ChatWindow = () => {
       display: 'flex',
       flexDirection: 'column',
       bgcolor: '#fafafa',
-      background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e8f4f0 100%)',
       overflow: 'hidden',
       height: '100vh',
       minHeight: 0,
-      pt: '64px', // Use padding-top instead of top positioning
+      pt: '72px', // Padding to match navbar height
       '&::before': {
         content: '""',
         position: 'absolute',
@@ -998,12 +994,12 @@ const ChatWindow = () => {
           borderRadius: '10px',
         },
         '&::-webkit-scrollbar-thumb': {
-          background: `linear-gradient(180deg, ${CHAT_THEME.primaryHover} 0%, ${CHAT_THEME.primaryDark} 100%)`,
+          background: CHAT_THEME.primaryHover,
           borderRadius: '10px',
           border: '2px solid transparent',
           backgroundClip: 'padding-box',
           '&:hover': {
-            background: `linear-gradient(180deg, ${CHAT_THEME.primaryDark} 0%, ${CHAT_THEME.primaryDark} 100%)`,
+            background: CHAT_THEME.primaryDark,
             backgroundClip: 'padding-box',
           },
         },
@@ -1053,7 +1049,7 @@ const ChatWindow = () => {
         bottom: 0, 
         left: 0, 
         right: 0, 
-        background: 'linear-gradient(180deg, transparent 0%, #fafafa 10%)',
+        background: '#fafafa',
         zIndex: 20, 
         pt: 2, 
         pb: 'env(safe-area-inset-bottom)',
@@ -1065,8 +1061,7 @@ const ChatWindow = () => {
             sx={{ 
               p: 1.5, 
               mb: 1.5, 
-              bgcolor: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
-              background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
+              bgcolor: '#f0fdf4',
               borderRadius: '14px',
               border: `1px solid ${CHAT_THEME.primaryRgba}0.2)`,
               boxShadow: `0 2px 8px ${CHAT_THEME.primaryRgba}0.1)`,
@@ -1079,7 +1074,7 @@ const ChatWindow = () => {
                 top: 0,
                 bottom: 0,
                 width: '4px',
-                background: `linear-gradient(180deg, ${CHAT_THEME.primaryHover} 0%, ${CHAT_THEME.primaryDark} 100%)`,
+                background: CHAT_THEME.primaryHover,
                 borderRadius: '2px 0 0 2px',
               }
             }}
@@ -1181,7 +1176,6 @@ const ChatWindow = () => {
             borderRadius: '24px',
             border: '1px solid rgba(0, 0, 0, 0.08)',
             bgcolor: '#ffffff',
-            background: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)',
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             position: 'relative',
             '&::before': {
@@ -1190,7 +1184,7 @@ const ChatWindow = () => {
               inset: 0,
               borderRadius: 'inherit',
               padding: '1px',
-              background: `linear-gradient(135deg, ${CHAT_THEME.primaryRgba}0.1), ${CHAT_THEME.primaryRgba}0.05))`,
+              background: `${CHAT_THEME.primaryRgba}0.1)`,
               WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
               WebkitMaskComposite: 'xor',
               maskComposite: 'exclude',
@@ -1274,8 +1268,7 @@ const ChatWindow = () => {
                     alignItems: 'center', 
                     p: 0.75, 
                     px: 1.25,
-                    bgcolor: 'linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%)',
-                    background: 'linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%)',
+                    bgcolor: '#e0f2fe',
                     borderRadius: '12px',
                     border: '1px solid ${CHAT_THEME.primaryRgba} 0.2)',
                     boxShadow: '0 2px 6px ${CHAT_THEME.primaryRgba} 0.1)',

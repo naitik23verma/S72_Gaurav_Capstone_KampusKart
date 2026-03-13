@@ -39,6 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [initializing, setInitializing] = useState(true);
   const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tokenRef = useRef<string | null>(null);
+  const isRefreshingRef = useRef<boolean>(false); // Prevent concurrent refreshes
 
   // On mount, check both storages for a valid token
   useEffect(() => {
@@ -92,29 +93,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       clearTimeout(refreshTimeoutRef.current);
     }
 
-    // Set up new refresh timeout (refresh 5 minutes before expiry)
+    // Token expires in 24 hours, refresh 1 hour before expiry (23 hours)
+    // This gives plenty of time for the refresh to complete
+    const refreshTime = 23 * 60 * 60 * 1000; // 23 hours in milliseconds
+    
     const timeout = setTimeout(() => {
       refreshToken();
-    }, 19 * 60 * 1000); // 19 minutes (assuming 24-hour token expiry)
+    }, refreshTime);
 
     refreshTimeoutRef.current = timeout;
   };
 
   const refreshToken = async () => {
+    // Prevent concurrent refresh attempts
+    if (isRefreshingRef.current) {
+      console.log('Token refresh already in progress, skipping...');
+      return;
+    }
+
     try {
+      isRefreshingRef.current = true;
       const currentToken = tokenRef.current;
+      
       if (!currentToken) {
+        console.log('No token available for refresh');
         return;
       }
+      
+      console.log('Refreshing authentication token...');
       const response = await axios.post(`${API_BASE}/api/auth/refresh`, {}, {
         headers: { Authorization: `Bearer ${currentToken}` }
       });
+      
       const { token: newToken } = response.data;
       setToken(newToken);
+      
+      // Update storage
+      const expiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
       localStorage.setItem('token', newToken);
-      localStorage.setItem('token_expiry', (Date.now() + 24 * 60 * 60 * 1000).toString());
+      localStorage.setItem('token_expiry', expiry.toString());
+      
+      console.log('Token refreshed successfully');
     } catch (error) {
-      logout();
+      console.error('Token refresh failed:', error);
+      // Only logout if the error is authentication-related
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        logout();
+      }
+    } finally {
+      isRefreshingRef.current = false;
     }
   };
 

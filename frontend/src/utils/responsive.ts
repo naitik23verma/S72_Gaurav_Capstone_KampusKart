@@ -68,10 +68,10 @@ export const gridClasses = {
  * Responsive button classes
  */
 export const buttonClasses = {
-  primary: 'px-4 py-2 md:px-6 md:py-3 text-sm md:text-base font-semibold rounded-full transition-all duration-200',
-  secondary: 'px-4 py-2 md:px-6 md:py-3 text-sm md:text-base font-medium rounded-full transition-all duration-200',
-  icon: 'p-2 md:p-3 rounded-full transition-all duration-200',
-  mobile: 'px-6 py-3 text-base font-semibold rounded-full transition-all duration-200',
+  primary: 'px-4 py-2 md:px-6 md:py-3 text-sm md:text-base font-semibold rounded-lg transition-all duration-200',
+  secondary: 'px-4 py-2 md:px-6 md:py-3 text-sm md:text-base font-medium rounded-lg transition-all duration-200',
+  icon: 'p-2 md:p-3 rounded-lg transition-all duration-200',
+  mobile: 'px-6 py-3 text-base font-semibold rounded-lg transition-all duration-200',
 } as const;
 
 /**

@@ -233,8 +233,8 @@ const Signup: React.FC = () => {
                 </button>
                 {Object.keys(passwordErrors).length > 0 && (
                   <div className="mt-1 space-y-1">
-                    {Object.values(passwordErrors).map((error, index) => (
-                      error && <p key={index} className="text-sm text-red-500">{error}</p>
+                    {Object.entries(passwordErrors).map(([field, error]) => (
+                      error && <p key={field} className="text-sm text-red-500">{error}</p>
                     ))}
                   </div>
                 )}

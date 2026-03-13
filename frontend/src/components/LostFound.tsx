@@ -716,11 +716,11 @@ const LostFound = () => {
             {/* Image Gallery with zoom */}
             {selectedItemForDetails.images && selectedItemForDetails.images.length > 0 && (
               <div className="mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                {selectedItemForDetails.images.map((image, index) => (
+                {selectedItemForDetails.images.map((image) => (
                   <img
-                    key={index}
+                    key={image.public_id || image.url}
                     src={image.url}
-                    alt={`${selectedItemForDetails.title} image ${index + 1}`}
+                    alt={`${selectedItemForDetails.title} image`}
                     className="w-full h-48 sm:h-56 md:h-64 object-cover rounded-md cursor-zoom-in hover:opacity-90 active:opacity-75 transition-opacity duration-200"
                     onClick={() => setZoomedImage(image.url)}
                   />

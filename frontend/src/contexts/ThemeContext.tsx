@@ -12,7 +12,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Force light mode - dark mode disabled
-  const [theme] = useState<Theme>('light');
+  const [theme, setThemeState] = useState<Theme>('light');
 
   useEffect(() => {
     const root = window.document.documentElement;

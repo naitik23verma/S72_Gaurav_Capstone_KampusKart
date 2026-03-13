@@ -49,6 +49,7 @@ const profileRoutes = require('./routes/profile');
 const complaintsRoutes = require('./routes/complaints');
 const startDeletionCronJob = require('./cron/deleteItems');
 const { startKeepAlive } = require('./cron/keepAlive');
+require('./cron/lostFoundCron'); // Import lost/found cron job
 const http = require('http');
 const { Server } = require('socket.io');
 const newsRoutes = require('./routes/news');
@@ -57,6 +58,7 @@ const facilitiesRoutes = require('./routes/facilities');
 const chatRoutes = require('./routes/chat');
 const clubsRoutes = require('./routes/clubs');
 const Chat = require('./models/Chat');
+const User = require('./models/User');
 
 const app = express();
 
@@ -83,8 +85,6 @@ app.use(cors({
       'https://kampuskart.netlify.app',
       'https://s72-gaurav-capstone.onrender.com'
     ];
-    // Log the origin for debugging
-    console.log('CORS check:', { origin });
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     if (!Array.isArray(allowedOrigins)) {
@@ -111,7 +111,6 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/complaints', complaintsRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/events', eventsRoutes);
-app.use('/api/lost-found', lostfoundRoutes);
 app.use('/api/facilities', facilitiesRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/clubs', clubsRoutes);
@@ -222,7 +221,7 @@ const io = new Server(server, {
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
   },
   transports: ['websocket', 'polling'],
-  maxHttpBufferSize: 1e8, // 100MB
+  maxHttpBufferSize: 1e6, // 1MB
 });
 
 // Make io accessible in routes
@@ -231,25 +230,60 @@ app.set('io', io);
 // Keep track of online users
 const onlineUsers = new Map();
 
+// Socket.IO authentication middleware
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token;
+  if (!token) {
+    return next(new Error('Authentication error: token required'));
+  }
+
+  try {
+    const jwt = require('jsonwebtoken');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    socket.userId = decoded.userId;
+  } catch (err) {
+    return next(new Error('Authentication error: invalid token'));
+  }
+
+  next();
+});
+
 io.on('connection', (socket) => {
   console.log('New client connected');
 
   // User joins the chat
-  socket.on('join', async (userData) => {
-    onlineUsers.set(socket.id, userData);
-    socket.join('global-chat');
-    
-    // Send online users list to all clients
-    io.emit('online-users', Array.from(onlineUsers.values()));
-    
-    // Send last 50 messages to the new user
-    const messages = await Chat.find({ isDeleted: false })
-      .sort({ timestamp: -1 })
-      .limit(50)
-      .populate('sender', 'name profilePicture')
-      .lean();
-    
-    socket.emit('previous-messages', messages.reverse());
+  socket.on('join', async () => {
+    try {
+      const authenticatedUser = await User.findById(socket.userId).select('name profilePicture');
+      if (!authenticatedUser) {
+        socket.emit('error', 'User not found');
+        return;
+      }
+
+      const userData = {
+        _id: authenticatedUser._id,
+        name: authenticatedUser.name,
+        profilePicture: authenticatedUser.profilePicture,
+      };
+
+      onlineUsers.set(socket.id, userData);
+      socket.join('global-chat');
+      
+      // Send online users list to all clients
+      io.emit('online-users', Array.from(onlineUsers.values()));
+      
+      // Send last 50 messages to the new user
+      const messages = await Chat.find({ isDeleted: false })
+        .sort({ timestamp: -1 })
+        .limit(50)
+        .populate('sender', 'name profilePicture')
+        .lean();
+      
+      socket.emit('previous-messages', messages.reverse());
+    } catch (error) {
+      console.error('Error in socket join handler:', error);
+      socket.emit('error', 'Failed to join chat');
+    }
   });
 
   // Handle new messages (this is a fallback, main message handling is via HTTP API)

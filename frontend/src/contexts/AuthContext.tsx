@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { API_BASE, isProduction } from '../config';
 import { AppSkeleton } from '../components/common/AppSkeleton';
@@ -37,7 +37,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [initializing, setInitializing] = useState(true);
-  const [refreshTimeout, setRefreshTimeout] = useState<NodeJS.Timeout | null>(null);
+  const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tokenRef = useRef<string | null>(null);
 
   // On mount, check both storages for a valid token
   useEffect(() => {
@@ -74,6 +75,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
+    tokenRef.current = token;
+  }, [token]);
+
+  useEffect(() => {
     console.log('AuthContext: Token state changed effect. Current token:', token ? 'present' : 'null');
     if (token) {
       fetchProfile();
@@ -82,17 +87,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } else {
       setUser(null);
       // Clear any existing refresh timeout
-      if (refreshTimeout) {
-        clearTimeout(refreshTimeout);
-        setRefreshTimeout(null);
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+        refreshTimeoutRef.current = null;
       }
     }
   }, [token]);
 
   const setupTokenRefresh = () => {
     // Clear any existing refresh timeout
-    if (refreshTimeout) {
-      clearTimeout(refreshTimeout);
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
     }
 
     // Set up new refresh timeout (refresh 5 minutes before expiry)
@@ -100,14 +105,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       refreshToken();
     }, 19 * 60 * 1000); // 19 minutes (assuming 24-hour token expiry)
 
-    setRefreshTimeout(timeout);
+    refreshTimeoutRef.current = timeout;
   };
 
   const refreshToken = async () => {
     console.log('AuthContext: Attempting to refresh token');
     try {
+      const currentToken = tokenRef.current;
+      if (!currentToken) {
+        return;
+      }
       const response = await axios.post(`${API_BASE}/api/auth/refresh`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${currentToken}` }
       });
       const { token: newToken } = response.data;
       setToken(newToken);
@@ -171,7 +180,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setToken(token);
           setUser(user);
           // Always save token to localStorage with expiry for persistent login
-          const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
+          const expiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
           localStorage.setItem('token', token);
           localStorage.setItem('token_expiry', expiry.toString());
           sessionStorage.removeItem('token');
@@ -277,7 +286,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(user);
           
           // Always save token to localStorage with expiry for persistent login
-          const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
+          const expiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
           localStorage.setItem('token', token);
           localStorage.setItem('token_expiry', expiry.toString());
           sessionStorage.removeItem('token');
@@ -332,9 +341,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sessionStorage.removeItem('token');
     setToken(null);
     setUser(null);
-    if (refreshTimeout) {
-      clearTimeout(refreshTimeout);
-      setRefreshTimeout(null);
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+      refreshTimeoutRef.current = null;
     }
     console.log('AuthContext: Logout complete');
   };
@@ -387,7 +396,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       setUser(response.data);
       // Always save token to localStorage with expiry for persistent login
-      const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
+      const expiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
       localStorage.setItem('token', token);
       localStorage.setItem('token_expiry', expiry.toString());
       sessionStorage.removeItem('token');

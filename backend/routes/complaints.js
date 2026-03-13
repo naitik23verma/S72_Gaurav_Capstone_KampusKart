@@ -6,6 +6,12 @@ const User = require('../models/User');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
+const { sanitizeInput, validateComplaint } = require('../middleware/validation');
+
+// Helper function to escape regex special characters
+const escapeRegex = (string) => {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
 
 // Cloudinary configuration
 cloudinary.config({
@@ -50,9 +56,10 @@ router.get('/', protect, async (req, res) => {
     }
 
     if (search && typeof search === 'string') {
+      const escapedSearch = escapeRegex(search);
       query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
+        { title: { $regex: escapedSearch, $options: 'i' } },
+        { description: { $regex: escapedSearch, $options: 'i' } },
       ];
     }
 
@@ -81,7 +88,7 @@ router.get('/', protect, async (req, res) => {
 // @desc    Create a new complaint
 // @route   POST /api/complaints
 // @access  Private
-router.post('/', protect, upload.array('images', 5), async (req, res) => {
+router.post('/', protect, sanitizeInput, validateComplaint, upload.array('images', 5), async (req, res) => {
   const { title, description, category, priority, department } = req.body;
 
   if (!title || !description) {
@@ -194,17 +201,7 @@ router.delete('/:id', protect, async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to delete this complaint.' });
     }
 
-    // Delete all images from Cloudinary
-    if (Array.isArray(complaint.images)) {
-      for (const img of complaint.images) {
-        try {
-          await cloudinary.uploader.destroy(img.public_id);
-        } catch (err) {
-          // Ignore errors
-        }
-      }
-    }
-
+    // Soft delete - do NOT delete images from Cloudinary so they remain if restored
     complaint.isDeleted = true;
     complaint.deletedAt = new Date();
     await complaint.save();
@@ -230,9 +227,10 @@ router.get('/admin/all', protect, async (req, res) => {
     }
 
     if (search) {
+      const escapedSearch = escapeRegex(search);
       query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
+        { title: { $regex: escapedSearch, $options: 'i' } },
+        { description: { $regex: escapedSearch, $options: 'i' } },
       ];
     }
 
@@ -241,8 +239,8 @@ router.get('/admin/all', protect, async (req, res) => {
       query.isDeleted = { $ne: true };
     }
 
-    const parsedPage = parseInt(page, 10);
-    const parsedLimit = parseInt(limit, 10);
+    const parsedPage = Math.max(1, parseInt(page, 10) || 1);
+    const parsedLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 50));
     const skip = (parsedPage - 1) * parsedLimit;
 
     const totalItems = await Complaint.countDocuments(query);

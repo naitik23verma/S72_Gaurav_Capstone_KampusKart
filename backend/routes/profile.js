@@ -88,34 +88,41 @@ router.put('/', authMiddleware, upload.single('profilePicture'), async (req, res
       const uploadStream = cloudinary.uploader.upload_stream(
         { folder: 'profile_pictures' }, // Optional: specify a folder
         async (error, result) => {
-          if (error) {
-            console.error('Cloudinary upload error:', error);
-            // If upload fails, respond with error and return to prevent further execution
-            return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
+          try {
+            if (error) {
+              console.error('Cloudinary upload error:', error);
+              // If upload fails, respond with error and return to prevent further execution
+              return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
+            }
+
+            // Update user document with new profile picture info
+            user.profilePicture = {
+              url: result.secure_url,
+              public_id: result.public_id,
+            };
+
+            // Save the user with the updated profile picture field and other profile fields
+            // Merge profileFields into user object before saving
+            Object.assign(user, profileFields);
+            await user.save();
+
+            // Respond with the updated user data after handling the picture
+            const updatedUser = await User.findById(req.user.id).select('-password -resetPasswordOTP -resetPasswordExpires');
+            
+            // Convert to plain object and add isAdmin field
+            const userObject = updatedUser.toObject();
+            const adminEmails = process.env.ADMIN_EMAILS ? 
+              process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : 
+              [];
+            userObject.isAdmin = adminEmails.includes(updatedUser.email);
+            
+            res.json(userObject);
+          } catch (callbackErr) {
+            console.error('Error in profile image upload callback:', callbackErr);
+            if (!res.headersSent) {
+              res.status(500).json({ message: 'Failed to update profile', error: callbackErr.message });
+            }
           }
-
-          // Update user document with new profile picture info
-          user.profilePicture = {
-            url: result.secure_url,
-            public_id: result.public_id,
-          };
-
-          // Save the user with the updated profile picture field and other profile fields
-          // Merge profileFields into user object before saving
-          Object.assign(user, profileFields);
-          await user.save();
-
-          // Respond with the updated user data after handling the picture
-          const updatedUser = await User.findById(req.user.id).select('-password -resetPasswordOTP -resetPasswordExpires');
-          
-          // Convert to plain object and add isAdmin field
-          const userObject = updatedUser.toObject();
-          const adminEmails = process.env.ADMIN_EMAILS ? 
-            process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : 
-            [];
-          userObject.isAdmin = adminEmails.includes(updatedUser.email);
-          
-          res.json(userObject);
         }
       );
 

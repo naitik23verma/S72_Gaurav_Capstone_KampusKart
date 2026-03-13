@@ -27,7 +27,7 @@ router.get('/', async (req, res) => {
 
 // POST new club recruitment (admin only)
 router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
-  if (req.user.email !== 'gauravkhandelwal205@gmail.com') {
+  if (!req.user.isAdmin) {
     return res.status(403).json({ message: 'Not authorized to add club recruitments.' });
   }
 
@@ -42,23 +42,30 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         { folder: 'clubs' },
         async (error, result) => {
-          if (error) {
-            return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
+          try {
+            if (error) {
+              return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
+            }
+            image = { public_id: result.public_id, url: result.secure_url };
+            const club = new ClubRecruitment({
+              title,
+              description,
+              clubName,
+              startDate,
+              endDate,
+              formUrl,
+              image,
+              contactInfo: contactInfo ? JSON.parse(contactInfo) : undefined,
+              status: status || 'Open',
+            });
+            const savedClub = await club.save();
+            res.status(201).json(savedClub);
+          } catch (err) {
+            console.error('Error in Cloudinary upload callback:', err);
+            if (!res.headersSent) {
+              res.status(500).json({ message: 'Error creating club recruitment', error: err.message });
+            }
           }
-          image = { public_id: result.public_id, url: result.secure_url };
-          const club = new ClubRecruitment({
-            title,
-            description,
-            clubName,
-            startDate,
-            endDate,
-            formUrl,
-            image,
-            contactInfo: contactInfo ? JSON.parse(contactInfo) : undefined,
-            status: status || 'Open',
-          });
-          const savedClub = await club.save();
-          res.status(201).json(savedClub);
         }
       );
       streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
@@ -89,7 +96,7 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
 
 // Update a club recruitment (admin only)
 router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
-  if (req.user.email !== 'gauravkhandelwal205@gmail.com') {
+  if (!req.user.isAdmin) {
     return res.status(403).json({ message: 'Only admin can edit club recruitments.' });
   }
   const { title, description, clubName, startDate, endDate, formUrl, contactInfo, status } = req.body;
@@ -111,20 +118,27 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         { folder: 'clubs' },
         async (error, result) => {
-          if (error) {
-            return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
+          try {
+            if (error) {
+              return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
+            }
+            club.image = { public_id: result.public_id, url: result.secure_url };
+            club.title = title;
+            club.description = description;
+            club.clubName = clubName;
+            club.startDate = startDate;
+            club.endDate = endDate;
+            club.formUrl = formUrl;
+            club.contactInfo = contactInfo ? JSON.parse(contactInfo) : undefined;
+            club.status = status;
+            await club.save();
+            res.json(club);
+          } catch (err) {
+            console.error('Error in Cloudinary upload callback:', err);
+            if (!res.headersSent) {
+              res.status(500).json({ message: 'Error updating club recruitment', error: err.message });
+            }
           }
-          club.image = { public_id: result.public_id, url: result.secure_url };
-          club.title = title;
-          club.description = description;
-          club.clubName = clubName;
-          club.startDate = startDate;
-          club.endDate = endDate;
-          club.formUrl = formUrl;
-          club.contactInfo = contactInfo ? JSON.parse(contactInfo) : undefined;
-          club.status = status;
-          await club.save();
-          res.json(club);
         }
       );
       streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
@@ -148,12 +162,21 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
 
 // Delete a club recruitment (admin only)
 router.delete('/:id', authMiddleware, async (req, res) => {
-  if (req.user.email !== 'gauravkhandelwal205@gmail.com') {
+  if (!req.user.isAdmin) {
     return res.status(403).json({ message: 'Only admin can delete club recruitments.' });
   }
   try {
-    const deleted = await ClubRecruitment.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: 'Club recruitment not found.' });
+    const club = await ClubRecruitment.findById(req.params.id);
+    if (!club) return res.status(404).json({ message: 'Club recruitment not found.' });
+    // Delete image from Cloudinary if exists
+    if (club.image && club.image.public_id) {
+      try {
+        await cloudinary.uploader.destroy(club.image.public_id);
+      } catch (err) {
+        console.error('Error deleting club image:', err);
+      }
+    }
+    await club.deleteOne();
     res.json({ message: 'Club recruitment deleted.' });
   } catch (err) {
     res.status(400).json({ message: err.message });

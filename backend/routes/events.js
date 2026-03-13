@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
 
 // POST new event (admin only)
 router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
-  if (req.user.email !== 'gauravkhandelwal205@gmail.com') {
+  if (!req.user.isAdmin) {
     return res.status(403).json({ message: 'Not authorized to add events.' });
   }
 
@@ -54,24 +54,31 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         { folder: 'events' },
         async (error, result) => {
-          if (error) {
-            return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
+          try {
+            if (error) {
+              return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
+            }
+            image = { public_id: result.public_id, url: result.secure_url };
+            const event = new Event({
+              title,
+              description,
+              date,
+              location,
+              status: status || 'Upcoming',
+              registerUrl,
+              image,
+              operatingHours,
+              contactInfo: contactInfo ? JSON.parse(contactInfo) : undefined,
+              mapLocation: mapLocation ? JSON.parse(mapLocation) : undefined
+            });
+            const savedEvent = await event.save();
+            res.status(201).json(savedEvent);
+          } catch (err) {
+            console.error('Error in Cloudinary upload callback:', err);
+            if (!res.headersSent) {
+              res.status(500).json({ message: 'Error creating event', error: err.message });
+            }
           }
-          image = { public_id: result.public_id, url: result.secure_url };
-          const event = new Event({
-            title,
-            description,
-            date,
-            location,
-            status: status || 'Upcoming',
-            registerUrl,
-            image,
-            operatingHours,
-            contactInfo: contactInfo ? JSON.parse(contactInfo) : undefined,
-            mapLocation: mapLocation ? JSON.parse(mapLocation) : undefined
-          });
-          const savedEvent = await event.save();
-          res.status(201).json(savedEvent);
         }
       );
       streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
@@ -103,7 +110,7 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
 
 // Update an event (admin only)
 router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
-  if (req.user.email !== 'gauravkhandelwal205@gmail.com') {
+  if (!req.user.isAdmin) {
     return res.status(403).json({ message: 'Only admin can edit events.' });
   }
   const { 
@@ -139,21 +146,28 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         { folder: 'events' },
         async (error, result) => {
-          if (error) {
-            return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
+          try {
+            if (error) {
+              return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
+            }
+            event.image = { public_id: result.public_id, url: result.secure_url };
+            event.title = title;
+            event.description = description;
+            event.date = date;
+            event.location = location;
+            event.status = status;
+            event.registerUrl = registerUrl;
+            event.operatingHours = operatingHours;
+            event.contactInfo = contactInfo ? JSON.parse(contactInfo) : undefined;
+            event.mapLocation = mapLocation ? JSON.parse(mapLocation) : undefined;
+            await event.save();
+            res.json(event);
+          } catch (err) {
+            console.error('Error in Cloudinary upload callback:', err);
+            if (!res.headersSent) {
+              res.status(500).json({ message: 'Error updating event', error: err.message });
+            }
           }
-          event.image = { public_id: result.public_id, url: result.secure_url };
-          event.title = title;
-          event.description = description;
-          event.date = date;
-          event.location = location;
-          event.status = status;
-          event.registerUrl = registerUrl;
-          event.operatingHours = operatingHours;
-          event.contactInfo = contactInfo ? JSON.parse(contactInfo) : undefined;
-          event.mapLocation = mapLocation ? JSON.parse(mapLocation) : undefined;
-          await event.save();
-          res.json(event);
         }
       );
       streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
@@ -179,12 +193,21 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
 
 // Delete an event (admin only)
 router.delete('/:id', authMiddleware, async (req, res) => {
-  if (req.user.email !== 'gauravkhandelwal205@gmail.com') {
+  if (!req.user.isAdmin) {
     return res.status(403).json({ message: 'Only admin can delete events.' });
   }
   try {
-    const deleted = await Event.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: 'Event not found.' });
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ message: 'Event not found.' });
+    // Delete image from Cloudinary if exists
+    if (event.image && event.image.public_id) {
+      try {
+        await cloudinary.uploader.destroy(event.image.public_id);
+      } catch (err) {
+        console.error('Error deleting event image:', err);
+      }
+    }
+    await event.deleteOne();
     res.json({ message: 'Event deleted.' });
   } catch (err) {
     res.status(400).json({ message: err.message });

@@ -21,7 +21,7 @@ const validateSignup = [
     .withMessage('Please provide a valid email address'),
   body('password')
     .isLength({ min: 8 })
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/)
     .withMessage('Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character'),
   body('name')
     .isLength({ min: 2, max: 50 })
@@ -113,7 +113,7 @@ const validateComplaint = [
     .escape()
     .withMessage('Description must be between 10 and 1000 characters'),
   body('category')
-    .isIn(['academic', 'facility', 'technical', 'other'])
+    .isIn(['Academic', 'Administrative', 'Facilities', 'IT', 'Security', 'Other'])
     .withMessage('Invalid category selected'),
   (req, res, next) => {
     const errors = validationResult(req);

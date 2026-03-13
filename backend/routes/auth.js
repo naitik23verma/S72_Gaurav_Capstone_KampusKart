@@ -217,9 +217,10 @@ router.post('/forgot-password', async (req, res) => {
 
     // Generate a 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
 
     // Set OTP and expiration time (e.g., 15 minutes)
-    user.resetPasswordOTP = otp;
+    user.resetPasswordOTP = hashedOtp;
     user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
     await user.save();
 
@@ -272,8 +273,12 @@ router.post('/reset-password', async (req, res) => {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
     }
 
-    // Secure OTP comparison to mitigate timing attacks
-    if (!user.resetPasswordOTP || user.resetPasswordOTP !== otp) {
+    // Secure OTP comparison using timing-safe compare
+    const hashedProvidedOtp = crypto.createHash('sha256').update(otp).digest('hex');
+    const otpMatch = user.resetPasswordOTP && 
+      user.resetPasswordOTP.length === hashedProvidedOtp.length &&
+      crypto.timingSafeEqual(Buffer.from(user.resetPasswordOTP), Buffer.from(hashedProvidedOtp));
+    if (!otpMatch) {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
     }
 

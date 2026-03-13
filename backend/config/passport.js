@@ -25,6 +25,11 @@ passport.use(
       try {
         console.log('Google OAuth profile:', profile);
         
+        // Check if profile has emails
+        if (!profile.emails || profile.emails.length === 0) {
+          return done(new Error('No email found in Google profile'), null);
+        }
+        
         // Check if user already exists
         let user = await User.findOne({ googleId: profile.id });
 

@@ -58,7 +58,7 @@ router.get('/', async (req, res) => {
 
 // POST new news (admin only)
 router.post('/', authMiddleware, upload.array('images', 5), async (req, res) => {
-  if (req.user.email !== 'gauravkhandelwal205@gmail.com') {
+  if (!req.user.isAdmin) {
     return res.status(403).json({ message: 'Not authorized to add news.' });
   }
   const { title, description, date, category } = req.body;
@@ -83,7 +83,7 @@ router.post('/', authMiddleware, upload.array('images', 5), async (req, res) => 
 
 // Update a news item (admin only)
 router.put('/:id', authMiddleware, upload.array('images', 5), async (req, res) => {
-  if (req.user.email !== 'gauravkhandelwal205@gmail.com') {
+  if (!req.user.isAdmin) {
     return res.status(403).json({ message: 'Only admin can edit news.' });
   }
   const { title, description, date, category, keepImages } = req.body;
@@ -138,12 +138,23 @@ router.put('/:id', authMiddleware, upload.array('images', 5), async (req, res) =
 
 // Delete a news item (admin only)
 router.delete('/:id', authMiddleware, async (req, res) => {
-  if (req.user.email !== 'gauravkhandelwal205@gmail.com') {
+  if (!req.user.isAdmin) {
     return res.status(403).json({ message: 'Only admin can delete news.' });
   }
   try {
-    const deleted = await News.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: 'News not found.' });
+    const news = await News.findById(req.params.id);
+    if (!news) return res.status(404).json({ message: 'News not found.' });
+    // Delete images from Cloudinary
+    if (Array.isArray(news.images)) {
+      for (const img of news.images) {
+        try {
+          await cloudinary.uploader.destroy(img.public_id);
+        } catch (err) {
+          console.error('Error deleting news image:', err);
+        }
+      }
+    }
+    await news.deleteOne();
     res.json({ message: 'News deleted.' });
   } catch (err) {
     res.status(400).json({ message: err.message });

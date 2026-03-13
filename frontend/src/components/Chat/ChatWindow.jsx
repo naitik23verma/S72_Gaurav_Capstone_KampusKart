@@ -89,9 +89,13 @@ const ChatWindow = () => {
   }, []);
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
     // Initialize socket connection
     socketRef.current = io(API_BASE, {
       withCredentials: true,
+      auth: {
+        token,
+      },
     });
 
     // Join chat when component mounts

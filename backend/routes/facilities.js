@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
 router.post('/', auth, upload.array('images', 5), async (req, res) => {
   try {
     // Check if user is admin
-    if (req.user.email !== 'gauravkhandelwal205@gmail.com') {
+    if (!req.user.isAdmin) {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
@@ -63,7 +63,7 @@ router.post('/', auth, upload.array('images', 5), async (req, res) => {
 router.put('/:id', auth, upload.array('images', 5), async (req, res) => {
   try {
     // Check if user is admin
-    if (req.user.email !== 'gauravkhandelwal205@gmail.com') {
+    if (!req.user.isAdmin) {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
@@ -121,7 +121,7 @@ router.put('/:id', auth, upload.array('images', 5), async (req, res) => {
 router.delete('/:id', auth, async (req, res) => {
   try {
     // Check if user is admin
-    if (req.user.email !== 'gauravkhandelwal205@gmail.com') {
+    if (!req.user.isAdmin) {
       return res.status(403).json({ message: 'Not authorized' });
     }
 

@@ -6,6 +6,7 @@ const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
 const streamifier = require('streamifier');
 const rateLimit = require('express-rate-limit'); // Import rate-limit
+const { sanitizeInput, validateLostFoundItem } = require('../middleware/validation');
 
 // Cloudinary configuration
 cloudinary.config({
@@ -72,6 +73,11 @@ const deleteImages = async (images) => {
   await Promise.all(deletePromises);
 };
 
+// Helper function to escape regex special characters
+const escapeRegex = (string) => {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
 // Rate limiting middleware for item creation, update, and deletion
 const itemRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -80,7 +86,7 @@ const itemRateLimiter = rateLimit({
 });
 
 // Create a new lost or found item
-router.post('/', authMiddleware, itemRateLimiter, upload.array('images', 5), async (req, res) => {
+router.post('/', authMiddleware, sanitizeInput, validateLostFoundItem, itemRateLimiter, upload.array('images', 5), async (req, res) => {
   try {
     const { type, title, description, location, date, contact } = req.body;
     const userId = req.user.id; // Assuming user ID is available from auth middleware
@@ -124,7 +130,7 @@ router.get('/suggestions', authMiddleware, async (req, res) => {
             return res.status(200).json([]);
         }
 
-        const searchRegex = new RegExp(query, 'i'); // Case-insensitive regex
+        const searchRegex = new RegExp(escapeRegex(query), 'i'); // Case-insensitive regex
 
         // Find items matching the query in title, description, or location
         const suggestions = await LostFoundItem.find({
@@ -175,19 +181,34 @@ function getTimeAgo(date) {
     const seconds = Math.floor((new Date() - date) / 1000);
     
     let interval = seconds / 31536000;
-    if (interval > 1) return Math.floor(interval) + ' years ago';
+    if (interval >= 1) {
+      const n = Math.floor(interval);
+      return n + (n === 1 ? ' year ago' : ' years ago');
+    }
     
     interval = seconds / 2592000;
-    if (interval > 1) return Math.floor(interval) + ' months ago';
+    if (interval >= 1) {
+      const n = Math.floor(interval);
+      return n + (n === 1 ? ' month ago' : ' months ago');
+    }
     
     interval = seconds / 86400;
-    if (interval > 1) return Math.floor(interval) + ' days ago';
+    if (interval >= 1) {
+      const n = Math.floor(interval);
+      return n + (n === 1 ? ' day ago' : ' days ago');
+    }
     
     interval = seconds / 3600;
-    if (interval > 1) return Math.floor(interval) + ' hours ago';
+    if (interval >= 1) {
+      const n = Math.floor(interval);
+      return n + (n === 1 ? ' hour ago' : ' hours ago');
+    }
     
     interval = seconds / 60;
-    if (interval > 1) return Math.floor(interval) + ' minutes ago';
+    if (interval >= 1) {
+      const n = Math.floor(interval);
+      return n + (n === 1 ? ' minute ago' : ' minutes ago');
+    }
     
     return Math.floor(seconds) + ' seconds ago';
 }
@@ -209,7 +230,8 @@ router.get('/', async (req, res) => {
 
     // Add search filter if search query is provided
     if (search) {
-        const searchRegex = new RegExp(search, 'i'); // Case-insensitive regex
+        const escapedSearch = escapeRegex(search);
+        const searchRegex = new RegExp(escapedSearch, 'i'); // Case-insensitive regex
         filter.$or = [
             { title: searchRegex },
             { description: searchRegex }
@@ -368,9 +390,7 @@ router.delete('/:id', authMiddleware, itemRateLimiter, async (req, res) => {
       return res.status(403).json({ message: 'You are not authorized to delete this item' });
     }
 
-    // Remove images from Cloudinary
-    await deleteImages(item.images);
-
+    // Soft delete - do NOT delete images from Cloudinary so they remain if restored
     item.isDeleted = true;
     item.deletedAt = new Date();
     await item.save();
@@ -430,10 +450,11 @@ router.get('/admin/all', authMiddleware, async (req, res) => {
     }
 
     if (search) {
+      const escapedSearch = escapeRegex(search);
       query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { location: { $regex: search, $options: 'i' } },
+        { title: { $regex: escapedSearch, $options: 'i' } },
+        { description: { $regex: escapedSearch, $options: 'i' } },
+        { location: { $regex: escapedSearch, $options: 'i' } },
       ];
     }
 
@@ -442,8 +463,8 @@ router.get('/admin/all', authMiddleware, async (req, res) => {
       query.isDeleted = { $ne: true };
     }
 
-    const parsedPage = parseInt(page, 10);
-    const parsedLimit = parseInt(limit, 10);
+    const parsedPage = Math.max(1, parseInt(page, 10) || 1);
+    const parsedLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 50));
     const skip = (parsedPage - 1) * parsedLimit;
 
     const totalItems = await LostFoundItem.countDocuments(query);

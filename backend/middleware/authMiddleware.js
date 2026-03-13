@@ -2,6 +2,12 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 const authMiddleware = async (req, res, next) => {
+  // Validate JWT_SECRET is configured
+  if (!process.env.JWT_SECRET) {
+    console.error('JWT_SECRET not configured');
+    return res.status(500).json({ message: 'Server configuration error' });
+  }
+
   // Get token from header
   let token;
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {

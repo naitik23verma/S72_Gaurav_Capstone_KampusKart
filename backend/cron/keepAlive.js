@@ -87,18 +87,8 @@ const startKeepAlive = () => {
       pingServer();
     }, KEEP_ALIVE_INTERVAL);
     
-    // Also use cron for scheduled pings (every 14 minutes)
-    // This provides redundancy in case setInterval fails
-    cronJob = cron.schedule('*/14 * * * *', () => {
-      pingServer();
-    }, {
-      scheduled: true,
-      timezone: 'UTC'
-    });
-    
     console.log(`✅ Keep-alive service started`);
     console.log(`   - setInterval: Every ${KEEP_ALIVE_INTERVAL / 1000 / 60} minutes`);
-    console.log(`   - Cron job: Every 14 minutes`);
     console.log(`\n📌 IMPORTANT: For true 24/7 uptime, set up external monitoring:`);
     console.log(`   - UptimeRobot: https://uptimerobot.com (Free, 5-min intervals)`);
     console.log(`   - Monitor URL: ${SERVER_URL}/api/health`);

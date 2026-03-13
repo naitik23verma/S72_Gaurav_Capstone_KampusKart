@@ -42,17 +42,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // On mount, check both storages for a valid token
   useEffect(() => {
-    console.log('AuthContext: Running initial token check effect');
     const now = Date.now();
     const localToken = localStorage.getItem('token');
     const expiry = localStorage.getItem('token_expiry');
     let persistedToken = null;
 
     if (localToken && expiry && now < Number(expiry)) {
-      console.log('AuthContext: Found valid token in localStorage');
       persistedToken = localToken;
     } else {
-      console.log('AuthContext: No valid token in localStorage, clearing...');
       // Clear potentially expired or invalid token from localStorage
       localStorage.removeItem('token');
       localStorage.removeItem('token_expiry');
@@ -60,18 +57,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // If no valid token from localStorage, check sessionStorage
     if (!persistedToken) {
-      console.log('AuthContext: No persisted token from localStorage, checking sessionStorage');
     const sessionToken = sessionStorage.getItem('token');
     if (sessionToken) {
-        console.log('AuthContext: Found token in sessionStorage');
         persistedToken = sessionToken;
       }
     }
 
     setToken(persistedToken);
-    console.log('AuthContext: Set token state to', persistedToken ? 'present' : 'null');
     setInitializing(false);
-    console.log('AuthContext: Finished initial token check effect');
   }, []);
 
   useEffect(() => {
@@ -79,7 +72,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [token]);
 
   useEffect(() => {
-    console.log('AuthContext: Token state changed effect. Current token:', token ? 'present' : 'null');
     if (token) {
       fetchProfile();
       // Set up token refresh
@@ -109,7 +101,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const refreshToken = async () => {
-    console.log('AuthContext: Attempting to refresh token');
     try {
       const currentToken = tokenRef.current;
       if (!currentToken) {
@@ -122,23 +113,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(newToken);
       localStorage.setItem('token', newToken);
       localStorage.setItem('token_expiry', (Date.now() + 24 * 60 * 60 * 1000).toString());
-      console.log('AuthContext: Token refreshed successfully');
     } catch (error) {
-      console.error('AuthContext: Error refreshing token:', error);
       logout();
     }
   };
 
   const fetchProfile = async () => {
-    console.log('AuthContext: Attempting to fetch profile with token', token ? 'present' : 'null');
     try {
       const response = await axios.get(`${API_BASE}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(response.data);
-      console.log('AuthContext: Profile fetched successfully', response.data);
     } catch (error) {
-      console.error('AuthContext: Error fetching profile:', error);
       setUser(null);
       if (axios.isAxiosError(error) && error.response?.status === 401) {
          logout();
@@ -165,8 +151,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Password must be at least 8 characters long');
       }
 
-      console.log('Attempting login with email:', email);
-      
       // Add retry logic for server wakeup scenarios
       let lastError;
       for (let attempt = 1; attempt <= 3; attempt++) {
@@ -175,7 +159,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             email: email.toLowerCase(),
             password
           });
-          console.log('Login response:', response.data);
           const { token, user } = response.data;
           setToken(token);
           setUser(user);
@@ -184,12 +167,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           localStorage.setItem('token', token);
           localStorage.setItem('token_expiry', expiry.toString());
           sessionStorage.removeItem('token');
-          console.log('AuthContext: Saved token to localStorage (Remember Me)');
           return; // Success, exit the retry loop
         } catch (error) {
           lastError = error;
           if (attempt < 3) {
-            console.log(`Login attempt ${attempt} failed, retrying in ${attempt * 1000}ms...`);
             await new Promise(resolve => setTimeout(resolve, attempt * 1000));
           }
         }
@@ -198,7 +179,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // If all retries failed, throw the last error
       throw lastError;
     } catch (error) {
-      console.error('Login error details:', error.response?.data);
       if (axios.isAxiosError(error)) {
         if (error.response?.data?.message) {
           throw new Error(error.response.data.message);
@@ -221,54 +201,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signup = async (email: string, password: string, name: string, remember?: boolean) => {
     try {
-      console.log('AuthContext: Starting signup process');
-      
       // Frontend validation
       if (!email || !password || !name) {
-        console.log('AuthContext: Missing required fields');
         throw new Error('All fields are required');
       }
 
       // Email format validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        console.log('AuthContext: Invalid email format');
         throw new Error('Invalid email format');
       }
 
       // Password strength validation
       if (password.length < 8) {
-        console.log('AuthContext: Password too short');
         throw new Error('Password must be at least 8 characters long');
       }
 
       if (!/[A-Z]/.test(password)) {
-        console.log('AuthContext: Password missing uppercase');
         throw new Error('Password must contain at least one uppercase letter');
       }
 
       if (!/[a-z]/.test(password)) {
-        console.log('AuthContext: Password missing lowercase');
         throw new Error('Password must contain at least one lowercase letter');
       }
 
       if (!/[0-9]/.test(password)) {
-        console.log('AuthContext: Password missing number');
         throw new Error('Password must contain at least one number');
       }
 
       if (!/[!@#$%^&*]/.test(password)) {
-        console.log('AuthContext: Password missing special character');
         throw new Error('Password must contain at least one special character (!@#$%^&*)');
       }
 
       // Name validation
       if (name.trim().length < 2) {
-        console.log('AuthContext: Name too short');
         throw new Error('Name must be at least 2 characters long');
       }
-
-      console.log('AuthContext: Making signup request to', `${API_BASE}/api/auth/signup`);
       
       // Add retry logic for server wakeup scenarios
       let lastError;
@@ -280,7 +248,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             name: name.trim()
           });
 
-          console.log('AuthContext: Signup response received', response.data);
           const { token, user } = response.data;
           setToken(token);
           setUser(user);
@@ -290,12 +257,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           localStorage.setItem('token', token);
           localStorage.setItem('token_expiry', expiry.toString());
           sessionStorage.removeItem('token');
-          console.log('AuthContext: Token saved to localStorage');
           return; // Success, exit the retry loop
         } catch (error) {
           lastError = error;
           if (attempt < 3) {
-            console.log(`Signup attempt ${attempt} failed, retrying in ${attempt * 1000}ms...`);
             await new Promise(resolve => setTimeout(resolve, attempt * 1000));
           }
         }
@@ -304,13 +269,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // If all retries failed, throw the last error
       throw lastError;
     } catch (error) {
-      console.error('AuthContext: Signup error:', error);
       if (axios.isAxiosError(error)) {
-        console.error('AuthContext: Axios error details:', {
-          status: error.response?.status,
-          data: error.response?.data,
-          message: error.message
-        });
         if (error.response?.data?.message) {
           throw new Error(error.response.data.message);
         }
@@ -335,7 +294,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Remove token from both storages on logout
   const logout = () => {
-    console.log('AuthContext: Logging out, clearing storage and state');
     localStorage.removeItem('token');
     localStorage.removeItem('token_expiry');
     sessionStorage.removeItem('token');
@@ -345,7 +303,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       clearTimeout(refreshTimeoutRef.current);
       refreshTimeoutRef.current = null;
     }
-    console.log('AuthContext: Logout complete');
   };
 
   const updateProfile = async (data: Partial<User>) => {
@@ -369,15 +326,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       });
       setUser(response.data);
-      console.log('AuthContext: Profile updated successfully', response.data);
     } catch (error) {
-      console.error('AuthContext: Error updating profile:', error);
       throw error;
     }
   };
 
   const loginWithGoogle = () => {
-    console.log('AuthContext: Initiating Google login');
     const backendUrl = isProduction 
       ? 'https://s72-gaurav-capstone.onrender.com'
       : 'http://localhost:5000';
@@ -400,10 +354,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('token', token);
       localStorage.setItem('token_expiry', expiry.toString());
       sessionStorage.removeItem('token');
-      console.log('AuthContext: Saved token to localStorage (Remember Me)');
       return response.data;
     } catch (error) {
-      console.error('AuthContext: Error handling Google callback profile fetch:', error);
       setUser(null);
       logout();
       throw error;

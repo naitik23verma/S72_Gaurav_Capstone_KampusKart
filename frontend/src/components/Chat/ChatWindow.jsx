@@ -84,7 +84,7 @@ const ChatWindow = () => {
         },
       });
     } catch (error) {
-      console.error('Error marking message as read:', error);
+      // Error marking message as read
     }
   }, []);
 
@@ -125,13 +125,11 @@ const ChatWindow = () => {
 
     // Handle connection errors
     socketRef.current.on('connect_error', (error) => {
-      console.error('Socket connection error:', error);
       setError('Failed to connect to chat server');
       setLoading(false);
     });
 
     socketRef.current.on('disconnect', (reason) => {
-      console.log('Socket disconnected:', reason);
       if (reason === 'io server disconnect') {
         setError('Connection lost. Please refresh the page.');
       }
@@ -226,7 +224,7 @@ const ChatWindow = () => {
         }
       }
     } catch (error) {
-      console.error('Error loading more messages:', error);
+      // Error loading more messages
     } finally {
       setLoading(false);
     }
@@ -299,7 +297,6 @@ const ChatWindow = () => {
         throw new Error('Failed to send message');
       }
     } catch (error) {
-      console.error('Error sending message:', error);
       // Restore the message if sending failed
       setNewMessage(messageText);
       setAttachments(currentAttachments);
@@ -359,7 +356,7 @@ const ChatWindow = () => {
         throw new Error('Failed to delete message');
       }
     } catch (error) {
-      console.error('Error deleting message:', error);
+      // Error deleting message
     } finally {
       setAnchorEl(null);
       setSelectedMessage(null);
@@ -371,13 +368,6 @@ const ChatWindow = () => {
     
     const userId = user._id || user.id;
     const senderId = selectedMessage.sender?._id || selectedMessage.sender?.id;
-    
-    console.log('Editing message:', {
-      messageId: selectedMessage._id,
-      currentUser: userId,
-      messageSender: senderId,
-      isOwnMessage: senderId === userId
-    });
     
     try {
       const response = await fetch(`${API_BASE}/api/chat/messages/${selectedMessage._id}`, {
@@ -397,14 +387,12 @@ const ChatWindow = () => {
               msg._id === selectedMessage._id ? { ...msg, ...updatedMessage } : msg
             )
           );
-          console.log('Message edited successfully');
         }
       } else {
-        const errorData = await response.json().catch(() => ({ message: 'Failed to edit message' }));
-        console.error('Failed to edit message:', response.status, response.statusText, errorData);
+        // Failed to edit message
       }
     } catch (error) {
-      console.error('Error editing message:', error);
+      // Error editing message
     }
     setEditingMessage(null);
     setEditText('');

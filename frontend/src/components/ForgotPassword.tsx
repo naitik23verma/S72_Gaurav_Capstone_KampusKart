@@ -49,7 +49,6 @@ const ForgotPassword = () => {
         setError(data.message || 'Failed to send OTP.');
       }
     } catch (err: any) {
-      console.error('Forgot password request error:', err);
       setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);
@@ -137,7 +136,6 @@ const ForgotPassword = () => {
                 setError(data.message || 'Failed to reset password. Please check your OTP.');
               }
             } catch (err: any) {
-              console.error('Reset password error:', err);
               setError('An error occurred. Please try again.');
             } finally {
               setLoading(false);

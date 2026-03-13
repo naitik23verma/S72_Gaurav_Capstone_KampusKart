@@ -120,7 +120,6 @@ const Profile = () => {
           setInitialProfileData(fetchedData);
         }
       } catch (err: any) {
-        console.error('Error fetching profile data:', err);
         setError('An error occurred while fetching profile data.');
       } finally {
         setPageLoading(false);
@@ -210,7 +209,6 @@ const Profile = () => {
             setError(data.message || 'Failed to save profile.');
         }
     } catch (err: any) {
-        console.error('Error saving profile:', err);
         setError('An error occurred while saving the profile.');
     } finally {
         setSaveLoading(false);

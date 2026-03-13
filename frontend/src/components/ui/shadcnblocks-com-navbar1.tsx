@@ -197,7 +197,7 @@ const renderMenuItem = (item: MenuItem) => {
               <li key={subItem.title}>
                 <NavigationMenuLink asChild>
                   <Link
-                    className="flex select-none gap-4 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-[#FFD166] hover:text-black focus:bg-[#FFD166] focus:text-black"
+                    className="flex select-none gap-4 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-[#FFD166] hover:text-black"
                     to={subItem.url}
                     aria-label={`Go to ${subItem.title}`}
                   >
@@ -226,7 +226,7 @@ const renderMenuItem = (item: MenuItem) => {
       <NavigationMenuLink asChild>
         <Link
           to={item.url}
-          className="group inline-flex h-10 w-max items-center justify-center rounded-full px-4 py-2 text-sm font-bold text-black bg-gray-50 transition-colors hover:bg-[#00C6A7] hover:text-white focus:bg-[#00C6A7] focus:text-white focus:outline-none"
+          className="group inline-flex h-10 w-max items-center justify-center rounded-full px-4 py-2 text-sm font-bold text-black bg-gray-50 transition-colors hover:bg-[#00C6A7] hover:text-white focus:outline-none"
           aria-label={`Go to ${item.title}`}
         >
           {item.title}
@@ -249,7 +249,7 @@ const renderMobileMenuItem = (item: MenuItem) => {
               <SheetClose key={subItem.title} asChild>
                 <Link
                   to={subItem.url}
-                  className="flex select-none gap-3 rounded-xl p-4 leading-none outline-none transition-all bg-white hover:bg-[#FFD166] hover:text-black focus:bg-[#FFD166] focus:text-black active:bg-[#FFD166] active:scale-95 border border-gray-100 hover:border-[#FFD166] min-h-[60px]"
+                  className="flex select-none gap-3 rounded-xl p-4 leading-none outline-none transition-all bg-white hover:bg-[#FFD166] hover:text-black active:bg-[#FFD166] active:scale-95 border border-gray-100 hover:border-[#FFD166] min-h-[60px]"
                   aria-label={`Go to ${subItem.title}`}
                 >
                   <div className="flex-1">

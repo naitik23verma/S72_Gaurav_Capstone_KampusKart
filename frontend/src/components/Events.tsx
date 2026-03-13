@@ -80,7 +80,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
         textColorClass = 'text-gray-800';
     }
     return (
-      <span className={`px-2.5 py-0.5 rounded-lg text-xs font-medium ${bgColorClass} ${textColorClass}`}>
+      <span className={`text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm ${bgColorClass} ${textColorClass}`}>
         {status}
       </span>
     );
@@ -691,8 +691,8 @@ const Events = () => {
           )}
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4 px-4 md:px-0">
-          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
             <div className="relative">
               <select 
                 value={filterStatus} 
@@ -713,7 +713,7 @@ const Events = () => {
           </div>
           </div>
           {/* AI-Powered Search Bar */}
-          <div className="relative w-full md:w-[500px]">
+          <div className="relative w-full lg:w-[520px]">
             <AIAutocomplete
               value={searchInput}
               onChange={(value) => {
@@ -726,7 +726,7 @@ const Events = () => {
                 handleSuggestionSelect(suggestion);
               }}
               placeholder="Search events"
-              className="w-full md:w-[500px]"
+              className="w-full"
               suggestions={suggestions}
               isLoading={aiLoading}
               disabled={false}
@@ -741,7 +741,7 @@ const Events = () => {
           {filteredEvents.map(event => (
             <div 
               key={event._id} 
-              className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden group"
+              className="bg-white rounded-lg shadow-sm hover:shadow-lg active:shadow-md transition-all duration-300 border border-gray-100 overflow-hidden group cursor-pointer"
               onClick={() => openEventDetailsModal(event)}
             >
               {/* Image Section with Overlay */}

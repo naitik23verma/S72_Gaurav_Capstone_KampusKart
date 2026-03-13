@@ -48,7 +48,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-xl p-8 max-w-3xl w-full mx-auto max-h-[90vh] overflow-y-auto relative">
+            <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -91,7 +91,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
           )}
           <div className="space-y-6 text-gray-700 flex-grow">
             <div className="flex flex-wrap items-center gap-3">
-              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${club.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>{club.status}</span>
+              <span className={`text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm ${club.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>{club.status}</span>
             </div>
             <div>
               <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
@@ -153,13 +153,13 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
                 <div className="flex flex-col sm:flex-row gap-2">
                   <button
                     onClick={() => onEdit?.(club)}
-                    className="flex-1 px-3 py-3 sm:py-2 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors duration-200 min-w-0"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 flex items-center"
                   >
                     <span className="truncate">Edit</span>
                   </button>
                   <button
                     onClick={() => onDelete?.(club._id)}
-                    className="flex-1 px-3 py-3 sm:py-2 rounded-full text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 transition-colors duration-200 min-w-0"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 flex items-center"
                   >
                     <span className="truncate">Delete</span>
                   </button>
@@ -412,27 +412,34 @@ const ClubsRecruitment = () => {
           {user?.isAdmin && (
             <button 
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 rounded-full bg-[#181818] text-white font-bold text-lg shadow hover:bg-[#00C6A7] transition"
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg shadow hover:bg-[#00C6A7] transition"
             >
               + Add Recruitment
             </button>
           )}
         </div>
         {/* Filter/Search Row */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-            <select
-              value={filterStatus}
-              onChange={e => setFilterStatus(e.target.value as 'all' | 'Open' | 'Closed')}
-              className="px-4 py-2 rounded-md bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
-            >
-              <option value="all">All Statuses</option>
-              <option value="Open">Open</option>
-              <option value="Closed">Closed</option>
-            </select>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+            <div className="relative">
+              <select
+                value={filterStatus}
+                onChange={e => setFilterStatus(e.target.value as 'all' | 'Open' | 'Closed')}
+                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
+              >
+                <option value="all">All Statuses</option>
+                <option value="Open">Open</option>
+                <option value="Closed">Closed</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
           {/* AI-Powered Search Bar */}
-          <div className="relative w-full md:w-[500px]">
+          <div className="relative w-full lg:w-[520px]">
             <AIAutocomplete
               value={searchInput}
               onChange={(value) => {
@@ -445,7 +452,7 @@ const ClubsRecruitment = () => {
                 handleSuggestionSelect(suggestion);
               }}
               placeholder="Search clubs"
-              className="w-full md:w-[500px]"
+              className="w-full"
               suggestions={suggestions}
               isLoading={aiLoading}
               disabled={false}
@@ -459,7 +466,7 @@ const ClubsRecruitment = () => {
           {filteredClubs.map(club => (
             <div 
               key={club._id} 
-              className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden group"
+              className="bg-white rounded-lg shadow-sm hover:shadow-lg active:shadow-md transition-all duration-300 border border-gray-100 overflow-hidden group cursor-pointer"
               onClick={() => openClubDetailsModal(club)}
             >
               <div className="relative h-60 sm:h-80 overflow-hidden">
@@ -481,7 +488,7 @@ const ClubsRecruitment = () => {
                   </div>
                 )}
                 <div className="absolute top-4 right-4">
-                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${club.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>{club.status}</span>
+                  <span className={`text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm ${club.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>{club.status}</span>
                 </div>
               </div>
               <div className="p-6">
@@ -535,7 +542,7 @@ const ClubsRecruitment = () => {
                           type="text"
                           value={newClub.title}
                           onChange={e => setNewClub({...newClub, title: e.target.value})}
-                          className="w-full px-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                          className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                           placeholder="Enter recruitment title (e.g., Drama Club 2024 Intake)"
                           required
                           aria-label="Recruitment Title"
@@ -550,7 +557,7 @@ const ClubsRecruitment = () => {
                         type="text"
                         value={newClub.clubName}
                         onChange={e => setNewClub({...newClub, clubName: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         required
                         aria-label="Club Name"
                       />
@@ -564,7 +571,7 @@ const ClubsRecruitment = () => {
                         type="date"
                         value={newClub.startDate}
                         onChange={e => setNewClub({...newClub, startDate: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         required
                         aria-label="Start Date"
                       />
@@ -575,7 +582,7 @@ const ClubsRecruitment = () => {
                         type="date"
                         value={newClub.endDate}
                         onChange={e => setNewClub({...newClub, endDate: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         required
                         aria-label="End Date"
                       />
@@ -618,7 +625,7 @@ const ClubsRecruitment = () => {
                     <select
                       value={newClub.status}
                       onChange={e => setNewClub({...newClub, status: e.target.value as 'Open' | 'Closed'})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                       required
                       aria-label="Recruitment Status"
                     >
@@ -634,7 +641,7 @@ const ClubsRecruitment = () => {
                         type="text"
                         value={newClub.contactInfo.name}
                         onChange={e => setNewClub({...newClub, contactInfo: {...newClub.contactInfo, name: e.target.value}})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         placeholder="Contact Name"
                         aria-label="Contact Name"
                       />
@@ -642,7 +649,7 @@ const ClubsRecruitment = () => {
                         type="email"
                         value={newClub.contactInfo.email}
                         onChange={e => setNewClub({...newClub, contactInfo: {...newClub.contactInfo, email: e.target.value}})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         placeholder="Contact Email"
                         aria-label="Contact Email"
                       />
@@ -650,7 +657,7 @@ const ClubsRecruitment = () => {
                         type="tel"
                         value={newClub.contactInfo.phone}
                         onChange={e => setNewClub({...newClub, contactInfo: {...newClub.contactInfo, phone: e.target.value}})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         placeholder="Contact Phone"
                         aria-label="Contact Phone"
                       />
@@ -671,13 +678,13 @@ const ClubsRecruitment = () => {
                   <button
                     type="button"
                     onClick={closeClubModal}
-                    className="px-4 py-2 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-full text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C7A7] transition"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition"
                   >
                     {editingClub ? 'Save Changes' : 'Add Recruitment'}
                   </button>

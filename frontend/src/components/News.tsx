@@ -227,21 +227,28 @@ const News = () => {
           )}
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-            <select
-              value={filterCategory}
-              onChange={e => setFilterCategory(e.target.value as 'all' | 'Announcements' | 'Campus News' | 'Events' | 'Achievements')}
-              className="px-4 py-2 rounded-md bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
-            >
-              <option value="All">All Categories</option>
-              <option value="Campus">Campus</option>
-              <option value="Food">Food</option>
-              <option value="Academics">Academics</option>
-            </select>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+            <div className="relative">
+              <select
+                value={filterCategory}
+                onChange={e => setFilterCategory(e.target.value as 'all' | 'Announcements' | 'Campus News' | 'Events' | 'Achievements')}
+                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
+              >
+                <option value="All">All Categories</option>
+                <option value="Campus">Campus</option>
+                <option value="Food">Food</option>
+                <option value="Academics">Academics</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
           {/* AI-Powered Search Bar */}
-          <div className="relative w-full md:w-[500px]">
+          <div className="relative w-full lg:w-[520px]">
             <AIAutocomplete
               value={searchInput}
               onChange={(value) => {
@@ -254,7 +261,7 @@ const News = () => {
                 handleSuggestionSelect(suggestion);
               }}
               placeholder="Search news"
-              className="w-full md:w-[500px]"
+              className="w-full"
               suggestions={suggestions}
               isLoading={aiLoading}
               disabled={false}
@@ -267,7 +274,7 @@ const News = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredNews.map(item => (
-            <div key={item._id} className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden group">
+            <div key={item._id} className="bg-white rounded-lg shadow-sm hover:shadow-lg active:shadow-md transition-all duration-300 border border-gray-100 overflow-hidden group cursor-pointer">
               {/* Image Section with Overlay */}
               <div className="relative h-60 sm:h-80 overflow-hidden">
                 {item.images && item.images.length > 0 ? (
@@ -291,14 +298,14 @@ const News = () => {
                 )}
                 {/* Category Badge */}
                 <div className="absolute top-4 left-4">
-                  <span className="text-xs px-3 py-1.5 rounded-full font-medium shadow-sm bg-white/90 backdrop-blur-sm text-gray-800 flex items-center gap-1">
+                  <span className="text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm bg-white/90 backdrop-blur-sm text-gray-800 flex items-center gap-1">
                     <FiTag className="w-3 h-3" />
                     {item.category}
                   </span>
                 </div>
                 {/* Date Badge */}
                 <div className="absolute top-4 right-4">
-                  <span className="text-xs px-3 py-1.5 rounded-full font-medium shadow-sm bg-white/90 backdrop-blur-sm text-gray-800 flex items-center gap-1">
+                  <span className="text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm bg-white/90 backdrop-blur-sm text-gray-800 flex items-center gap-1">
                     <FiCalendar className="w-3 h-3" />
                     {new Date(item.date).toLocaleDateString('en-US', {
                       year: 'numeric',
@@ -360,7 +367,7 @@ const News = () => {
                           type="text"
                           value={newNews.title}
                           onChange={e => setNewNews({...newNews, title: e.target.value})}
-                          className="w-full px-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                          className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                           placeholder="e.g. New Library Opening"
                           required
                           aria-label="News Title"
@@ -375,7 +382,7 @@ const News = () => {
                         type="date"
                         value={newNews.date}
                         onChange={e => setNewNews({...newNews, date: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         required
                         aria-label="News Date"
                       />
@@ -403,7 +410,7 @@ const News = () => {
                     <select
                       value={newNews.category}
                       onChange={e => setNewNews({...newNews, category: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                       required
                       aria-label="News Category"
                     >

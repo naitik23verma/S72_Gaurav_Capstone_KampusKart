@@ -217,8 +217,8 @@ function getTimeAgo(date) {
 router.get('/', async (req, res) => {
   try {
     const { type, resolved, search, page = 1, limit = 10 } = req.query;
-    const parsedPage = parseInt(page, 10);
-    const parsedLimit = parseInt(limit, 10);
+    const parsedPage = Math.max(1, parseInt(page, 10) || 1);
+    const parsedLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 10));
 
     let filter = {};
     if (type) {

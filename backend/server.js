@@ -254,6 +254,11 @@ io.on('connection', (socket) => {
   // User joins the chat
   socket.on('join', async () => {
     try {
+      if (!socket.userId) {
+        socket.emit('error', 'Authentication required');
+        return;
+      }
+
       const authenticatedUser = await User.findById(socket.userId).select('name profilePicture');
       if (!authenticatedUser) {
         socket.emit('error', 'User not found');
@@ -289,6 +294,11 @@ io.on('connection', (socket) => {
   // Handle new messages (this is a fallback, main message handling is via HTTP API)
   socket.on('send-message', async (messageData) => {
     try {
+      if (!messageData || !messageData.senderId || !messageData.message) {
+        socket.emit('error', 'Invalid message data');
+        return;
+      }
+
       const chatMessage = new Chat({
         sender: messageData.senderId,
         message: messageData.message
@@ -310,21 +320,37 @@ io.on('connection', (socket) => {
 
   // Handle typing indicator
   socket.on('typing', (userData) => {
-    socket.to('global-chat').emit('user-typing', userData);
+    try {
+      if (userData) {
+        socket.to('global-chat').emit('user-typing', userData);
+      }
+    } catch (error) {
+      console.error('Error handling typing event:', error);
+    }
   });
 
   // Handle stop typing
   socket.on('stop-typing', (userData) => {
-    socket.to('global-chat').emit('user-stop-typing', userData);
+    try {
+      if (userData) {
+        socket.to('global-chat').emit('user-stop-typing', userData);
+      }
+    } catch (error) {
+      console.error('Error handling stop-typing event:', error);
+    }
   });
 
   // Handle disconnection
   socket.on('disconnect', () => {
-    const userData = onlineUsers.get(socket.id);
-    if (userData) {
-      onlineUsers.delete(socket.id);
-      io.emit('online-users', Array.from(onlineUsers.values()));
-      io.emit('user-left', userData);
+    try {
+      const userData = onlineUsers.get(socket.id);
+      if (userData) {
+        onlineUsers.delete(socket.id);
+        io.emit('online-users', Array.from(onlineUsers.values()));
+        io.emit('user-left', userData);
+      }
+    } catch (error) {
+      console.error('Error handling disconnect:', error);
     }
   });
 });

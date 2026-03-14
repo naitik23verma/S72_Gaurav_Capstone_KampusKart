@@ -129,12 +129,12 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
               <img
                 src={image.previewUrl || image.url}
                 alt={`Preview ${index + 1}`}
-                className={`${single ? 'h-48 w-full' : 'h-28 w-28'} object-cover rounded-md border border-gray-200`}
+                className={`${single ? 'h-48 w-full' : 'h-28 w-28'} object-cover rounded-lg border-2 border-gray-200`}
               />
               <button
                 type="button"
                 onClick={() => handleRemoveImage(index)}
-                className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-lg p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                 aria-label="Remove image"
               >
                 <FiX className="w-4 h-4" />

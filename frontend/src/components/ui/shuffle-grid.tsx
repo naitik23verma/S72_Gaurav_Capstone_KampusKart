@@ -1,0 +1,117 @@
+import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+
+const shuffle = (array: (typeof squareData)[0][]) => {
+  let currentIndex = array.length,
+    randomIndex;
+  while (currentIndex != 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+  return array;
+};
+
+const squareData = [
+  { id: 1,  src: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=400&q=80" },
+  { id: 2,  src: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&q=80" },
+  { id: 3,  src: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?w=400&q=80" },
+  { id: 4,  src: "https://images.unsplash.com/photo-1519452635265-7b1fbfd1e4e0?w=400&q=80" },
+  { id: 5,  src: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&q=80" },
+  { id: 6,  src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" },
+  { id: 7,  src: "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?w=400&q=80" },
+  { id: 8,  src: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=400&q=80" },
+  { id: 9,  src: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=400&q=80" },
+  { id: 10, src: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=400&q=80" },
+  { id: 11, src: "https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?w=400&q=80" },
+  { id: 12, src: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=400&q=80" },
+  { id: 13, src: "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=400&q=80" },
+  { id: 14, src: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80" },
+  { id: 15, src: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&q=80" },
+  { id: 16, src: "https://images.unsplash.com/photo-1564981797816-1043664bf78d?w=400&q=80" },
+];
+
+const generateSquares = () => {
+  return shuffle([...squareData]).map((sq) => (
+    <motion.div
+      key={sq.id}
+      layout
+      transition={{ duration: 1.5, type: "spring" }}
+      className="w-full h-full rounded-lg overflow-hidden border-2 border-gray-200"
+      style={{
+        backgroundImage: `url(${sq.src})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    />
+  ));
+};
+
+const ShuffleGrid = () => {
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [squares, setSquares] = useState(generateSquares());
+
+  useEffect(() => {
+    shuffleSquares();
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const shuffleSquares = () => {
+    setSquares(generateSquares());
+    timeoutRef.current = setTimeout(shuffleSquares, 3000);
+  };
+
+  return (
+    <div className="grid grid-cols-4 grid-rows-4 h-[min(520px,calc(100vh-140px))] gap-2">
+      {squares.map((sq) => sq)}
+    </div>
+  );
+};
+
+export const ShuffleHero = () => {
+  return (
+    <section className="w-full h-full px-4 sm:px-8 grid grid-cols-1 md:grid-cols-2 items-center gap-10 max-w-6xl mx-auto">
+      {/* Left: text */}
+      <div>
+        <span className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-lg bg-gray-50 border-2 border-gray-200 text-xs font-semibold text-[#00C6A7] uppercase tracking-widest">
+          Your campus, simplified
+        </span>
+        <h1
+          className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-black leading-tight mb-5"
+          style={{ letterSpacing: "-0.02em" }}
+        >
+          Don't make campus life awkward
+        </h1>
+        <p className="text-base md:text-lg text-gray-500 mb-8 max-w-md leading-relaxed">
+          No more missing out on events, updates, or connections. KampusKart
+          puts everything you need in one place.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            to="/signup"
+            className="px-8 py-3 rounded-lg font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 text-sm"
+          >
+            Get started
+          </Link>
+          <Link
+            to="/login"
+            className="px-8 py-3 rounded-lg font-bold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors duration-200 text-sm"
+          >
+            Log in
+          </Link>
+        </div>
+      </div>
+
+      {/* Right: shuffle grid — hidden on mobile */}
+      <div className="hidden md:block">
+        <ShuffleGrid />
+      </div>
+    </section>
+  );
+};

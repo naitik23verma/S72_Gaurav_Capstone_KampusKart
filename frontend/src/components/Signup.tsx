@@ -151,7 +151,7 @@ const Signup: React.FC = () => {
   return (
     <div className="min-h-screen w-screen h-screen flex font-sans bg-white">
       {/* Left: Signup Form */}
-      <div className="flex flex-col items-center w-full md:w-1/2 px-8 py-8 bg-white rounded-2xl shadow-lg overflow-y-auto">
+      <div className="flex flex-col items-center w-full md:w-1/2 px-8 py-8 bg-white overflow-y-auto">
         <div className="w-full max-w-sm">
           <div className="flex items-center justify-center gap-6 mb-6">
             <Link to="/" className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
@@ -253,8 +253,7 @@ const Signup: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex justify-center py-3 px-4 rounded-lg text-lg font-semibold text-white bg-[#181818] shadow-lg hover:bg-[#00C6A7] hover:text-white transition mobile-touch-friendly mobile-no-hover mobile-active-feedback ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-              style={{ boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)' }}
+              className={`w-full flex justify-center py-3 px-4 rounded-lg text-lg font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] hover:text-white transition-colors duration-200 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {loading ? 'Creating account...' : 'Sign up'}
             </button>
@@ -271,7 +270,7 @@ const Signup: React.FC = () => {
             <button
               type="button"
               onClick={handleGoogleSignup}
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg text-lg font-semibold text-black bg-white border border-[#E0E0E0] hover:bg-[#FFD166] hover:text-black transition"
+              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg text-lg font-semibold text-black bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors duration-200"
             >
               <img src="/google-icon.svg" alt="Google" className="w-5 h-5" />
               Sign up with Google

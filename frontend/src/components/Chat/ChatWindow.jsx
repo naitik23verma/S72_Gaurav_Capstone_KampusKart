@@ -647,7 +647,7 @@ const ChatWindow = () => {
                     <img
                       src={attachment.url}
                       alt={attachment.name}
-                      style={{ maxWidth: '180px', borderRadius: '8px', boxShadow: '0 2px 8px #eee' }}
+                      style={{ maxWidth: '180px', borderRadius: '8px' }}
                     />
                   ) : (
                     <Button
@@ -677,9 +677,7 @@ const ChatWindow = () => {
                       py: 0.25,
                       borderRadius: '8px',
                       fontSize: 16,
-                      border: `1px solid ${CHAT_THEME.border}`,
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s ease',
+                      border: `2px solid ${CHAT_THEME.border}`,
                       '&:hover': {
                         transform: 'scale(1.1)',
                       }
@@ -736,7 +734,7 @@ const ChatWindow = () => {
               top: 4, 
               left: 4,
               backgroundColor: CHAT_THEME.cardBg,
-              border: `1px solid ${CHAT_THEME.border}`,
+              border: `2px solid ${CHAT_THEME.border}`,
               borderRadius: '8px',
               width: 28,
               height: 28,

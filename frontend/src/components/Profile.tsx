@@ -416,7 +416,7 @@ const Profile = () => {
                     Cancel
                   </button>
                   <button type="button" onClick={handleSave} disabled={saveLoading}
-                    className={`px-6 py-3 rounded-lg text-sm font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition ${saveLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                    className={`px-6 py-3 rounded-lg text-sm font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 ${saveLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                     {saveLoading ? (
                       <span className="flex items-center gap-2">
                         <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -507,9 +507,9 @@ const Profile = () => {
                   </div>
                 </div>
 
-                <div className="flex justify-end pt-2 border-t border-gray-100">
+                <div className="flex justify-end pt-2 border-t-2 border-gray-200">
                   <button type="button" onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-sm shadow hover:bg-[#00C6A7] transition">
+                    className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] transition-colors duration-200">
                     <FiEdit2 className="w-4 h-4" /> Edit Profile
                   </button>
                 </div>

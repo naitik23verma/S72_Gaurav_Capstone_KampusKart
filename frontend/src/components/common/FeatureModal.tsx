@@ -38,7 +38,7 @@ export const FeatureModal: React.FC<FeatureModalProps> = ({
       onClick={onClose}
     >
       <div
-        className={`bg-white rounded-lg p-4 sm:p-6 md:p-8 ${sizeClasses[size]} w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative`}
+        className={`bg-white rounded-lg border-2 border-gray-200 p-4 sm:p-6 md:p-8 ${sizeClasses[size]} w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -49,7 +49,7 @@ export const FeatureModal: React.FC<FeatureModalProps> = ({
           <button
             onClick={onClose}
             aria-label="Close"
-            className="bg-[#181818] hover:bg-[#00C6A7] text-white rounded-lg p-2.5 transition-all duration-200 shadow-lg min-h-touch min-w-touch flex-shrink-0 flex items-center justify-center"
+            className="bg-[#181818] hover:bg-[#00C6A7] text-white rounded-lg p-2.5 transition-colors duration-200 min-h-touch min-w-touch flex-shrink-0 flex items-center justify-center"
           >
             <FiX className="w-5 h-5" />
           </button>

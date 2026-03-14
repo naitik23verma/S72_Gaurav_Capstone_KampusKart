@@ -93,7 +93,7 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex justify-center py-3 px-4 rounded-lg text-lg font-semibold text-white bg-[#181818] shadow-lg hover:bg-[#00C6A7] hover:text-white transition`}
+              className={`w-full flex justify-center py-3 px-4 rounded-lg text-lg font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] hover:text-white transition-colors duration-200`}
             >
               {loading ? 'Sending OTP...' : 'Send OTP'}
             </button>
@@ -194,7 +194,7 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex justify-center py-3 px-4 rounded-lg text-lg font-semibold text-white bg-[#181818] shadow-lg hover:bg-[#00C6A7] hover:text-white transition`}
+              className={`w-full flex justify-center py-3 px-4 rounded-lg text-lg font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] hover:text-white transition-colors duration-200`}
             >
               {loading ? 'Resetting Password...' : 'Reset Password'}
             </button>

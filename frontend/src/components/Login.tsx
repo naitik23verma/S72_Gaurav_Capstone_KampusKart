@@ -84,7 +84,7 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen w-screen h-screen flex font-sans bg-white">
       {/* Left: Login Form */}
-      <div className="flex flex-col justify-center items-center w-full md:w-1/2 px-8 py-8 bg-white rounded-2xl shadow-lg">
+      <div className="flex flex-col justify-center items-center w-full md:w-1/2 px-8 py-8 bg-white">
         <div className="w-full max-w-sm">
           <div className="flex items-center justify-center gap-6 mb-6">
             <Link to="/" className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
@@ -167,8 +167,7 @@ const Login: React.FC = () => {
             <button
               type="submit"
               disabled={loading || !!emailError}
-              className={`w-full flex justify-center py-3 px-4 rounded-lg text-lg font-semibold text-white bg-[#181818] shadow-lg hover:bg-[#00C6A7] hover:text-white transition mobile-touch-friendly mobile-no-hover mobile-active-feedback ${emailError ? 'opacity-50 cursor-not-allowed' : ''}`}
-              style={{ boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)' }}
+              className={`w-full flex justify-center py-3 px-4 rounded-lg text-lg font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] hover:text-white transition-colors duration-200 ${emailError ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {loading ? 'Logging in...' : 'Login'}
             </button>
@@ -185,7 +184,7 @@ const Login: React.FC = () => {
             <button
               type="button"
               onClick={handleGoogleLogin}
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg text-lg font-semibold text-black bg-white border border-[#E0E0E0] hover:bg-[#FFD166] hover:text-black transition mobile-touch-friendly mobile-no-hover mobile-active-feedback"
+              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg text-lg font-semibold text-black bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors duration-200"
             >
               <img src="/google-icon.svg" alt="Google" className="w-5 h-5" />
               Sign in with Google

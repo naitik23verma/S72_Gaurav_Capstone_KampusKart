@@ -239,7 +239,7 @@ const Facilities = () => {
           {user?.isAdmin && (
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg shadow hover:bg-[#00C6A7] transition"
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] transition-colors duration-200"
             >
               + Add Facility
             </button>
@@ -302,7 +302,7 @@ const Facilities = () => {
             
             {/* Autocomplete Dropdown */}
             {showSuggestions && filteredSuggestions.length > 0 && (
-              <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg border-2 border-gray-200 max-h-60 overflow-auto">
+              <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg max-h-60 overflow-auto">
                 {filteredSuggestions.map((suggestion, index) => (
                   <div
                     key={index}
@@ -588,7 +588,7 @@ const Facilities = () => {
                   </button>
                   <button
                     type="submit"
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition ${addLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 ${addLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={addLoading}
                   >
                     {addLoading ? (
@@ -762,7 +762,7 @@ const Facilities = () => {
                   </button>
                   <button
                     type="submit"
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition ${editLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 ${editLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={editLoading}
                   >
                     {editLoading ? (

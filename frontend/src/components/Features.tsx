@@ -51,7 +51,7 @@ const Features: React.FC = () => {
             <Link 
               to={feature.link} 
               key={feature.name} 
-              className="bg-white rounded-lg shadow hover:shadow-lg p-8 flex flex-col items-center text-center transition group border border-gray-100"
+              className="bg-white rounded-lg border-2 border-gray-200 p-8 flex flex-col items-center text-center transition-colors duration-200 group hover:border-gray-300"
             >
               <div className="mb-4">{feature.icon}</div>
               <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-[#00C6A7]">{feature.name}</h3>

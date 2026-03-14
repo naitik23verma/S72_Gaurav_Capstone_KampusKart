@@ -4,10 +4,7 @@ const User = require('../../models/User');
 describe('User Model Test', () => {
   beforeAll(async () => {
     // Connect to test database
-    await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(process.env.MONGODB_URI);
   });
 
   afterAll(async () => {

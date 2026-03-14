@@ -3,10 +3,7 @@ const Complaint = require('../../models/Complaint');
 
 describe('Complaint Model Test', () => {
   beforeAll(async () => {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(process.env.MONGODB_URI);
   });
 
   afterAll(async () => {

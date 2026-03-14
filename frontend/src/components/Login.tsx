@@ -71,19 +71,19 @@ const Login: React.FC = () => {
     <div className="min-h-screen w-screen flex flex-col font-sans bg-white">
       <div className="flex-1 flex">
         {/* Left: form */}
-        <div className="flex flex-col justify-center items-center w-full md:w-1/2 px-8 py-8 bg-white">
+        <div className="flex flex-col justify-center items-center w-full md:w-1/2 px-4 sm:px-6 md:px-8 py-6 md:py-8 bg-white">
         <div className="w-full max-w-sm">
 
           {/* Logo */}
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity duration-200">
-              <img src="/Logo.png" alt="KampusKart Logo" className="h-10 w-10 object-contain" />
-              <span className="text-xl font-extrabold text-black tracking-tight">KampusKart</span>
+          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-6 sm:mb-8">
+            <Link to="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity duration-200">
+              <img src="/Logo.png" alt="KampusKart Logo" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" />
+              <span className="text-lg sm:text-xl font-extrabold text-black tracking-tight">KampusKart</span>
             </Link>
           </div>
 
-          <h2 className="mb-1 text-2xl font-extrabold text-black text-center">Welcome back</h2>
-          <p className="text-sm text-gray-500 text-center mb-8">Sign in to your account</p>
+          <h2 className="mb-1 text-xl sm:text-2xl font-extrabold text-black text-center">Welcome back</h2>
+          <p className="text-xs sm:text-sm text-gray-500 text-center mb-6 sm:mb-8">Sign in to your account</p>
 
           {/* Error */}
           {error && (
@@ -92,32 +92,32 @@ const Login: React.FC = () => {
             </div>
           )}
 
-          <form className="space-y-5" onSubmit={handleSubmit}>
+          <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit}>
             {/* Email */}
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Email</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Email</label>
               <input
                 type="email"
                 autoComplete="email"
                 required
-                className={`w-full px-3 py-2.5 border-2 ${emailError ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200`}
+                className={`w-full px-3 py-3 sm:py-2.5 border-2 ${emailError ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200 min-h-touch`}
                 placeholder="you@example.com"
                 value={email}
                 onChange={handleEmailChange}
                 onBlur={handleEmailBlur}
               />
-              {emailError && <p className="mt-1 text-xs text-red-500">{emailError}</p>}
+              {emailError && <p className="mt-1.5 text-xs text-red-500">{emailError}</p>}
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Password</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
                   required
-                  className="w-full px-3 py-2.5 pr-10 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200"
+                  className="w-full px-3 py-3 sm:py-2.5 pr-12 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200 min-h-touch"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -125,11 +125,11 @@ const Login: React.FC = () => {
                 <button
                   type="button"
                   tabIndex={-1}
-                  className="absolute right-0 bottom-2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200 bg-transparent p-0 border-0"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200 bg-transparent p-2 border-0 min-h-touch min-w-touch"
                   onClick={() => setShowPassword(v => !v)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? <EyeSlashIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                  {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
                 </button>
               </div>
             </div>
@@ -154,7 +154,7 @@ const Login: React.FC = () => {
             <button
               type="submit"
               disabled={loading || !!emailError}
-              className={`w-full py-3 px-4 rounded-lg text-sm font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 ${(loading || !!emailError) ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full py-3 px-4 rounded-lg text-sm sm:text-base font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 min-h-touch ${(loading || !!emailError) ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
@@ -173,9 +173,9 @@ const Login: React.FC = () => {
             <button
               type="button"
               onClick={() => loginWithGoogle()}
-              className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors duration-200"
+              className="w-full flex items-center justify-center gap-2 sm:gap-3 py-3 px-4 rounded-lg text-sm sm:text-base font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors duration-200 min-h-touch"
             >
-              <img src="/google-icon.svg" alt="Google" className="w-4 h-4" />
+              <img src="/google-icon.svg" alt="Google" className="w-4 h-4 sm:w-5 sm:h-5" />
               Sign in with Google
             </button>
 

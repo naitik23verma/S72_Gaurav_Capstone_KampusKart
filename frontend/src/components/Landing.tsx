@@ -25,7 +25,7 @@ const Landing: React.FC = () => {
       <div className="bg-white font-sans pt-[72px]">
 
         {/* Hero — full viewport minus navbar */}
-        <div className="h-[calc(100vh-72px)] w-full flex items-center overflow-hidden">
+        <div className="min-h-[calc(100vh-72px)] w-full flex items-center overflow-hidden py-8 md:py-0">
           <ShuffleHero />
         </div>
 
@@ -35,33 +35,33 @@ const Landing: React.FC = () => {
         </div>
 
         {/* How it works */}
-        <section className="max-w-6xl mx-auto px-4 sm:px-8 py-16">
-          <div className="mb-10">
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-12 md:py-16">
+          <div className="mb-8 md:mb-10 text-center md:text-left">
             <span className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-lg bg-gray-50 border-2 border-gray-200 text-xs font-semibold text-[#00C6A7] uppercase tracking-widest">
               Simple by design
             </span>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-black mb-3" style={{ letterSpacing: '-0.01em' }}>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-black mb-3" style={{ letterSpacing: '-0.01em' }}>
               Here's how it works
             </h2>
-            <p className="text-base md:text-lg text-gray-500">More living, less searching.</p>
+            <p className="text-sm sm:text-base md:text-lg text-gray-500">More living, less searching.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {steps.map((step, idx) => (
-              <div key={idx} className="p-6 bg-white border-2 border-gray-200 rounded-lg">
-                <div className={`mb-4 w-12 h-12 flex items-center justify-center rounded-lg font-extrabold text-lg text-white ${step.iconBg}`}>
+              <div key={idx} className="p-4 sm:p-5 md:p-6 bg-white border-2 border-gray-200 rounded-lg hover:shadow-md transition-shadow duration-200">
+                <div className={`mb-3 md:mb-4 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-lg font-extrabold text-base sm:text-lg text-white ${step.iconBg}`}>
                   {step.number}
                 </div>
-                <h3 className="text-lg font-extrabold text-black mb-2">{step.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{step.desc}</p>
+                <h3 className="text-base sm:text-lg font-extrabold text-black mb-2">{step.title}</h3>
+                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">{step.desc}</p>
               </div>
             ))}
           </div>
 
-          <div className="mt-10">
+          <div className="mt-8 md:mt-10 text-center md:text-left">
             <Link
               to="/signup"
-              className="inline-block px-8 py-3 rounded-lg font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 text-sm"
+              className="inline-block px-6 sm:px-8 py-3 rounded-lg font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 text-sm sm:text-base min-h-touch"
             >
               Sign up free
             </Link>

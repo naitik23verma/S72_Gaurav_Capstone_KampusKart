@@ -109,21 +109,21 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white font-sans">
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 md:px-8 py-8 md:py-12">
         <div className="w-full max-w-md">
         
         {/* Logo */}
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity duration-200">
-            <img src="/Logo.png" alt="KampusKart Logo" className="h-10 w-10 object-contain" />
-            <span className="text-xl font-extrabold text-black tracking-tight">KampusKart</span>
+        <div className="flex items-center justify-center gap-2 sm:gap-3 mb-6 sm:mb-8">
+          <Link to="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity duration-200">
+            <img src="/Logo.png" alt="KampusKart Logo" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" />
+            <span className="text-lg sm:text-xl font-extrabold text-black tracking-tight">KampusKart</span>
           </Link>
         </div>
 
-        <h2 className="mb-1 text-2xl font-extrabold text-black text-center">
+        <h2 className="mb-1 text-xl sm:text-2xl font-extrabold text-black text-center">
           {step === 'request_otp' ? 'Forgot Password' : 'Reset Password'}
         </h2>
-        <p className="text-sm text-gray-500 text-center mb-8">
+        <p className="text-xs sm:text-sm text-gray-500 text-center mb-6 sm:mb-8">
           {step === 'request_otp' 
             ? 'Enter your email to receive a reset code' 
             : 'Enter the OTP and your new password'}
@@ -144,14 +144,14 @@ const ForgotPassword = () => {
         )}
 
         {step === 'request_otp' ? (
-          <form className="space-y-5" onSubmit={handleRequestOtp}>
+          <form className="space-y-4 sm:space-y-5" onSubmit={handleRequestOtp}>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Email</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Email</label>
               <input
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full pb-2 border-b border-gray-300 focus:outline-none focus:border-[#00C6A7] bg-transparent text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200"
+                className="w-full px-3 py-3 sm:py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200 min-h-touch"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -161,7 +161,7 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 px-4 rounded-lg text-sm font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full py-3 px-4 rounded-lg text-sm sm:text-base font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 min-h-touch ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {loading ? 'Sending OTP...' : 'Send OTP'}
             </button>
@@ -172,7 +172,7 @@ const ForgotPassword = () => {
             </p>
           </form>
         ) : (
-          <form className="space-y-5" onSubmit={handleResetPassword}>
+          <form className="space-y-4 sm:space-y-5" onSubmit={handleResetPassword}>
             {countdown > 0 && (
               <div className="text-center text-xs text-gray-500 mb-2">
                 OTP expires in {Math.floor(countdown / 60)}:{(countdown % 60).toString().padStart(2, '0')}
@@ -180,11 +180,11 @@ const ForgotPassword = () => {
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">OTP Code</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">OTP Code</label>
               <input
                 type="text"
                 required
-                className="w-full pb-2 border-b border-gray-300 focus:outline-none focus:border-[#00C6A7] bg-transparent text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200"
+                className="w-full px-3 py-3 sm:py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200 min-h-touch"
                 placeholder="Enter 6-digit code"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
@@ -193,13 +193,13 @@ const ForgotPassword = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">New Password</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">New Password</label>
               <div className="relative">
                 <input
                   type={showNewPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   required
-                  className="w-full pb-2 pr-10 border-b border-gray-300 focus:outline-none focus:border-[#00C6A7] bg-transparent text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200"
+                  className="w-full px-3 py-3 sm:py-2.5 pr-12 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200 min-h-touch"
                   placeholder="••••••••"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
@@ -207,23 +207,23 @@ const ForgotPassword = () => {
                 <button
                   type="button"
                   tabIndex={-1}
-                  className="absolute right-0 bottom-2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200 bg-transparent p-0 border-0"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200 bg-transparent p-2 border-0 min-h-touch min-w-touch"
                   onClick={() => setShowNewPassword(v => !v)}
                   aria-label={showNewPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showNewPassword ? <EyeSlashIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                  {showNewPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
                 </button>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Confirm Password</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Confirm Password</label>
               <div className="relative">
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   required
-                  className="w-full pb-2 pr-10 border-b border-gray-300 focus:outline-none focus:border-[#00C6A7] bg-transparent text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200"
+                  className="w-full px-3 py-3 sm:py-2.5 pr-12 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200 min-h-touch"
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -231,11 +231,11 @@ const ForgotPassword = () => {
                 <button
                   type="button"
                   tabIndex={-1}
-                  className="absolute right-0 bottom-2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200 bg-transparent p-0 border-0"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200 bg-transparent p-2 border-0 min-h-touch min-w-touch"
                   onClick={() => setShowConfirmPassword(v => !v)}
                   aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showConfirmPassword ? <EyeSlashIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                  {showConfirmPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
                 </button>
               </div>
             </div>
@@ -243,7 +243,7 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 px-4 rounded-lg text-sm font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full py-3 px-4 rounded-lg text-sm sm:text-base font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 min-h-touch ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {loading ? 'Resetting Password...' : 'Reset Password'}
             </button>

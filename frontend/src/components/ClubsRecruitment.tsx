@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { FiPlus, FiCalendar, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiUser, FiPhone } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
-import AIAutocomplete from './AIAutocomplete';
-import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { validateMultipleRequired, validateEmail, validatePhone, validateUrl, validateDateRange } from '../utils/formValidation';
@@ -201,32 +199,48 @@ const ClubsRecruitment = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedClubForDetails, setSelectedClubForDetails] = useState<ClubRecruitment | null>(null);
   const [filterStatus, setFilterStatus] = useState<'all' | 'Open' | 'Closed'>('all');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
+  const searchRef = useRef<HTMLDivElement>(null);
 
-  // AI Autocomplete hook
-  const preExistingStrings = useMemo(() => {
-    const pool: string[] = [];
-    if (Array.isArray(clubs)) {
-      clubs.forEach(c => {
-        if (c && c.title) pool.push(c.title);
-        if (c && c.description) pool.push(c.description);
-        if (c && c.clubName) pool.push(c.clubName);
-      });
+  // Generate autocomplete suggestions from existing clubs
+  useEffect(() => {
+    if (searchInput.trim().length > 0) {
+      const suggestions = new Set<string>();
+      if (Array.isArray(clubs)) {
+        clubs.forEach(club => {
+          if (club && club.title && club.title.toLowerCase().includes(searchInput.toLowerCase())) {
+            suggestions.add(club.title);
+          }
+          if (club && club.clubName && club.clubName.toLowerCase().includes(searchInput.toLowerCase())) {
+            suggestions.add(club.clubName);
+          }
+          if (club && club.description && club.description.toLowerCase().includes(searchInput.toLowerCase())) {
+            const words = club.description.split(' ').filter(word => 
+              word.toLowerCase().includes(searchInput.toLowerCase()) && word.length > 3
+            );
+            words.forEach(word => suggestions.add(word));
+          }
+        });
+      }
+      setFilteredSuggestions(Array.from(suggestions).slice(0, 5));
+      setShowSuggestions(true);
+    } else {
+      setFilteredSuggestions([]);
+      setShowSuggestions(false);
     }
-    return Array.from(new Set(pool.map(s => s?.trim()).filter(Boolean)));
-  }, [clubs]);
+  }, [searchInput, clubs]);
 
-  const {
-    suggestions,
-    isLoading: aiLoading,
-    error: aiError,
-    handleInputChange: handleAISearchInput,
-    handleSuggestionSelect,
-    clearSuggestions
-  } = useAIAutocomplete({
-    context: { section: 'clubs' },
-    debounceMs: 300,
-    preExistingStrings
-  });
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     fetchClubs();
@@ -438,28 +452,63 @@ const ClubsRecruitment = () => {
               </div>
             </div>
           </div>
-          {/* AI-Powered Search Bar */}
-          <div className="relative w-full lg:w-[520px]">
-            <AIAutocomplete
-              value={searchInput}
-              onChange={(value) => {
-                setSearchInput(value);
-                handleAISearchInput(value);
-              }}
-              onSelect={(suggestion) => {
-                setSearchInput(suggestion.text);
-                setSearchQuery(suggestion.text);
-                handleSuggestionSelect(suggestion);
-              }}
-              placeholder="Search clubs"
-              className="w-full"
-              suggestions={suggestions}
-              isLoading={aiLoading}
-              disabled={false}
-              showSubmitButton
-              submitLabel="Search"
-              onSubmit={() => setSearchQuery(searchInput)}
-            />
+          {/* Search Bar */}
+          <div className="relative w-full lg:w-[520px]" ref={searchRef}>
+            <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white shadow-sm hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
+              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setSearchQuery(searchInput);
+                    setShowSuggestions(false);
+                  } else if (e.key === 'Escape') {
+                    setShowSuggestions(false);
+                  }
+                }}
+                onFocus={() => {
+                  if (filteredSuggestions.length > 0) {
+                    setShowSuggestions(true);
+                  }
+                }}
+                placeholder="Search clubs..."
+                className="flex-1 pl-12 pr-3 py-3.5 bg-transparent text-gray-700 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery(searchInput);
+                  setShowSuggestions(false);
+                }}
+                className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
+                aria-label="Search"
+              >
+                <FiSearch className="w-4 h-4" />
+                <span className="hidden sm:inline">Search</span>
+              </button>
+            </div>
+            
+            {/* Autocomplete Dropdown */}
+            {showSuggestions && filteredSuggestions.length > 0 && (
+              <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto">
+                {filteredSuggestions.map((suggestion, index) => (
+                  <div
+                    key={index}
+                    onClick={() => {
+                      setSearchInput(suggestion);
+                      setSearchQuery(suggestion);
+                      setShowSuggestions(false);
+                    }}
+                    className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                  >
+                    <FiSearch className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm font-medium text-gray-700">{suggestion}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

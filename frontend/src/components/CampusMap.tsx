@@ -1,8 +1,6 @@
 /// <reference types="vite/client" />
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { GoogleMap, useLoadScript, InfoWindow, Marker, Libraries } from '@react-google-maps/api';
-import AIAutocomplete from './AIAutocomplete';
-import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
 import { MapSkeleton } from './common/SkeletonLoader';
 
 // Define libraries as a proper static constant with correct type
@@ -246,32 +244,48 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   // Add state for map center and zoom
   const [mapCenter, setMapCenter] = useState(universityLocation);
   const [mapZoom, setMapZoom] = useState(16);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
+  const searchRef = useRef<HTMLDivElement>(null);
 
-  // AI Autocomplete hook - prepare pre-existing strings from locations
-  const preExistingStrings = useMemo(() => {
-    const pool: string[] = [];
-    if (Array.isArray(locations)) {
-      locations.forEach((location) => {
-        if (location && location.name) pool.push(location.name);
-        if (location && location.description) pool.push(location.description);
-        if (location && location.category) pool.push(location.category);
-      });
+  // Generate autocomplete suggestions from existing locations
+  useEffect(() => {
+    if (searchInput.trim().length > 0) {
+      const suggestions = new Set<string>();
+      if (Array.isArray(locations)) {
+        locations.forEach(location => {
+          if (location && location.name && location.name.toLowerCase().includes(searchInput.toLowerCase())) {
+            suggestions.add(location.name);
+          }
+          if (location && location.category && location.category.toLowerCase().includes(searchInput.toLowerCase())) {
+            suggestions.add(location.category);
+          }
+          if (location && location.description && location.description.toLowerCase().includes(searchInput.toLowerCase())) {
+            const words = location.description.split(' ').filter(word => 
+              word.toLowerCase().includes(searchInput.toLowerCase()) && word.length > 3
+            );
+            words.forEach(word => suggestions.add(word));
+          }
+        });
+      }
+      setFilteredSuggestions(Array.from(suggestions).slice(0, 5));
+      setShowSuggestions(true);
+    } else {
+      setFilteredSuggestions([]);
+      setShowSuggestions(false);
     }
-    return Array.from(new Set(pool.map(s => s?.trim()).filter(Boolean)));
-  }, [locations]);
+  }, [searchInput, locations]);
 
-  const {
-    suggestions,
-    isLoading: aiLoading,
-    error: aiError,
-    handleInputChange: handleAISearchInput,
-    handleSuggestionSelect,
-    clearSuggestions
-  } = useAIAutocomplete({
-    context: { section: 'campus-map' },
-    debounceMs: 300,
-    preExistingStrings
-  });
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Memoize filtered locations
   const filteredLocations = useMemo(() => {
@@ -422,36 +436,77 @@ const CampusMap: React.FC<CampusMapProps> = () => {
         <div className="w-full md:w-2/3 h-full relative">
           <div className="bg-white shadow-lg overflow-hidden h-full relative">
             {/* Mobile Search Bar - Visible on mobile only, positioned over map */}
-            <div className="md:hidden absolute top-2 left-3 right-3 z-10">
-              <AIAutocomplete
-                value={searchInput}
-                onChange={(value) => {
-                  setSearchInput(value);
-                  handleAISearchInput(value);
-                }}
-                onSelect={(suggestion) => {
-                  setSearchInput(suggestion.text);
-                  setSearchQuery(suggestion.text);
-                  handleSuggestionSelect(suggestion);
-                  // Find and navigate to matching location if found
-                  const matchingLocation = locations.find(loc =>
-                    loc.name.toLowerCase().includes(suggestion.text.toLowerCase()) ||
-                    loc.description?.toLowerCase().includes(suggestion.text.toLowerCase()) ||
-                    loc.category?.toLowerCase().includes(suggestion.text.toLowerCase())
-                  );
-                  if (matchingLocation) {
-                    handleLocationClick(matchingLocation);
-                  }
-                }}
-                placeholder="Search campus locations..."
-                className="w-full"
-                suggestions={suggestions}
-                isLoading={aiLoading}
-                disabled={false}
-                showSubmitButton
-                submitLabel="Search"
-                onSubmit={() => setSearchQuery(searchInput)}
-              />
+            <div className="md:hidden absolute top-2 left-3 right-3 z-10" ref={searchRef}>
+              <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white shadow-sm hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  type="text"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setSearchQuery(searchInput);
+                      setShowSuggestions(false);
+                    } else if (e.key === 'Escape') {
+                      setShowSuggestions(false);
+                    }
+                  }}
+                  onFocus={() => {
+                    if (filteredSuggestions.length > 0) {
+                      setShowSuggestions(true);
+                    }
+                  }}
+                  placeholder="Search campus locations..."
+                  className="flex-1 pl-10 pr-2 py-2.5 bg-transparent text-gray-700 font-medium outline-none text-sm border-none placeholder:text-gray-400 rounded-l-lg"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery(searchInput);
+                    setShowSuggestions(false);
+                  }}
+                  className="px-4 py-2.5 bg-[#181818] text-white font-bold text-xs hover:bg-[#00C6A7] flex items-center justify-center gap-1.5 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
+                  aria-label="Search"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <span>Search</span>
+                </button>
+              </div>
+              
+              {/* Autocomplete Dropdown */}
+              {showSuggestions && filteredSuggestions.length > 0 && (
+                <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto">
+                  {filteredSuggestions.map((suggestion, index) => (
+                    <div
+                      key={index}
+                      onClick={() => {
+                        setSearchInput(suggestion);
+                        setSearchQuery(suggestion);
+                        setShowSuggestions(false);
+                        // Find and navigate to matching location if found
+                        const matchingLocation = locations.find(loc =>
+                          loc.name.toLowerCase().includes(suggestion.toLowerCase()) ||
+                          loc.description?.toLowerCase().includes(suggestion.toLowerCase()) ||
+                          loc.category?.toLowerCase().includes(suggestion.toLowerCase())
+                        );
+                        if (matchingLocation) {
+                          handleLocationClick(matchingLocation);
+                        }
+                      }}
+                      className="flex items-center px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                    >
+                      <svg className="w-3.5 h-3.5 text-gray-400 mr-2.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <span className="text-xs font-medium text-gray-700">{suggestion}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <GoogleMap
@@ -611,36 +666,77 @@ const CampusMap: React.FC<CampusMapProps> = () => {
           <div className={`bg-white shadow-lg p-3 md:p-4 md:flex-grow transition-all duration-300 ease-in-out opacity-100 h-full overflow-y-auto`}>
             <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-3 md:mb-4">Campus Locations</h2>
             {/* Desktop Search Bar - Visible on desktop only */}
-            <div className="hidden md:block mb-6 w-full">
-              <AIAutocomplete
-                value={searchInput}
-                onChange={(value) => {
-                  setSearchInput(value);
-                  handleAISearchInput(value);
-                }}
-                onSelect={(suggestion) => {
-                  setSearchInput(suggestion.text);
-                  setSearchQuery(suggestion.text);
-                  handleSuggestionSelect(suggestion);
-                  // Find and navigate to matching location if found
-                  const matchingLocation = locations.find(loc =>
-                    loc.name.toLowerCase().includes(suggestion.text.toLowerCase()) ||
-                    loc.description?.toLowerCase().includes(suggestion.text.toLowerCase()) ||
-                    loc.category?.toLowerCase().includes(suggestion.text.toLowerCase())
-                  );
-                  if (matchingLocation) {
-                    handleLocationClick(matchingLocation);
-                  }
-                }}
-                placeholder="Search locations..."
-                className="w-full"
-                suggestions={suggestions}
-                isLoading={aiLoading}
-                disabled={false}
-                showSubmitButton
-                submitLabel="Search"
-                onSubmit={() => setSearchQuery(searchInput)}
-              />
+            <div className="hidden md:block mb-6 w-full relative">
+              <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white shadow-sm hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
+                <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  type="text"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setSearchQuery(searchInput);
+                      setShowSuggestions(false);
+                    } else if (e.key === 'Escape') {
+                      setShowSuggestions(false);
+                    }
+                  }}
+                  onFocus={() => {
+                    if (filteredSuggestions.length > 0) {
+                      setShowSuggestions(true);
+                    }
+                  }}
+                  placeholder="Search locations..."
+                  className="flex-1 pl-12 pr-3 py-3.5 bg-transparent text-gray-700 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery(searchInput);
+                    setShowSuggestions(false);
+                  }}
+                  className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
+                  aria-label="Search"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <span className="hidden sm:inline">Search</span>
+                </button>
+              </div>
+              
+              {/* Autocomplete Dropdown */}
+              {showSuggestions && filteredSuggestions.length > 0 && (
+                <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto">
+                  {filteredSuggestions.map((suggestion, index) => (
+                    <div
+                      key={index}
+                      onClick={() => {
+                        setSearchInput(suggestion);
+                        setSearchQuery(suggestion);
+                        setShowSuggestions(false);
+                        // Find and navigate to matching location if found
+                        const matchingLocation = locations.find(loc =>
+                          loc.name.toLowerCase().includes(suggestion.toLowerCase()) ||
+                          loc.description?.toLowerCase().includes(suggestion.toLowerCase()) ||
+                          loc.category?.toLowerCase().includes(suggestion.toLowerCase())
+                        );
+                        if (matchingLocation) {
+                          handleLocationClick(matchingLocation);
+                        }
+                      }}
+                      className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                    >
+                      <svg className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <span className="text-sm font-medium text-gray-700">{suggestion}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             {/* Locations List - Always in panel on desktop, hidden on mobile */}
             <div className="hidden md:block transition-all duration-300 ease-in-out opacity-100">

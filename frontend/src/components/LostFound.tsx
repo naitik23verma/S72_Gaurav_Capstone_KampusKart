@@ -71,8 +71,6 @@ const LostFound = () => {
       });
       if (node) observer.current.observe(node);
     }, [isFetchingMore, currentPage, totalPages]);
-  const [dragItem, setDragItem] = useState<number | null>(null);
-  const [dragOverItem, setDragOverItem] = useState<number | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -302,10 +300,12 @@ const LostFound = () => {
       });
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to delete item');
+        alert(error.message || 'Failed to delete item');
+        return;
       }
       setItems(items.filter(i => i._id !== id));
       setSelectedItemForDetails(null);
+      setSuccessMessage('Item deleted successfully!');
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Failed to delete item');
     }
@@ -322,25 +322,12 @@ const LostFound = () => {
         const error = await response.json();
         throw new Error(error.message || 'Failed to mark as resolved');
       }
-      const updated = await response.json();
+      await response.json();
       setItems(items.map(i => i._id === id ? { ...i, resolved: true } : i));
       setSelectedItemForDetails(prev => prev ? { ...prev, resolved: true } : prev);
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Failed to mark as resolved');
     }
-  };
-
-  // Drag-and-drop logic for images
-  const handleDragStart = (index: number) => setDragItem(index);
-  const handleDragEnter = (index: number) => setDragOverItem(index);
-  const handleDragEnd = () => {
-    if (dragItem === null || dragOverItem === null) return;
-    const newImages = [...newItem.images];
-    const dragged = newImages.splice(dragItem, 1)[0];
-    newImages.splice(dragOverItem, 0, dragged);
-    setNewItem({ ...newItem, images: newImages });
-    setDragItem(null);
-    setDragOverItem(null);
   };
 
   const renderStatus = (type: 'lost' | 'found', resolved: boolean) => {
@@ -1073,26 +1060,5 @@ const LostFound = () => {
     </div>
   );
 };
-
-function getTimeAgo(date: Date): string {
-  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
-  
-  let interval = seconds / 31536000;
-  if (interval > 1) return Math.floor(interval) + ' years ago';
-  
-  interval = seconds / 2592000;
-  if (interval > 1) return Math.floor(interval) + ' months ago';
-  
-  interval = seconds / 86400;
-  if (interval > 1) return Math.floor(interval) + ' days ago';
-  
-  interval = seconds / 3600;
-  if (interval > 1) return Math.floor(interval) + ' hours ago';
-  
-  interval = seconds / 60;
-  if (interval > 1) return Math.floor(interval) + ' minutes ago';
-  
-  return Math.floor(seconds) + ' seconds ago';
-}
 
 export default LostFound; 

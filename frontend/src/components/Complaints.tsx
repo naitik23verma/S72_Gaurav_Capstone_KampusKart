@@ -3,8 +3,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { FiPlus, FiEdit2, FiTrash2, FiX, FiCheckCircle, FiUser, FiCalendar, FiTag, FiFileText, FiSearch, FiInfo } from 'react-icons/fi';
 import { format } from 'date-fns';
 import { API_BASE } from '../config';
-import AIAutocomplete from './AIAutocomplete';
-import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { validateMultipleRequired } from '../utils/formValidation';
@@ -77,34 +75,52 @@ const Complaints = () => {
   const observer = useRef<IntersectionObserver | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
+  const searchRef = useRef<HTMLDivElement>(null);
 
-  // AI Autocomplete hook
-  const preExistingStrings = useMemo(() => {
-    const pool: string[] = [];
-    if (Array.isArray(complaints)) {
-      complaints.forEach((c: Complaint | null) => {
-        if (!c) return;
-        if (c.title) pool.push(c.title);
-        if (c.description) pool.push(c.description);
-        if (c.category) pool.push(c.category);
-        if (c.department) pool.push(c.department);
-      });
+  // Generate autocomplete suggestions from existing complaints
+  useEffect(() => {
+    if (searchInput.trim().length > 0) {
+      const suggestions = new Set<string>();
+      if (Array.isArray(complaints)) {
+        complaints.forEach((complaint: Complaint | null) => {
+          if (!complaint) return;
+          if (complaint.title && complaint.title.toLowerCase().includes(searchInput.toLowerCase())) {
+            suggestions.add(complaint.title);
+          }
+          if (complaint.category && complaint.category.toLowerCase().includes(searchInput.toLowerCase())) {
+            suggestions.add(complaint.category);
+          }
+          if (complaint.department && complaint.department.toLowerCase().includes(searchInput.toLowerCase())) {
+            suggestions.add(complaint.department);
+          }
+          if (complaint.description && complaint.description.toLowerCase().includes(searchInput.toLowerCase())) {
+            const words = complaint.description.split(' ').filter(word => 
+              word.toLowerCase().includes(searchInput.toLowerCase()) && word.length > 3
+            );
+            words.forEach(word => suggestions.add(word));
+          }
+        });
+      }
+      setFilteredSuggestions(Array.from(suggestions).slice(0, 5));
+      setShowSuggestions(true);
+    } else {
+      setFilteredSuggestions([]);
+      setShowSuggestions(false);
     }
-    return Array.from(new Set(pool.map(s => s?.trim()).filter(Boolean)));
-  }, [complaints]);
+  }, [searchInput, complaints]);
 
-  const {
-    suggestions,
-    isLoading: aiLoading,
-    error: aiError,
-    handleInputChange: handleAISearchInput,
-    handleSuggestionSelect,
-    clearSuggestions
-  } = useAIAutocomplete({
-    context: { section: 'complaints' },
-    debounceMs: 300,
-    preExistingStrings
-  });
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Auto-hide success message after 3 seconds
   useEffect(() => {
@@ -560,7 +576,7 @@ const Complaints = () => {
             <div className="relative">
               <select
                 value={filterStatus}
-                onChange={e => setFilterStatus(e.target.value as 'all' | 'Open' | 'InProgress' | 'Resolved' | 'Closed')}
+                onChange={e => setFilterStatus(e.target.value as 'All' | 'Open' | 'In Progress' | 'Resolved' | 'Closed')}
                 className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
               >
                 <option value="All">All Statuses</option>
@@ -576,28 +592,63 @@ const Complaints = () => {
               </div>
             </div>
           </div>
-          {/* AI-Powered Search Bar */}
-          <div className="relative w-full lg:w-[520px]">
-            <AIAutocomplete
-              value={searchInput}
-              onChange={(value) => {
-                setSearchInput(value);
-                handleAISearchInput(value);
-              }}
-              onSelect={(suggestion) => {
-                setSearchInput(suggestion.text);
-                setSearchQuery(suggestion.text);
-                handleSuggestionSelect(suggestion);
-              }}
-              placeholder="Search complaints"
-              className="w-full"
-              suggestions={suggestions}
-              isLoading={aiLoading}
-              disabled={false}
-              showSubmitButton
-              submitLabel="Search"
-              onSubmit={() => setSearchQuery(searchInput)}
-            />
+          {/* Search Bar */}
+          <div className="relative w-full lg:w-[520px]" ref={searchRef}>
+            <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white shadow-sm hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
+              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setSearchQuery(searchInput);
+                    setShowSuggestions(false);
+                  } else if (e.key === 'Escape') {
+                    setShowSuggestions(false);
+                  }
+                }}
+                onFocus={() => {
+                  if (filteredSuggestions.length > 0) {
+                    setShowSuggestions(true);
+                  }
+                }}
+                placeholder="Search complaints..."
+                className="flex-1 pl-12 pr-3 py-3.5 bg-transparent text-gray-700 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery(searchInput);
+                  setShowSuggestions(false);
+                }}
+                className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
+                aria-label="Search"
+              >
+                <FiSearch className="w-4 h-4" />
+                <span className="hidden sm:inline">Search</span>
+              </button>
+            </div>
+            
+            {/* Autocomplete Dropdown */}
+            {showSuggestions && filteredSuggestions.length > 0 && (
+              <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto">
+                {filteredSuggestions.map((suggestion, index) => (
+                  <div
+                    key={index}
+                    onClick={() => {
+                      setSearchInput(suggestion);
+                      setSearchQuery(suggestion);
+                      setShowSuggestions(false);
+                    }}
+                    className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                  >
+                    <FiSearch className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm font-medium text-gray-700">{suggestion}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
         {/* Card Grid */}

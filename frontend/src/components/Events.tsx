@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { FiPlus, FiCalendar, FiMapPin, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiClock, FiUser, FiPhone, FiCheckCircle } from 'react-icons/fi';
 import { FaSearch } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
-import AIAutocomplete from './AIAutocomplete';
-import { useAIAutocomplete } from '../hooks/useAIAutocomplete';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { validateMultipleRequired, validateEmail, validatePhone, validateUrl } from '../utils/formValidation';
@@ -297,30 +295,46 @@ const Events = () => {
   const [selectedEventForDetails, setSelectedEventForDetails] = useState<Event | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
+  const searchRef = useRef<HTMLDivElement>(null);
 
-  // AI Autocomplete hook
-  const preExistingStrings = useMemo(() => {
-    const pool: string[] = [];
-    events.forEach(e => {
-      if (e.title) pool.push(e.title);
-      if (e.description) pool.push(e.description);
-      if (e.location) pool.push(e.location);
-    });
-    return Array.from(new Set(pool.map(s => s.trim()).filter(Boolean)));
-  }, [events]);
+  // Generate autocomplete suggestions from existing events
+  useEffect(() => {
+    if (searchInput.trim().length > 0) {
+      const suggestions = new Set<string>();
+      events.forEach(event => {
+        if (event.title.toLowerCase().includes(searchInput.toLowerCase())) {
+          suggestions.add(event.title);
+        }
+        if (event.location && event.location.toLowerCase().includes(searchInput.toLowerCase())) {
+          suggestions.add(event.location);
+        }
+        if (event.description.toLowerCase().includes(searchInput.toLowerCase())) {
+          const words = event.description.split(' ').filter(word => 
+            word.toLowerCase().includes(searchInput.toLowerCase()) && word.length > 3
+          );
+          words.forEach(word => suggestions.add(word));
+        }
+      });
+      setFilteredSuggestions(Array.from(suggestions).slice(0, 5));
+      setShowSuggestions(true);
+    } else {
+      setFilteredSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [searchInput, events]);
 
-  const {
-    suggestions,
-    isLoading: aiLoading,
-    error: aiError,
-    handleInputChange: handleAISearchInput,
-    handleSuggestionSelect,
-    clearSuggestions
-  } = useAIAutocomplete({
-    context: { section: 'events' },
-    debounceMs: 300,
-    preExistingStrings
-  });
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Auto-hide success message after 3 seconds
   useEffect(() => {
@@ -696,14 +710,14 @@ const Events = () => {
             <div className="relative">
               <select 
                 value={filterStatus} 
-                onChange={e => setFilterStatus(e.target.value as 'all' | 'upcoming' | 'ongoing' | 'past')}
+                onChange={e => setFilterStatus(e.target.value)}
                 className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
               >
-              <option value="all">All Statuses</option>
-              <option value="upcoming">Upcoming</option>
-              <option value="ongoing">Ongoing</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
+              <option value="All">All Statuses</option>
+              <option value="Upcoming">Upcoming</option>
+              <option value="Ongoing">Ongoing</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -712,28 +726,63 @@ const Events = () => {
             </div>
           </div>
           </div>
-          {/* AI-Powered Search Bar */}
-          <div className="relative w-full lg:w-[520px]">
-            <AIAutocomplete
-              value={searchInput}
-              onChange={(value) => {
-                setSearchInput(value);
-                handleAISearchInput(value);
-              }}
-              onSelect={(suggestion) => {
-                setSearchInput(suggestion.text);
-                setSearchQuery(suggestion.text);
-                handleSuggestionSelect(suggestion);
-              }}
-              placeholder="Search events"
-              className="w-full"
-              suggestions={suggestions}
-              isLoading={aiLoading}
-              disabled={false}
-              showSubmitButton
-              submitLabel="Search"
-              onSubmit={() => setSearchQuery(searchInput)}
-            />
+          {/* Search Bar */}
+          <div className="relative w-full lg:w-[520px]" ref={searchRef}>
+            <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white shadow-sm hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
+              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setSearchQuery(searchInput);
+                    setShowSuggestions(false);
+                  } else if (e.key === 'Escape') {
+                    setShowSuggestions(false);
+                  }
+                }}
+                onFocus={() => {
+                  if (filteredSuggestions.length > 0) {
+                    setShowSuggestions(true);
+                  }
+                }}
+                placeholder="Search events..."
+                className="flex-1 pl-12 pr-3 py-3.5 bg-transparent text-gray-700 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery(searchInput);
+                  setShowSuggestions(false);
+                }}
+                className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
+                aria-label="Search"
+              >
+                <FiSearch className="w-4 h-4" />
+                <span className="hidden sm:inline">Search</span>
+              </button>
+            </div>
+            
+            {/* Autocomplete Dropdown */}
+            {showSuggestions && filteredSuggestions.length > 0 && (
+              <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto">
+                {filteredSuggestions.map((suggestion, index) => (
+                  <div
+                    key={index}
+                    onClick={() => {
+                      setSearchInput(suggestion);
+                      setSearchQuery(suggestion);
+                      setShowSuggestions(false);
+                    }}
+                    className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                  >
+                    <FiSearch className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm font-medium text-gray-700">{suggestion}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

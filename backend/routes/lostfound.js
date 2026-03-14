@@ -380,12 +380,7 @@ router.delete('/:id', authMiddleware, itemRateLimiter, async (req, res) => {
       return res.status(404).json({ message: 'Item not found' });
     }
 
-    // Check if the item is resolved - only for non-admin users
-    if (item.resolved && !req.user.isAdmin) {
-      return res.status(409).json({ message: 'Resolved items cannot be deleted' });
-    }
-
-    // Allow owner or admin
+    // Allow owner or admin to delete (removed resolved item restriction)
     if (item.user.toString() !== userId && !req.user.isAdmin) {
       return res.status(403).json({ message: 'You are not authorized to delete this item' });
     }

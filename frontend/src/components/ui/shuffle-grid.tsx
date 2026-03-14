@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { Skeleton } from "./skeleton";
 
 const shuffle = (array: (typeof squareData)[0][]) => {
   let currentIndex = array.length,
@@ -35,19 +36,56 @@ const squareData = [
   { id: 16, src: "https://images.unsplash.com/photo-1564981797816-1043664bf78d?w=400&q=80" },
 ];
 
-const generateSquares = () => {
-  return shuffle([...squareData]).map((sq) => (
+interface ImageSquareProps {
+  src: string;
+  id: number;
+}
+
+const ImageSquare = ({ src, id }: ImageSquareProps) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = src;
+    img.onload = () => setIsLoaded(true);
+    img.onerror = () => setHasError(true);
+  }, [src]);
+
+  return (
     <motion.div
-      key={sq.id}
+      key={id}
       layout
       transition={{ duration: 1.5, type: "spring" }}
-      className="w-full h-full rounded-lg overflow-hidden border-2 border-gray-200"
-      style={{
-        backgroundImage: `url(${sq.src})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    />
+      className="w-full h-full rounded-lg overflow-hidden border-2 border-gray-200 relative"
+      role="img"
+      aria-label="Campus life image"
+    >
+      {!isLoaded && !hasError && (
+        <Skeleton className="w-full h-full absolute inset-0" />
+      )}
+      {hasError && (
+        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+          <span className="text-gray-400 text-xs">Image unavailable</span>
+        </div>
+      )}
+      <div
+        className={`w-full h-full transition-opacity duration-300 ${
+          isLoaded ? 'opacity-100' : 'opacity-0'
+        }`}
+        style={{
+          backgroundImage: `url(${src})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
+    </motion.div>
+  );
+};
+
+const generateSquares = () => {
+  return shuffle([...squareData]).map((sq) => (
+    <ImageSquare key={sq.id} src={sq.src} id={sq.id} />
   ));
 };
 
@@ -68,7 +106,7 @@ export const ShuffleGrid = () => {
   };
 
   return (
-    <div className="grid grid-cols-4 grid-rows-4 h-full gap-2">
+    <div className="grid grid-cols-4 grid-rows-4 h-full gap-2 sm:gap-3">
       {squares.map((sq) => sq)}
     </div>
   );
@@ -76,32 +114,33 @@ export const ShuffleGrid = () => {
 
 export const ShuffleHero = () => {
   return (
-    <section className="w-full h-full px-4 sm:px-8 grid grid-cols-1 md:grid-cols-2 items-center gap-10 max-w-6xl mx-auto overflow-hidden">
+    <section className="w-full px-4 sm:px-6 md:px-8 grid grid-cols-1 md:grid-cols-2 items-center gap-6 sm:gap-8 md:gap-10 lg:gap-12 max-w-6xl mx-auto">
       {/* Left: text */}
-      <div>
-        <span className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-lg bg-gray-50 border-2 border-gray-200 text-xs font-semibold text-[#00C6A7] uppercase tracking-widest">
+      <div className="text-center md:text-left space-y-3 sm:space-y-4 md:space-y-5">
+        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border-2 border-gray-200 text-xs font-semibold text-[#00C6A7] uppercase tracking-widest">
           Your campus, simplified
         </span>
         <h1
-          className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-black leading-tight mb-5"
+          className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-black leading-tight"
           style={{ letterSpacing: "-0.02em" }}
         >
-          Don't make campus life awkward
+          Everything Campus, One App
         </h1>
-        <p className="text-base md:text-lg text-gray-500 mb-8 max-w-md leading-relaxed">
-          No more missing out on events, updates, or connections. KampusKart
-          puts everything you need in one place.
+        <p className="text-sm sm:text-base md:text-lg text-gray-500 max-w-md mx-auto md:mx-0 leading-relaxed">
+          Your all-in-one campus companion for navigation, events, news, lost & found, complaints, and more.
         </p>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col xs:flex-row gap-2 sm:gap-3 justify-center md:justify-start pt-1 sm:pt-2">
           <Link
             to="/signup"
-            className="px-8 py-3 rounded-lg font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 text-sm"
+            aria-label="Sign up for free account"
+            className="min-h-[48px] px-6 sm:px-8 py-3 rounded-lg font-bold text-white bg-[#181818] hover:bg-[#00C6A7] focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:ring-offset-2 transition-colors duration-200 text-sm sm:text-base text-center"
           >
             Get started
           </Link>
           <Link
             to="/login"
-            className="px-8 py-3 rounded-lg font-bold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors duration-200 text-sm"
+            aria-label="Log in to your account"
+            className="min-h-[48px] px-6 sm:px-8 py-3 rounded-lg font-bold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 transition-colors duration-200 text-sm sm:text-base text-center"
           >
             Log in
           </Link>
@@ -109,8 +148,8 @@ export const ShuffleHero = () => {
       </div>
 
       {/* Right: shuffle grid — hidden on mobile */}
-      <div className="hidden md:flex items-center justify-center h-full py-8">
-        <div className="w-full h-full max-h-[520px]">
+      <div className="hidden md:block w-full">
+        <div className="w-full aspect-square max-w-[420px] lg:max-w-[520px] mx-auto">
           <ShuffleGrid />
         </div>
       </div>

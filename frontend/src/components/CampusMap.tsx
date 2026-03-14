@@ -568,24 +568,24 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                     }}
                   >
                     {/* Header Section */}
-                    <div className="bg-gradient-to-r from-[#00C6A7] to-[#009e87] p-4 relative">
+                    <div className="bg-white p-4 relative border-b-2 border-gray-200">
                       {/* Close Button */}
                       <button
                         onClick={() => {
                           setInfoWindowPosition(null);
                           setSelectedLocation(null);
                         }}
-                        className="absolute top-3 right-3 p-2 rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-200 group"
+                        className="absolute top-3 right-3 p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
                         aria-label="Close"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white group-hover:rotate-90 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                       
                       <div className="pr-10">
-                        <h3 className="font-black text-lg text-white mb-2 line-clamp-2 leading-tight">{selectedLocation.name}</h3>
-                        <span className="inline-flex items-center px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-xs font-semibold rounded-lg shadow-sm">
+                        <h3 className="font-black text-lg text-gray-900 mb-2 line-clamp-2 leading-tight">{selectedLocation.name}</h3>
+                        <span className="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-lg border-2 border-gray-200">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                           </svg>
@@ -599,7 +599,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                       {/* Description Section */}
                       <div className="bg-gray-50 p-3 rounded-lg border-2 border-gray-200">
                         <div className="flex items-start gap-2 mb-2">
-                          <div className="flex items-center justify-center w-6 h-6 bg-[#00C6A7] rounded-lg flex-shrink-0">
+                          <div className="flex items-center justify-center w-6 h-6 bg-gray-700 rounded-lg flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -611,13 +611,13 @@ const CampusMap: React.FC<CampusMapProps> = () => {
 
                       {/* Location ID Badge */}
                       <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border-2 border-gray-200">
-                        <div className="flex items-center justify-center w-8 h-8 bg-[#00C6A7] rounded-lg">
+                        <div className="flex items-center justify-center w-8 h-8 bg-gray-700 rounded-lg">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                           </svg>
                         </div>
-                        <span className="text-sm font-semibold text-gray-700">Location ID: <span className="text-[#00C6A7] font-bold">#{selectedLocation.id}</span></span>
+                        <span className="text-sm font-semibold text-gray-700">Location ID: <span className="text-gray-900 font-bold">#{selectedLocation.id}</span></span>
                       </div>
 
                       {/* Action Button */}

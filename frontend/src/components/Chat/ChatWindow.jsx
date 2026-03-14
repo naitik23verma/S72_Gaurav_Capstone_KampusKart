@@ -86,7 +86,7 @@ const ChatWindow = () => {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-    } catch (error) {
+    } catch {
       // Error marking message as read
     }
   }, []);
@@ -127,7 +127,7 @@ const ChatWindow = () => {
     });
 
     // Handle connection errors
-    socketRef.current.on('connect_error', (error) => {
+    socketRef.current.on('connect_error', () => {
       setError('Failed to connect to chat server');
       setLoading(false);
     });
@@ -226,7 +226,7 @@ const ChatWindow = () => {
           setHasMore(data.pagination.page < data.pagination.pages);
         }
       }
-    } catch (error) {
+    } catch {
       // Error loading more messages
     } finally {
       setLoading(false);
@@ -299,7 +299,7 @@ const ChatWindow = () => {
         setAttachments(currentAttachments);
         throw new Error('Failed to send message');
       }
-    } catch (error) {
+    } catch {
       // Restore the message if sending failed
       setNewMessage(messageText);
       setAttachments(currentAttachments);
@@ -358,7 +358,7 @@ const ChatWindow = () => {
       } else {
         throw new Error('Failed to delete message');
       }
-    } catch (error) {
+    } catch {
       // Error deleting message
     } finally {
       setAnchorEl(null);
@@ -368,9 +368,6 @@ const ChatWindow = () => {
 
   const handleEditMessage = async () => {
     if (!selectedMessage || !editText.trim() || !user) return;
-    
-    const userId = user._id || user.id;
-    const senderId = selectedMessage.sender?._id || selectedMessage.sender?.id;
     
     try {
       const response = await fetch(`${API_BASE}/api/chat/messages/${selectedMessage._id}`, {
@@ -394,7 +391,7 @@ const ChatWindow = () => {
       } else {
         // Failed to edit message
       }
-    } catch (error) {
+    } catch {
       // Error editing message
     }
     setEditingMessage(null);

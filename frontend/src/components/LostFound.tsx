@@ -1119,7 +1119,3 @@ const LostFound = () => {
 };
 
 export default LostFound;
-
-export default LostFound; 
-
-

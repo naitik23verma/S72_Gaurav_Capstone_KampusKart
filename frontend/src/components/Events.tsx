@@ -1115,6 +1115,27 @@ const Events = () => {
           />
         )}
       </main>
+
+      {/* Footer */}
+      <Footer
+        logo={<img src="/Logo.png" alt="KampusKart Logo" className="h-7 w-7" />}
+        brandName="KampusKart"
+        socialLinks={socialLinks}
+        mainLinks={[
+          { href: '/news', label: 'News' },
+          { href: '/facilities', label: 'Facilities' },
+          { href: '/clubs-recruitment', label: 'Clubs' },
+          { href: '/campus-map', label: 'Map' },
+        ]}
+        legalLinks={[
+          { href: '/privacy', label: 'Privacy' },
+          { href: '/terms', label: 'Terms' },
+        ]}
+        copyright={{
+          text: `© ${new Date().getFullYear()} KampusKart`,
+          license: 'All rights reserved.',
+        }}
+      />
     </div>
   );
 };

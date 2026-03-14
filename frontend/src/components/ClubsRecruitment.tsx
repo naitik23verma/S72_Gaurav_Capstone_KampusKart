@@ -1,11 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FiCalendar, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiUser, FiPhone } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
+import { Instagram, Linkedin, Globe, Github } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { PageSkeleton } from './common/SkeletonLoader';
+import { Footer } from './ui/footer';
+
+const socialLinks = [
+  { href: 'https://www.instagram.com/gaurav_khandelwal_/', label: 'Instagram', icon: <Instagram className="h-4 w-4" /> },
+  { href: 'https://www.linkedin.com/in/gaurav-khandelwal-17a127358/', label: 'LinkedIn', icon: <Linkedin className="h-4 w-4" /> },
+  { href: 'https://gaurav-khandelwal.vercel.app/', label: 'Portfolio', icon: <Globe className="h-4 w-4" /> },
+  { href: 'https://github.com/Gaurav-205', label: 'GitHub', icon: <Github className="h-4 w-4" /> },
+];
 
 interface ClubRecruitment {
   _id: string;
@@ -753,6 +762,27 @@ const ClubsRecruitment = () => {
           />
         )}
       </main>
+
+      {/* Footer */}
+      <Footer
+        logo={<img src="/Logo.png" alt="KampusKart Logo" className="h-7 w-7" />}
+        brandName="KampusKart"
+        socialLinks={socialLinks}
+        mainLinks={[
+          { href: '/news', label: 'News' },
+          { href: '/events', label: 'Events' },
+          { href: '/facilities', label: 'Facilities' },
+          { href: '/campus-map', label: 'Map' },
+        ]}
+        legalLinks={[
+          { href: '/privacy', label: 'Privacy' },
+          { href: '/terms', label: 'Terms' },
+        ]}
+        copyright={{
+          text: `© ${new Date().getFullYear()} KampusKart`,
+          license: 'All rights reserved.',
+        }}
+      />
     </div>
   );
 };

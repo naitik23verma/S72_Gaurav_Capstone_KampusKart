@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const auth = require('../../middleware/auth');
+const auth = require('../../middleware/authMiddleware');
 const User = require('../../models/User');
 
 // Mock User model

@@ -1015,9 +1015,8 @@ const ChatWindow = () => {
               p: 1.5, 
               mb: 1.5, 
               bgcolor: '#f0fdf4',
-              borderRadius: '14px',
-              border: `1px solid ${CHAT_THEME.primaryRgba}0.2)`,
-              boxShadow: `0 2px 8px ${CHAT_THEME.primaryRgba}0.1)`,
+              borderRadius: '8px',
+              border: `2px solid ${CHAT_THEME.border}`,
               position: 'relative',
               overflow: 'hidden',
               '&::before': {
@@ -1028,7 +1027,6 @@ const ChatWindow = () => {
                 bottom: 0,
                 width: '4px',
                 background: CHAT_THEME.primaryHover,
-                borderRadius: '2px 0 0 2px',
               }
             }}
           >
@@ -1040,13 +1038,12 @@ const ChatWindow = () => {
                 size="small" 
                 onClick={() => setReplyTo(null)}
                 sx={{ 
-                  color: '#6b7280',
+                  color: CHAT_THEME.textSecondary,
                   width: 28,
                   height: 28,
                   '&:hover': { 
-                    bgcolor: `${CHAT_THEME.primaryRgba}0.1)`,
+                    bgcolor: CHAT_THEME.cardBg,
                     color: CHAT_THEME.primary,
-                    transform: 'rotate(90deg)',
                   },
                   transition: 'all 0.2s ease',
                 }}
@@ -1054,7 +1051,7 @@ const ChatWindow = () => {
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Box>
-            <Typography variant="body2" noWrap sx={{ color: '#374151', ml: 1, fontSize: '0.875rem' }}>
+            <Typography variant="body2" noWrap sx={{ color: CHAT_THEME.textPrimary, ml: 1, fontSize: '0.875rem' }}>
               {replyTo.message}
             </Typography>
           </Paper>
@@ -1068,45 +1065,42 @@ const ChatWindow = () => {
             alignItems: 'center', 
             gap: 1.5,
             py: 1,
-            bgcolor: `${CHAT_THEME.primaryRgba}0.05)`,
-            borderRadius: '12px',
-            border: `1px solid ${CHAT_THEME.primaryRgba}0.1)`,
+            bgcolor: CHAT_THEME.cardBg,
+            borderRadius: '8px',
+            border: `2px solid ${CHAT_THEME.border}`,
           }}>
             <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
               <Box sx={{ 
                 width: 8, 
                 height: 8, 
                 borderRadius: '50%', 
-                bgcolor: CHAT_THEME.primary, 
-                boxShadow: `0 2px 4px ${CHAT_THEME.primaryRgba}0.3)`,
+                bgcolor: CHAT_THEME.primary,
                 animation: 'bounce 1.4s infinite',
                 '@keyframes bounce': { 
-                  '0%, 60%, 100%': { transform: 'translateY(0) scale(1)' }, 
-                  '30%': { transform: 'translateY(-8px) scale(1.1)' } 
+                  '0%, 60%, 100%': { transform: 'translateY(0)' }, 
+                  '30%': { transform: 'translateY(-6px)' } 
                 } 
               }} />
               <Box sx={{ 
                 width: 8, 
                 height: 8, 
                 borderRadius: '50%', 
-                bgcolor: CHAT_THEME.primary, 
-                boxShadow: `0 2px 4px ${CHAT_THEME.primaryRgba}0.3)`,
+                bgcolor: CHAT_THEME.primary,
                 animation: 'bounce 1.4s infinite 0.2s',
                 '@keyframes bounce': { 
-                  '0%, 60%, 100%': { transform: 'translateY(0) scale(1)' }, 
-                  '30%': { transform: 'translateY(-8px) scale(1.1)' } 
+                  '0%, 60%, 100%': { transform: 'translateY(0)' }, 
+                  '30%': { transform: 'translateY(-6px)' } 
                 } 
               }} />
               <Box sx={{ 
                 width: 8, 
                 height: 8, 
                 borderRadius: '50%', 
-                bgcolor: CHAT_THEME.primary, 
-                boxShadow: `0 2px 4px ${CHAT_THEME.primaryRgba}0.3)`,
+                bgcolor: CHAT_THEME.primary,
                 animation: 'bounce 1.4s infinite 0.4s',
                 '@keyframes bounce': { 
-                  '0%, 60%, 100%': { transform: 'translateY(0) scale(1)' }, 
-                  '30%': { transform: 'translateY(-8px) scale(1.1)' } 
+                  '0%, 60%, 100%': { transform: 'translateY(0)' }, 
+                  '30%': { transform: 'translateY(-6px)' } 
                 } 
               }} />
             </Box>
@@ -1200,18 +1194,12 @@ const ChatWindow = () => {
                     alignItems: 'center', 
                     p: 0.75, 
                     px: 1.25,
-                    bgcolor: '#e0f2fe',
-                    borderRadius: '12px',
-                    border: '1px solid ${CHAT_THEME.primaryRgba} 0.2)',
-                    boxShadow: '0 2px 6px ${CHAT_THEME.primaryRgba} 0.1)',
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 4px 12px ${CHAT_THEME.primaryRgba} 0.15)',
-                    }
+                    bgcolor: CHAT_THEME.cardBg,
+                    borderRadius: '8px',
+                    border: `2px solid ${CHAT_THEME.border}`,
                   }}
                 >
-                  <Typography variant="caption" sx={{ mr: 1, color: '#0369a1', fontWeight: 500, fontSize: '0.75rem' }}>
+                  <Typography variant="caption" sx={{ mr: 1, color: CHAT_THEME.textSecondary, fontWeight: 500, fontSize: '0.75rem' }}>
                     {file.name}
                   </Typography>
                   <IconButton 
@@ -1220,10 +1208,10 @@ const ChatWindow = () => {
                     sx={{
                       width: 20,
                       height: 20,
-                      color: '#0369a1',
+                      color: CHAT_THEME.textSecondary,
                       '&:hover': {
-                        bgcolor: 'rgba(3, 105, 161, 0.1)',
-                        transform: 'rotate(90deg)',
+                        bgcolor: CHAT_THEME.border,
+                        color: CHAT_THEME.primary,
                       },
                       transition: 'all 0.2s ease',
                     }}
@@ -1278,6 +1266,7 @@ const ChatWindow = () => {
             sx={{
               width: { xs: 40, sm: 44 },
               height: { xs: 40, sm: 44 },
+              borderRadius: '8px',
               background: (newMessage.trim() !== '' || attachments.length > 0) && !sendingMessage
                 ? CHAT_THEME.primary
                 : '#e5e7eb',
@@ -1288,16 +1277,12 @@ const ChatWindow = () => {
                 background: (newMessage.trim() !== '' || attachments.length > 0) && !sendingMessage
                   ? CHAT_THEME.primaryHover
                   : '#d1d5db',
-                transform: 'scale(1.05)',
               },
               '&:disabled': {
                 background: '#e5e7eb',
                 color: '#9ca3af',
               },
-              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              boxShadow: (newMessage.trim() !== '' || attachments.length > 0) && !sendingMessage
-                ? '0 4px 12px ${CHAT_THEME.primaryRgba} 0.3)'
-                : 'none',
+              transition: 'background 0.2s ease',
             }}
           >
             {sendingMessage ? (
@@ -1316,9 +1301,9 @@ const ChatWindow = () => {
         onClose={() => setAnchorEl(null)}
         PaperProps={{
           sx: {
-            borderRadius: '12px',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
-            border: '1px solid rgba(0, 0, 0, 0.08)',
+            borderRadius: '8px',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+            border: `2px solid ${CHAT_THEME.border}`,
             minWidth: 120
           }
         }}
@@ -1331,15 +1316,13 @@ const ChatWindow = () => {
                 setAnchorEl(null);
               }}
               sx={{
-                borderRadius: '8px',
+                borderRadius: '6px',
                 mx: 0.5,
                 my: 0.25,
-                '&:hover': {
-                  backgroundColor: '#e3f2fd'
-                }
+                '&:hover': { backgroundColor: CHAT_THEME.cardBg }
               }}
             >
-              <EditIcon fontSize="small" sx={{ mr: 1.5, color: '#1976d2' }} />
+              <EditIcon fontSize="small" sx={{ mr: 1.5, color: CHAT_THEME.textSecondary }} />
               <Typography variant="body2" sx={{ fontWeight: 500 }}>Edit</Typography>
             </MenuItem>
             <MenuItem 
@@ -1348,16 +1331,16 @@ const ChatWindow = () => {
                 setAnchorEl(null);
               }}
               sx={{
-                borderRadius: '8px',
+                borderRadius: '6px',
                 mx: 0.5,
                 my: 0.25,
                 '&:hover': {
-                  backgroundColor: '#ffebee'
+                  backgroundColor: '#fef2f2'
                 }
               }}
             >
-              <DeleteIcon fontSize="small" sx={{ mr: 1.5, color: '#d32f2f' }} />
-              <Typography variant="body2" sx={{ fontWeight: 500, color: '#d32f2f' }}>Delete</Typography>
+              <DeleteIcon fontSize="small" sx={{ mr: 1.5, color: '#ef4444' }} />
+              <Typography variant="body2" sx={{ fontWeight: 500, color: '#ef4444' }}>Delete</Typography>
             </MenuItem>
           </>
         )}

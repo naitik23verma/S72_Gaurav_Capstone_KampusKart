@@ -45,12 +45,12 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-xl p-8 max-w-3xl w-full mx-auto max-h-[90vh] overflow-y-auto relative">
+            <div className="bg-white rounded-lg border-2 border-gray-200 p-8 max-w-3xl w-full mx-auto max-h-[90vh] overflow-y-auto relative">
         {/* Close Button */}
         <button
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-4 right-4 bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg"
+          className="absolute top-4 right-4 bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -61,13 +61,13 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
         <div className="flex flex-col md:flex-row gap-8">
           {club.image?.url ? (
             <div 
-              className="relative group mb-6 md:mb-0 rounded-lg overflow-hidden shadow-sm w-full md:w-1/2 lg:w-1/2 h-128 flex-shrink-0 mx-auto md:mx-0 max-w-xl cursor-pointer"
+              className="relative group mb-6 md:mb-0 rounded-lg overflow-hidden border-2 border-gray-200 w-full md:w-1/2 lg:w-1/2 h-128 flex-shrink-0 mx-auto md:mx-0 max-w-xl cursor-pointer"
               onClick={() => handleImageClick(club.image?.url || '')}
             >
               <img 
                 src={club.image.url} 
                 alt={club.title} 
-                className="block w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                className="block w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -88,7 +88,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
           )}
           <div className="space-y-6 text-gray-700 flex-grow">
             <div className="flex flex-wrap items-center gap-3">
-              <span className={`px-3 py-1.5 rounded-lg text-xs font-medium shadow-sm ${club.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>{club.status}</span>
+              <span className={`px-3 py-1.5 rounded-lg text-xs font-medium ${club.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>{club.status}</span>
             </div>
             <div>
               <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
@@ -150,7 +150,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
                 <div className="flex flex-col sm:flex-row gap-2">
                   <button
                     onClick={() => onEdit?.(club)}
-                    className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors duration-200"
+                    className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors duration-200"
                   >
                     Edit
                   </button>
@@ -168,7 +168,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
         {/* Zoomed Image Modal */}
         {zoomedImage && (
           <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50" onClick={closeZoomedImageModal}>
-            <img src={zoomedImage} alt="Zoomed" className="max-h-[80vh] max-w-[90vw] rounded-lg shadow-lg" />
+            <img src={zoomedImage} alt="Zoomed" className="max-h-[80vh] max-w-[90vw] rounded-lg" />
           </div>
         )}
       </div>
@@ -444,7 +444,7 @@ const ClubsRecruitment = () => {
               <select
                 value={filterStatus}
                 onChange={e => setFilterStatus(e.target.value as 'all' | 'Open' | 'Closed')}
-                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
+                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
               >
                 <option value="all">All Statuses</option>
                 <option value="Open">Open</option>
@@ -459,7 +459,7 @@ const ClubsRecruitment = () => {
           </div>
           {/* Search Bar with Autocomplete */}
           <div className="relative w-full lg:w-[520px]" ref={searchRef}>
-            <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white shadow-sm hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
+            <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
               <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
               <input
                 type="text"
@@ -518,7 +518,7 @@ const ClubsRecruitment = () => {
           {filteredClubs.map(club => (
             <div 
               key={club._id} 
-              className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden group cursor-pointer"
+              className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden cursor-pointer hover:border-gray-300 transition-colors duration-200"
               onClick={() => openClubDetailsModal(club)}
             >
               <div className="relative h-60 sm:h-80 overflow-hidden">
@@ -527,9 +527,8 @@ const ClubsRecruitment = () => {
                     <img 
                       src={club.image.url} 
                       alt={club.title} 
-                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300" 
+                      className="w-full h-full object-cover" 
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-50">
@@ -540,7 +539,7 @@ const ClubsRecruitment = () => {
                   </div>
                 )}
                 <div className="absolute top-4 right-4">
-                  <span className={`px-3 py-1.5 rounded-lg text-xs font-medium shadow-sm ${club.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>{club.status}</span>
+                  <span className={`px-3 py-1.5 rounded-lg text-xs font-medium ${club.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>{club.status}</span>
                 </div>
               </div>
               <div className="p-6">
@@ -584,7 +583,7 @@ const ClubsRecruitment = () => {
           error={error}
         >
               <form onSubmit={editingClub ? handleSaveClub : handleAddClub} className="space-y-8">
-                <div className="border-b pb-6 mb-6 bg-gray-50 rounded-lg p-6">
+                <div className="border-2 border-gray-200 rounded-lg p-6 mb-6">
                   <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Recruitment Details <FiInfo className="text-gray-400" title="Fill in the details of your club recruitment." /></h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -594,7 +593,7 @@ const ClubsRecruitment = () => {
                           type="text"
                           value={newClub.title}
                           onChange={e => setNewClub({...newClub, title: e.target.value})}
-                          className="w-full px-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                          className="w-full px-10 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
                           placeholder="Enter recruitment title (e.g., Drama Club 2024 Intake)"
                           required
                           aria-label="Recruitment Title"
@@ -609,7 +608,7 @@ const ClubsRecruitment = () => {
                         type="text"
                         value={newClub.clubName}
                         onChange={e => setNewClub({...newClub, clubName: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
                         required
                         aria-label="Club Name"
                       />
@@ -623,7 +622,7 @@ const ClubsRecruitment = () => {
                         type="date"
                         value={newClub.startDate}
                         onChange={e => setNewClub({...newClub, startDate: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
                         required
                         aria-label="Start Date"
                       />
@@ -634,7 +633,7 @@ const ClubsRecruitment = () => {
                         type="date"
                         value={newClub.endDate}
                         onChange={e => setNewClub({...newClub, endDate: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
                         required
                         aria-label="End Date"
                       />
@@ -646,7 +645,7 @@ const ClubsRecruitment = () => {
                       <textarea
                         value={newClub.description}
                         onChange={e => setNewClub({...newClub, description: e.target.value})}
-                        className="w-full px-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-10 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
                         rows={4}
                         placeholder="Provide a detailed description of the recruitment. Include requirements, process, and highlights."
                         required
@@ -663,7 +662,7 @@ const ClubsRecruitment = () => {
                         type="url"
                         value={newClub.formUrl}
                         onChange={e => setNewClub({...newClub, formUrl: e.target.value})}
-                        className="w-full px-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-10 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
                         placeholder="https://forms.google.com/..."
                         required
                         aria-label="Form URL"
@@ -677,7 +676,7 @@ const ClubsRecruitment = () => {
                     <select
                       value={newClub.status}
                       onChange={e => setNewClub({...newClub, status: e.target.value as 'Open' | 'Closed'})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                      className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
                       required
                       aria-label="Recruitment Status"
                     >
@@ -693,7 +692,7 @@ const ClubsRecruitment = () => {
                         type="text"
                         value={newClub.contactInfo.name}
                         onChange={e => setNewClub({...newClub, contactInfo: {...newClub.contactInfo, name: e.target.value}})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
                         placeholder="Contact Name"
                         aria-label="Contact Name"
                       />
@@ -701,7 +700,7 @@ const ClubsRecruitment = () => {
                         type="email"
                         value={newClub.contactInfo.email}
                         onChange={e => setNewClub({...newClub, contactInfo: {...newClub.contactInfo, email: e.target.value}})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
                         placeholder="Contact Email"
                         aria-label="Contact Email"
                       />
@@ -709,7 +708,7 @@ const ClubsRecruitment = () => {
                         type="tel"
                         value={newClub.contactInfo.phone}
                         onChange={e => setNewClub({...newClub, contactInfo: {...newClub.contactInfo, phone: e.target.value}})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
                         placeholder="Contact Phone"
                         aria-label="Contact Phone"
                       />
@@ -730,7 +729,7 @@ const ClubsRecruitment = () => {
                   <button
                     type="button"
                     onClick={closeClubModal}
-                    className="px-6 py-3 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-300 hover:bg-gray-50 transition-colors"
+                    className="px-6 py-3 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors"
                   >
                     Cancel
                   </button>

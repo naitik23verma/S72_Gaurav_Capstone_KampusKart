@@ -235,357 +235,282 @@ const Profile = () => {
     <div className="min-h-screen flex flex-col bg-white font-sans overflow-x-hidden">
       <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
         <div className="max-w-3xl mx-auto">
-          <div className="mb-8 flex flex-col items-center">
-            <div className="w-full flex flex-col items-center">
-              <div className="bg-white rounded-2xl shadow-md p-0 w-full flex flex-col items-center relative mt-24" style={{ minHeight: 220 }}>
-                {/* Profile Picture Card */}
-                <div className="w-32 h-32 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-[#e5e7eb] shadow-md absolute left-1/2 -translate-x-1/2 -top-20 z-10">
-                  {profileData.profilePicture?.url || previewUrl ? (
-                    <img 
-                      src={previewUrl || profileData.profilePicture?.url}
-                      alt="Profile" 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <FiUser className="w-16 h-16 text-gray-300"/>
-                  )}
-                  {isEditing && (
-                    <label 
-                      htmlFor="profilePicture-upload"
-                      className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white cursor-pointer opacity-0 hover:opacity-100 transition-opacity rounded-lg"
-                    >
-                      <FiUpload className="w-6 h-6 mr-2"/> Upload
-                    </label>
-                  )}
-                  <input
-                    id="profilePicture-upload"
-                    type="file"
-                    accept="image/*"
-                    className="sr-only"
-                    onChange={handleFileChange}
-                    disabled={!isEditing}
-                  />
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+            <h1 className="text-h2 font-extrabold text-black">My Profile</h1>
+          </div>
+
+          {/* Profile Picture + Completion */}
+          <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 p-6 bg-white border-2 border-gray-200 rounded-lg">
+            <div className="relative w-24 h-24 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-gray-200 flex-shrink-0">
+              {profileData.profilePicture?.url || previewUrl ? (
+                <img
+                  src={previewUrl || profileData.profilePicture?.url}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <FiUser className="w-10 h-10 text-gray-300" />
+              )}
+              {isEditing && (
+                <label
+                  htmlFor="profilePicture-upload"
+                  className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white cursor-pointer opacity-0 hover:opacity-100 transition-opacity rounded-lg"
+                >
+                  <FiUpload className="w-5 h-5 mr-1" /> Upload
+                </label>
+              )}
+              <input
+                id="profilePicture-upload"
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={handleFileChange}
+                disabled={!isEditing}
+              />
+            </div>
+            <div className="flex-1 w-full">
+              <p className="text-lg font-bold text-gray-900 mb-1">{profileData.name || 'Your Name'}</p>
+              <p className="text-sm text-gray-500 mb-3">{profileData.email}</p>
+              {/* Completion bar */}
+              <div className="w-full">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-xs font-medium text-gray-600">Profile Completion</span>
+                  <span className="text-xs font-semibold text-gray-700">{calculateCompletion(profileData)}%</span>
                 </div>
-                <div className="pt-24 pb-8 px-6 w-full flex flex-col items-center">
-                  <h1 className="text-2xl font-extrabold text-black mb-2 mt-8">My Profile</h1>
-                  {/* Profile Completion Meter */}
-                  <div className="mb-6 w-full max-w-xs">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-xs font-medium text-gray-700">Profile Completion</span>
-                      <span className="text-xs text-gray-500">{calculateCompletion(profileData)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-[#00C6A7] h-2 rounded-full transition-all duration-300" style={{ width: `${calculateCompletion(profileData)}%` }}></div>
-                    </div>
-                  </div>
-                  {error && (
-                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 flex items-center w-full max-w-xs">
-                      <FiAlertCircle className="mr-2 w-5 h-5" />
-                      <span className="text-xs">{error}</span>
-                    </div>
-                  )}
-                  {successMessage && (
-                    <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 flex items-center w-full max-w-xs">
-                      <FiCheckCircle className="mr-2 w-5 h-5" />
-                      <span className="text-xs">{successMessage}</span>
-                    </div>
-                  )}
+                <div className="w-full bg-gray-200 rounded-lg h-2">
+                  <div className="bg-[#00C6A7] h-2 rounded-lg transition-all duration-300" style={{ width: `${calculateCompletion(profileData)}%` }} />
                 </div>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-2xl shadow-md p-8 w-full mt-0">
+
+          {/* Alerts */}
+          {error && (
+            <div className="mb-6 bg-red-50 border-2 border-red-200 rounded-lg p-4 flex items-center gap-3">
+              <FiAlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+              <p className="text-red-800 font-medium text-sm">{error}</p>
+            </div>
+          )}
+          {successMessage && (
+            <div className="mb-6 bg-green-50 border-2 border-green-200 rounded-lg p-4 flex items-center gap-3">
+              <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+              <p className="text-green-800 font-medium text-sm">{successMessage}</p>
+            </div>
+          )}
+
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-6 w-full">
             {isEditing ? (
-              <div className="space-y-12">
-                {/* Personal Info Section Header */}
-                <div className="flex items-center gap-2 mb-2 ml-1">
-                  <span className="bg-[#00C6A7] text-white rounded-lg p-1.5"><FiUser className="w-6 h-6" /></span>
-                  <h2 className="text-xl font-extrabold text-black">Personal Information</h2>
-                </div>
-                {/* Personal Info Card */}
-                <div className="bg-white rounded-lg p-6 border-b border-gray-200 shadow-lg">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-8">
+                {/* Personal Info */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="bg-[#181818] text-white rounded-lg p-1.5"><FiUser className="w-4 h-4" /></span>
+                    <h2 className="text-lg font-extrabold text-black">Personal Information</h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {/* Name */}
                     <div className="flex flex-col">
-                      <label htmlFor="name" className="block text-xs font-semibold text-gray-800 mb-1">Full Name</label>
+                      <label htmlFor="name" className="block text-xs font-semibold text-gray-700 mb-1">Full Name</label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300"><FiUser className="w-5 h-5"/></span>
-                        <input
-                          id="name"
-                          type="text"
-                          name="name"
-                          value={profileData.name}
-                          onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
-                          placeholder="Your full name"
-                          disabled={!isEditing}
-                          aria-label="Full Name"
-                          required
-                        />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FiUser className="w-4 h-4"/></span>
+                        <input id="name" type="text" name="name" value={profileData.name} onChange={handleInputChange}
+                          className="w-full pl-10 pr-3 py-2.5 bg-white text-gray-900 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent placeholder-gray-400 text-sm"
+                          placeholder="Your full name" required />
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">Enter your full name as per records.</p>
-                      {!profileData.name.trim() && error && <p className="text-xs text-red-400 mt-1">Name is required.</p>}
                     </div>
                     {/* Email */}
                     <div className="flex flex-col">
-                      <label htmlFor="email" className="block text-xs font-semibold text-gray-800 mb-1">Email</label>
+                      <label htmlFor="email" className="block text-xs font-semibold text-gray-700 mb-1">Email</label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300"><FiMail className="w-5 h-5"/></span>
-                        <input
-                          id="email"
-                          type="email"
-                          name="email"
-                          value={profileData.email}
-                          onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-gray-100 text-gray-500 border border-gray-300 rounded-lg shadow-sm cursor-not-allowed placeholder-gray-400 sm:text-sm"
-                          placeholder="Your email address"
-                          disabled
-                          aria-label="Email"
-                        />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FiMail className="w-4 h-4"/></span>
+                        <input id="email" type="email" name="email" value={profileData.email}
+                          className="w-full pl-10 pr-3 py-2.5 bg-gray-100 text-gray-500 border-2 border-gray-200 rounded-lg cursor-not-allowed text-sm"
+                          disabled />
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">This is your registered email and cannot be changed.</p>
+                      <p className="text-xs text-gray-400 mt-1">Cannot be changed.</p>
                     </div>
                     {/* Phone */}
                     <div className="flex flex-col">
-                      <label htmlFor="phone" className="block text-xs font-semibold text-gray-800 mb-1">Phone</label>
+                      <label htmlFor="phone" className="block text-xs font-semibold text-gray-700 mb-1">Phone</label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300"><FiPhone className="w-5 h-5"/></span>
-                        <input
-                          id="phone"
-                          type="text"
-                          name="phone"
-                          value={profileData.phone}
-                          onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
-                          placeholder="Your phone number"
-                          disabled={!isEditing}
-                          aria-label="Phone"
-                        />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FiPhone className="w-4 h-4"/></span>
+                        <input id="phone" type="text" name="phone" value={profileData.phone} onChange={handleInputChange}
+                          className="w-full pl-10 pr-3 py-2.5 bg-white text-gray-900 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent placeholder-gray-400 text-sm"
+                          placeholder="Your phone number" />
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">Add a phone number for contact (optional).</p>
                     </div>
                     {/* Gender */}
                     <div className="flex flex-col">
-                      <label htmlFor="gender" className="block text-xs font-semibold text-gray-800 mb-1">Gender</label>
+                      <label htmlFor="gender" className="block text-xs font-semibold text-gray-700 mb-1">Gender</label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300"><FiUser className="w-5 h-5"/></span>
-                        <select
-                          id="gender"
-                          name="gender"
-                          value={profileData.gender}
-                          onChange={handleSelectChange}
-                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7]"
-                          disabled={!isEditing}
-                          aria-label="Gender"
-                        >
+                        <select id="gender" name="gender" value={profileData.gender} onChange={handleSelectChange}
+                          className="appearance-none w-full px-4 py-2.5 bg-white text-gray-900 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm cursor-pointer">
                           <option value="">Select Gender</option>
                           <option value="Male">Male</option>
                           <option value="Female">Female</option>
                           <option value="Other">Other</option>
                           <option value="Prefer not to say">Prefer not to say</option>
                         </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                        </div>
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">Select your gender (optional).</p>
                     </div>
                     {/* Date of Birth */}
                     <div className="flex flex-col">
-                      <label htmlFor="dateOfBirth" className="block text-xs font-semibold text-gray-800 mb-1">Date of Birth</label>
+                      <label htmlFor="dateOfBirth" className="block text-xs font-semibold text-gray-700 mb-1">Date of Birth</label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300"><FiCalendar className="w-5 h-5"/></span>
-                        <input
-                          id="dateOfBirth"
-                          type="date"
-                          name="dateOfBirth"
-                          value={profileData.dateOfBirth}
-                          onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
-                          disabled={!isEditing}
-                          aria-label="Date of Birth"
-                        />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FiCalendar className="w-4 h-4"/></span>
+                        <input id="dateOfBirth" type="date" name="dateOfBirth" value={profileData.dateOfBirth} onChange={handleInputChange}
+                          className="w-full pl-10 pr-3 py-2.5 bg-white text-gray-900 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm" />
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">Format: YYYY-MM-DD</p>
                     </div>
                   </div>
                 </div>
-                {/* Academic Info Section Header */}
-                <div className="flex items-center gap-2 mb-2 mt-8 ml-1">
-                  <span className="bg-[#00C6A7] text-white rounded-lg p-1.5"><FiBriefcase className="w-6 h-6" /></span>
-                  <h2 className="text-xl font-extrabold text-black">Academic Information</h2>
-                </div>
-                {/* Academic Info Card */}
-                <div className="bg-white rounded-lg p-6 shadow-lg">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Major/Department */}
+
+                {/* Academic Info */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="bg-[#181818] text-white rounded-lg p-1.5"><FiBriefcase className="w-4 h-4" /></span>
+                    <h2 className="text-lg font-extrabold text-black">Academic Information</h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {/* Major */}
                     <div className="flex flex-col">
-                      <label htmlFor="major" className="block text-xs font-semibold text-gray-800 mb-1">Major/Department</label>
+                      <label htmlFor="major" className="block text-xs font-semibold text-gray-700 mb-1">Major / Department</label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300"><FiMail className="w-5 h-5"/></span>
-                        <input
-                          id="major"
-                          type="text"
-                          name="major"
-                          value={profileData.major}
-                          onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
-                          placeholder="e.g., Computer Science"
-                          disabled={!isEditing}
-                          aria-label="Major/Department"
-                        />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FiTag className="w-4 h-4"/></span>
+                        <input id="major" type="text" name="major" value={profileData.major} onChange={handleInputChange}
+                          className="w-full pl-10 pr-3 py-2.5 bg-white text-gray-900 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent placeholder-gray-400 text-sm"
+                          placeholder="e.g., Computer Science" />
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">Your department or major (optional).</p>
                     </div>
                     {/* Program */}
                     <div className="flex flex-col">
-                      <label htmlFor="program" className="block text-xs font-semibold text-gray-800 mb-1">Program</label>
+                      <label htmlFor="program" className="block text-xs font-semibold text-gray-700 mb-1">Program</label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300"><FiBriefcase className="w-5 h-5"/></span>
-                        <input
-                          id="program"
-                          type="text"
-                          name="program"
-                          value={profileData.program}
-                          onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
-                          placeholder="e.g., Bachelor of Science"
-                          disabled={!isEditing}
-                          aria-label="Program"
-                        />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FiBriefcase className="w-4 h-4"/></span>
+                        <input id="program" type="text" name="program" value={profileData.program} onChange={handleInputChange}
+                          className="w-full pl-10 pr-3 py-2.5 bg-white text-gray-900 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent placeholder-gray-400 text-sm"
+                          placeholder="e.g., Bachelor of Science" />
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">e.g., BSc, MSc, BTech, etc.</p>
                     </div>
-                    {/* Year Interval */}
+                    {/* Year */}
                     <div className="flex flex-col">
-                      <label htmlFor="yearOfStudy" className="block text-xs font-semibold text-gray-800 mb-1">Year Interval</label>
+                      <label htmlFor="yearOfStudy" className="block text-xs font-semibold text-gray-700 mb-1">Year Interval</label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300"><FiCalendar className="w-5 h-5"/></span>
-                        <input
-                          id="yearOfStudy"
-                          type="text"
-                          name="yearOfStudy"
-                          value={profileData.yearOfStudy}
-                          onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
-                          placeholder="e.g., 2024 - 2028"
-                          disabled={!isEditing}
-                          aria-label="Year Interval"
-                        />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FiCalendar className="w-4 h-4"/></span>
+                        <input id="yearOfStudy" type="text" name="yearOfStudy" value={profileData.yearOfStudy} onChange={handleInputChange}
+                          className="w-full pl-10 pr-3 py-2.5 bg-white text-gray-900 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent placeholder-gray-400 text-sm"
+                          placeholder="e.g., 2024 - 2028" />
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">e.g., 2022 - 2026</p>
                     </div>
                   </div>
                 </div>
+
                 {/* Buttons */}
-                <div className="flex flex-col md:flex-row justify-end gap-4 pt-2">
-                  <button
-                    type="button"
-                    onClick={handleCancelEdit}
-                    className="px-6 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition"
-                  >
+                <div className="flex flex-col md:flex-row justify-end gap-3 pt-2 border-t border-gray-100">
+                  <button type="button" onClick={handleCancelEdit}
+                    className="px-6 py-3 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-gray-300 transition">
                     Cancel
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleSave}
-                    disabled={saveLoading}
-                    className={`px-6 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition ${saveLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
+                  <button type="button" onClick={handleSave} disabled={saveLoading}
+                    className={`px-6 py-3 rounded-lg text-sm font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition ${saveLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                     {saveLoading ? (
-                      <span className="flex items-center">
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <span className="flex items-center gap-2">
+                        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                         </svg>
                         Saving...
                       </span>
-                    ) : (
-                      'Save Changes'
-                    )}
+                    ) : 'Save Changes'}
                   </button>
                 </div>
               </div>
             ) : (
               <div className="space-y-8">
+                {/* Personal Info */}
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900 mb-4">Personal Information</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Display Name */}
-                    <div>
-                      <p className="text-xs font-semibold text-gray-700 mb-1">Name</p>
-                      <div className="flex items-center text-gray-900">
-                        <FiUser className="w-5 h-5 mr-2 text-gray-500"/>
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="bg-[#181818] text-white rounded-lg p-1.5"><FiUser className="w-4 h-4" /></span>
+                    <h2 className="text-lg font-extrabold text-black">Personal Information</h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                      <p className="text-xs font-semibold text-gray-500 mb-1">Name</p>
+                      <div className="flex items-center gap-2 text-gray-900 font-medium">
+                        <FiUser className="w-4 h-4 text-gray-400 flex-shrink-0" />
                         <span>{profileData.name || 'N/A'}</span>
                       </div>
                     </div>
-                    {/* Display Email */}
-                    <div>
-                      <p className="text-xs font-semibold text-gray-700 mb-1">Email</p>
-                      <div className="flex items-center text-gray-900">
-                        <FiMail className="w-5 h-5 mr-2 text-gray-500"/>
-                        <span>{profileData.email || 'N/A'}</span>
+                    <div className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                      <p className="text-xs font-semibold text-gray-500 mb-1">Email</p>
+                      <div className="flex items-center gap-2 text-gray-900 font-medium">
+                        <FiMail className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <span className="truncate">{profileData.email || 'N/A'}</span>
                       </div>
                     </div>
-                    {/* Display Phone */}
-                    <div>
-                      <p className="text-xs font-semibold text-gray-700 mb-1">Phone</p>
-                      <div className="flex items-center text-gray-900">
-                        <FiPhone className="w-5 h-5 mr-2 text-gray-500"/>
+                    <div className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                      <p className="text-xs font-semibold text-gray-500 mb-1">Phone</p>
+                      <div className="flex items-center gap-2 text-gray-900 font-medium">
+                        <FiPhone className="w-4 h-4 text-gray-400 flex-shrink-0" />
                         <span>{profileData.phone || 'N/A'}</span>
                       </div>
                     </div>
-                    {/* Display Gender */}
-                    <div>
-                      <p className="text-xs font-semibold text-gray-700 mb-1">Gender</p>
-                      <div className="flex items-center text-gray-900">
-                        <FiUser className="w-5 h-5 mr-2 text-gray-500"/>
+                    <div className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                      <p className="text-xs font-semibold text-gray-500 mb-1">Gender</p>
+                      <div className="flex items-center gap-2 text-gray-900 font-medium">
+                        <FiUser className="w-4 h-4 text-gray-400 flex-shrink-0" />
                         <span>{profileData.gender || 'N/A'}</span>
                       </div>
                     </div>
-                    {/* Display Date of Birth */}
-                    <div>
-                      <p className="text-xs font-semibold text-gray-700 mb-1">Date of Birth</p>
-                      <div className="flex items-center text-gray-900">
-                        <FiCalendar className="w-5 h-5 mr-2 text-gray-500"/>
+                    <div className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                      <p className="text-xs font-semibold text-gray-500 mb-1">Date of Birth</p>
+                      <div className="flex items-center gap-2 text-gray-900 font-medium">
+                        <FiCalendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
                         <span>{formatDate(profileData.dateOfBirth)}</span>
                       </div>
                     </div>
                   </div>
                 </div>
+
+                {/* Academic Info */}
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900 mb-4">Academic Information</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Display Major/Department */}
-                    <div>
-                      <p className="text-xs font-semibold text-gray-700 mb-1">Major/Department</p>
-                      <div className="flex items-center text-gray-900">
-                        <FiMail className="w-5 h-5 mr-2 text-gray-500"/>
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="bg-[#181818] text-white rounded-lg p-1.5"><FiBriefcase className="w-4 h-4" /></span>
+                    <h2 className="text-lg font-extrabold text-black">Academic Information</h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                      <p className="text-xs font-semibold text-gray-500 mb-1">Major / Department</p>
+                      <div className="flex items-center gap-2 text-gray-900 font-medium">
+                        <FiTag className="w-4 h-4 text-gray-400 flex-shrink-0" />
                         <span>{profileData.major || 'N/A'}</span>
                       </div>
                     </div>
-                    {/* Display Program */}
-                    <div>
-                      <p className="text-xs font-semibold text-gray-700 mb-1">Program</p>
-                      <div className="flex items-center text-gray-900">
-                        <FiBriefcase className="w-5 h-5 mr-2 text-gray-500"/>
+                    <div className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                      <p className="text-xs font-semibold text-gray-500 mb-1">Program</p>
+                      <div className="flex items-center gap-2 text-gray-900 font-medium">
+                        <FiBriefcase className="w-4 h-4 text-gray-400 flex-shrink-0" />
                         <span>{profileData.program || 'N/A'}</span>
                       </div>
                     </div>
-                    {/* Display Year Interval */}
-                    <div>
-                      <p className="text-xs font-semibold text-gray-700 mb-1">Year Interval</p>
-                      <div className="flex items-center text-gray-900">
-                        <FiCalendar className="w-5 h-5 mr-2 text-gray-500"/>
+                    <div className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                      <p className="text-xs font-semibold text-gray-500 mb-1">Year Interval</p>
+                      <div className="flex items-center gap-2 text-gray-900 font-medium">
+                        <FiCalendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
                         <span>{profileData.yearOfStudy || 'N/A'}</span>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-end pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsEditing(true)}
-                    className="px-6 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition"
-                  >
-                    Edit Profile
+
+                <div className="flex justify-end pt-2 border-t border-gray-100">
+                  <button type="button" onClick={() => setIsEditing(true)}
+                    className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-sm shadow hover:bg-[#00C6A7] transition">
+                    <FiEdit2 className="w-4 h-4" /> Edit Profile
                   </button>
                 </div>
               </div>

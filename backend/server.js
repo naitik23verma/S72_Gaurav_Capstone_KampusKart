@@ -150,7 +150,7 @@ app.get('/api/server-status', (req, res) => {
 });
 
 // Global error handling middleware
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
   console.error('Error:', err);
   
   // Log error details for debugging

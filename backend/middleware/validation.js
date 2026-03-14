@@ -77,7 +77,7 @@ const validateProfileUpdate = [
     .withMessage('Name must be between 2 and 50 characters'),
   body('phone')
     .optional()
-    .matches(/^[\+]?[1-9][\d]{0,15}$/)
+    .matches(/^[+]?[1-9][\d]{0,15}$/)
     .withMessage('Please provide a valid phone number'),
   body('major')
     .optional()

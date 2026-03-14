@@ -1,7 +1,7 @@
 const request = require('supertest');
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
+const _bcrypt = require('bcryptjs');
 const User = require('../../models/User');
 const auth = require('../../middleware/authMiddleware');
 
@@ -430,7 +430,7 @@ describe('Auth Routes', () => {
       User.mockImplementation(() => mockUser);
       jwt.sign.mockReturnValue('mock-jwt-token');
 
-      const response = await request(app)
+      await request(app)
         .post('/test-signup')
         .send(userData)
         .expect(201);

@@ -839,7 +839,7 @@ const seedData = async () => {
     console.log(`✓ Seeded ${clubs.length} club recruitments`);
 
     console.log('\n✅ All dummy data seeded successfully!');
-    console.log(`\nSummary:`);
+    console.log('\nSummary:');
     console.log(`- Events: ${events.length}`);
     console.log(`- News: ${news.length}`);
     console.log(`- Facilities: ${facilities.length}`);

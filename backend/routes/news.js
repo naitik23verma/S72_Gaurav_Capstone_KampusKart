@@ -112,7 +112,9 @@ router.put('/:id', authMiddleware, upload.array('images', 5), async (req, res) =
         if (!keepPublicIds.includes(img.public_id)) {
           try {
             await cloudinary.uploader.destroy(img.public_id);
-          } catch (err) {}
+          } catch (err) {
+            // Ignore cloudinary deletion errors
+          }
         }
       }
     }

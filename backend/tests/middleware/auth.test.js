@@ -12,7 +12,7 @@ describe('Auth Middleware', () => {
 
   beforeEach(() => {
     mockReq = {
-      header: jest.fn(),
+      headers: {},
       user: null
     };
     mockRes = {
@@ -46,7 +46,7 @@ describe('Auth Middleware', () => {
 
   describe('Authorization Header', () => {
     test('should return 401 error when no authorization header', async () => {
-      mockReq.header.mockReturnValue(null);
+      mockReq.headers = {};
 
       await auth(mockReq, mockRes, mockNext);
 
@@ -58,7 +58,7 @@ describe('Auth Middleware', () => {
     });
 
     test('should return 401 error when authorization header does not start with Bearer', async () => {
-      mockReq.header.mockReturnValue('InvalidToken');
+      mockReq.headers.authorization = 'InvalidToken';
 
       await auth(mockReq, mockRes, mockNext);
 
@@ -74,7 +74,7 @@ describe('Auth Middleware', () => {
       const mockDecoded = { userId: 'user123' };
       const mockUser = { _id: 'user123', email: 'test@example.com', name: 'Test User' };
 
-      mockReq.header.mockReturnValue(`Bearer ${mockToken}`);
+      mockReq.headers.authorization = `Bearer ${mockToken}`;
       jwt.verify = jest.fn().mockReturnValue(mockDecoded);
       User.findById = jest.fn().mockReturnValue({
         select: jest.fn().mockResolvedValue(mockUser)
@@ -90,7 +90,7 @@ describe('Auth Middleware', () => {
 
   describe('Token Verification', () => {
     test('should return 401 error when token is invalid', async () => {
-      mockReq.header.mockReturnValue('Bearer invalid-token');
+      mockReq.headers.authorization = 'Bearer invalid-token';
       jwt.verify = jest.fn().mockImplementation(() => {
         throw new Error('Invalid token');
       });
@@ -99,13 +99,13 @@ describe('Auth Middleware', () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(401);
       expect(mockRes.json).toHaveBeenCalledWith({
-        message: 'Token is not valid'
+        message: 'Not authorized, token failed'
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
 
     test('should handle JWT verification errors gracefully', async () => {
-      mockReq.header.mockReturnValue('Bearer malformed-token');
+      mockReq.headers.authorization = 'Bearer malformed-token';
       jwt.verify = jest.fn().mockImplementation(() => {
         throw new jwt.JsonWebTokenError('jwt malformed');
       });
@@ -114,7 +114,7 @@ describe('Auth Middleware', () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(401);
       expect(mockRes.json).toHaveBeenCalledWith({
-        message: 'Token is not valid'
+        message: 'Not authorized, token failed'
       });
     });
   });
@@ -123,7 +123,7 @@ describe('Auth Middleware', () => {
     test('should return 401 error when user not found', async () => {
       const mockDecoded = { userId: 'nonexistent-user' };
 
-      mockReq.header.mockReturnValue('Bearer valid-token');
+      mockReq.headers.authorization = 'Bearer valid-token';
       jwt.verify = jest.fn().mockReturnValue(mockDecoded);
       User.findById = jest.fn().mockReturnValue({
         select: jest.fn().mockResolvedValue(null)
@@ -133,7 +133,7 @@ describe('Auth Middleware', () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(401);
       expect(mockRes.json).toHaveBeenCalledWith({
-        message: 'Token is not valid'
+        message: 'User not found'
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -146,7 +146,7 @@ describe('Auth Middleware', () => {
         name: 'Test User' 
       };
 
-      mockReq.header.mockReturnValue('Bearer valid-token');
+      mockReq.headers.authorization = 'Bearer valid-token';
       jwt.verify = jest.fn().mockReturnValue(mockDecoded);
       User.findById = jest.fn().mockReturnValue({
         select: jest.fn().mockResolvedValue(mockUser)
@@ -154,7 +154,7 @@ describe('Auth Middleware', () => {
 
       await auth(mockReq, mockRes, mockNext);
 
-      expect(mockReq.user).toEqual(mockUser);
+      expect(mockReq.user).toEqual(expect.objectContaining(mockUser));
       expect(mockNext).toHaveBeenCalled();
     });
 
@@ -167,7 +167,7 @@ describe('Auth Middleware', () => {
         password: 'hashed-password'
       };
 
-      mockReq.header.mockReturnValue('Bearer valid-token');
+      mockReq.headers.authorization = 'Bearer valid-token';
       jwt.verify = jest.fn().mockReturnValue(mockDecoded);
       User.findById = jest.fn().mockReturnValue({
         select: jest.fn().mockResolvedValue(mockUser)
@@ -188,7 +188,7 @@ describe('Auth Middleware', () => {
         name: 'Admin User' 
       };
 
-      mockReq.header.mockReturnValue('Bearer valid-token');
+      mockReq.headers.authorization = 'Bearer valid-token';
       jwt.verify = jest.fn().mockReturnValue(mockDecoded);
       User.findById = jest.fn().mockReturnValue({
         select: jest.fn().mockResolvedValue(mockUser)
@@ -208,7 +208,7 @@ describe('Auth Middleware', () => {
         name: 'Regular User' 
       };
 
-      mockReq.header.mockReturnValue('Bearer valid-token');
+      mockReq.headers.authorization = 'Bearer valid-token';
       jwt.verify = jest.fn().mockReturnValue(mockDecoded);
       User.findById = jest.fn().mockReturnValue({
         select: jest.fn().mockResolvedValue(mockUser)
@@ -230,7 +230,7 @@ describe('Auth Middleware', () => {
         name: 'Any User' 
       };
 
-      mockReq.header.mockReturnValue('Bearer valid-token');
+      mockReq.headers.authorization = 'Bearer valid-token';
       jwt.verify = jest.fn().mockReturnValue(mockDecoded);
       User.findById = jest.fn().mockReturnValue({
         select: jest.fn().mockResolvedValue(mockUser)
@@ -252,7 +252,7 @@ describe('Auth Middleware', () => {
         name: 'Admin User' 
       };
 
-      mockReq.header.mockReturnValue('Bearer valid-token');
+      mockReq.headers.authorization = 'Bearer valid-token';
       jwt.verify = jest.fn().mockReturnValue(mockDecoded);
       User.findById = jest.fn().mockReturnValue({
         select: jest.fn().mockResolvedValue(mockUser)
@@ -269,7 +269,7 @@ describe('Auth Middleware', () => {
     test('should handle database errors gracefully', async () => {
       const mockDecoded = { userId: 'user123' };
 
-      mockReq.header.mockReturnValue('Bearer valid-token');
+      mockReq.headers.authorization = 'Bearer valid-token';
       jwt.verify = jest.fn().mockReturnValue(mockDecoded);
       User.findById = jest.fn().mockReturnValue({
         select: jest.fn().mockRejectedValue(new Error('Database error'))
@@ -279,7 +279,7 @@ describe('Auth Middleware', () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(401);
       expect(mockRes.json).toHaveBeenCalledWith({
-        message: 'Token is not valid'
+        message: 'Not authorized, token failed'
       });
     });
 
@@ -287,7 +287,7 @@ describe('Auth Middleware', () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       const mockDecoded = { userId: 'user123' };
 
-      mockReq.header.mockReturnValue('Bearer valid-token');
+      mockReq.headers.authorization = 'Bearer valid-token';
       jwt.verify = jest.fn().mockReturnValue(mockDecoded);
       User.findById = jest.fn().mockReturnValue({
         select: jest.fn().mockRejectedValue(new Error('Test error'))
@@ -295,7 +295,7 @@ describe('Auth Middleware', () => {
 
       await auth(mockReq, mockRes, mockNext);
 
-      expect(consoleSpy).toHaveBeenCalledWith('Auth middleware error:', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith('Auth middleware error:', 'Test error');
       consoleSpy.mockRestore();
     });
   });

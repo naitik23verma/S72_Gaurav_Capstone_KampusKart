@@ -6,7 +6,7 @@ const User = require('../models/User');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
-const bcrypt = require('bcryptjs');
+const _bcrypt = require('bcryptjs');
 const { validateSignup, validateLogin, sanitizeInput } = require('../middleware/validation');
 
 // Create Nodemailer transporter with better error handling

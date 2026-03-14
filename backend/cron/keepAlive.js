@@ -1,5 +1,5 @@
 const axios = require('axios');
-const cron = require('node-cron');
+const _cron = require('node-cron');
 
 /**
  * Keep-alive service to prevent Render.com from spinning down the server
@@ -87,12 +87,12 @@ const startKeepAlive = () => {
       pingServer();
     }, KEEP_ALIVE_INTERVAL);
     
-    console.log(`✅ Keep-alive service started`);
+    console.log('✅ Keep-alive service started');
     console.log(`   - setInterval: Every ${KEEP_ALIVE_INTERVAL / 1000 / 60} minutes`);
-    console.log(`\n📌 IMPORTANT: For true 24/7 uptime, set up external monitoring:`);
-    console.log(`   - UptimeRobot: https://uptimerobot.com (Free, 5-min intervals)`);
+    console.log('\n📌 IMPORTANT: For true 24/7 uptime, set up external monitoring:');
+    console.log('   - UptimeRobot: https://uptimerobot.com (Free, 5-min intervals)');
     console.log(`   - Monitor URL: ${SERVER_URL}/api/health`);
-    console.log(`   - See KEEP_ALIVE_SETUP.md for detailed instructions\n`);
+    console.log('   - See KEEP_ALIVE_SETUP.md for detailed instructions\n');
   } else {
     console.log('ℹ️  Keep-alive service disabled');
     console.log('   Set ENABLE_KEEP_ALIVE=true to force enable');

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Instagram, Linkedin, Twitter, Github } from 'lucide-react';
+import { Instagram, Linkedin, Globe, Github } from 'lucide-react';
 import { FiMap, FiSearch, FiCalendar, FiFileText, FiAlertCircle, FiHome, FiUsers, FiMessageSquare } from 'react-icons/fi';
 import { Footer } from './ui/footer';
 import { ShuffleGrid } from './ui/shuffle-grid';
@@ -19,7 +19,7 @@ const features = [
 const socialLinks = [
   { href: 'https://www.instagram.com/gaurav_khandelwal_/', label: 'Instagram', icon: <Instagram className="h-4 w-4" /> },
   { href: 'https://www.linkedin.com/in/gaurav-khandelwal-17a127358/', label: 'LinkedIn', icon: <Linkedin className="h-4 w-4" /> },
-  { href: 'https://x.com/xXxGauravxXx', label: 'Twitter', icon: <Twitter className="h-4 w-4" /> },
+  { href: 'https://gaurav-khandelwal.vercel.app/', label: 'Portfolio', icon: <Globe className="h-4 w-4" /> },
   { href: 'https://github.com/Gaurav-205', label: 'GitHub', icon: <Github className="h-4 w-4" /> },
 ];
 

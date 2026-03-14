@@ -73,7 +73,7 @@ const Landing: React.FC = () => {
         <section className="flex flex-col items-center justify-center min-h-[60vh] pt-24 md:pt-36 pb-8 md:pb-16 px-4">
         <h1 className="text-3xl md:text-h1 font-extrabold text-center text-black mb-4 md:mb-6 leading-tight" style={{ fontWeight: 900, letterSpacing: '-0.02em', lineHeight: '1.05' }}>Don't make campus life awkward</h1>
         <p className="text-base md:text-lg text-center text-gray-500 mb-6 md:mb-10 max-w-2xl">No more missing out on campus events, updates, or connections. KampusKart makes it easy to discover, connect, and manage your campus life—all in one place.</p>
-        <Link to="/signup" className="mt-2 px-8 md:px-10 py-3 md:py-4 rounded-full font-bold text-white bg-[#181818] shadow-lg hover:bg-[#00C6A7] hover:text-white transition text-base md:text-lg">Sign up</Link>
+        <Link to="/signup" className="mt-2 px-8 md:px-10 py-3 md:py-4 rounded-lg font-bold text-white bg-[#181818] shadow-lg hover:bg-[#00C6A7] hover:text-white transition text-base md:text-lg">Sign up</Link>
       </section>
       {/* How it works */}
       <section className="flex flex-col items-center justify-center py-8 md:py-12 px-4">
@@ -82,13 +82,13 @@ const Landing: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-10 max-w-5xl w-full">
           {steps.map((step, idx) => (
             <div key={idx} className="flex flex-col items-center text-center p-4 md:p-0">
-              <div className={`mb-4 w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-full font-bold text-lg md:text-h4 ${step.bg} ${step.color}`}>{step.number}</div>
+              <div className={`mb-4 w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-lg font-bold text-lg md:text-h4 ${step.bg} ${step.color}`}>{step.number}</div>
               <h3 className="text-lg md:text-h4 font-bold text-black mb-2">{step.title}</h3>
               <p className="text-sm md:text-body text-gray-500">{step.desc}</p>
             </div>
           ))}
         </div>
-        <Link to="/signup" className="mt-8 md:mt-12 px-8 md:px-10 py-3 md:py-4 rounded-full font-bold text-white bg-[#00C6A7] shadow-lg hover:bg-[#181818] hover:text-white transition text-base md:text-lg">Sign up</Link>
+        <Link to="/signup" className="mt-8 md:mt-12 px-8 md:px-10 py-3 md:py-4 rounded-lg font-bold text-white bg-[#00C6A7] shadow-lg hover:bg-[#181818] hover:text-white transition text-base md:text-lg">Sign up</Link>
       </section>
       {/* Footer */}
       <footer className="text-center py-6 md:py-8 px-4 text-gray-400 text-sm">

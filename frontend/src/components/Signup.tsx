@@ -162,7 +162,7 @@ const Signup: React.FC = () => {
           <h2 className="mb-6 text-h3 font-bold text-black text-center pt-6">Sign Up</h2>
           <form className="space-y-4" onSubmit={handleSubmit}>
             {error && (
-              <div className="rounded-md bg-orange/10 p-4">
+              <div className="rounded-lg bg-orange/10 p-4">
                 <div className="text-sm text-orange-700">{error}</div>
               </div>
             )}

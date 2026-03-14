@@ -239,7 +239,7 @@ const Profile = () => {
             <div className="w-full flex flex-col items-center">
               <div className="bg-white rounded-2xl shadow-md p-0 w-full flex flex-col items-center relative mt-24" style={{ minHeight: 220 }}>
                 {/* Profile Picture Card */}
-                <div className="w-32 h-32 rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-[#e5e7eb] shadow-md absolute left-1/2 -translate-x-1/2 -top-20 z-10">
+                <div className="w-32 h-32 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-[#e5e7eb] shadow-md absolute left-1/2 -translate-x-1/2 -top-20 z-10">
                   {profileData.profilePicture?.url || previewUrl ? (
                     <img 
                       src={previewUrl || profileData.profilePicture?.url}
@@ -252,7 +252,7 @@ const Profile = () => {
                   {isEditing && (
                     <label 
                       htmlFor="profilePicture-upload"
-                      className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white cursor-pointer opacity-0 hover:opacity-100 transition-opacity rounded-xl"
+                      className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white cursor-pointer opacity-0 hover:opacity-100 transition-opacity rounded-lg"
                     >
                       <FiUpload className="w-6 h-6 mr-2"/> Upload
                     </label>
@@ -299,7 +299,7 @@ const Profile = () => {
               <div className="space-y-12">
                 {/* Personal Info Section Header */}
                 <div className="flex items-center gap-2 mb-2 ml-1">
-                  <span className="bg-[#00C6A7] text-white rounded-full p-1.5"><FiUser className="w-6 h-6" /></span>
+                  <span className="bg-[#00C6A7] text-white rounded-lg p-1.5"><FiUser className="w-6 h-6" /></span>
                   <h2 className="text-xl font-extrabold text-black">Personal Information</h2>
                 </div>
                 {/* Personal Info Card */}
@@ -316,7 +316,7 @@ const Profile = () => {
                           name="name"
                           value={profileData.name}
                           onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
+                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
                           placeholder="Your full name"
                           disabled={!isEditing}
                           aria-label="Full Name"
@@ -337,7 +337,7 @@ const Profile = () => {
                           name="email"
                           value={profileData.email}
                           onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-gray-100 text-gray-500 border border-gray-300 rounded-md shadow-sm cursor-not-allowed placeholder-gray-400 sm:text-sm"
+                          className="w-full px-10 py-2 bg-gray-100 text-gray-500 border border-gray-300 rounded-lg shadow-sm cursor-not-allowed placeholder-gray-400 sm:text-sm"
                           placeholder="Your email address"
                           disabled
                           aria-label="Email"
@@ -356,7 +356,7 @@ const Profile = () => {
                           name="phone"
                           value={profileData.phone}
                           onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
+                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
                           placeholder="Your phone number"
                           disabled={!isEditing}
                           aria-label="Phone"
@@ -374,7 +374,7 @@ const Profile = () => {
                           name="gender"
                           value={profileData.gender}
                           onChange={handleSelectChange}
-                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7]"
+                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7]"
                           disabled={!isEditing}
                           aria-label="Gender"
                         >
@@ -398,7 +398,7 @@ const Profile = () => {
                           name="dateOfBirth"
                           value={profileData.dateOfBirth}
                           onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
+                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
                           disabled={!isEditing}
                           aria-label="Date of Birth"
                         />
@@ -409,7 +409,7 @@ const Profile = () => {
                 </div>
                 {/* Academic Info Section Header */}
                 <div className="flex items-center gap-2 mb-2 mt-8 ml-1">
-                  <span className="bg-[#00C6A7] text-white rounded-full p-1.5"><FiBriefcase className="w-6 h-6" /></span>
+                  <span className="bg-[#00C6A7] text-white rounded-lg p-1.5"><FiBriefcase className="w-6 h-6" /></span>
                   <h2 className="text-xl font-extrabold text-black">Academic Information</h2>
                 </div>
                 {/* Academic Info Card */}
@@ -426,7 +426,7 @@ const Profile = () => {
                           name="major"
                           value={profileData.major}
                           onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
+                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
                           placeholder="e.g., Computer Science"
                           disabled={!isEditing}
                           aria-label="Major/Department"
@@ -445,7 +445,7 @@ const Profile = () => {
                           name="program"
                           value={profileData.program}
                           onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
+                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
                           placeholder="e.g., Bachelor of Science"
                           disabled={!isEditing}
                           aria-label="Program"
@@ -464,7 +464,7 @@ const Profile = () => {
                           name="yearOfStudy"
                           value={profileData.yearOfStudy}
                           onChange={handleInputChange}
-                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
+                          className="w-full px-10 py-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-[#00C6A7] placeholder-gray-400"
                           placeholder="e.g., 2024 - 2028"
                           disabled={!isEditing}
                           aria-label="Year Interval"
@@ -479,7 +479,7 @@ const Profile = () => {
                   <button
                     type="button"
                     onClick={handleCancelEdit}
-                    className="px-6 py-2 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition"
+                    className="px-6 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition"
                   >
                     Cancel
                   </button>
@@ -487,7 +487,7 @@ const Profile = () => {
                     type="button"
                     onClick={handleSave}
                     disabled={saveLoading}
-                    className={`px-6 py-2 rounded-full text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition ${saveLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`px-6 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition ${saveLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {saveLoading ? (
                       <span className="flex items-center">

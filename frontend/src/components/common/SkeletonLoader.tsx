@@ -36,7 +36,7 @@ export const CardSkeleton: React.FC<{ count?: number }> = ({ count = 6 }) => {
       {Array.from({ length: count }).map((_, index) => (
         <div
           key={index}
-          className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+          className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden"
         >
           <Skeleton height="200px" rounded="none" className="mb-0" />
           <div className="p-6">
@@ -57,7 +57,7 @@ export const CardSkeleton4Col: React.FC<{ count?: number }> = ({ count = 8 }) =>
       {Array.from({ length: count }).map((_, index) => (
         <div
           key={index}
-          className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+          className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden"
         >
           <Skeleton height="280px" rounded="none" className="mb-0" />
           <div className="p-4">
@@ -180,7 +180,7 @@ export const ProfileSkeleton: React.FC = () => {
             <div className="w-full flex flex-col items-center">
               <div className="bg-white rounded-2xl shadow-md p-0 w-full flex flex-col items-center relative mt-24" style={{ minHeight: 220 }}>
                 {/* Profile Picture Skeleton */}
-                <div className="w-32 h-32 rounded-xl bg-gray-200 flex items-center justify-center overflow-hidden border-2 border-gray-200 shadow-md absolute left-1/2 -translate-x-1/2 -top-20 z-10 animate-pulse" />
+                <div className="w-32 h-32 rounded-lg bg-gray-200 flex items-center justify-center overflow-hidden border-2 border-gray-200 shadow-md absolute left-1/2 -translate-x-1/2 -top-20 z-10 animate-pulse" />
                 
                 <div className="pt-24 pb-8 px-6 w-full flex flex-col items-center">
                   <Skeleton height="32px" width="200px" className="mb-2 mt-8" />

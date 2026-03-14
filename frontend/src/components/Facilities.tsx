@@ -151,29 +151,36 @@ const Facilities = () => {
           {user?.isAdmin && (
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 rounded-full bg-[#181818] text-white font-bold text-lg shadow hover:bg-[#00C6A7] transition"
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg shadow hover:bg-[#00C6A7] transition"
             >
               + Add Facility
             </button>
           )}
         </div>
         {/* Filter/Search Row */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4 px-4 md:px-0">
-          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-            <select
-              value={filterType}
-              onChange={e => setFilterType(e.target.value)}
-              className="px-4 py-2 rounded-md bg-gray-100 text-black font-medium border border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
-            >
-              <option value="All">All Types</option>
-              <option value="Academic">Academic</option>
-              <option value="Food">Food</option>
-              <option value="Service">Service</option>
-              <option value="Accommodation">Accommodation</option>
-            </select>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+            <div className="relative">
+              <select
+                value={filterType}
+                onChange={e => setFilterType(e.target.value)}
+                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
+              >
+                <option value="All">All Types</option>
+                <option value="Academic">Academic</option>
+                <option value="Food">Food</option>
+                <option value="Service">Service</option>
+                <option value="Accommodation">Accommodation</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
           {/* AI-Powered Search Bar */}
-          <div className="relative w-full md:w-[500px]">
+          <div className="relative w-full lg:w-[520px]">
             <AIAutocomplete
               value={searchInput}
               onChange={(value) => {
@@ -186,7 +193,7 @@ const Facilities = () => {
                 handleSuggestionSelect(suggestion);
               }}
               placeholder="Search facilities"
-              className="w-full md:w-[500px]"
+              className="w-full lg:w-[520px]"
               suggestions={suggestions}
               isLoading={aiLoading}
               disabled={false}
@@ -201,7 +208,7 @@ const Facilities = () => {
           {filteredFacilities.map(facility => (
             <div
               key={facility._id}
-              className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden group"
+              className="bg-white rounded-lg shadow-sm hover:shadow-lg active:shadow-md transition-all duration-300 border border-gray-100 overflow-hidden group cursor-pointer"
               onClick={() => setSelectedFacility(facility)}
             >
               {/* Image Section with Overlay */}
@@ -226,7 +233,7 @@ const Facilities = () => {
                 {/* Type Badge */}
                 {facility?.type && (
                   <div className="absolute top-4 left-4">
-                    <span className="text-xs px-3 py-1.5 rounded-full font-medium shadow-sm bg-white/90 backdrop-blur-sm text-gray-800 flex items-center gap-1">
+                    <span className="text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm bg-white/90 backdrop-blur-sm text-gray-800 flex items-center gap-1">
                       <FiTag className="w-3 h-3" />
                       {facility.type}
                     </span>
@@ -235,7 +242,7 @@ const Facilities = () => {
                 {/* Location Badge */}
                 {facility?.location && (
                   <div className="absolute top-4 right-4">
-                    <span className="text-xs px-3 py-1.5 rounded-full font-medium shadow-sm bg-white/90 backdrop-blur-sm text-gray-800 flex items-center gap-1">
+                    <span className="text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm bg-white/90 backdrop-blur-sm text-gray-800 flex items-center gap-1">
                       <FiMapPin className="w-3 h-3" />
                       {facility.location}
                     </span>
@@ -353,7 +360,7 @@ const Facilities = () => {
                         type="text"
                         value={newFacility.name}
                         onChange={e => setNewFacility({ ...newFacility, name: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         required
                         placeholder="e.g. Main Library"
                       />
@@ -365,7 +372,7 @@ const Facilities = () => {
                         type="text"
                         value={newFacility.location}
                         onChange={e => setNewFacility({ ...newFacility, location: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         required
                         placeholder="e.g. Central Block"
                       />
@@ -377,7 +384,7 @@ const Facilities = () => {
                     <textarea
                       value={newFacility.description}
                       onChange={e => setNewFacility({ ...newFacility, description: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                       rows={3}
                       required
                       placeholder="Describe the facility, features, etc."
@@ -390,7 +397,7 @@ const Facilities = () => {
                       <select
                         value={newFacility.type}
                         onChange={e => setNewFacility({ ...newFacility, type: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         required
                       >
                         <option value="Academic">Academic</option>
@@ -405,7 +412,7 @@ const Facilities = () => {
                       <select
                         value={newFacility.icon}
                         onChange={e => setNewFacility({ ...newFacility, icon: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         required
                       >
                         {iconOptions.map(opt => (
@@ -414,7 +421,7 @@ const Facilities = () => {
                       </select>
                       <div className="flex gap-4 mt-2">
                         {iconOptions.map(opt => (
-                          <span key={opt.value} className={`p-2 rounded-full border ${newFacility.icon === opt.value ? 'border-[#00C6A7]' : 'border-gray-200'}`}>{opt.icon}</span>
+                          <span key={opt.value} className={`p-2 rounded-lg border ${newFacility.icon === opt.value ? 'border-[#00C6A7]' : 'border-gray-200'}`}>{opt.icon}</span>
                         ))}
                       </div>
                       <p className="text-xs text-gray-500 mt-1">Choose an icon for this facility.</p>
@@ -432,14 +439,14 @@ const Facilities = () => {
                   <button
                     type="button"
                     onClick={closeAddModal}
-                    className="px-4 py-2 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
                     disabled={addLoading}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className={`px-4 py-2 rounded-full text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C7A7] transition ${addLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition ${addLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={addLoading}
                   >
                     {addLoading ? (
@@ -514,7 +521,7 @@ const Facilities = () => {
                         type="text"
                         value={editFacility?.name || ''}
                         onChange={e => setEditFacility(editFacility ? { ...editFacility, name: e.target.value } : null)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         required
                         placeholder="e.g. Main Library"
                       />
@@ -526,7 +533,7 @@ const Facilities = () => {
                         type="text"
                         value={editFacility?.location || ''}
                         onChange={e => setEditFacility(editFacility ? { ...editFacility, location: e.target.value } : null)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         required
                         placeholder="e.g. Central Block"
                       />
@@ -538,7 +545,7 @@ const Facilities = () => {
                     <textarea
                       value={editFacility?.description || ''}
                       onChange={e => setEditFacility(editFacility ? { ...editFacility, description: e.target.value } : null)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                       rows={3}
                       required
                       placeholder="Describe the facility, features, etc."
@@ -551,7 +558,7 @@ const Facilities = () => {
                       <select
                         value={editFacility?.type || 'Academic'}
                         onChange={e => setEditFacility(editFacility ? { ...editFacility, type: e.target.value as Facility['type'] } : null)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         required
                       >
                         <option value="Academic">Academic</option>
@@ -566,7 +573,7 @@ const Facilities = () => {
                       <select
                         value={editFacility?.icon || 'FiBookOpen'}
                         onChange={e => setEditFacility(editFacility ? { ...editFacility, icon: e.target.value } : null)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         required
                       >
                         {iconOptions.map(opt => (
@@ -575,7 +582,7 @@ const Facilities = () => {
                       </select>
                       <div className="flex gap-4 mt-2">
                         {iconOptions.map(opt => (
-                          <span key={opt.value} className={`p-2 rounded-full border ${editFacility?.icon === opt.value ? 'border-[#00C6A7]' : 'border-gray-200'}`}>{opt.icon}</span>
+                          <span key={opt.value} className={`p-2 rounded-lg border ${editFacility?.icon === opt.value ? 'border-[#00C6A7]' : 'border-gray-200'}`}>{opt.icon}</span>
                         ))}
                       </div>
                       <p className="text-xs text-gray-500 mt-1">Choose an icon for this facility.</p>
@@ -593,14 +600,14 @@ const Facilities = () => {
                   <button
                     type="button"
                     onClick={closeEditModal}
-                    className="px-4 py-2 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
                     disabled={editLoading}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className={`px-4 py-2 rounded-full text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C7A7] transition ${editLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition ${editLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={editLoading}
                   >
                     {editLoading ? (
@@ -622,15 +629,15 @@ const Facilities = () => {
         {/* Facility Details Modal */}
         {selectedFacility && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-xl p-8 max-w-3xl w-full mx-auto max-h-[90vh] overflow-y-auto relative">
+            <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
               {/* Close Button */}
               <button
                 onClick={() => setSelectedFacility(null)}
                 aria-label="Close"
-                className="absolute top-4 right-4 bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200 shadow-lg"
+                className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] text-white rounded-lg p-2.5 transition-all duration-200 shadow-lg flex items-center justify-center w-10 h-10"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
 
@@ -646,7 +653,7 @@ const Facilities = () => {
                       key={idx}
                       src={img.url}
                       alt={`Facility image ${idx + 1}`}
-                      className="w-full h-64 object-cover rounded-md cursor-zoom-in hover:opacity-90 transition-opacity duration-200"
+                      className="w-full h-64 object-cover rounded-lg cursor-zoom-in hover:opacity-90 transition-opacity duration-200"
                       onClick={() => setZoomedImage(img.url)}
                     />
                   ))}
@@ -697,7 +704,7 @@ const Facilities = () => {
                       setIsEditModalOpen(true);
                       setSelectedFacility(null);
                     }}
-                    className="flex-1 px-3 py-3 sm:py-2 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors duration-200 min-w-0"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 flex items-center"
                   ><span className="truncate">Edit</span></button>
                   <button
                     onClick={async () => {
@@ -715,7 +722,7 @@ const Facilities = () => {
                         setError('Failed to delete facility');
                       }
                     }}
-                    className="flex-1 px-3 py-3 sm:py-2 rounded-full text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 transition-colors duration-200 min-w-0"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 flex items-center"
                   ><span className="truncate">Delete</span></button>
                 </div>
               )}
@@ -738,7 +745,7 @@ const Facilities = () => {
               <>
                 {/* Previous Button */}
                 <button
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/30 backdrop-blur-sm rounded-full p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/30 backdrop-blur-sm rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
                   onClick={(e) => {
                     e.stopPropagation();
                     const currentIndex = selectedFacility.images.findIndex(img => img.url === zoomedImage);
@@ -753,7 +760,7 @@ const Facilities = () => {
                 </button>
                 {/* Next Button */}
                 <button
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/30 backdrop-blur-sm rounded-full p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/30 backdrop-blur-sm rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
                   onClick={(e) => {
                     e.stopPropagation();
                     const currentIndex = selectedFacility.images.findIndex(img => img.url === zoomedImage);
@@ -773,7 +780,7 @@ const Facilities = () => {
              <button
               onClick={() => setZoomedImage(null)}
               aria-label="Close zoomed image"
-              className="absolute top-4 right-4 bg-white/30 backdrop-blur-sm rounded-full p-2 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+              className="absolute top-4 right-4 bg-white/30 backdrop-blur-sm rounded-lg p-2 text-white hover:bg-white/50 transition-colors duration-200 z-50"
             >
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" />

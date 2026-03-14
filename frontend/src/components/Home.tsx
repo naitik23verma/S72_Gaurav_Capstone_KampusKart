@@ -80,7 +80,7 @@ const Home = () => {
       <section className="flex flex-col items-center justify-center text-center min-h-[60vh] pt-20 md:pt-36 pb-12 md:pb-16 px-4">
         <h1 className="text-3xl md:text-5xl font-extrabold text-black mb-4 md:mb-6 leading-tight" style={{ fontWeight: 900, letterSpacing: '-0.02em', lineHeight: '1.05' }}>Welcome to Kampuskart</h1>
         <p className="text-base md:text-xl text-gray-700 mb-6 md:mb-8 max-w-2xl mx-auto">Your all-in-one campus companion for navigation, events, news, lost & found, complaints, and more!</p>
-        <Link to="/campus-map" className="inline-block px-6 md:px-8 py-3 md:py-4 bg-[#00C6A7] text-white rounded-full font-bold text-base md:text-lg shadow hover:bg-[#009e87] hover:text-white transition">Explore Campus Map</Link>
+        <Link to="/campus-map" className="inline-block px-6 md:px-8 py-3 md:py-4 bg-[#00C6A7] text-white rounded-lg font-bold text-base md:text-lg shadow hover:bg-[#009e87] hover:text-white transition">Explore Campus Map</Link>
       </section>
 
       {/* Features Section */}
@@ -88,7 +88,7 @@ const Home = () => {
         <h2 className="text-xl md:text-3xl font-bold text-gray-800 text-center mb-6 md:mb-10">Features</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
           {features.map((feature) => (
-            <Link to={feature.link} key={feature.name} className="bg-white rounded-xl shadow hover:shadow-lg p-8 flex flex-col items-center text-center transition group border border-gray-100">
+            <Link to={feature.link} key={feature.name} className="bg-white rounded-lg shadow hover:shadow-lg p-8 flex flex-col items-center text-center transition group border border-gray-100">
               <div className="mb-4">{feature.icon}</div>
               <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-[#00C6A7]">{feature.name}</h3>
               <p className="text-gray-600 text-sm">{feature.description}</p>

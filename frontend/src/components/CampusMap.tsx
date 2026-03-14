@@ -503,7 +503,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                   }}
                 >
                   <div 
-                    className="p-0 max-w-xs bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200/50" 
+                    className="p-0 max-w-xs bg-white rounded-lg shadow-2xl overflow-hidden border border-gray-200/50" 
                     style={{ 
                       margin: 0, 
                       padding: 0,
@@ -540,7 +540,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                     {/* Content Section */}
                     <div className="p-3 space-y-3" style={{ overflow: 'hidden', overflowY: 'hidden', overflowX: 'hidden' }}>
                     {/* Description Section */}
-                      <div className="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                      <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
                         <div className="flex items-start gap-2 mb-1.5">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#00C6A7] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -563,7 +563,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
 
                       {/* Action Button */}
                       <button
-                        className="w-full px-3 py-2.5 bg-[#00C6A7] text-white rounded-xl hover:bg-[#009e87] transition-all duration-200 flex items-center justify-center gap-2 font-bold text-xs shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                        className="w-full px-3 py-2.5 bg-[#00C6A7] text-white rounded-lg hover:bg-[#009e87] transition-all duration-200 flex items-center justify-center gap-2 font-bold text-xs shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
                         onClick={() => {
                           const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedLocation.lat},${selectedLocation.lng}`;
                           window.open(url, '_blank');

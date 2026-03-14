@@ -38,7 +38,7 @@ export const FeatureModal: React.FC<FeatureModalProps> = ({
       onClick={onClose}
     >
       <div
-        className={`bg-white rounded-lg md:rounded-xl p-4 sm:p-6 md:p-8 ${sizeClasses[size]} w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative`}
+        className={`bg-white rounded-lg p-4 sm:p-6 md:p-8 ${sizeClasses[size]} w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

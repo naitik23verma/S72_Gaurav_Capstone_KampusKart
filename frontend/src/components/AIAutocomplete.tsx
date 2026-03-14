@@ -157,7 +157,7 @@ const AIAutocomplete: React.FC<AIAutocompleteProps> = ({
 
   return (
     <div className={`relative ${className}`} ref={wrapperRef}>
-      <div className="relative w-full rounded-xl border-2 border-gray-200 bg-white shadow-sm hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
+      <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white shadow-sm hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
         <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
         <input
           ref={inputRef}
@@ -193,7 +193,7 @@ const AIAutocomplete: React.FC<AIAutocompleteProps> = ({
       {isOpen && suggestions.length > 0 && (
         <div
           ref={dropdownRef}
-          className={`${openUpward ? 'bottom-full mb-2' : 'top-full mt-2'} absolute z-50 w-full bg-white border-2 border-gray-200 rounded-xl shadow-xl max-h-[50vh] sm:max-h-80 overflow-auto`}
+          className={`${openUpward ? 'bottom-full mb-2' : 'top-full mt-2'} absolute z-50 w-full bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-[50vh] sm:max-h-80 overflow-auto`}
         >
           {suggestions.map((suggestion, index) => (
             <div

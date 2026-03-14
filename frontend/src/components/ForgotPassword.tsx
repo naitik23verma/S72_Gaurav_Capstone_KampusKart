@@ -67,12 +67,12 @@ const ForgotPassword = () => {
         {step === 'request_otp' && (
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="rounded-md bg-orange/10 p-4">
+              <div className="rounded-lg bg-orange/10 p-4">
                 <div className="text-sm text-orange-700">{error}</div>
               </div>
             )}
             {message && (
-              <div className="rounded-md bg-green-100 p-4">
+              <div className="rounded-lg bg-green-100 p-4">
                 <div className="text-sm text-green-700">{message}</div>
               </div>
             )}
@@ -93,7 +93,7 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex justify-center py-3 px-4 rounded-full text-lg font-semibold text-white bg-[#181818] shadow-lg hover:bg-[#00C6A7] hover:text-white transition`}
+              className={`w-full flex justify-center py-3 px-4 rounded-lg text-lg font-semibold text-white bg-[#181818] shadow-lg hover:bg-[#00C6A7] hover:text-white transition`}
             >
               {loading ? 'Sending OTP...' : 'Send OTP'}
             </button>
@@ -142,12 +142,12 @@ const ForgotPassword = () => {
             }
           }}>
             {error && (
-              <div className="rounded-md bg-orange/10 p-4">
+              <div className="rounded-lg bg-orange/10 p-4">
                 <div className="text-sm text-orange-700">{error}</div>
               </div>
             )}
             {message && (
-              <div className="rounded-md bg-green-100 p-4">
+              <div className="rounded-lg bg-green-100 p-4">
                 <div className="text-sm text-green-700">{message}</div>
               </div>
             )}
@@ -194,7 +194,7 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex justify-center py-3 px-4 rounded-full text-lg font-semibold text-white bg-[#181818] shadow-lg hover:bg-[#00C6A7] hover:text-white transition`}
+              className={`w-full flex justify-center py-3 px-4 rounded-lg text-lg font-semibold text-white bg-[#181818] shadow-lg hover:bg-[#00C6A7] hover:text-white transition`}
             >
               {loading ? 'Resetting Password...' : 'Reset Password'}
             </button>

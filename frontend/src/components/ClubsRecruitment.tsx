@@ -594,7 +594,7 @@ const ClubsRecruitment = () => {
                       <textarea
                         value={newClub.description}
                         onChange={e => setNewClub({...newClub, description: e.target.value})}
-                        className="w-full px-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         rows={4}
                         placeholder="Provide a detailed description of the recruitment. Include requirements, process, and highlights."
                         required
@@ -611,7 +611,7 @@ const ClubsRecruitment = () => {
                         type="url"
                         value={newClub.formUrl}
                         onChange={e => setNewClub({...newClub, formUrl: e.target.value})}
-                        className="w-full px-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                        className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         placeholder="https://forms.google.com/..."
                         required
                         aria-label="Form URL"

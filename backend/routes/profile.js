@@ -24,7 +24,7 @@ router.get('/', authMiddleware, async (req, res) => {
   try {
     // req.user is set by authMiddleware
     // Select all fields except password and reset token fields
-    const user = await User.findById(req.user.id).select('-password -resetPasswordOTP -resetPasswordExpires');
+    const user = await User.findById(req.user._id).select('-password -resetPasswordOTP -resetPasswordExpires');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -66,7 +66,7 @@ router.put('/', authMiddleware, upload.single('profilePicture'), async (req, res
   // Add other fields to update here
 
   try {
-    let user = await User.findById(req.user.id);
+    let user = await User.findById(req.user._id);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -107,7 +107,7 @@ router.put('/', authMiddleware, upload.single('profilePicture'), async (req, res
             await user.save();
 
             // Respond with the updated user data after handling the picture
-            const updatedUser = await User.findById(req.user.id).select('-password -resetPasswordOTP -resetPasswordExpires');
+            const updatedUser = await User.findById(req.user._id).select('-password -resetPasswordOTP -resetPasswordExpires');
             
             // Convert to plain object and add isAdmin field
             const userObject = updatedUser.toObject();
@@ -133,7 +133,7 @@ router.put('/', authMiddleware, upload.single('profilePicture'), async (req, res
       // If no file is provided, just update the text fields
       // Use findByIdAndUpdate to directly update and get the new document
       user = await User.findByIdAndUpdate(
-        req.user.id,
+        req.user._id,
         { $set: profileFields },
         { new: true, runValidators: true }
       ).select('-password -resetPasswordOTP -resetPasswordExpires');

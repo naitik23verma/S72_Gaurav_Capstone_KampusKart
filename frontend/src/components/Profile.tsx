@@ -410,7 +410,7 @@ const Profile = () => {
                 </div>
 
                 {/* Buttons */}
-                <div className="flex flex-col md:flex-row justify-end gap-3 pt-2 border-t border-gray-100">
+                <div className="flex flex-col md:flex-row justify-end gap-3 pt-2 border-t-2 border-gray-200">
                   <button type="button" onClick={handleCancelEdit}
                     className="px-6 py-3 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-gray-300 transition">
                     Cancel

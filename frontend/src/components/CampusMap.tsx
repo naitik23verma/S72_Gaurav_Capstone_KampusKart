@@ -499,7 +499,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                           setTimeout(() => handleLocationClick(matchingLocation), 100);
                         }
                       }}
-                      className="flex items-center px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                      className="flex items-center px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0"
                     >
                       <svg className="w-3.5 h-3.5 text-gray-400 mr-2.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -728,7 +728,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                           setTimeout(() => handleLocationClick(matchingLocation), 100);
                         }
                       }}
-                      className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                      className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0"
                     >
                       <svg className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

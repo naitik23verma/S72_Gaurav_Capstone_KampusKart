@@ -94,7 +94,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
               <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
               <p className="text-gray-700 whitespace-pre-wrap text-sm">{club.description}</p>
             </div>
-            <div className="space-y-3 pt-4 border-t border-gray-100">
+            <div className="space-y-3 pt-4 border-t-2 border-gray-200">
               <div className="flex items-center text-sm text-gray-500">
                 <FiTag className="w-5 h-5 mr-2 flex-shrink-0 text-gray-500" />
                 <span className="font-medium text-gray-900">{club.clubName}</span>
@@ -504,7 +504,7 @@ const ClubsRecruitment = () => {
                       setSearchQuery(suggestion);
                       setShowSuggestions(false);
                     }}
-                    className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                    className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0"
                   >
                     <FiSearch className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" />
                     <span className="text-sm font-medium text-gray-700">{suggestion}</span>
@@ -545,7 +545,7 @@ const ClubsRecruitment = () => {
               <div className="p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">{club.title}</h2>
                 <p className="text-gray-600 text-sm mb-4 line-clamp-3">{club.description}</p>
-                <div className="space-y-3 pt-4 border-t border-gray-100">
+                <div className="space-y-3 pt-4 border-t-2 border-gray-200">
                   <div className="flex items-center text-sm text-gray-500">
                     <FiTag className="mr-2 flex-shrink-0 text-gray-400" />
                     <span className="font-medium text-gray-900">{club.clubName}</span>
@@ -555,7 +555,7 @@ const ClubsRecruitment = () => {
                     <span>{new Date(club.startDate).toLocaleDateString()} - {new Date(club.endDate).toLocaleDateString()}</span>
                   </div>
                 </div>
-                <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="mt-4 pt-4 border-t-2 border-gray-200">
                   <button
                     className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
                       club.formUrl 

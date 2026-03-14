@@ -654,7 +654,7 @@ const Complaints = () => {
                       setSearchQuery(suggestion);
                       setShowSuggestions(false);
                     }}
-                    className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                    className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0"
                   >
                     <FiSearch className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" />
                     <span className="text-sm font-medium text-gray-700">{suggestion}</span>
@@ -719,7 +719,7 @@ const Complaints = () => {
                 <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{complaint.description}</p>
 
                 {/* Meta Info Row */}
-                <div className="space-y-3 pt-4 border-t border-gray-100">
+                <div className="space-y-3 pt-4 border-t-2 border-gray-200">
                   <div className="flex items-center text-sm text-gray-500">
                     <FiTag className="mr-2 flex-shrink-0" />
                     <span className="truncate">{complaint.category}</span>
@@ -750,7 +750,7 @@ const Complaints = () => {
                   
                   return canEdit;
                 })() && (
-                  <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t border-gray-100">
+                  <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t-2 border-gray-200">
                     <button
                       onClick={(e) => { e.stopPropagation(); openEditComplaintModal(complaint); }}
                       className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-4 sm:py-2.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 active:bg-blue-200 transition-colors duration-200 text-xs sm:text-sm min-w-0 min-h-touch"
@@ -999,7 +999,7 @@ const Complaints = () => {
                             <p className="text-gray-700 whitespace-pre-wrap">{selectedComplaintForDetails.description}</p>
                         </div>
                         {/* Meta Info - Posted By, Posted At */}
-                        <div className="space-y-3 pt-4 border-t border-gray-100">
+                        <div className="space-y-3 pt-4 border-t-2 border-gray-200">
                             {/* Posted By and Posted At Combined */}
                             <div className="flex items-center text-sm text-gray-500">
                                       <FiUser className="w-5 h-5 mr-2 text-gray-500"/>

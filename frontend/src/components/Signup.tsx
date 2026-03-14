@@ -123,7 +123,7 @@ const Signup: React.FC = () => {
               <input
                 type="text"
                 required
-                className="w-full pb-2 border-b border-gray-300 focus:outline-none focus:border-[#00C6A7] bg-transparent text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200"
+                className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200"
                 placeholder="Your full name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -137,7 +137,7 @@ const Signup: React.FC = () => {
                 type="email"
                 autoComplete="email"
                 required
-                className={`w-full pb-2 border-b ${emailError ? 'border-red-400' : 'border-gray-300'} focus:outline-none focus:border-[#00C6A7] bg-transparent text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200`}
+                className={`w-full px-3 py-2.5 border-2 ${emailError ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200`}
                 placeholder="you@example.com"
                 value={email}
                 onChange={handleEmailChange}
@@ -154,7 +154,7 @@ const Signup: React.FC = () => {
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   required
-                  className={`w-full pb-2 pr-10 border-b ${passwordErrors.length > 0 ? 'border-red-400' : 'border-gray-300'} focus:outline-none focus:border-[#00C6A7] bg-transparent text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200`}
+                  className={`w-full px-3 py-2.5 pr-10 border-2 ${passwordErrors.length > 0 ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200`}
                   placeholder="••••••••"
                   value={password}
                   onChange={handlePasswordChange}

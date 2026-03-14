@@ -90,7 +90,7 @@ const Login: React.FC = () => {
                 type="email"
                 autoComplete="email"
                 required
-                className={`w-full pb-2 border-b ${emailError ? 'border-red-400' : 'border-gray-300'} focus:outline-none focus:border-[#00C6A7] bg-transparent text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200`}
+                className={`w-full px-3 py-2.5 border-2 ${emailError ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200`}
                 placeholder="you@example.com"
                 value={email}
                 onChange={handleEmailChange}
@@ -107,7 +107,7 @@ const Login: React.FC = () => {
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
                   required
-                  className="w-full pb-2 pr-10 border-b border-gray-300 focus:outline-none focus:border-[#00C6A7] bg-transparent text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200"
+                  className="w-full px-3 py-2.5 pr-10 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

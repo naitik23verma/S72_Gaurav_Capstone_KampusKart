@@ -69,12 +69,12 @@ const Navbar1 = ({
   },
 }: Navbar1Props) => {
   return (
-    <section className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md w-full border-b-2 border-gray-100 transition-shadow duration-300">
+    <section className="fixed top-0 left-0 right-0 z-50 bg-white w-full border-b-2 border-gray-200 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <nav className="hidden justify-between lg:flex items-center">
           <div className="flex items-center gap-6">
-            <Link to={logo.url} className="flex items-center gap-2.5 focus:outline-none rounded-lg transition-transform duration-200 hover:scale-105" aria-label="Go to home page">
-              <img src={logo.src} className="w-8 h-8 transition-transform duration-200" alt={logo.alt} />
+            <Link to={logo.url} className="flex items-center gap-2.5 focus:outline-none rounded-lg transition-colors duration-200" aria-label="Go to home page">
+              <img src={logo.src} className="w-8 h-8" alt={logo.alt} />
               <span className="text-xl font-extrabold text-black tracking-tight">{logo.title}</span>
             </Link>
             <div className="flex items-center">
@@ -86,15 +86,15 @@ const Navbar1 = ({
             </div>
           </div>
           <div className="flex gap-3 items-center">
-            <Button asChild variant="outline" className="h-10 px-4 text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400 transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 rounded-lg hover:shadow-sm">
+            <Button asChild variant="outline" className="h-10 px-4 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 transition-colors duration-200 focus:outline-none focus:ring-0 rounded-lg">
               <Link to={auth.login.url}>{auth.login.text}</Link>
             </Button>
             {auth.signup.onClick ? (
-              <Button onClick={auth.signup.onClick} className="h-10 px-4 text-sm font-semibold bg-gray-900 text-white hover:bg-gray-800 transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 rounded-lg border-0 hover:shadow-md hover:scale-105 active:scale-95" aria-label={auth.signup.text}>
+              <Button onClick={auth.signup.onClick} className="h-10 px-4 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] transition-colors duration-200 focus:outline-none focus:ring-0 rounded-lg border-0" aria-label={auth.signup.text}>
                 {auth.signup.text}
               </Button>
             ) : (
-              <Button asChild className="h-10 px-4 text-sm font-semibold bg-gray-900 text-white hover:bg-gray-800 transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 rounded-lg border-0 hover:shadow-md hover:scale-105 active:scale-95">
+              <Button asChild className="h-10 px-4 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] transition-colors duration-200 focus:outline-none focus:ring-0 rounded-lg border-0">
                 <Link to={auth.signup.url}>{auth.signup.text}</Link>
               </Button>
             )}
@@ -102,8 +102,8 @@ const Navbar1 = ({
         </nav>
         <div className="block lg:hidden">
           <div className="flex items-center justify-between h-10">
-            <Link to={logo.url} className="flex items-center gap-2.5 focus:outline-none rounded-lg transition-transform duration-200 hover:scale-105" aria-label="Go to home page">
-              <img src={logo.src} className="w-8 h-8 transition-transform duration-200" alt={logo.alt} />
+            <Link to={logo.url} className="flex items-center gap-2.5 focus:outline-none rounded-lg transition-colors duration-200" aria-label="Go to home page">
+              <img src={logo.src} className="w-8 h-8" alt={logo.alt} />
               <span className="text-xl font-extrabold text-black tracking-tight">{logo.title}</span>
             </Link>
             <Sheet>
@@ -111,17 +111,17 @@ const Navbar1 = ({
                 <Button 
                   variant="ghost" 
                   size="icon"
-                  className="h-9 w-9 bg-transparent hover:bg-gray-100 transition-all duration-200 ease-in-out focus:outline-none focus:ring-0 rounded-lg p-0 hover:scale-110 active:scale-95"
+                  className="h-9 w-9 bg-transparent hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-0 rounded-lg p-0"
                   aria-label="Open navigation menu"
                 >
-                  <Menu className="h-5 w-5 text-black transition-transform duration-200" strokeWidth={2} />
+                  <Menu className="h-5 w-5 text-black" strokeWidth={2} />
                 </Button>
               </SheetTrigger>
               <SheetContent className="bg-white w-[85vw] sm:w-[380px] p-0 border-l-2 border-gray-200 animate-in slide-in-from-right duration-300">
-                  <SheetHeader className="px-6 border-b-2 border-gray-100 min-h-[72px] flex flex-row items-center justify-start">
+                  <SheetHeader className="px-6 border-b-2 border-gray-200 min-h-[72px] flex flex-row items-center justify-start">
                     <SheetTitle className="text-left flex-1">
-                      <Link to={logo.url} className="flex items-center gap-2.5 focus:outline-none rounded-lg transition-transform duration-200 hover:scale-105" aria-label="Go to home page">
-                        <img src={logo.src} className="w-8 h-8 transition-transform duration-200" alt={logo.alt} />
+                      <Link to={logo.url} className="flex items-center gap-2.5 focus:outline-none rounded-lg transition-colors duration-200" aria-label="Go to home page">
+                        <img src={logo.src} className="w-8 h-8" alt={logo.alt} />
                         <span className="text-xl font-extrabold text-black tracking-tight">
                           {logo.title}
                         </span>
@@ -147,7 +147,7 @@ const Navbar1 = ({
                           <SheetClose key={idx} asChild>
                             <Link
                               to={link.url}
-                              className="inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 py-3 text-sm font-semibold text-gray-700 bg-white border border-gray-200 transition-all duration-200 ease-in-out hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300 active:scale-98 focus:outline-none focus:ring-0 hover:shadow-sm"
+                              className="inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 py-3 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 transition-colors duration-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 focus:outline-none focus:ring-0"
                               aria-label={`Go to ${link.name}`}
                             >
                               {link.name}
@@ -159,19 +159,19 @@ const Navbar1 = ({
                   )}
                     <div className="flex flex-col gap-2 pt-4 mt-2 border-t border-gray-200 animate-in fade-in-50 duration-300">
                       <SheetClose asChild>
-                        <Button asChild variant="outline" className="w-full h-11 text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400 transition-all duration-200 ease-in-out rounded-lg active:scale-98 focus:outline-none focus:ring-0 hover:shadow-sm">
+                        <Button asChild variant="outline" className="w-full h-11 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 transition-colors duration-200 rounded-lg focus:outline-none focus:ring-0">
                           <Link to={auth.login.url}>{auth.login.text}</Link>
                         </Button>
                       </SheetClose>
                       {auth.signup.onClick ? (
                         <SheetClose asChild>
-                          <Button onClick={auth.signup.onClick} className="w-full h-11 text-sm font-semibold bg-gray-900 text-white hover:bg-gray-800 transition-all duration-200 ease-in-out rounded-lg active:scale-98 focus:outline-none focus:ring-0 hover:shadow-md" aria-label={auth.signup.text}>
+                          <Button onClick={auth.signup.onClick} className="w-full h-11 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] transition-colors duration-200 rounded-lg focus:outline-none focus:ring-0" aria-label={auth.signup.text}>
                             {auth.signup.text}
                           </Button>
                         </SheetClose>
                       ) : (
                         <SheetClose asChild>
-                          <Button asChild className="w-full h-11 text-sm font-semibold bg-gray-900 text-white hover:bg-gray-800 transition-all duration-200 ease-in-out rounded-lg active:scale-98 focus:outline-none focus:ring-0 hover:shadow-md">
+                          <Button asChild className="w-full h-11 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] transition-colors duration-200 rounded-lg focus:outline-none focus:ring-0">
                             <Link to={auth.signup.url}>{auth.signup.text}</Link>
                           </Button>
                         </SheetClose>
@@ -193,15 +193,15 @@ const renderMenuItem = (item: MenuItem) => {
       <NavigationMenuItem key={item.title} className="text-black">
         <NavigationMenuTrigger className="text-gray-700 font-semibold bg-transparent hover:bg-gray-100 hover:text-gray-900 data-[state=open]:bg-gray-100 data-[state=open]:text-gray-900 focus:bg-gray-100 focus:text-gray-900 transition-colors rounded-lg px-4 py-2 border-0 focus:outline-none focus:ring-0 [&>svg]:text-gray-700 data-[state=open]:[&>svg]:text-gray-900" aria-label={`${item.title} menu`}>{item.title}</NavigationMenuTrigger>
         <NavigationMenuContent>
-          <ul className="w-80 p-2 bg-white shadow-xl border border-gray-200 rounded-lg">
+          <ul className="w-80 p-2 bg-white border-2 border-gray-200 rounded-lg">
             {item.items.map((subItem) => (
               <li key={subItem.title}>
                 <NavigationMenuLink asChild>
                   <Link
-                    className={`flex select-none gap-3 rounded-lg p-3 leading-none no-underline outline-none transition-all duration-200 ease-in-out border-0 focus:ring-0 ${
+                    className={`flex select-none gap-3 rounded-lg p-3 leading-none no-underline outline-none transition-colors duration-200 border-0 focus:ring-0 ${
                       subItem.locked 
                         ? 'bg-gray-50 text-gray-400 cursor-not-allowed hover:bg-gray-50' 
-                        : 'hover:bg-gray-100 text-gray-700 hover:text-gray-900 hover:scale-[1.02] active:scale-[0.98]'
+                        : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
                     }`}
                     to={subItem.url}
                     aria-label={`Go to ${subItem.title}`}
@@ -233,7 +233,7 @@ const renderMenuItem = (item: MenuItem) => {
       <NavigationMenuLink asChild>
         <Link
           to={item.url}
-          className="group inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-gray-700 bg-transparent border-0 transition-all duration-200 ease-in-out hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-0 hover:scale-105 active:scale-95"
+          className="group inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-gray-700 bg-transparent border-0 transition-colors duration-200 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-0"
           aria-label={`Go to ${item.title}`}
         >
           {item.title}
@@ -247,7 +247,7 @@ const renderMobileMenuItem = (item: MenuItem) => {
   if (item.items) {
     return (
       <AccordionItem key={item.title} value={item.title} className="border-none">
-        <AccordionTrigger className="py-3 px-4 font-semibold hover:no-underline !text-gray-700 bg-white hover:!bg-gray-100 hover:!text-gray-900 data-[state=open]:!text-gray-900 data-[state=open]:!bg-gray-50 transition-all duration-300 ease-in-out rounded-lg text-sm focus:outline-none focus:ring-0 border border-gray-200 hover:border-gray-300 data-[state=open]:border-gray-300 [&>svg]:!text-gray-700 data-[state=open]:[&>svg]:!text-gray-900 [&>svg]:transition-transform [&>svg]:duration-300 [&>svg]:ease-in-out" aria-label={`${item.title} menu`}>
+        <AccordionTrigger className="py-3 px-4 font-semibold hover:no-underline !text-gray-700 bg-white hover:!bg-gray-50 hover:!text-gray-900 data-[state=open]:!text-gray-900 data-[state=open]:!bg-gray-50 transition-colors duration-200 rounded-lg text-sm focus:outline-none focus:ring-0 border-2 border-gray-200 hover:border-gray-300 data-[state=open]:border-gray-300 [&>svg]:!text-gray-700 data-[state=open]:[&>svg]:!text-gray-900 [&>svg]:transition-transform [&>svg]:duration-300 [&>svg]:ease-in-out" aria-label={`${item.title} menu`}>
           {item.title}
         </AccordionTrigger>
         <AccordionContent className="mt-2 pb-2 transition-all duration-300 ease-in-out">
@@ -256,10 +256,10 @@ const renderMobileMenuItem = (item: MenuItem) => {
               <SheetClose key={subItem.title} asChild>
                 <Link
                   to={subItem.url}
-                  className={`flex select-none gap-3 rounded-lg p-3 leading-none outline-none transition-all duration-200 ease-in-out border focus:ring-0 ${
+                  className={`flex select-none gap-3 rounded-lg p-3 leading-none outline-none transition-colors duration-200 border-2 focus:ring-0 ${
                     subItem.locked
                       ? 'bg-gray-50 !text-gray-400 cursor-not-allowed border-gray-200'
-                      : 'bg-white hover:bg-gray-100 !text-gray-700 hover:!text-gray-900 active:scale-98 border-gray-200 hover:border-gray-300 focus:!text-gray-900'
+                      : 'bg-white hover:bg-gray-50 !text-gray-700 hover:!text-gray-900 border-gray-200 hover:border-gray-300 focus:!text-gray-900'
                   }`}
                   aria-label={`Go to ${subItem.title}`}
                 >
@@ -288,7 +288,7 @@ const renderMobileMenuItem = (item: MenuItem) => {
     <SheetClose key={item.title} asChild>
       <Link 
         to={item.url} 
-        className="block py-3 px-4 font-semibold !text-gray-700 bg-white hover:bg-gray-100 hover:!text-gray-900 transition-all duration-200 ease-in-out rounded-lg text-sm h-11 flex items-center active:scale-98 focus:outline-none focus:ring-0 border border-gray-200 hover:border-gray-300 focus:!text-gray-900"
+        className="block py-3 px-4 font-semibold !text-gray-700 bg-white hover:bg-gray-50 hover:!text-gray-900 transition-colors duration-200 rounded-lg text-sm h-11 flex items-center focus:outline-none focus:ring-0 border-2 border-gray-200 hover:border-gray-300 focus:!text-gray-900"
         aria-label={`Go to ${item.title}`}
       >
         {item.title}

@@ -314,7 +314,7 @@ const Facilities = () => {
                       setSearchQuery(suggestion);
                       setShowSuggestions(false);
                     }}
-                    className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                    className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0"
                   >
                     <FiSearch className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" />
                     <span className="text-sm font-medium text-gray-700">{suggestion}</span>
@@ -385,7 +385,7 @@ const Facilities = () => {
                 <p className="text-gray-600 text-sm mb-4 line-clamp-3">{facility?.description || ''}</p>
 
                 {/* Meta Info Row */}
-                <div className="space-y-3 pt-4 border-t border-gray-100">
+                <div className="space-y-3 pt-4 border-t-2 border-gray-200">
                   {facility.createdAt && (
                     <div className="flex items-center text-sm text-gray-500">
                       <FiCalendar className="mr-2 flex-shrink-0" />
@@ -406,7 +406,7 @@ const Facilities = () => {
 
                 {/* Action Buttons */}
                 {user?.isAdmin && (
-                  <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t border-gray-100">
+                  <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t-2 border-gray-200">
                     <button
                       onClick={(e) => { 
                         e.stopPropagation(); 
@@ -822,7 +822,7 @@ const Facilities = () => {
                   <p className="text-gray-700 whitespace-pre-wrap">{selectedFacility?.description || 'No description available'}</p>
                 </div>
                 {/* Meta Info - Location, Date, Posted By */}
-                <div className="space-y-3 pt-4 border-t border-gray-100">
+                <div className="space-y-3 pt-4 border-t-2 border-gray-200">
                   {selectedFacility.location && (
                     <div className="flex items-center text-sm text-gray-500">
                       <FiMapPin className="w-5 h-5 mr-2 flex-shrink-0"/>

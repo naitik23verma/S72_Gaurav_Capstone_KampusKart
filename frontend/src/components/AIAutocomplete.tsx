@@ -199,7 +199,7 @@ const AIAutocomplete: React.FC<AIAutocompleteProps> = ({
             <div
               key={suggestion.id}
               onClick={() => handleSuggestionClick(suggestion)}
-              className={`flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${index === highlightedIndex ? 'bg-[#00C6A7]/5 border-l-4 border-l-[#00C6A7]' : ''}`}
+              className={`flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0 ${index === highlightedIndex ? 'bg-[#00C6A7]/5 border-l-4 border-l-[#00C6A7]' : ''}`}
             >
               <div className="flex items-center space-x-3 flex-1 min-w-0">
                 {getSuggestionIcon(suggestion.type)}

@@ -480,7 +480,7 @@ const LostFound = () => {
                       setSearchQuery(suggestion);
                       setShowSuggestions(false);
                     }}
-                    className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                    className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0"
                   >
                     <FiSearch className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" />
                     <span className="text-sm font-medium text-gray-700">{suggestion}</span>
@@ -556,7 +556,7 @@ const LostFound = () => {
                 <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{item.description}</p>
 
                 {/* Meta Info Row - Location, Date, User */}
-                <div className="space-y-3 pt-4 border-t border-gray-100">
+                <div className="space-y-3 pt-4 border-t-2 border-gray-200">
                   {item.location && (
                     <div className="flex items-center text-sm text-gray-500">
                       <FiMapPin className="mr-2 flex-shrink-0" />
@@ -587,7 +587,7 @@ const LostFound = () => {
                   (user._id === item.user._id || 
                    user.id === item.user._id || 
                    user.isAdmin) && (
-                    <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t border-gray-100">
+                    <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t-2 border-gray-200">
                       {!item.resolved && (
                         <button
                           onClick={(e) => {
@@ -956,7 +956,7 @@ const LostFound = () => {
               </div>
 
               {/* Meta Info - Location, Date, Posted By */}
-              <div className="space-y-3 pt-4 border-t border-gray-100">
+              <div className="space-y-3 pt-4 border-t-2 border-gray-200">
                 {selectedItemForDetails.location && (
                   <div>
                     <div className="flex items-center text-sm text-gray-500">

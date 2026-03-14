@@ -313,7 +313,7 @@ const News = () => {
                       setSearchQuery(suggestion);
                       setShowSuggestions(false);
                     }}
-                    className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                    className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0"
                   >
                     <FiSearch className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" />
                     <span className="text-sm font-medium text-gray-700">{suggestion}</span>
@@ -374,7 +374,7 @@ const News = () => {
 
                 {/* Action Buttons */}
                 {user && user.isAdmin && (
-                  <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t border-gray-100">
+                  <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t-2 border-gray-200">
                     <button
                       onClick={() => handleEditNews(item)}
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-3 sm:py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200 text-sm sm:text-base min-w-0"

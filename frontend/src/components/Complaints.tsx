@@ -608,11 +608,6 @@ const Complaints = () => {
                     setShowSuggestions(false);
                   }
                 }}
-                onFocus={() => {
-                  if (filteredSuggestions.length > 0) {
-                    setShowSuggestions(true);
-                  }
-                }}
                 placeholder="Search complaints..."
                 className="flex-1 pl-12 pr-3 py-3.5 bg-transparent text-gray-700 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
               />
@@ -636,7 +631,9 @@ const Complaints = () => {
                 {filteredSuggestions.map((suggestion, index) => (
                   <div
                     key={index}
-                    onClick={() => {
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       setSearchInput(suggestion);
                       setSearchQuery(suggestion);
                       setShowSuggestions(false);

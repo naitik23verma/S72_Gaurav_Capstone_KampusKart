@@ -453,11 +453,6 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                       setShowSuggestions(false);
                     }
                   }}
-                  onFocus={() => {
-                    if (filteredSuggestions.length > 0) {
-                      setShowSuggestions(true);
-                    }
-                  }}
                   placeholder="Search campus locations..."
                   className="flex-1 pl-10 pr-2 py-2.5 bg-transparent text-gray-700 font-medium outline-none text-sm border-none placeholder:text-gray-400 rounded-l-lg"
                 />
@@ -483,18 +478,20 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                   {filteredSuggestions.map((suggestion, index) => (
                     <div
                       key={index}
-                      onClick={() => {
-                        setSearchInput(suggestion);
-                        setSearchQuery(suggestion);
-                        setShowSuggestions(false);
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         // Find and navigate to matching location if found
                         const matchingLocation = locations.find(loc =>
                           loc.name.toLowerCase().includes(suggestion.toLowerCase()) ||
                           loc.description?.toLowerCase().includes(suggestion.toLowerCase()) ||
                           loc.category?.toLowerCase().includes(suggestion.toLowerCase())
                         );
+                        setSearchInput(suggestion);
+                        setSearchQuery(suggestion);
+                        setShowSuggestions(false);
                         if (matchingLocation) {
-                          handleLocationClick(matchingLocation);
+                          setTimeout(() => handleLocationClick(matchingLocation), 0);
                         }
                       }}
                       className="flex items-center px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
@@ -683,11 +680,6 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                       setShowSuggestions(false);
                     }
                   }}
-                  onFocus={() => {
-                    if (filteredSuggestions.length > 0) {
-                      setShowSuggestions(true);
-                    }
-                  }}
                   placeholder="Search locations..."
                   className="flex-1 pl-12 pr-3 py-3.5 bg-transparent text-gray-700 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
                 />
@@ -713,18 +705,20 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                   {filteredSuggestions.map((suggestion, index) => (
                     <div
                       key={index}
-                      onClick={() => {
-                        setSearchInput(suggestion);
-                        setSearchQuery(suggestion);
-                        setShowSuggestions(false);
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         // Find and navigate to matching location if found
                         const matchingLocation = locations.find(loc =>
                           loc.name.toLowerCase().includes(suggestion.toLowerCase()) ||
                           loc.description?.toLowerCase().includes(suggestion.toLowerCase()) ||
                           loc.category?.toLowerCase().includes(suggestion.toLowerCase())
                         );
+                        setSearchInput(suggestion);
+                        setSearchQuery(suggestion);
+                        setShowSuggestions(false);
                         if (matchingLocation) {
-                          handleLocationClick(matchingLocation);
+                          setTimeout(() => handleLocationClick(matchingLocation), 0);
                         }
                       }}
                       className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"

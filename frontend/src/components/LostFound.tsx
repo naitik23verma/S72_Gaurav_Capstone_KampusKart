@@ -74,11 +74,16 @@ const LostFound = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
+  const isSelectingSuggestion = useRef(false);
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Generate autocomplete suggestions from existing items
   useEffect(() => {
+    if (isSelectingSuggestion.current) {
+      isSelectingSuggestion.current = false;
+      return;
+    }
     if (searchInput.trim().length > 0) {
       const suggestions = new Set<string>();
       items.forEach(item => {
@@ -437,11 +442,6 @@ const LostFound = () => {
                     setShowSuggestions(false);
                   }
                 }}
-                onFocus={() => {
-                  if (filteredSuggestions.length > 0) {
-                    setShowSuggestions(true);
-                  }
-                }}
                 placeholder="Search items..."
                 className="flex-1 pl-12 pr-3 py-3.5 bg-transparent text-gray-700 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
               />
@@ -465,7 +465,10 @@ const LostFound = () => {
                 {filteredSuggestions.map((suggestion, index) => (
                   <div
                     key={index}
-                    onClick={() => {
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      isSelectingSuggestion.current = true;
                       setSearchInput(suggestion);
                       setSearchQuery(suggestion);
                       setShowSuggestions(false);

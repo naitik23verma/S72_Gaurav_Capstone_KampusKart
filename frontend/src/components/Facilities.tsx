@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { FiMapPin, FiSearch, FiHome, FiWifi, FiBookOpen, FiCoffee, FiPlus, FiEdit2, FiTag, FiCalendar, FiUser } from 'react-icons/fi';
+import { FiMapPin, FiSearch, FiPlus, FiEdit2, FiTag, FiCalendar, FiUser, FiTrash2 } from 'react-icons/fi';
+import { MdSchool, MdRestaurant, MdLocalLaundryService, MdHotel, MdLibraryBooks, MdFastfood, MdLocalCafe, MdRoomService, MdBed, MdApartment } from 'react-icons/md';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
@@ -35,7 +36,7 @@ const Facilities = () => {
     description: '',
     location: '',
     type: 'Academic',
-    icon: 'FiBookOpen',
+    icon: 'MdSchool',
   });
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -49,10 +50,76 @@ const Facilities = () => {
   const editDragImage = useRef<number | null>(null);
   const editDragOverImage = useRef<number | null>(null);
   const iconOptions = [
-    { value: 'FiBookOpen', label: 'Academic', icon: <FiBookOpen className="text-[#00C6A7] w-8 h-8" /> },
-    { value: 'FiCoffee', label: 'Food', icon: <FiCoffee className="text-[#F05A25] w-8 h-8" /> },
-    { value: 'FiWifi', label: 'Service', icon: <FiWifi className="text-blue-500 w-8 h-8" /> },
-    { value: 'FiHome', label: 'Accommodation', icon: <FiHome className="text-purple-500 w-8 h-8" /> },
+    { 
+      value: 'MdSchool', 
+      label: 'Academic - School', 
+      icon: <MdSchool className="w-10 h-10" />,
+      gradient: 'from-blue-500 to-indigo-600',
+      color: 'text-blue-600'
+    },
+    { 
+      value: 'MdLibraryBooks', 
+      label: 'Academic - Library', 
+      icon: <MdLibraryBooks className="w-10 h-10" />,
+      gradient: 'from-purple-500 to-pink-600',
+      color: 'text-purple-600'
+    },
+    { 
+      value: 'MdRestaurant', 
+      label: 'Food - Restaurant', 
+      icon: <MdRestaurant className="w-10 h-10" />,
+      gradient: 'from-orange-500 to-red-600',
+      color: 'text-orange-600'
+    },
+    { 
+      value: 'MdFastfood', 
+      label: 'Food - Fast Food', 
+      icon: <MdFastfood className="w-10 h-10" />,
+      gradient: 'from-yellow-500 to-orange-600',
+      color: 'text-yellow-600'
+    },
+    { 
+      value: 'MdLocalCafe', 
+      label: 'Food - Cafe', 
+      icon: <MdLocalCafe className="w-10 h-10" />,
+      gradient: 'from-amber-500 to-orange-600',
+      color: 'text-amber-600'
+    },
+    { 
+      value: 'MdLocalLaundryService', 
+      label: 'Service - Laundry', 
+      icon: <MdLocalLaundryService className="w-10 h-10" />,
+      gradient: 'from-cyan-500 to-blue-600',
+      color: 'text-cyan-600'
+    },
+    { 
+      value: 'MdRoomService', 
+      label: 'Service - Room Service', 
+      icon: <MdRoomService className="w-10 h-10" />,
+      gradient: 'from-teal-500 to-green-600',
+      color: 'text-teal-600'
+    },
+    { 
+      value: 'MdHotel', 
+      label: 'Accommodation - Hotel', 
+      icon: <MdHotel className="w-10 h-10" />,
+      gradient: 'from-emerald-500 to-teal-600',
+      color: 'text-emerald-600'
+    },
+    { 
+      value: 'MdBed', 
+      label: 'Accommodation - Hostel', 
+      icon: <MdBed className="w-10 h-10" />,
+      gradient: 'from-green-500 to-emerald-600',
+      color: 'text-green-600'
+    },
+    { 
+      value: 'MdApartment', 
+      label: 'Accommodation - Apartment', 
+      icon: <MdApartment className="w-10 h-10" />,
+      gradient: 'from-lime-500 to-green-600',
+      color: 'text-lime-600'
+    },
   ];
   const [selectedFacility, setSelectedFacility] = useState<Facility | null>(null);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
@@ -142,7 +209,7 @@ const Facilities = () => {
 
   const closeAddModal = () => {
     setIsModalOpen(false);
-    setNewFacility({ name: '', description: '', location: '', type: 'Academic', icon: '🏫' });
+    setNewFacility({ name: '', description: '', location: '', type: 'Academic', icon: 'MdSchool' });
     setFacilityImages([]);
     setFormError(null);
   };
@@ -211,11 +278,6 @@ const Facilities = () => {
                     setShowSuggestions(false);
                   }
                 }}
-                onFocus={() => {
-                  if (filteredSuggestions.length > 0) {
-                    setShowSuggestions(true);
-                  }
-                }}
                 placeholder="Search facilities..."
                 className="flex-1 pl-12 pr-3 py-3.5 bg-transparent text-gray-700 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
               />
@@ -239,7 +301,9 @@ const Facilities = () => {
                 {filteredSuggestions.map((suggestion, index) => (
                   <div
                     key={index}
-                    onClick={() => {
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       setSearchInput(suggestion);
                       setSearchQuery(suggestion);
                       setShowSuggestions(false);
@@ -274,10 +338,19 @@ const Facilities = () => {
                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                    <div className="flex flex-col items-center justify-center text-gray-300">
-                      {iconOptions.find(opt => opt.value === facility?.icon)?.icon || <FiHome className="w-16 h-16" />}
-                      <span className="text-xs mt-2">No Image</span>
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+                    <div className="flex flex-col items-center justify-center">
+                      {(() => {
+                        const iconOption = iconOptions.find(opt => opt.value === facility?.icon);
+                        return (
+                          <div className={`p-6 rounded-full bg-gradient-to-br ${iconOption?.gradient || 'from-gray-400 to-gray-500'} shadow-xl transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
+                            <div className="text-white">
+                              {iconOption?.icon || <MdSchool className="w-16 h-16" />}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                      <span className="text-sm font-medium text-gray-500 mt-4">No Image</span>
                     </div>
                   </div>
                 )}
@@ -393,7 +466,7 @@ const Facilities = () => {
                   if (!res.ok) throw new Error('Failed to add facility');
                   const saved = await res.json();
                   setFacilities([saved, ...facilities]);
-                  setNewFacility({ name: '', description: '', location: '', type: 'Academic', icon: 'FiBookOpen' });
+                  setNewFacility({ name: '', description: '', location: '', type: 'Academic', icon: 'MdSchool' });
                   setFacilityImages([]);
                   setIsModalOpen(false);
                 } catch (err: any) {
@@ -403,7 +476,7 @@ const Facilities = () => {
                 }
               }} className="space-y-8">
                 <div className="border-b pb-6 mb-6 bg-gray-50 rounded-lg p-6">
-                  <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Facility Details <FiHome className="text-gray-400" /></h3>
+                  <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Facility Details <MdSchool className="text-gray-400" /></h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
@@ -459,7 +532,7 @@ const Facilities = () => {
                       <p className="text-xs text-gray-500 mt-1">Select the facility type.</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Icon</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Icon</label>
                       <select
                         value={newFacility.icon}
                         onChange={e => setNewFacility({ ...newFacility, icon: e.target.value })}
@@ -470,12 +543,25 @@ const Facilities = () => {
                           <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                       </select>
-                      <div className="flex gap-4 mt-2">
+                      <div className="grid grid-cols-5 gap-2 mt-3">
                         {iconOptions.map(opt => (
-                          <span key={opt.value} className={`p-2 rounded-lg border ${newFacility.icon === opt.value ? 'border-[#00C6A7]' : 'border-gray-200'}`}>{opt.icon}</span>
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setNewFacility({ ...newFacility, icon: opt.value })}
+                            className={`p-3 rounded-lg border-2 transition-all duration-200 hover:scale-110 ${
+                              newFacility.icon === opt.value 
+                                ? `border-[#00C6A7] bg-gradient-to-br ${opt.gradient} shadow-lg` 
+                                : 'border-gray-200 bg-white hover:border-gray-300'
+                            }`}
+                          >
+                            <div className={newFacility.icon === opt.value ? 'text-white' : opt.color}>
+                              {opt.icon}
+                            </div>
+                          </button>
                         ))}
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">Choose an icon for this facility.</p>
+                      <p className="text-xs text-gray-500 mt-2">Choose an icon that best represents this facility.</p>
                     </div>
                   </div>
                 </div>
@@ -536,7 +622,7 @@ const Facilities = () => {
                 formData.append('description', editFacility?.description || '');
                 formData.append('location', editFacility?.location || '');
                 formData.append('type', editFacility?.type || 'Academic');
-                formData.append('icon', editFacility?.icon || 'FiBookOpen');
+                formData.append('icon', editFacility?.icon || 'MdSchool');
                 // Keep images
                 const keepPublicIds = editFacilityImages.filter(img => img.public_id).map(img => img.public_id);
                 formData.append('keepImages', JSON.stringify(keepPublicIds));
@@ -564,7 +650,7 @@ const Facilities = () => {
                 }
               }} className="space-y-8">
                 <div className="border-b pb-6 mb-6 bg-gray-50 rounded-lg p-6">
-                  <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Facility Details <FiHome className="text-gray-400" /></h3>
+                  <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Facility Details <MdSchool className="text-gray-400" /></h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
@@ -620,9 +706,9 @@ const Facilities = () => {
                       <p className="text-xs text-gray-500 mt-1">Select the facility type.</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Icon</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Icon</label>
                       <select
-                        value={editFacility?.icon || 'FiBookOpen'}
+                        value={editFacility?.icon || 'MdSchool'}
                         onChange={e => setEditFacility(editFacility ? { ...editFacility, icon: e.target.value } : null)}
                         className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
                         required
@@ -631,12 +717,25 @@ const Facilities = () => {
                           <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                       </select>
-                      <div className="flex gap-4 mt-2">
+                      <div className="grid grid-cols-5 gap-2 mt-3">
                         {iconOptions.map(opt => (
-                          <span key={opt.value} className={`p-2 rounded-lg border ${editFacility?.icon === opt.value ? 'border-[#00C6A7]' : 'border-gray-200'}`}>{opt.icon}</span>
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setEditFacility(editFacility ? { ...editFacility, icon: opt.value } : null)}
+                            className={`p-3 rounded-lg border-2 transition-all duration-200 hover:scale-110 ${
+                              editFacility?.icon === opt.value 
+                                ? `border-[#00C6A7] bg-gradient-to-br ${opt.gradient} shadow-lg` 
+                                : 'border-gray-200 bg-white hover:border-gray-300'
+                            }`}
+                          >
+                            <div className={editFacility?.icon === opt.value ? 'text-white' : opt.color}>
+                              {opt.icon}
+                            </div>
+                          </button>
                         ))}
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">Choose an icon for this facility.</p>
+                      <p className="text-xs text-gray-500 mt-2">Choose an icon that best represents this facility.</p>
                     </div>
                   </div>
                 </div>

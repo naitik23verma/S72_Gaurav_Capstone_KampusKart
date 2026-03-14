@@ -298,9 +298,14 @@ const Events = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
+  const isSelectingSuggestion = useRef(false);
 
   // Generate autocomplete suggestions from existing events
   useEffect(() => {
+    if (isSelectingSuggestion.current) {
+      isSelectingSuggestion.current = false;
+      return;
+    }
     if (searchInput.trim().length > 0) {
       const suggestions = new Set<string>();
       events.forEach(event => {
@@ -742,11 +747,6 @@ const Events = () => {
                     setShowSuggestions(false);
                   }
                 }}
-                onFocus={() => {
-                  if (filteredSuggestions.length > 0) {
-                    setShowSuggestions(true);
-                  }
-                }}
                 placeholder="Search events..."
                 className="flex-1 pl-12 pr-3 py-3.5 bg-transparent text-gray-700 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
               />
@@ -770,7 +770,9 @@ const Events = () => {
                 {filteredSuggestions.map((suggestion, index) => (
                   <div
                     key={index}
-                    onClick={() => {
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       setSearchInput(suggestion);
                       setSearchQuery(suggestion);
                       setShowSuggestions(false);

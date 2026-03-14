@@ -51,7 +51,7 @@ const generateSquares = () => {
   ));
 };
 
-const ShuffleGrid = () => {
+export const ShuffleGrid = () => {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [squares, setSquares] = useState(generateSquares());
 

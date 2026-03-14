@@ -1,43 +1,9 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Instagram, Linkedin, Twitter, Github } from 'lucide-react';
 import { FiMap, FiSearch, FiCalendar, FiFileText, FiAlertCircle, FiHome, FiUsers, FiMessageSquare } from 'react-icons/fi';
-import { GoogleMap, useLoadScript, Marker, InfoWindow, Libraries } from '@react-google-maps/api';
 import { Footer } from './ui/footer';
-import { MapSkeleton } from './common/SkeletonLoader';
-
-const GOOGLE_MAPS_LIBRARIES: Libraries = ["places"];
-
-const MAP_OPTIONS = {
-  disableDefaultUI: false,
-  zoomControl: true,
-  streetViewControl: false,
-  scaleControl: false,
-  mapTypeControl: false,
-  fullscreenControl: true,
-  mapId: '7b1615000ef5c43e3005d9c9'
-} as const;
-
-const MAP_CONTAINER_STYLE = {
-  width: '100%',
-  height: '100%',
-} as const;
-
-const useGoogleMaps = () => {
-  return useLoadScript({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    libraries: GOOGLE_MAPS_LIBRARIES
-  });
-};
-
-interface Location {
-  id: number;
-  name: string;
-  lat: number;
-  lng: number;
-  description?: string;
-  category?: string;
-}
+import { ShuffleGrid } from './ui/shuffle-grid';
 
 const features = [
   { name: 'Campus Map',        description: 'Explore the campus and find locations easily.',          icon: <FiMap className="w-7 h-7" />,           link: '/campus-map',        iconBg: 'bg-[#181818]' },
@@ -58,23 +24,12 @@ const socialLinks = [
 ];
 
 const Home = () => {
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
-  const { isLoaded, loadError } = useGoogleMaps();
-
-  const locations = useMemo(() => [
-    { id: 1, name: "MIT-ADT Entrance", lat: 18.490173753843422, lng: 74.0254303116109, description: "Main entrance of MIT-ADT University", category: "Entrance" },
-    { id: 2, name: "Admin Block", lat: 18.490946453598095, lng: 74.02419055616282, description: "Administrative offices", category: "Administration" },
-    { id: 3, name: "Cricket Ground", lat: 18.490748499095503, lng: 74.02836838570158, description: "Main cricket ground", category: "Sports" },
-    { id: 4, name: "Library", lat: 18.491234, lng: 74.024567, description: "Central library", category: "Academic" },
-  ], []);
-
-  const center = useMemo(() => ({ lat: 18.490173753843422, lng: 74.0254303116109 }), []);
-
-  const onMapLoad = useCallback((map: google.maps.Map) => {
-    const bounds = new google.maps.LatLngBounds();
-    locations.forEach(loc => bounds.extend({ lat: loc.lat, lng: loc.lng }));
-    map.fitBounds(bounds);
-  }, [locations]);
+  const scrollToFeatures = () => {
+    const featuresSection = document.getElementById('features-section');
+    if (featuresSection) {
+      featuresSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   return (
     <div className="bg-white font-sans pt-[72px]">
@@ -103,60 +58,19 @@ const Home = () => {
               >
                 Explore Full Map
               </Link>
-              <Link
-                to="/features"
+              <button
+                onClick={scrollToFeatures}
                 className="px-8 py-3 rounded-lg font-bold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors duration-200 text-sm"
               >
                 View Features
-              </Link>
+              </button>
             </div>
           </div>
 
-          {/* Right: map — hidden on mobile */}
-          <div className="hidden md:block h-full py-8">
-            <div className="w-full h-full max-h-[520px] rounded-lg border-2 border-gray-200 overflow-hidden">
-              {loadError && (
-                <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                  <p className="text-sm text-red-500">Error loading map</p>
-                </div>
-              )}
-              {!isLoaded && !loadError && <MapSkeleton />}
-              {isLoaded && !loadError && (
-                <GoogleMap
-                  mapContainerStyle={MAP_CONTAINER_STYLE}
-                  center={center}
-                  zoom={16}
-                  options={MAP_OPTIONS}
-                  onLoad={onMapLoad}
-                >
-                  {locations.map((location) => (
-                    <Marker
-                      key={location.id}
-                      position={{ lat: location.lat, lng: location.lng }}
-                      onClick={() => setSelectedLocation(location)}
-                      title={location.name}
-                    />
-                  ))}
-                  {selectedLocation && (
-                    <InfoWindow
-                      position={{ lat: selectedLocation.lat, lng: selectedLocation.lng }}
-                      onCloseClick={() => setSelectedLocation(null)}
-                    >
-                      <div className="p-2 max-w-xs">
-                        <h3 className="font-bold text-sm text-black mb-1">{selectedLocation.name}</h3>
-                        {selectedLocation.description && (
-                          <p className="text-xs text-gray-600 mb-2">{selectedLocation.description}</p>
-                        )}
-                        {selectedLocation.category && (
-                          <span className="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded">
-                            {selectedLocation.category}
-                          </span>
-                        )}
-                      </div>
-                    </InfoWindow>
-                  )}
-                </GoogleMap>
-              )}
+          {/* Right: shuffle grid — hidden on mobile */}
+          <div className="hidden md:flex items-center justify-center h-full py-8">
+            <div className="w-full h-full max-h-[520px]">
+              <ShuffleGrid />
             </div>
           </div>
         </section>
@@ -168,7 +82,7 @@ const Home = () => {
       </div>
 
       {/* Features */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-8 py-16">
+      <section id="features-section" className="max-w-6xl mx-auto px-4 sm:px-8 py-16">
         <div className="mb-10">
           <span className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-lg bg-gray-50 border-2 border-gray-200 text-xs font-semibold text-[#00C6A7] uppercase tracking-widest">
             Everything you need

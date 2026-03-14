@@ -89,7 +89,7 @@ const itemRateLimiter = rateLimit({
 router.post('/', authMiddleware, itemRateLimiter, upload.array('images', 5), sanitizeInput, validateLostFoundItem, async (req, res) => {
   try {
     const { type, title, description, location, date, contact } = req.body;
-    const userId = req.user.id; // Assuming user ID is available from auth middleware
+    const userId = req.user._id; // Get user ID from auth middleware
 
     // Validate required fields
     if (!title || !description || !date || !contact) {
@@ -276,7 +276,7 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', authMiddleware, itemRateLimiter, upload.array('images', 5), async (req, res) => {
   try {
     const { type, title, description, location, date, resolved, contact, keepImages } = req.body;
-    const userId = req.user.id;
+    const userId = req.user._id;
     const itemId = req.params.id;
 
     // Validate required fields
@@ -372,7 +372,7 @@ router.put('/:id', authMiddleware, itemRateLimiter, upload.array('images', 5), a
 router.delete('/:id', authMiddleware, itemRateLimiter, async (req, res) => {
   try {
     const itemId = req.params.id;
-    const userId = req.user.id;
+    const userId = req.user._id;
 
     const item = await LostFoundItem.findById(itemId);
 
@@ -401,7 +401,7 @@ router.delete('/:id', authMiddleware, itemRateLimiter, async (req, res) => {
 router.patch('/:id/resolve', authMiddleware, async (req, res) => {
   try {
     const itemId = req.params.id;
-    const userId = req.user.id;
+    const userId = req.user._id;
 
     const item = await LostFoundItem.findById(itemId);
 

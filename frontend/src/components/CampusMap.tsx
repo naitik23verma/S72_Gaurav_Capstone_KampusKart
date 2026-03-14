@@ -439,10 +439,10 @@ const CampusMap: React.FC<CampusMapProps> = () => {
       <div className="flex flex-col md:flex-row flex-1 min-h-0">
         {/* Map Container - Full width on mobile, 2/3 on desktop */}
         <div className="w-full md:w-2/3 h-full relative">
-          <div className="bg-white shadow-lg overflow-hidden h-full relative">
+          <div className="bg-white overflow-hidden h-full relative">
             {/* Mobile Search Bar - Visible on mobile only, positioned over map */}
             <div className="md:hidden absolute top-2 left-3 right-3 z-10" ref={searchRef}>
-              <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white shadow-sm hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
+              <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
                 <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -479,7 +479,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
               
               {/* Autocomplete Dropdown */}
               {showSuggestions && filteredSuggestions.length > 0 && (
-                <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto">
+                <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg max-h-60 overflow-auto">
                   {filteredSuggestions.map((suggestion, index) => (
                     <div
                       key={index}
@@ -560,7 +560,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                   }}
                 >
                   <div 
-                    className="p-0 max-w-sm bg-white rounded-lg shadow-xl overflow-hidden border-2 border-gray-200" 
+                    className="p-0 max-w-sm bg-white rounded-lg overflow-hidden border-2 border-gray-200" 
                     style={{ 
                       margin: 0, 
                       padding: 0,
@@ -622,7 +622,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
 
                       {/* Action Button */}
                       <button
-                        className="w-full px-4 py-3 bg-[#181818] text-white rounded-lg hover:bg-[#00C6A7] transition-all duration-200 flex items-center justify-center gap-2 font-bold text-sm shadow-lg"
+                        className="w-full px-4 py-3 bg-[#181818] text-white rounded-lg hover:bg-[#00C6A7] transition-colors duration-200 flex items-center justify-center gap-2 font-bold text-sm"
                         onClick={() => {
                           const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedLocation.lat},${selectedLocation.lng}`;
                           window.open(url, '_blank');
@@ -641,11 +641,10 @@ const CampusMap: React.FC<CampusMapProps> = () => {
             {/* Recenter Button - Optimized for mobile */}
             <button
               onClick={handleRecenter}
-              className="absolute bottom-3 left-3 z-10 bg-white border border-gray-300 shadow-lg rounded-full p-2.5 flex items-center justify-center hover:bg-blue-50 transition-all duration-200"
+              className="absolute bottom-3 left-3 z-10 bg-white border-2 border-gray-200 rounded-lg p-2.5 flex items-center justify-center hover:bg-gray-50 transition-colors duration-200"
               title="Re-center map on your location"
-              style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#00C6A7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={2} fill="none" />
                 <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth={2} fill="none" />
                 <line x1="12" y1="2" x2="12" y2="6" stroke="currentColor" strokeWidth={2} />
@@ -667,11 +666,11 @@ const CampusMap: React.FC<CampusMapProps> = () => {
           {/* Added pt-4 to prevent button overlap */}
           {/* Adjusted opacity and height based on panel state */}
           {/* Removed mobile specific height/opacity classes */}
-          <div className={`bg-white shadow-lg p-3 md:p-4 md:flex-grow transition-all duration-300 ease-in-out opacity-100 h-full overflow-y-auto`}>
+          <div className={`bg-white p-3 md:p-4 md:flex-grow transition-all duration-300 ease-in-out opacity-100 h-full overflow-y-auto`}>
             <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-3 md:mb-4">Campus Locations</h2>
             {/* Desktop Search Bar - Visible on desktop only */}
             <div className="hidden md:block mb-6 w-full relative">
-              <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white shadow-sm hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
+              <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
                 <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -708,7 +707,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
               
               {/* Autocomplete Dropdown */}
               {showSuggestions && filteredSuggestions.length > 0 && (
-                <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto">
+                <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg max-h-60 overflow-auto">
                   {filteredSuggestions.map((suggestion, index) => (
                     <div
                       key={index}

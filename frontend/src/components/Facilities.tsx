@@ -554,9 +554,9 @@ const Facilities = () => {
                             key={opt.value}
                             type="button"
                             onClick={() => setNewFacility({ ...newFacility, icon: opt.value })}
-                            className={`p-3 rounded-lg border-2 transition-all duration-200 ${
+                            className={`p-3 rounded-lg border-2 transition-colors duration-200 ${
                               newFacility.icon === opt.value 
-                                ? `border-[#00C6A7] bg-gradient-to-br ${opt.gradient}` 
+                                ? 'border-[#00C6A7] bg-[#00C6A7]' 
                                 : 'border-gray-200 bg-white hover:border-gray-300'
                             }`}
                           >
@@ -728,9 +728,9 @@ const Facilities = () => {
                             key={opt.value}
                             type="button"
                             onClick={() => setEditFacility(editFacility ? { ...editFacility, icon: opt.value } : null)}
-                            className={`p-3 rounded-lg border-2 transition-all duration-200 ${
+                            className={`p-3 rounded-lg border-2 transition-colors duration-200 ${
                               editFacility?.icon === opt.value 
-                                ? `border-[#00C6A7] bg-gradient-to-br ${opt.gradient}` 
+                                ? 'border-[#00C6A7] bg-[#00C6A7]' 
                                 : 'border-gray-200 bg-white hover:border-gray-300'
                             }`}
                           >

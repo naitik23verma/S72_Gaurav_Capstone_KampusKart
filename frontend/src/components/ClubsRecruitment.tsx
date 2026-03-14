@@ -210,6 +210,7 @@ const ClubsRecruitment: React.FC = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
+  const isSelectingSuggestion = useRef(false);
 
   const isAdmin = user?.role === 'admin';
 
@@ -219,6 +220,10 @@ const ClubsRecruitment: React.FC = () => {
 
   // Generate autocomplete suggestions
   useEffect(() => {
+    if (isSelectingSuggestion.current) {
+      isSelectingSuggestion.current = false;
+      return;
+    }
     if (searchInput.trim().length > 0) {
       const suggestions = new Set<string>();
       recruitments.forEach(recruitment => {
@@ -405,12 +410,13 @@ const ClubsRecruitment: React.FC = () => {
                   {filteredSuggestions.map((suggestion, index) => (
                     <div
                       key={index}
-                      onMouseDown={(e) => {
+                      onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
+                        isSelectingSuggestion.current = true;
                         setSearchInput(suggestion);
                         setSearchQuery(suggestion);
-                        setShowSuggestions(false);
+                        setTimeout(() => setShowSuggestions(false), 0);
                       }}
                       className="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-2"
                     >

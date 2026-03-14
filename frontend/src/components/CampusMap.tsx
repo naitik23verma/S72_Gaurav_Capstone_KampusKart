@@ -247,9 +247,14 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
+  const isSelectingSuggestion = useRef(false);
 
   // Generate autocomplete suggestions from existing locations
   useEffect(() => {
+    if (isSelectingSuggestion.current) {
+      isSelectingSuggestion.current = false;
+      return;
+    }
     if (searchInput.trim().length > 0) {
       const suggestions = new Set<string>();
       if (Array.isArray(locations)) {
@@ -479,8 +484,8 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                     <div
                       key={index}
                       onMouseDown={(e) => {
-                        e.preventDefault();
                         e.stopPropagation();
+                        isSelectingSuggestion.current = true;
                         // Find and navigate to matching location if found
                         const matchingLocation = locations.find(loc =>
                           loc.name.toLowerCase().includes(suggestion.toLowerCase()) ||
@@ -491,7 +496,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                         setSearchQuery(suggestion);
                         setShowSuggestions(false);
                         if (matchingLocation) {
-                          setTimeout(() => handleLocationClick(matchingLocation), 0);
+                          setTimeout(() => handleLocationClick(matchingLocation), 100);
                         }
                       }}
                       className="flex items-center px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
@@ -706,8 +711,8 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                     <div
                       key={index}
                       onMouseDown={(e) => {
-                        e.preventDefault();
                         e.stopPropagation();
+                        isSelectingSuggestion.current = true;
                         // Find and navigate to matching location if found
                         const matchingLocation = locations.find(loc =>
                           loc.name.toLowerCase().includes(suggestion.toLowerCase()) ||
@@ -718,7 +723,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                         setSearchQuery(suggestion);
                         setShowSuggestions(false);
                         if (matchingLocation) {
-                          setTimeout(() => handleLocationClick(matchingLocation), 0);
+                          setTimeout(() => handleLocationClick(matchingLocation), 100);
                         }
                       }}
                       className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"

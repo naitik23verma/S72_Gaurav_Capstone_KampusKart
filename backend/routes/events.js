@@ -51,44 +51,44 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
   let image = undefined;
   if (req.file) {
     try {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: 'events' },
-        async (error, result) => {
-          try {
+      const uploadPromise = new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: 'events' },
+          (error, result) => {
             if (error) {
-              return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
+              return reject(error);
             }
-            image = { public_id: result.public_id, url: result.secure_url };
-            const event = new Event({
-              title,
-              description,
-              date,
-              location,
-              status: status || 'Upcoming',
-              registerUrl,
-              image,
-              operatingHours,
-              contactInfo: contactInfo ? JSON.parse(contactInfo) : undefined,
-              mapLocation: mapLocation ? JSON.parse(mapLocation) : undefined
-            });
-            const savedEvent = await event.save();
-            res.status(201).json(savedEvent);
-          } catch (err) {
-            console.error('Error in Cloudinary upload callback:', err);
-            if (!res.headersSent) {
-              res.status(500).json({ message: 'Error creating event', error: err.message });
-            }
+            resolve({ public_id: result.public_id, url: result.secure_url });
           }
-        }
-      );
-      streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
-      return;
+        );
+        streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+      });
+      
+      image = await uploadPromise;
     } catch (err) {
-      return res.status(500).json({ message: 'Image upload error', error: err.message });
+      return res.status(500).json({ message: 'Cloudinary upload failed', error: err.message });
     }
   }
 
   try {
+    let parsedContactInfo, parsedMapLocation;
+    
+    if (contactInfo) {
+      try {
+        parsedContactInfo = JSON.parse(contactInfo);
+      } catch (e) {
+        return res.status(400).json({ message: 'Invalid contactInfo JSON format' });
+      }
+    }
+    
+    if (mapLocation) {
+      try {
+        parsedMapLocation = JSON.parse(mapLocation);
+      } catch (e) {
+        return res.status(400).json({ message: 'Invalid mapLocation JSON format' });
+      }
+    }
+
     const event = new Event({
       title,
       description,
@@ -98,8 +98,8 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
       registerUrl,
       image,
       operatingHours,
-      contactInfo: contactInfo ? JSON.parse(contactInfo) : undefined,
-      mapLocation: mapLocation ? JSON.parse(mapLocation) : undefined
+      contactInfo: parsedContactInfo,
+      mapLocation: parsedMapLocation
     });
     const savedEvent = await event.save();
     res.status(201).json(savedEvent);
@@ -142,39 +142,46 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
           console.error('Error deleting old event image:', err);
         }
       }
-      // Upload new image
-      const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: 'events' },
-        async (error, result) => {
-          try {
-            if (error) {
-              return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
+      
+      try {
+        const uploadPromise = new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: 'events' },
+            (error, result) => {
+              if (error) {
+                return reject(error);
+              }
+              resolve({ public_id: result.public_id, url: result.secure_url });
             }
-            event.image = { public_id: result.public_id, url: result.secure_url };
-            event.title = title;
-            event.description = description;
-            event.date = date;
-            event.location = location;
-            event.status = status;
-            event.registerUrl = registerUrl;
-            event.operatingHours = operatingHours;
-            event.contactInfo = contactInfo ? JSON.parse(contactInfo) : undefined;
-            event.mapLocation = mapLocation ? JSON.parse(mapLocation) : undefined;
-            await event.save();
-            res.json(event);
-          } catch (err) {
-            console.error('Error in Cloudinary upload callback:', err);
-            if (!res.headersSent) {
-              res.status(500).json({ message: 'Error updating event', error: err.message });
-            }
-          }
-        }
-      );
-      streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
-      return;
+          );
+          streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+        });
+        
+        event.image = await uploadPromise;
+      } catch (error) {
+        return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
+      }
     }
 
-    // No new image, just update fields
+    let parsedContactInfo, parsedMapLocation;
+    
+    if (contactInfo) {
+      try {
+        parsedContactInfo = JSON.parse(contactInfo);
+      } catch (e) {
+        return res.status(400).json({ message: 'Invalid contactInfo JSON format' });
+      }
+    }
+    
+    if (mapLocation) {
+      try {
+        parsedMapLocation = JSON.parse(mapLocation);
+      } catch (e) {
+        return res.status(400).json({ message: 'Invalid mapLocation JSON format' });
+      }
+    }
+
+    // Update fields
     event.title = title;
     event.description = description;
     event.date = date;
@@ -182,8 +189,8 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
     event.status = status;
     event.registerUrl = registerUrl;
     event.operatingHours = operatingHours;
-    event.contactInfo = contactInfo ? JSON.parse(contactInfo) : undefined;
-    event.mapLocation = mapLocation ? JSON.parse(mapLocation) : undefined;
+    event.contactInfo = parsedContactInfo;
+    event.mapLocation = parsedMapLocation;
     await event.save();
     res.json(event);
   } catch (err) {

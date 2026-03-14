@@ -39,43 +39,35 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
   let image = undefined;
   if (req.file) {
     try {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: 'clubs' },
-        async (error, result) => {
-          try {
+      const uploadPromise = new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: 'clubs' },
+          (error, result) => {
             if (error) {
-              return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
+              return reject(error);
             }
-            image = { public_id: result.public_id, url: result.secure_url };
-            const club = new ClubRecruitment({
-              title,
-              description,
-              clubName,
-              startDate,
-              endDate,
-              formUrl,
-              image,
-              contactInfo: contactInfo ? JSON.parse(contactInfo) : undefined,
-              status: status || 'Open',
-            });
-            const savedClub = await club.save();
-            res.status(201).json(savedClub);
-          } catch (err) {
-            console.error('Error in Cloudinary upload callback:', err);
-            if (!res.headersSent) {
-              res.status(500).json({ message: 'Error creating club recruitment', error: err.message });
-            }
+            resolve({ public_id: result.public_id, url: result.secure_url });
           }
-        }
-      );
-      streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
-      return;
+        );
+        streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+      });
+      
+      image = await uploadPromise;
     } catch (err) {
-      return res.status(500).json({ message: 'Image upload error', error: err.message });
+      return res.status(500).json({ message: 'Cloudinary upload failed', error: err.message });
     }
   }
 
   try {
+    let parsedContactInfo;
+    if (contactInfo) {
+      try {
+        parsedContactInfo = JSON.parse(contactInfo);
+      } catch (e) {
+        return res.status(400).json({ message: 'Invalid contactInfo JSON format' });
+      }
+    }
+
     const club = new ClubRecruitment({
       title,
       description,
@@ -84,7 +76,7 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
       endDate,
       formUrl,
       image,
-      contactInfo: contactInfo ? JSON.parse(contactInfo) : undefined,
+      contactInfo: parsedContactInfo,
       status: status || 'Open',
     });
     const savedClub = await club.save();
@@ -115,34 +107,34 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
           console.error('Error deleting old club image:', err);
         }
       }
-      const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: 'clubs' },
-        async (error, result) => {
-          try {
-            if (error) {
-              return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
+      
+      try {
+        const uploadPromise = new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: 'clubs' },
+            (error, result) => {
+              if (error) {
+                return reject(error);
+              }
+              resolve({ public_id: result.public_id, url: result.secure_url });
             }
-            club.image = { public_id: result.public_id, url: result.secure_url };
-            club.title = title;
-            club.description = description;
-            club.clubName = clubName;
-            club.startDate = startDate;
-            club.endDate = endDate;
-            club.formUrl = formUrl;
-            club.contactInfo = contactInfo ? JSON.parse(contactInfo) : undefined;
-            club.status = status;
-            await club.save();
-            res.json(club);
-          } catch (err) {
-            console.error('Error in Cloudinary upload callback:', err);
-            if (!res.headersSent) {
-              res.status(500).json({ message: 'Error updating club recruitment', error: err.message });
-            }
-          }
-        }
-      );
-      streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
-      return;
+          );
+          streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+        });
+        
+        club.image = await uploadPromise;
+      } catch (error) {
+        return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
+      }
+    }
+
+    let parsedContactInfo;
+    if (contactInfo) {
+      try {
+        parsedContactInfo = JSON.parse(contactInfo);
+      } catch (e) {
+        return res.status(400).json({ message: 'Invalid contactInfo JSON format' });
+      }
     }
 
     club.title = title;
@@ -151,7 +143,7 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
     club.startDate = startDate;
     club.endDate = endDate;
     club.formUrl = formUrl;
-    club.contactInfo = contactInfo ? JSON.parse(contactInfo) : undefined;
+    club.contactInfo = parsedContactInfo;
     club.status = status;
     await club.save();
     res.json(club);

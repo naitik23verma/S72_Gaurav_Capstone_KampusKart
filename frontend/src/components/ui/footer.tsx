@@ -33,7 +33,7 @@ export function Footer({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 rounded-lg border-2 border-gray-200 text-gray-400 hover:text-[#F05A25] hover:bg-gray-50 transition-colors duration-200"
+                  className="h-9 w-9 rounded-lg border-2 border-gray-200 text-gray-600 hover:text-[#F05A25] hover:bg-gray-50 transition-colors duration-200"
                   asChild
                 >
                   <a href={link.href} target="_blank" rel="noopener noreferrer" aria-label={link.label}>
@@ -68,7 +68,7 @@ export function Footer({
                 <li key={i} className="my-1 mx-3 shrink-0">
                   <a
                     href={link.href}
-                    className="text-sm text-gray-400 hover:text-[#00C6A7] transition-colors duration-200"
+                    className="text-sm text-gray-600 hover:text-[#00C6A7] transition-colors duration-200"
                   >
                     {link.label}
                   </a>
@@ -77,7 +77,7 @@ export function Footer({
             </ul>
           </div>
 
-          <div className="mt-6 text-xs leading-6 text-gray-400 lg:mt-0 lg:row-[1/3] lg:col-[1/4]">
+          <div className="mt-6 text-xs leading-6 text-gray-600 lg:mt-0 lg:row-[1/3] lg:col-[1/4]">
             <div>{copyright.text}</div>
             {copyright.license && <div>{copyright.license}</div>}
           </div>

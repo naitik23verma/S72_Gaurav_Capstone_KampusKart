@@ -34,6 +34,7 @@ interface LostFoundItem {
 const LostFound = () => {
   const [items, setItems] = useState<LostFoundItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isFiltering, setIsFiltering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { token, user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -237,7 +238,12 @@ const LostFound = () => {
 
   const fetchItems = async () => {
     try {
-      setLoading(currentPage === 1);
+      // Only show full page loading on initial load, not when filtering
+      if (currentPage === 1 && items.length === 0) {
+        setLoading(true);
+      } else if (currentPage === 1) {
+        setIsFiltering(true);
+      }
       setError(null);
       const url = new URL(`${API_BASE}/api/lostfound`);
       url.searchParams.append('page', currentPage.toString());
@@ -279,6 +285,7 @@ const LostFound = () => {
       setError(err.message || 'Failed to fetch lost and found items.');
     } finally {
       setLoading(false);
+      setIsFiltering(false);
       setIsFetchingMore(false);
     }
   };
@@ -465,13 +472,13 @@ const LostFound = () => {
                 {filteredSuggestions.map((suggestion, index) => (
                   <div
                     key={index}
-                    onClick={(e) => {
+                    onMouseDown={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       isSelectingSuggestion.current = true;
                       setSearchInput(suggestion);
                       setSearchQuery(suggestion);
-                      setTimeout(() => setShowSuggestions(false), 0);
+                      setShowSuggestions(false);
                     }}
                     className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
                   >
@@ -485,7 +492,24 @@ const LostFound = () => {
         </div>
         {/* Card Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.filter(item => item).map((item, idx) => (
+          {isFiltering ? (
+            // Show skeleton cards while filtering
+            Array.from({ length: 6 }).map((_, idx) => (
+              <div key={idx} className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden animate-pulse">
+                <div className="h-64 sm:h-80 bg-gray-200"></div>
+                <div className="p-6 space-y-3">
+                  <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                </div>
+              </div>
+            ))
+          ) : items.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <p className="text-gray-500 text-lg">No items found</p>
+            </div>
+          ) : (
+            items.filter(item => item).map((item, idx) => (
             <div
               key={item._id}
               ref={idx === items.length - 1 ? lastItemRef : undefined}
@@ -605,7 +629,8 @@ const LostFound = () => {
                 
               </div>
             </div>
-          ))}
+          ))
+          )}
         </div>
         {isFetchingMore && (
           <div className="flex justify-center items-center mt-8">

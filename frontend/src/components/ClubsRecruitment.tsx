@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { FiPlus, FiCalendar, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiUser, FiPhone } from 'react-icons/fi';
+import React, { useState, useEffect, useRef } from 'react';
+import { FiCalendar, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiUser, FiPhone } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
-import { validateMultipleRequired, validateEmail, validatePhone, validateUrl, validateDateRange } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
 
 interface ClubRecruitment {
@@ -324,7 +323,11 @@ const ClubsRecruitment = () => {
       endDate: club.endDate.split('T')[0],
       formUrl: club.formUrl,
       images: club.image?.url ? [{ url: club.image.url, public_id: club.image.public_id }] : [],
-      contactInfo: club.contactInfo || { name: '', email: '', phone: '' },
+      contactInfo: {
+        name: club.contactInfo?.name || '',
+        email: club.contactInfo?.email || '',
+        phone: club.contactInfo?.phone || ''
+      },
       status: club.status,
     });
     setIsModalOpen(true);

@@ -306,13 +306,13 @@ const Facilities = () => {
                 {filteredSuggestions.map((suggestion, index) => (
                   <div
                     key={index}
-                    onClick={(e) => {
+                    onMouseDown={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       isSelectingSuggestion.current = true;
                       setSearchInput(suggestion);
                       setSearchQuery(suggestion);
-                      setTimeout(() => setShowSuggestions(false), 0);
+                      setShowSuggestions(false);
                     }}
                     className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
                   >

@@ -555,72 +555,74 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                   }}
                   options={{
                     pixelOffset: new window.google.maps.Size(0, -50),
-                    maxWidth: window.innerWidth < 768 ? 280 : 380,
+                    maxWidth: window.innerWidth < 768 ? 300 : 400,
                     disableAutoPan: false
                   }}
                 >
                   <div 
-                    className="p-0 max-w-xs bg-white rounded-lg shadow-2xl overflow-hidden border border-gray-200/50" 
+                    className="p-0 max-w-sm bg-white rounded-lg shadow-xl overflow-hidden border-2 border-gray-200" 
                     style={{ 
                       margin: 0, 
                       padding: 0,
-                      overflow: 'hidden',
-                      overflowY: 'hidden',
-                      overflowX: 'hidden'
+                      overflow: 'hidden'
                     }}
                   >
                     {/* Header Section */}
-                    <div className="bg-white p-3 relative border-b border-gray-200" style={{ margin: 0, paddingTop: '12px', paddingBottom: '12px' }}>
+                    <div className="bg-gradient-to-r from-[#00C6A7] to-[#009e87] p-4 relative">
                       {/* Close Button */}
                       <button
                         onClick={() => {
                           setInfoWindowPosition(null);
                           setSelectedLocation(null);
                         }}
-                        className="absolute top-1.5 right-1.5 p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 transition-all duration-200 flex-shrink-0 group"
+                        className="absolute top-3 right-3 p-2 rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-200 group"
                         aria-label="Close"
-                        title="Close"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-600 group-hover:rotate-90 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white group-hover:rotate-90 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                       
-                      <div className="pr-8">
-                        <h3 className="font-black text-base text-gray-900 mb-1.5 line-clamp-2 leading-tight">{selectedLocation.name}</h3>
-                        <span className="inline-flex items-center px-2.5 py-0.5 bg-[#00C6A7] text-white text-xs font-semibold rounded-full">
+                      <div className="pr-10">
+                        <h3 className="font-black text-lg text-white mb-2 line-clamp-2 leading-tight">{selectedLocation.name}</h3>
+                        <span className="inline-flex items-center px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-xs font-semibold rounded-lg shadow-sm">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                          </svg>
                           {selectedLocation.category}
                         </span>
                       </div>
                     </div>
 
                     {/* Content Section */}
-                    <div className="p-3 space-y-3" style={{ overflow: 'hidden', overflowY: 'hidden', overflowX: 'hidden' }}>
-                    {/* Description Section */}
-                      <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                        <div className="flex items-start gap-2 mb-1.5">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#00C6A7] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          <h4 className="text-xs font-bold text-gray-900">About this location</h4>
+                    <div className="p-4 space-y-4">
+                      {/* Description Section */}
+                      <div className="bg-gray-50 p-3 rounded-lg border-2 border-gray-200">
+                        <div className="flex items-start gap-2 mb-2">
+                          <div className="flex items-center justify-center w-6 h-6 bg-[#00C6A7] rounded-lg flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                          <h4 className="text-sm font-bold text-gray-900">About</h4>
                         </div>
-                        <p className="text-xs text-gray-700 leading-relaxed line-clamp-3 pl-6">{selectedLocation.description}</p>
-                    </div>
+                        <p className="text-sm text-gray-700 leading-relaxed">{selectedLocation.description}</p>
+                      </div>
 
-                    {/* Location Details Section */}
-                      <div className="flex items-center gap-2 px-2 py-1.5 bg-gray-50 rounded-lg border border-gray-200/50">
-                        <div className="flex items-center justify-center w-8 h-8 bg-[#00C6A7]/10 rounded-lg">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#00C6A7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      {/* Location ID Badge */}
+                      <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border-2 border-gray-200">
+                        <div className="flex items-center justify-center w-8 h-8 bg-[#00C6A7] rounded-lg">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
+                          </svg>
+                        </div>
+                        <span className="text-sm font-semibold text-gray-700">Location ID: <span className="text-[#00C6A7] font-bold">#{selectedLocation.id}</span></span>
                       </div>
-                        <span className="text-sm font-medium text-gray-700">Location ID: <span className="text-[#00C6A7] font-bold">{selectedLocation.id}</span></span>
-                    </div>
 
                       {/* Action Button */}
                       <button
-                        className="w-full px-3 py-2.5 bg-[#00C6A7] text-white rounded-lg hover:bg-[#009e87] transition-all duration-200 flex items-center justify-center gap-2 font-bold text-xs shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                        className="w-full px-4 py-3 bg-[#181818] text-white rounded-lg hover:bg-[#00C6A7] transition-all duration-200 flex items-center justify-center gap-2 font-bold text-sm shadow-lg"
                         onClick={() => {
                           const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedLocation.lat},${selectedLocation.lng}`;
                           window.open(url, '_blank');

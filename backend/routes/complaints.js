@@ -48,11 +48,15 @@ const uploadImages = async (files) => {
 // @access  Private
 router.get('/', protect, async (req, res) => {
   try {
-    const { status, search, page = 1, limit = 9 } = req.query;
+    const { status, category, search, page = 1, limit = 9 } = req.query;
     const query = {};
 
     if (status && status !== 'All') {
       query.status = status;
+    }
+
+    if (category && category !== 'all') {
+      query.category = category;
     }
 
     if (search && typeof search === 'string') {
@@ -60,6 +64,8 @@ router.get('/', protect, async (req, res) => {
       query.$or = [
         { title: { $regex: escapedSearch, $options: 'i' } },
         { description: { $regex: escapedSearch, $options: 'i' } },
+        { category: { $regex: escapedSearch, $options: 'i' } },
+        { department: { $regex: escapedSearch, $options: 'i' } },
       ];
     }
 

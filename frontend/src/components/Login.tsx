@@ -2,8 +2,17 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { Instagram, Linkedin, Globe, Github } from 'lucide-react';
+import { Footer } from './ui/footer';
 
 const imageUrl = '/login-side.jpg';
+
+const socialLinks = [
+  { href: 'https://www.instagram.com/gaurav_khandelwal_/', label: 'Instagram', icon: <Instagram className="h-4 w-4" /> },
+  { href: 'https://www.linkedin.com/in/gaurav-khandelwal-17a127358/', label: 'LinkedIn', icon: <Linkedin className="h-4 w-4" /> },
+  { href: 'https://gaurav-khandelwal.vercel.app/', label: 'Portfolio', icon: <Globe className="h-4 w-4" /> },
+  { href: 'https://github.com/Gaurav-205', label: 'GitHub', icon: <Github className="h-4 w-4" /> },
+];
 
 const RightPanel: React.FC = () => (
   <div className="hidden md:flex flex-1 items-center justify-center bg-gray-100">
@@ -59,9 +68,10 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-screen h-screen flex font-sans bg-white">
-      {/* Left: form */}
-      <div className="flex flex-col justify-center items-center w-full md:w-1/2 px-8 py-8 bg-white">
+    <div className="min-h-screen w-screen flex flex-col font-sans bg-white">
+      <div className="flex-1 flex">
+        {/* Left: form */}
+        <div className="flex flex-col justify-center items-center w-full md:w-1/2 px-8 py-8 bg-white">
         <div className="w-full max-w-sm">
 
           {/* Logo */}
@@ -179,6 +189,26 @@ const Login: React.FC = () => {
 
       {/* Right: image */}
       <RightPanel />
+      </div>
+
+      {/* Footer */}
+      <Footer
+        logo={<img src="/Logo.png" alt="KampusKart Logo" className="h-7 w-7" />}
+        brandName="KampusKart"
+        socialLinks={socialLinks}
+        mainLinks={[
+          { href: '/signup', label: 'Sign Up' },
+          { href: '/forgot-password', label: 'Forgot Password' },
+        ]}
+        legalLinks={[
+          { href: '/privacy', label: 'Privacy' },
+          { href: '/terms', label: 'Terms' },
+        ]}
+        copyright={{
+          text: `© ${new Date().getFullYear()} KampusKart`,
+          license: 'All rights reserved.',
+        }}
+      />
     </div>
   );
 };

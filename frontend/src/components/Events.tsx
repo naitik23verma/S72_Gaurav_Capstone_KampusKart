@@ -1,12 +1,21 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { FiPlus, FiCalendar, FiMapPin, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiClock, FiUser, FiPhone, FiCheckCircle } from 'react-icons/fi';
+import { FiPlus, FiCalendar, FiMapPin, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiClock, FiUser, FiPhone, FiCheckCircle, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { FaSearch } from 'react-icons/fa';
+import { Instagram, Linkedin, Globe, Github } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { validateMultipleRequired, validateEmail, validatePhone, validateUrl } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
+import { Footer } from './ui/footer';
+
+const socialLinks = [
+  { href: 'https://www.instagram.com/gaurav_khandelwal_/', label: 'Instagram', icon: <Instagram className="h-4 w-4" /> },
+  { href: 'https://www.linkedin.com/in/gaurav-khandelwal-17a127358/', label: 'LinkedIn', icon: <Linkedin className="h-4 w-4" /> },
+  { href: 'https://gaurav-khandelwal.vercel.app/', label: 'Portfolio', icon: <Globe className="h-4 w-4" /> },
+  { href: 'https://github.com/Gaurav-205', label: 'GitHub', icon: <Github className="h-4 w-4" /> },
+];
 
 interface Event {
   _id: string;

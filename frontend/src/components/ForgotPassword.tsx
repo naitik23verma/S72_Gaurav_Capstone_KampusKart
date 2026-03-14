@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { Instagram, Linkedin, Globe, Github } from 'lucide-react';
 import { API_BASE } from '../config';
+import { Footer } from './ui/footer';
+
+const socialLinks = [
+  { href: 'https://www.instagram.com/gaurav_khandelwal_/', label: 'Instagram', icon: <Instagram className="h-4 w-4" /> },
+  { href: 'https://www.linkedin.com/in/gaurav-khandelwal-17a127358/', label: 'LinkedIn', icon: <Linkedin className="h-4 w-4" /> },
+  { href: 'https://gaurav-khandelwal.vercel.app/', label: 'Portfolio', icon: <Globe className="h-4 w-4" /> },
+  { href: 'https://github.com/Gaurav-205', label: 'GitHub', icon: <Github className="h-4 w-4" /> },
+];
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -47,9 +56,6 @@ const ForgotPassword = () => {
 
       if (response.ok) {
         setMessage(data.message);
-        if (data.otp) {
-          setMessage(`${data.message} (Dev OTP: ${data.otp})`);
-        }
         setStep('reset_password');
         setCountdown(300); // 5 minutes
       } else {
@@ -102,8 +108,9 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white font-sans px-4">
-      <div className="w-full max-w-md py-12">
+    <div className="min-h-screen flex flex-col bg-white font-sans">
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md">
         
         {/* Logo */}
         <div className="flex items-center justify-center gap-3 mb-8">
@@ -257,7 +264,27 @@ const ForgotPassword = () => {
             </button>
           </form>
         )}
+        </div>
       </div>
+
+      {/* Footer */}
+      <Footer
+        logo={<img src="/Logo.png" alt="KampusKart Logo" className="h-7 w-7" />}
+        brandName="KampusKart"
+        socialLinks={socialLinks}
+        mainLinks={[
+          { href: '/login', label: 'Sign In' },
+          { href: '/signup', label: 'Sign Up' },
+        ]}
+        legalLinks={[
+          { href: '/privacy', label: 'Privacy' },
+          { href: '/terms', label: 'Terms' },
+        ]}
+        copyright={{
+          text: `© ${new Date().getFullYear()} KampusKart`,
+          license: 'All rights reserved.',
+        }}
+      />
     </div>
   );
 };

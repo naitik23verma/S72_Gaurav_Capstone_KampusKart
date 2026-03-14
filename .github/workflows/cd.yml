@@ -1,19 +1,13 @@
-name: CD
+name: CD - Continuous Deployment
 
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:
 
 jobs:
   deploy-frontend:
-    name: Deploy Frontend
+    name: Deploy Frontend to Netlify
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-    
-    defaults:
-      run:
-        working-directory: ./frontend
     
     steps:
       - name: Checkout code
@@ -27,46 +21,51 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       
       - name: Install dependencies
+        working-directory: ./frontend
         run: npm ci
       
-      - name: Build frontend
+      - name: Build production bundle
+        working-directory: ./frontend
         run: npm run build
         env:
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
       
       - name: Deploy to Netlify
-        uses: netlify/actions/cli@master
+        uses: nwtgck/actions-netlify@v3.0
+        with:
+          publish-dir: './frontend/dist'
+          production-branch: main
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "Deploy from GitHub Actions"
+          enable-pull-request-comment: false
+          enable-commit-comment: true
+          overwrites-pull-request-comment: true
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-        with:
-          args: deploy --dir=dist --prod
+        timeout-minutes: 10
 
   deploy-backend:
-    name: Deploy Backend
+    name: Trigger Backend Deployment on Render
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-    
-    defaults:
-      run:
-        working-directory: ./backend
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Trigger Render Deployment
+        run: |
+          curl -X POST "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys" \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"clearCache": false}'
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
+      - name: Wait for deployment
+        run: sleep 60
       
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Deploy to Render
-        uses: johnbeynon/render-deploy-action@v0.0.8
-        with:
-          service-id: ${{ secrets.RENDER_SERVICE_ID }}
-          api-key: ${{ secrets.RENDER_API_KEY }}
+      - name: Health check
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://s72-gaurav-capstone.onrender.com/api/health)
+          if [ $response -eq 200 ]; then
+            echo "✅ Backend deployment successful!"
+          else
+            echo "❌ Backend health check failed with status: $response"
+            exit 1
+          fi

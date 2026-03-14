@@ -345,12 +345,12 @@ const LostFound = () => {
   const renderStatus = (type: 'lost' | 'found', resolved: boolean) => {
     return (
       <div className="flex gap-2">
-        <span className={`text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm ${
+        <span className={`text-xs px-3 py-1.5 rounded-lg font-medium ${
           type === 'lost' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
         }`}>
           {type === 'lost' ? 'Lost Item' : 'Found Item'}
         </span>
-        <span className={`text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm ${
+        <span className={`text-xs px-3 py-1.5 rounded-lg font-medium ${
           resolved ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
         }`}>
           {resolved ? 'Resolved' : 'Unresolved'}
@@ -404,7 +404,7 @@ const LostFound = () => {
               <select
                 value={filterType}
                 onChange={e => setFilterType(e.target.value as 'all' | 'lost' | 'found')}
-                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
+                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
               >
                 <option value="all">All Types</option>
                 <option value="lost">Lost Items</option>
@@ -420,7 +420,7 @@ const LostFound = () => {
               <select
                 value={filterResolved}
                 onChange={e => setFilterResolved(e.target.value as 'all' | 'resolved' | 'unresolved')}
-                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
+                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
               >
                 <option value="all">All Statuses</option>
                 <option value="unresolved">Unresolved</option>
@@ -435,7 +435,7 @@ const LostFound = () => {
           </div>
           {/* Search Bar */}
           <div className="relative w-full lg:w-[520px]" ref={searchRef}>
-            <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white shadow-sm hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
+            <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
               <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
               <input
                 type="text"
@@ -468,7 +468,7 @@ const LostFound = () => {
             
             {/* Autocomplete Dropdown */}
             {showSuggestions && filteredSuggestions.length > 0 && (
-              <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto">
+              <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg border-2 border-gray-200 max-h-60 overflow-auto">
                 {filteredSuggestions.map((suggestion, index) => (
                   <div
                     key={index}
@@ -495,7 +495,7 @@ const LostFound = () => {
           {isFiltering ? (
             // Show skeleton cards while filtering
             Array.from({ length: 6 }).map((_, idx) => (
-              <div key={idx} className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden animate-pulse">
+              <div key={idx} className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden animate-pulse">
                 <div className="h-64 sm:h-80 bg-gray-200"></div>
                 <div className="p-6 space-y-3">
                   <div className="h-6 bg-gray-200 rounded w-3/4"></div>
@@ -513,7 +513,7 @@ const LostFound = () => {
             <div
               key={item._id}
               ref={idx === items.length - 1 ? lastItemRef : undefined}
-              className="bg-white rounded-lg shadow-sm hover:shadow-lg active:shadow-md transition-all duration-300 border border-gray-100 overflow-hidden group cursor-pointer"
+              className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden cursor-pointer hover:border-gray-300 transition-colors duration-200"
               onClick={() => setSelectedItemForDetails(item)}
             >
               {/* Image Section with Overlay */}
@@ -523,9 +523,8 @@ const LostFound = () => {
                     <img
                       src={item.images[0].url}
                       alt={item?.title || 'Item'}
-                      className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-300"
+                      className="object-cover w-full h-full"
                     />
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-50">
@@ -538,12 +537,12 @@ const LostFound = () => {
                 )}
                 {/* Status Badges - Now positioned over the image */}
                 <div className="absolute top-4 right-4 flex flex-col gap-2">
-                  <span className={`text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm ${
+                  <span className={`text-xs px-3 py-1.5 rounded-lg font-medium ${
                     item.type === 'lost' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                   }`}>
                     {item.type === 'lost' ? 'Lost Item' : 'Found Item'}
                   </span>
-                  <span className={`text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm ${
+                  <span className={`text-xs px-3 py-1.5 rounded-lg font-medium ${
                     item.resolved ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
                   }`}>
                     {item.resolved ? 'Resolved' : 'Unresolved'}
@@ -740,7 +739,7 @@ const LostFound = () => {
                       <select
                         value={newItem.type}
                         onChange={(e) => setNewItem({...newItem, type: e.target.value as 'lost' | 'found'})}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                         required
                         aria-label="Item Type"
                       >
@@ -769,7 +768,7 @@ const LostFound = () => {
                           }}
                           onBlur={(e) => handleFieldBlur('date', e.target.value)}
                           max={new Date().toISOString().split('T')[0]}
-                          className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.date ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm cursor-pointer [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
+                          className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.date ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm cursor-pointer [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
                           required
                           aria-label="Item Date"
                         />
@@ -791,7 +790,7 @@ const LostFound = () => {
                           }
                         }}
                         onBlur={(e) => handleFieldBlur('title', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.title ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
+                        className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.title ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
                         placeholder="e.g. Black Wallet, Red Backpack"
                         required
                         aria-label="Item Title"
@@ -813,7 +812,7 @@ const LostFound = () => {
                           }
                         }}
                         onBlur={(e) => handleFieldBlur('description', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
+                        className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
                         rows={4}
                         placeholder="Describe the item, any unique features, etc."
                         required
@@ -837,7 +836,7 @@ const LostFound = () => {
                           }
                         }}
                         onBlur={(e) => handleFieldBlur('location', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.location ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
+                        className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.location ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
                         placeholder="Where was the item lost/found?"
                         aria-label="Item Location"
                       />
@@ -863,7 +862,7 @@ const LostFound = () => {
                         }
                       }}
                       onBlur={(e) => handleFieldBlur('contact', e.target.value)}
-                      className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.contact ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
+                      className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.contact ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
                       placeholder="Email or phone number"
                       required
                       aria-label="Contact Information"
@@ -886,7 +885,7 @@ const LostFound = () => {
                   <button
                     type="button"
                     onClick={closeItemModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
                     disabled={loading}
                   >
                     Cancel
@@ -916,12 +915,12 @@ const LostFound = () => {
       {/* Item Details Modal */}
       {selectedItemForDetails && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 safe-top safe-bottom">
-          <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
+          <div className="bg-white rounded-lg border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
             {/* Close Button */}
             <button
               onClick={() => setSelectedItemForDetails(null)}
               aria-label="Close"
-              className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] text-white rounded-lg p-2.5 transition-all duration-200 shadow-lg flex items-center justify-center w-10 h-10"
+              className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
             >
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
@@ -999,7 +998,7 @@ const LostFound = () => {
                 {!selectedItemForDetails.resolved && (
                   <button
                     onClick={() => { setSelectedItemForDetails(null); openEditItemModal(selectedItemForDetails); }}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 flex items-center"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 flex items-center"
                   >
                     <FiEdit2 className="mr-1" /> Edit
                   </button>
@@ -1031,7 +1030,7 @@ const LostFound = () => {
           <img 
             src={zoomedImage} 
             alt="Zoomed"
-            className="max-h-[90vh] max-w-full lg:max-w-[80vw] rounded-lg shadow-2xl object-contain"
+            className="max-h-[90vh] max-w-full lg:max-w-[80vw] rounded-lg object-contain"
             onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the image
           />
           
@@ -1040,7 +1039,7 @@ const LostFound = () => {
             <>
               {/* Previous Button */}
               <button
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/30 backdrop-blur-sm rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/30 rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
                 onClick={(e) => {
                   e.stopPropagation();
                   const currentIndex = selectedItemForDetails.images.findIndex(img => img.url === zoomedImage);
@@ -1055,7 +1054,7 @@ const LostFound = () => {
               </button>
               {/* Next Button */}
               <button
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/30 backdrop-blur-sm rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/30 rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
                 onClick={(e) => {
                   e.stopPropagation();
                   const currentIndex = selectedItemForDetails.images.findIndex(img => img.url === zoomedImage);
@@ -1075,7 +1074,7 @@ const LostFound = () => {
            <button
             onClick={() => setZoomedImage(null)}
             aria-label="Close zoomed image"
-            className="absolute top-4 right-4 bg-white/30 backdrop-blur-sm rounded-lg p-2 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+            className="absolute top-4 right-4 bg-white/30 rounded-lg p-2 text-white hover:bg-white/50 transition-colors duration-200 z-50"
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -1090,3 +1089,5 @@ const LostFound = () => {
 };
 
 export default LostFound; 
+
+

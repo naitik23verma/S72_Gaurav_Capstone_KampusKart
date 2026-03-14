@@ -15,6 +15,10 @@ const KampusKartNavbar: React.FC = () => {
   // Menu structure - same for both authenticated and unauthenticated
   const menuItems = [
     {
+      title: "Home",
+      url: token && user ? "/home" : "/",
+    },
+    {
       title: "Features",
       url: "#",
       items: [

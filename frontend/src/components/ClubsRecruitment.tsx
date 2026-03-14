@@ -492,7 +492,7 @@ const ClubsRecruitment = () => {
             
             {/* Autocomplete Dropdown */}
             {showSuggestions && filteredSuggestions.length > 0 && (
-              <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto">
+              <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg max-h-60 overflow-auto">
                 {filteredSuggestions.map((suggestion, index) => (
                   <div
                     key={index}
@@ -758,3 +758,4 @@ const ClubsRecruitment = () => {
 };
 
 export default ClubsRecruitment;
+

@@ -420,13 +420,13 @@ const Complaints = () => {
   const renderStatus = (status: Complaint['status']) => {
     switch (status) {
       case 'Open':
-        return <span className="text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm bg-red-100 text-red-800">Open</span>;
+        return <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-red-100 text-red-800">Open</span>;
       case 'In Progress':
-        return <span className="text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm bg-yellow-100 text-yellow-800">In Progress</span>;
+        return <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-yellow-100 text-yellow-800">In Progress</span>;
       case 'Resolved':
-        return <span className="text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm bg-green-100 text-green-800">Resolved</span>;
+        return <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-green-100 text-green-800">Resolved</span>;
       case 'Closed':
-        return <span className="text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm bg-gray-100 text-gray-800">Closed</span>;
+        return <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-gray-100 text-gray-800">Closed</span>;
       default:
         return null;
     }
@@ -561,7 +561,7 @@ const Complaints = () => {
               <select
                 value={filterCategory}
                 onChange={e => setFilterCategory(e.target.value as 'all' | 'Academic' | 'Administrative' | 'Facilities' | 'IT' | 'Security' | 'Other')}
-                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
+                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
               >
                 <option value="all">All Categories</option>
                 <option value="Academic">Academic</option>
@@ -582,7 +582,7 @@ const Complaints = () => {
               <select
                 value={filterStatus}
                 onChange={e => setFilterStatus(e.target.value as 'All' | 'Open' | 'In Progress' | 'Resolved' | 'Closed')}
-                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
+                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
               >
                 <option value="All">All Statuses</option>
                 <option value="Open">Open</option>
@@ -599,7 +599,7 @@ const Complaints = () => {
           </div>
           {/* Search Bar */}
           <div className="relative w-full lg:w-[520px]" ref={searchRef}>
-            <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white shadow-sm hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
+            <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
               <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
               <input
                 type="text"
@@ -632,7 +632,7 @@ const Complaints = () => {
             
             {/* Autocomplete Dropdown */}
             {showSuggestions && filteredSuggestions.length > 0 && (
-              <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto">
+              <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg border-2 border-gray-200 max-h-60 overflow-auto">
                 {filteredSuggestions.map((suggestion, index) => (
                   <div
                     key={index}
@@ -660,7 +660,7 @@ const Complaints = () => {
             <div
               key={complaint._id}
               ref={idx === complaints.length - 1 ? lastComplaintRef : undefined}
-              className="bg-white rounded-lg shadow-sm hover:shadow-lg active:shadow-md transition-all duration-300 border border-gray-100 overflow-hidden group cursor-pointer"
+              className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden cursor-pointer hover:border-gray-300 transition-colors duration-200"
               onClick={() => setSelectedComplaintForDetails(complaint)}
             >
               {/* Image Section with Overlay */}
@@ -670,9 +670,8 @@ const Complaints = () => {
                     <img
                       src={complaint.images[0].url}
                       alt={complaint.title}
-                      className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-300"
+                      className="object-cover w-full h-full"
                     />
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-50">
@@ -685,7 +684,7 @@ const Complaints = () => {
                 )}
                 {/* Status and Priority Badges */}
                 <div className="absolute top-4 right-4 flex flex-col gap-2">
-                  <span className={`text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm ${
+                  <span className={`text-xs px-3 py-1.5 rounded-lg font-medium ${
                     complaint.status === 'Open' ? 'bg-red-100 text-red-800' :
                     complaint.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' :
                     complaint.status === 'Resolved' ? 'bg-green-100 text-green-800' :
@@ -693,7 +692,7 @@ const Complaints = () => {
                   }`}>
                     {complaint.status}
                   </span>
-                  <span className={`text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm ${
+                  <span className={`text-xs px-3 py-1.5 rounded-lg font-medium ${
                     complaint.priority === 'Urgent' ? 'bg-red-100 text-red-800' :
                     complaint.priority === 'High' ? 'bg-orange-100 text-orange-800' :
                     complaint.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
@@ -773,7 +772,7 @@ const Complaints = () => {
 
               <form onSubmit={handleSaveComplaint} className="space-y-8">
                 {/* Complaint Details Section */}
-                <div className="border-b pb-6 mb-6 bg-gray-50 rounded-lg p-6">
+                <div className="border-2 border-gray-200 rounded-lg p-6 mb-6">
                   <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Complaint Details <FiInfo className="text-gray-400" title="Fill in the details of your complaint." /></h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Title */}
@@ -791,7 +790,7 @@ const Complaints = () => {
                             }
                           }}
                           onBlur={(e) => handleFieldBlur('title', e.target.value)}
-                          className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.title ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
+                          className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.title ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
                           placeholder="e.g. Mess Food Issue, Hostel Cleanliness"
                           required
                           aria-label="Complaint Title"
@@ -809,7 +808,7 @@ const Complaints = () => {
                         name="category"
                         value={newComplaint.category}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                         required
                         aria-label="Complaint Category"
                       >
@@ -830,7 +829,7 @@ const Complaints = () => {
                         name="priority"
                         value={newComplaint.priority}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                         required
                         aria-label="Complaint Priority"
                       >
@@ -850,7 +849,7 @@ const Complaints = () => {
                         name="department"
                         value={newComplaint.department}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                         required
                         aria-label="Assigned Department"
                       >
@@ -871,7 +870,7 @@ const Complaints = () => {
                           name="status"
                           value={newComplaint.status || editingComplaint.status}
                           onChange={(e) => setNewComplaint({ ...newComplaint, status: e.target.value as Complaint['status'] })}
-                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
+                          className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                         >
                           <option value="Open">Open</option>
                           <option value="In Progress">In Progress</option>
@@ -897,7 +896,7 @@ const Complaints = () => {
                           }
                         }}
                         onBlur={(e) => handleFieldBlur('description', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
+                        className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
                         rows={4}
                         placeholder="Describe the issue, any relevant details, etc."
                         required
@@ -922,7 +921,7 @@ const Complaints = () => {
                   <button
                     type="button"
                     onClick={closeComplaintModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
                     disabled={isSubmitting}
                   >
                     Cancel
@@ -951,12 +950,12 @@ const Complaints = () => {
          {/* Complaint Details Modal */}
          {selectedComplaintForDetails && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 safe-top safe-bottom">
-                <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
+                <div className="bg-white rounded-lg border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
                   {/* Close Button */}
                   <button
                     onClick={() => setSelectedComplaintForDetails(null)}
                     aria-label="Close"
-                    className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] text-white rounded-lg p-2.5 transition-all duration-200 shadow-lg flex items-center justify-center w-10 h-10"
+                    className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
                   >
                     <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
@@ -1011,7 +1010,7 @@ const Complaints = () => {
                         <div className="flex gap-3 mt-6">
                             <button
                                 onClick={() => { setSelectedComplaintForDetails(null); openEditComplaintModal(selectedComplaintForDetails); }}
-                                className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 flex items-center"
+                                className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 flex items-center"
                             >
                                 <FiEdit2 className="mr-1" /> Edit
                             </button>
@@ -1034,7 +1033,7 @@ const Complaints = () => {
              <img 
                src={zoomedImage} 
                alt="Zoomed"
-               className="max-h-[90vh] max-w-full lg:max-w-[80vw] rounded-lg shadow-2xl object-contain"
+               className="max-h-[90vh] max-w-full lg:max-w-[80vw] rounded-lg object-contain"
                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the image
              />
              
@@ -1043,7 +1042,7 @@ const Complaints = () => {
                <>
                  {/* Previous Button */}
                  <button
-                   className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/30 backdrop-blur-sm rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+                   className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/30 rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
                    onClick={(e) => {
                      e.stopPropagation();
                      const currentIndex = selectedComplaintForDetails.images.findIndex(img => img.url === zoomedImage);
@@ -1058,7 +1057,7 @@ const Complaints = () => {
                  </button>
                  {/* Next Button */}
                  <button
-                   className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/30 backdrop-blur-sm rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+                   className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/30 rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
                    onClick={(e) => {
                      e.stopPropagation();
                      const currentIndex = selectedComplaintForDetails.images.findIndex(img => img.url === zoomedImage);
@@ -1078,7 +1077,7 @@ const Complaints = () => {
               <button
                onClick={() => setZoomedImage(null)}
                aria-label="Close zoomed image"
-               className="absolute top-4 right-4 bg-white/30 backdrop-blur-sm rounded-lg p-2 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+               className="absolute top-4 right-4 bg-white/30 rounded-lg p-2 text-white hover:bg-white/50 transition-colors duration-200 z-50"
              >
                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                  <line x1="18" y1="6" x2="6" y2="18" />
@@ -1104,3 +1103,5 @@ const Complaints = () => {
 };
 
 export default Complaints; 
+
+

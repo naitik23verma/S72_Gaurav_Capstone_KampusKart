@@ -252,7 +252,7 @@ const Facilities = () => {
               <select
                 value={filterType}
                 onChange={e => setFilterType(e.target.value)}
-                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
+                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
               >
                 <option value="All">All Types</option>
                 <option value="Academic">Academic</option>
@@ -269,7 +269,7 @@ const Facilities = () => {
           </div>
           {/* Search Bar */}
           <div className="relative w-full lg:w-[520px]" ref={searchRef}>
-            <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white shadow-sm hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
+            <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
               <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
               <input
                 type="text"
@@ -302,7 +302,7 @@ const Facilities = () => {
             
             {/* Autocomplete Dropdown */}
             {showSuggestions && filteredSuggestions.length > 0 && (
-              <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto">
+              <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg border-2 border-gray-200 max-h-60 overflow-auto">
                 {filteredSuggestions.map((suggestion, index) => (
                   <div
                     key={index}
@@ -329,7 +329,7 @@ const Facilities = () => {
           {filteredFacilities.map(facility => (
             <div
               key={facility._id}
-              className="bg-white rounded-lg shadow-sm hover:shadow-lg active:shadow-md transition-all duration-300 border border-gray-100 overflow-hidden group cursor-pointer"
+              className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden cursor-pointer hover:border-gray-300 transition-colors duration-200"
               onClick={() => setSelectedFacility(facility)}
             >
               {/* Image Section with Overlay */}
@@ -339,17 +339,16 @@ const Facilities = () => {
                     <img
                       src={facility.images[0].url}
                       alt={facility?.name || 'Facility'}
-                      className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-300"
+                      className="object-cover w-full h-full"
                     />
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+                  <div className="w-full h-full flex items-center justify-center bg-gray-50">
                     <div className="flex flex-col items-center justify-center">
                       {(() => {
                         const iconOption = iconOptions.find(opt => opt.value === facility?.icon);
                         return (
-                          <div className={`p-6 rounded-full bg-gradient-to-br ${iconOption?.gradient || 'from-gray-400 to-gray-500'} shadow-xl transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
+                          <div className={`p-4 rounded-lg bg-[#181818]`}>
                             <div className="text-white">
                               {iconOption?.icon || <MdSchool className="w-16 h-16" />}
                             </div>
@@ -363,7 +362,7 @@ const Facilities = () => {
                 {/* Type Badge */}
                 {facility?.type && (
                   <div className="absolute top-4 left-4">
-                    <span className="text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm bg-white/90 backdrop-blur-sm text-gray-800 flex items-center gap-1">
+                    <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white text-gray-800 flex items-center gap-1">
                       <FiTag className="w-3 h-3" />
                       {facility.type}
                     </span>
@@ -372,7 +371,7 @@ const Facilities = () => {
                 {/* Location Badge */}
                 {facility?.location && (
                   <div className="absolute top-4 right-4">
-                    <span className="text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm bg-white/90 backdrop-blur-sm text-gray-800 flex items-center gap-1">
+                    <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white text-gray-800 flex items-center gap-1">
                       <FiMapPin className="w-3 h-3" />
                       {facility.location}
                     </span>
@@ -481,7 +480,7 @@ const Facilities = () => {
                   setAddLoading(false);
                 }
               }} className="space-y-8">
-                <div className="border-b pb-6 mb-6 bg-gray-50 rounded-lg p-6">
+                <div className="border-2 border-gray-200 rounded-lg p-6 mb-6">
                   <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Facility Details <MdSchool className="text-gray-400" /></h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -490,7 +489,7 @@ const Facilities = () => {
                         type="text"
                         value={newFacility.name}
                         onChange={e => setNewFacility({ ...newFacility, name: e.target.value })}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                         required
                         placeholder="e.g. Main Library"
                       />
@@ -502,7 +501,7 @@ const Facilities = () => {
                         type="text"
                         value={newFacility.location}
                         onChange={e => setNewFacility({ ...newFacility, location: e.target.value })}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                         required
                         placeholder="e.g. Central Block"
                       />
@@ -514,7 +513,7 @@ const Facilities = () => {
                     <textarea
                       value={newFacility.description}
                       onChange={e => setNewFacility({ ...newFacility, description: e.target.value })}
-                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
+                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                       rows={3}
                       required
                       placeholder="Describe the facility, features, etc."
@@ -527,7 +526,7 @@ const Facilities = () => {
                       <select
                         value={newFacility.type}
                         onChange={e => setNewFacility({ ...newFacility, type: e.target.value })}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                         required
                       >
                         <option value="Academic">Academic</option>
@@ -542,7 +541,7 @@ const Facilities = () => {
                       <select
                         value={newFacility.icon}
                         onChange={e => setNewFacility({ ...newFacility, icon: e.target.value })}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                         required
                       >
                         {iconOptions.map(opt => (
@@ -555,9 +554,9 @@ const Facilities = () => {
                             key={opt.value}
                             type="button"
                             onClick={() => setNewFacility({ ...newFacility, icon: opt.value })}
-                            className={`p-3 rounded-lg border-2 transition-all duration-200 hover:scale-110 ${
+                            className={`p-3 rounded-lg border-2 transition-all duration-200 ${
                               newFacility.icon === opt.value 
-                                ? `border-[#00C6A7] bg-gradient-to-br ${opt.gradient} shadow-lg` 
+                                ? `border-[#00C6A7] bg-gradient-to-br ${opt.gradient}` 
                                 : 'border-gray-200 bg-white hover:border-gray-300'
                             }`}
                           >
@@ -582,7 +581,7 @@ const Facilities = () => {
                   <button
                     type="button"
                     onClick={closeAddModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
                     disabled={addLoading}
                   >
                     Cancel
@@ -655,7 +654,7 @@ const Facilities = () => {
                   setEditLoading(false);
                 }
               }} className="space-y-8">
-                <div className="border-b pb-6 mb-6 bg-gray-50 rounded-lg p-6">
+                <div className="border-2 border-gray-200 rounded-lg p-6 mb-6">
                   <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Facility Details <MdSchool className="text-gray-400" /></h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -664,7 +663,7 @@ const Facilities = () => {
                         type="text"
                         value={editFacility?.name || ''}
                         onChange={e => setEditFacility(editFacility ? { ...editFacility, name: e.target.value } : null)}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                         required
                         placeholder="e.g. Main Library"
                       />
@@ -676,7 +675,7 @@ const Facilities = () => {
                         type="text"
                         value={editFacility?.location || ''}
                         onChange={e => setEditFacility(editFacility ? { ...editFacility, location: e.target.value } : null)}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                         required
                         placeholder="e.g. Central Block"
                       />
@@ -688,7 +687,7 @@ const Facilities = () => {
                     <textarea
                       value={editFacility?.description || ''}
                       onChange={e => setEditFacility(editFacility ? { ...editFacility, description: e.target.value } : null)}
-                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
+                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                       rows={3}
                       required
                       placeholder="Describe the facility, features, etc."
@@ -701,7 +700,7 @@ const Facilities = () => {
                       <select
                         value={editFacility?.type || 'Academic'}
                         onChange={e => setEditFacility(editFacility ? { ...editFacility, type: e.target.value as Facility['type'] } : null)}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                         required
                       >
                         <option value="Academic">Academic</option>
@@ -716,7 +715,7 @@ const Facilities = () => {
                       <select
                         value={editFacility?.icon || 'MdSchool'}
                         onChange={e => setEditFacility(editFacility ? { ...editFacility, icon: e.target.value } : null)}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                         required
                       >
                         {iconOptions.map(opt => (
@@ -729,9 +728,9 @@ const Facilities = () => {
                             key={opt.value}
                             type="button"
                             onClick={() => setEditFacility(editFacility ? { ...editFacility, icon: opt.value } : null)}
-                            className={`p-3 rounded-lg border-2 transition-all duration-200 hover:scale-110 ${
+                            className={`p-3 rounded-lg border-2 transition-all duration-200 ${
                               editFacility?.icon === opt.value 
-                                ? `border-[#00C6A7] bg-gradient-to-br ${opt.gradient} shadow-lg` 
+                                ? `border-[#00C6A7] bg-gradient-to-br ${opt.gradient}` 
                                 : 'border-gray-200 bg-white hover:border-gray-300'
                             }`}
                           >
@@ -756,7 +755,7 @@ const Facilities = () => {
                   <button
                     type="button"
                     onClick={closeEditModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
                     disabled={editLoading}
                   >
                     Cancel
@@ -785,12 +784,12 @@ const Facilities = () => {
         {/* Facility Details Modal */}
         {selectedFacility && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
+            <div className="bg-white rounded-lg border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
               {/* Close Button */}
               <button
                 onClick={() => setSelectedFacility(null)}
                 aria-label="Close"
-                className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] text-white rounded-lg p-2.5 transition-all duration-200 shadow-lg flex items-center justify-center w-10 h-10"
+                className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
               >
                 <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -860,7 +859,7 @@ const Facilities = () => {
                       setIsEditModalOpen(true);
                       setSelectedFacility(null);
                     }}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 flex items-center"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 flex items-center"
                   ><span className="truncate">Edit</span></button>
                   <button
                     onClick={async () => {
@@ -892,7 +891,7 @@ const Facilities = () => {
             <img 
               src={zoomedImage} 
               alt="Zoomed"
-              className="max-h-[90vh] max-w-full lg:max-w-[80vw] rounded-lg shadow-2xl object-contain"
+              className="max-h-[90vh] max-w-full lg:max-w-[80vw] rounded-lg object-contain"
               onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the image
             />
             
@@ -901,7 +900,7 @@ const Facilities = () => {
               <>
                 {/* Previous Button */}
                 <button
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/30 backdrop-blur-sm rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/30 rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
                   onClick={(e) => {
                     e.stopPropagation();
                     const currentIndex = selectedFacility.images.findIndex(img => img.url === zoomedImage);
@@ -916,7 +915,7 @@ const Facilities = () => {
                 </button>
                 {/* Next Button */}
                 <button
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/30 backdrop-blur-sm rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/30 rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
                   onClick={(e) => {
                     e.stopPropagation();
                     const currentIndex = selectedFacility.images.findIndex(img => img.url === zoomedImage);
@@ -936,7 +935,7 @@ const Facilities = () => {
              <button
               onClick={() => setZoomedImage(null)}
               aria-label="Close zoomed image"
-              className="absolute top-4 right-4 bg-white/30 backdrop-blur-sm rounded-lg p-2 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+              className="absolute top-4 right-4 bg-white/30 rounded-lg p-2 text-white hover:bg-white/50 transition-colors duration-200 z-50"
             >
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" />
@@ -952,3 +951,5 @@ const Facilities = () => {
 };
 
 export default Facilities; 
+
+

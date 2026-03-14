@@ -74,10 +74,9 @@ const Landing: React.FC = () => {
           brandName="KampusKart"
           socialLinks={socialLinks}
           mainLinks={[
-            { href: '/home', label: 'Home' },
-            { href: '/events', label: 'Events' },
-            { href: '/facilities', label: 'Facilities' },
-            { href: '/clubs', label: 'Clubs' },
+            { href: '/', label: 'Home' },
+            { href: '/login', label: 'Sign In' },
+            { href: '/signup', label: 'Sign Up' },
           ]}
           legalLinks={[
             { href: '/privacy', label: 'Privacy' },

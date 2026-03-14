@@ -1,35 +1,22 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
-// Use an image from the public folder
-const imageUrl = '/login-side.jpg'; // Place your image in the public folder as login-side.jpg
+const imageUrl = '/login-side.jpg';
 
-const RightPanel: React.FC = () => {
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    console.error('Failed to load image:', imageUrl);
-    console.error('Current location:', window.location.href);
-    e.currentTarget.style.display = 'none';
-  };
+const RightPanel: React.FC = () => (
+  <div className="hidden md:flex flex-1 items-center justify-center bg-gray-100">
+    <img
+      src={imageUrl}
+      alt="Campus"
+      className="object-cover w-full h-full"
+      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+    />
+  </div>
+);
 
-  return (
-    <div className="hidden md:flex flex-1 items-center justify-center bg-black/10">
-      <img 
-        src={imageUrl} 
-        alt="Panel" 
-        className="object-cover w-full h-full"
-        onError={handleImageError}
-        onLoad={() => console.log('Image loaded successfully:', imageUrl)}
-      />
-    </div>
-  );
-};
-
-const validateEmail = (email: string) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
+const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -43,164 +30,157 @@ const Login: React.FC = () => {
   const { login, loginWithGoogle } = useAuth();
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newEmail = e.target.value;
-    setEmail(newEmail);
-    setEmailError(validateEmail(newEmail) ? '' : 'Please enter a valid email address');
+    const val = e.target.value;
+    setEmail(val);
+    if (emailError && validateEmail(val)) {
+      setEmailError('');
+    }
+  };
+
+  const handleEmailBlur = () => {
+    if (email && !validateEmail(email)) {
+      setEmailError('Please enter a valid email address');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate email
-    if (!validateEmail(email)) {
-      setEmailError('Please enter a valid email address');
-      return;
-    }
-
+    if (!validateEmail(email)) { setEmailError('Please enter a valid email address'); return; }
     try {
       setError('');
       setLoading(true);
       await login(email, password, remember);
       navigate('/home');
     } catch (err: any) {
-      // Robust error handling
-      let message = 'Failed to login';
-      if (err?.response?.data?.message) {
-        message = err.response.data.message;
-      } else if (err?.message) {
-        message = err.message;
-      }
-      setError(message);
-      console.error('Login error:', err);
+      setError(err?.response?.data?.message || err?.message || 'Failed to login');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleLogin = () => {
-    loginWithGoogle();
-  };
-
   return (
     <div className="min-h-screen w-screen h-screen flex font-sans bg-white">
-      {/* Left: Login Form */}
+      {/* Left: form */}
       <div className="flex flex-col justify-center items-center w-full md:w-1/2 px-8 py-8 bg-white">
         <div className="w-full max-w-sm">
-          <div className="flex items-center justify-center gap-6 mb-6">
-            <Link to="/" className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
-              <img src="/Logo.png" alt="KampusKart Logo" className="h-12 w-12 object-contain" style={{ background: 'none', border: 'none', borderRadius: 0, boxShadow: 'none' }} />
-              <span className="text-h4 font-extrabold text-black tracking-tight font-sans">Kampuskart</span>
+
+          {/* Logo */}
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity duration-200">
+              <img src="/Logo.png" alt="KampusKart Logo" className="h-10 w-10 object-contain" />
+              <span className="text-xl font-extrabold text-black tracking-tight">KampusKart</span>
             </Link>
           </div>
-          <h2 className="mb-6 text-h3 font-bold text-black text-center pt-6">Login</h2>
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            {error && (
-              <div className="rounded-lg bg-orange/10 p-4">
-                <div className="text-sm text-orange-700">{error}</div>
-              </div>
-            )}
-            <div className="space-y-4">
+
+          <h2 className="mb-1 text-2xl font-extrabold text-black text-center">Welcome back</h2>
+          <p className="text-sm text-gray-500 text-center mb-8">Sign in to your account</p>
+
+          {/* Error */}
+          {error && (
+            <div className="mb-4 rounded-lg bg-red-50 border-2 border-red-200 p-3">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          <form className="space-y-5" onSubmit={handleSubmit}>
+            {/* Email */}
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Email</label>
+              <input
+                type="email"
+                autoComplete="email"
+                required
+                className={`w-full pb-2 border-b ${emailError ? 'border-red-400' : 'border-gray-300'} focus:outline-none focus:border-[#00C6A7] bg-transparent text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200`}
+                placeholder="you@example.com"
+                value={email}
+                onChange={handleEmailChange}
+                onBlur={handleEmailBlur}
+              />
+              {emailError && <p className="mt-1 text-xs text-red-500">{emailError}</p>}
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Password</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  <EnvelopeIcon className="h-5 w-5" />
-                </span>
                 <input
-                  id="email-address"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className={`block w-full pl-10 pr-3 py-3 border-b ${emailError ? 'border-red-500' : 'border-gray-300'} focus:border-black focus:ring-0 text-black placeholder-gray-400 bg-transparent`}
-                  placeholder="user name/e-mail"
-                  value={email}
-                  onChange={handleEmailChange}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' && emailError) {
-                      e.preventDefault();
-                    }
-                  }}
-                />
-                {emailError && (
-                  <p className="mt-1 text-sm text-red-500">{emailError}</p>
-                )}
-              </div>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  <LockClosedIcon className="h-5 w-5" />
-                </span>
-                <input
-                  id="password"
-                  name="password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
                   required
-                  className="block w-full pl-10 pr-10 py-3 border-b border-gray-300 focus:border-black focus:ring-0 text-black placeholder-gray-400 bg-transparent"
-                  placeholder="password"
+                  className="w-full pb-2 pr-10 border-b border-gray-300 focus:outline-none focus:border-[#00C6A7] bg-transparent text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200"
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
                 <button
                   type="button"
                   tabIndex={-1}
-                  className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full bg-white text-black`}
-                  onClick={() => setShowPassword((v) => !v)}
-                  style={{ transition: 'color 0.2s' }}
+                  className="absolute right-0 bottom-2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200 bg-transparent p-0 border-0"
+                  onClick={() => setShowPassword(v => !v)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                  {showPassword ? <EyeSlashIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
                 </button>
               </div>
-              <div className="flex items-center justify-between mt-2">
-                <label className="flex items-center text-sm text-gray-500">
-                  <input
-                    type="checkbox"
-                    checked={remember}
-                    onChange={e => setRemember(e.target.checked)}
-                    className="h-4 w-4 text-black focus:ring-black border-gray-300 rounded mr-2"
-                  />
-                  Remember me
-                </label>
-                <Link to="/forgot-password" className="text-sm text-[#F05A25] hover:underline">
-                  Forgot password?
-                </Link>
-              </div>
             </div>
+
+            {/* Forgot password link */}
+            <div className="text-right">
+              <Link to="/forgot-password" className="text-xs text-[#F05A25] hover:underline font-medium">Forgot password?</Link>
+            </div>
+
+            {/* Remember me */}
+            <label className="flex items-center gap-2 text-sm text-gray-500 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={e => setRemember(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-[#00C6A7] focus:ring-[#00C6A7]"
+              />
+              Remember me
+            </label>
+
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading || !!emailError}
-              className={`w-full flex justify-center py-3 px-4 rounded-lg text-lg font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] hover:text-white transition-colors duration-200 ${emailError ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full py-3 px-4 rounded-lg text-sm font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 ${(loading || !!emailError) ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
 
-            <div className="relative">
+            {/* Divider */}
+            <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
+                <div className="w-full border-t-2 border-gray-200" />
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-3 bg-white text-gray-400 font-medium">or continue with</span>
               </div>
             </div>
 
+            {/* Google */}
             <button
               type="button"
-              onClick={handleGoogleLogin}
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg text-lg font-semibold text-black bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors duration-200"
+              onClick={() => loginWithGoogle()}
+              className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors duration-200"
             >
-              <img src="/google-icon.svg" alt="Google" className="w-5 h-5" />
+              <img src="/google-icon.svg" alt="Google" className="w-4 h-4" />
               Sign in with Google
             </button>
 
-            <div className="text-center text-sm mt-6 text-gray-500">
-              Don&apos;t have an account yet?{' '}
+            <p className="text-center text-sm text-gray-500 mt-4">
+              Don't have an account?{' '}
               <Link to="/signup" className="text-[#F05A25] font-semibold hover:underline">Sign up</Link>
-            </div>
+            </p>
           </form>
         </div>
       </div>
-      {/* Right: Image Panel */}
+
+      {/* Right: image */}
       <RightPanel />
     </div>
   );
 };
 
-export default Login; 
+export default Login;

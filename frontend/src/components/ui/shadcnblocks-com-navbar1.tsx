@@ -1,4 +1,4 @@
-import { Menu } from "lucide-react";
+import { Menu, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import {
@@ -31,6 +31,7 @@ interface MenuItem {
   url: string;
   description?: string;
   items?: MenuItem[];
+  locked?: boolean;
 }
 
 interface Navbar1Props {
@@ -197,17 +198,23 @@ const renderMenuItem = (item: MenuItem) => {
               <li key={subItem.title}>
                 <NavigationMenuLink asChild>
                   <Link
-                    className="flex select-none gap-3 rounded-lg p-3 leading-none no-underline outline-none transition-all duration-200 ease-in-out hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-0 focus:ring-0 hover:scale-[1.02] active:scale-[0.98]"
+                    className={`flex select-none gap-3 rounded-lg p-3 leading-none no-underline outline-none transition-all duration-200 ease-in-out border-0 focus:ring-0 ${
+                      subItem.locked 
+                        ? 'bg-gray-50 text-gray-400 cursor-not-allowed hover:bg-gray-50' 
+                        : 'hover:bg-gray-100 text-gray-700 hover:text-gray-900 hover:scale-[1.02] active:scale-[0.98]'
+                    }`}
                     to={subItem.url}
                     aria-label={`Go to ${subItem.title}`}
                   >
-                    <div>
-                      <div className="text-sm font-semibold text-gray-900">
+                    <div className="flex-1">
+                      <div className={`text-sm font-semibold flex items-center gap-2 ${subItem.locked ? 'text-gray-400' : 'text-gray-900'}`}>
                         {subItem.title}
+                        {subItem.locked && <Lock className="h-3 w-3" />}
                       </div>
                       {subItem.description && (
-                        <p className="text-xs leading-snug text-gray-600 mt-1">
+                        <p className={`text-xs leading-snug mt-1 ${subItem.locked ? 'text-gray-400' : 'text-gray-600'}`}>
                           {subItem.description}
+                          {subItem.locked && ' • Sign in to access'}
                         </p>
                       )}
                     </div>
@@ -249,14 +256,22 @@ const renderMobileMenuItem = (item: MenuItem) => {
               <SheetClose key={subItem.title} asChild>
                 <Link
                   to={subItem.url}
-                  className="flex select-none gap-3 rounded-lg p-3 leading-none outline-none transition-all duration-200 ease-in-out bg-white hover:bg-gray-100 !text-gray-700 hover:!text-gray-900 active:scale-98 border border-gray-200 hover:border-gray-300 focus:ring-0 focus:!text-gray-900"
+                  className={`flex select-none gap-3 rounded-lg p-3 leading-none outline-none transition-all duration-200 ease-in-out border focus:ring-0 ${
+                    subItem.locked
+                      ? 'bg-gray-50 !text-gray-400 cursor-not-allowed border-gray-200'
+                      : 'bg-white hover:bg-gray-100 !text-gray-700 hover:!text-gray-900 active:scale-98 border-gray-200 hover:border-gray-300 focus:!text-gray-900'
+                  }`}
                   aria-label={`Go to ${subItem.title}`}
                 >
                   <div className="flex-1">
-                    <div className="text-sm font-semibold !text-gray-900 mb-1">{subItem.title}</div>
+                    <div className={`text-sm font-semibold flex items-center gap-2 mb-1 ${subItem.locked ? '!text-gray-400' : '!text-gray-900'}`}>
+                      {subItem.title}
+                      {subItem.locked && <Lock className="h-3 w-3" />}
+                    </div>
                     {subItem.description && (
-                      <p className="text-xs leading-snug !text-gray-600">
+                      <p className={`text-xs leading-snug ${subItem.locked ? '!text-gray-400' : '!text-gray-600'}`}>
                         {subItem.description}
+                        {subItem.locked && ' • Sign in to access'}
                       </p>
                     )}
                   </div>

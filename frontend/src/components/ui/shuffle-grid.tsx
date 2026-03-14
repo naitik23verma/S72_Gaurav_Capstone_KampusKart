@@ -68,7 +68,7 @@ const ShuffleGrid = () => {
   };
 
   return (
-    <div className="grid grid-cols-4 grid-rows-4 h-[min(520px,calc(100vh-140px))] gap-2">
+    <div className="grid grid-cols-4 grid-rows-4 h-full gap-2">
       {squares.map((sq) => sq)}
     </div>
   );
@@ -76,7 +76,7 @@ const ShuffleGrid = () => {
 
 export const ShuffleHero = () => {
   return (
-    <section className="w-full h-full px-4 sm:px-8 grid grid-cols-1 md:grid-cols-2 items-center gap-10 max-w-6xl mx-auto">
+    <section className="w-full h-full px-4 sm:px-8 grid grid-cols-1 md:grid-cols-2 items-center gap-10 max-w-6xl mx-auto overflow-hidden">
       {/* Left: text */}
       <div>
         <span className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-lg bg-gray-50 border-2 border-gray-200 text-xs font-semibold text-[#00C6A7] uppercase tracking-widest">
@@ -109,8 +109,10 @@ export const ShuffleHero = () => {
       </div>
 
       {/* Right: shuffle grid — hidden on mobile */}
-      <div className="hidden md:block">
-        <ShuffleGrid />
+      <div className="hidden md:flex items-center justify-center h-full py-8">
+        <div className="w-full h-full max-h-[520px]">
+          <ShuffleGrid />
+        </div>
       </div>
     </section>
   );

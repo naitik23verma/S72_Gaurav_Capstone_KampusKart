@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { FiPlus, FiCalendar, FiFileText, FiSearch, FiInfo, FiTag, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiPlus, FiCalendar, FiFileText, FiSearch, FiInfo, FiTag, FiEdit2, FiTrash2, FiCheckCircle } from 'react-icons/fi';
 import { Instagram, Linkedin, Globe, Github } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
@@ -49,6 +49,7 @@ const News = () => {
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
   const isSelectingSuggestion = useRef(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Generate autocomplete suggestions from existing news
   useEffect(() => {
@@ -96,6 +97,16 @@ const News = () => {
   useEffect(() => {
     fetchNews();
   }, []);
+
+  // Auto-hide success message after 3 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
 
   const fetchNews = async () => {
     try {
@@ -145,6 +156,7 @@ const News = () => {
         date: '',
         category: 'Campus'
       });
+      setSuccessMessage('News added successfully!');
     } catch (error) {
       console.error('Error adding news:', error);
       setError(error instanceof Error ? error.message : 'Failed to add news');
@@ -175,6 +187,7 @@ const News = () => {
         throw new Error(error.message || 'Failed to delete news');
       }
       setNews(news.filter(n => n._id !== id));
+      setSuccessMessage('News deleted successfully!');
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to delete news');
     }
@@ -208,8 +221,10 @@ const News = () => {
       const savedNews = await response.json();
       if (editingNews) {
         setNews(news.map(n => n._id === savedNews._id ? savedNews : n));
+        setSuccessMessage('News updated successfully!');
       } else {
         setNews([savedNews, ...news]);
+        setSuccessMessage('News added successfully!');
       }
       closeNewsModal();
     } catch (error) {
@@ -243,6 +258,15 @@ const News = () => {
   return (
     <div className="min-h-screen bg-white font-sans">
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
+        
+        {/* Success Message Banner */}
+        {successMessage && (
+          <div className="mb-6 rounded-lg bg-green-50 border-2 border-green-200 p-4 flex items-center gap-3">
+            <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+            <p className="text-sm font-medium text-green-800">{successMessage}</p>
+          </div>
+        )}
+        
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <h1 className="text-h2 font-extrabold text-black">Campus News</h1>
           {user?.isAdmin && (
@@ -498,7 +522,7 @@ const News = () => {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C7A7] transition"
+                    className="px-6 py-3 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200"
                   >
                     {editingNews ? 'Save Changes' : 'Add News'}
                   </button>

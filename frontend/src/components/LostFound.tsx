@@ -1093,7 +1093,6 @@ const LostFound = () => {
 
         </div>
       )}
-    </div>
 
       {/* Footer */}
       <Footer
@@ -1118,6 +1117,8 @@ const LostFound = () => {
     </div>
   );
 };
+
+export default LostFound;
 
 export default LostFound; 
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiCalendar, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiUser, FiPhone } from 'react-icons/fi';
+import { FiCalendar, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiUser, FiPhone, FiCheckCircle } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
 import { Instagram, Linkedin, Globe, Github } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -211,10 +211,21 @@ const ClubsRecruitment = () => {
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
   const isSelectingSuggestion = useRef(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchClubs();
   }, []);
+
+  // Auto-hide success message after 3 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
 
   // Generate autocomplete suggestions
   useEffect(() => {
@@ -317,6 +328,7 @@ const ClubsRecruitment = () => {
         contactInfo: { name: '', email: '', phone: '' },
         status: 'Open',
       });
+      setSuccessMessage('Club recruitment added successfully!');
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to add club recruitment');
     }
@@ -356,6 +368,7 @@ const ClubsRecruitment = () => {
       }
       setClubs(clubs.filter(c => c._id !== id));
       setSelectedClubForDetails(null);
+      setSuccessMessage('Club recruitment deleted successfully!');
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to delete club recruitment');
     }
@@ -390,6 +403,7 @@ const ClubsRecruitment = () => {
       }
       const savedClub = await response.json();
       setClubs(clubs.map(c => c._id === savedClub._id ? savedClub : c));
+      setSuccessMessage('Club recruitment updated successfully!');
       closeClubModal();
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to save club recruitment');
@@ -435,6 +449,15 @@ const ClubsRecruitment = () => {
   return (
     <div className="min-h-screen bg-white font-sans">
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
+        
+        {/* Success Message Banner */}
+        {successMessage && (
+          <div className="mb-6 rounded-lg bg-green-50 border-2 border-green-200 p-4 flex items-center gap-3">
+            <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+            <p className="text-sm font-medium text-green-800">{successMessage}</p>
+          </div>
+        )}
+        
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <h1 className="text-h2 font-extrabold text-black">Clubs Recruitment</h1>
           {user?.isAdmin && (

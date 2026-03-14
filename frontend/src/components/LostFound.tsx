@@ -149,7 +149,7 @@ const LostFound = () => {
       case 'description':
         if (!value.trim()) return 'Description is required';
         if (value.trim().length < 10) return 'Description must be at least 10 characters';
-        if (value.trim().length > 500) return 'Description must be less than 500 characters';
+        if (value.trim().length > 1000) return 'Description must be less than 1000 characters';
         return null;
       
       case 'location':

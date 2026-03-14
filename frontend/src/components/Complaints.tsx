@@ -149,7 +149,7 @@ const Complaints = () => {
     switch (fieldName) {
       case 'title':
         if (!value.trim()) return 'Title is required';
-        if (value.trim().length < 5) return 'Title must be at least 5 characters';
+        if (value.trim().length < 3) return 'Title must be at least 3 characters';
         if (value.trim().length > 100) return 'Title must be less than 100 characters';
         return null;
       

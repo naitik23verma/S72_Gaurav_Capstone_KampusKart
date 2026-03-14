@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { FiMapPin, FiSearch, FiPlus, FiEdit2, FiTag, FiCalendar, FiUser, FiTrash2 } from 'react-icons/fi';
+import { FiMapPin, FiSearch, FiPlus, FiEdit2, FiTag, FiCalendar, FiUser, FiTrash2, FiCheckCircle } from 'react-icons/fi';
 import { MdSchool, MdRestaurant, MdLocalLaundryService, MdHotel, MdLibraryBooks, MdFastfood, MdLocalCafe, MdRoomService, MdBed, MdApartment } from 'react-icons/md';
 import { Instagram, Linkedin, Globe, Github } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -139,6 +139,17 @@ const Facilities = () => {
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
   const isSelectingSuggestion = useRef(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Auto-hide success message after 3 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
 
   // Generate autocomplete suggestions from existing facilities
   useEffect(() => {
@@ -242,6 +253,15 @@ const Facilities = () => {
   return (
     <div className="min-h-screen bg-white font-sans">
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
+        
+        {/* Success Message Banner */}
+        {successMessage && (
+          <div className="mb-6 rounded-lg bg-green-50 border-2 border-green-200 p-4 flex items-center gap-3">
+            <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+            <p className="text-sm font-medium text-green-800">{successMessage}</p>
+          </div>
+        )}
+        
         {/* Top Bar: Heading + Add Button */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <h1 className="text-h2 font-extrabold text-black">Campus Facilities</h1>
@@ -483,6 +503,7 @@ const Facilities = () => {
                   setNewFacility({ name: '', description: '', location: '', type: 'Academic', icon: 'MdSchool' });
                   setFacilityImages([]);
                   setIsModalOpen(false);
+                  setSuccessMessage('Facility added successfully!');
                 } catch (err: any) {
                   setFormError(err.message || 'Failed to add facility');
                 } finally {
@@ -657,6 +678,7 @@ const Facilities = () => {
                   const updated = await res.json();
                   setFacilities(facilities.map(f => f._id === updated._id ? updated : f));
                   setIsEditModalOpen(false);
+                  setSuccessMessage('Facility updated successfully!');
                 } catch (err: any) {
                   setFormError(err.message || 'Failed to update facility');
                 } finally {
@@ -882,6 +904,7 @@ const Facilities = () => {
                         if (!res.ok) throw new Error('Failed to delete facility');
                         setFacilities(facilities.filter(f => f._id !== selectedFacility._id));
                         setSelectedFacility(null);
+                        setSuccessMessage('Facility deleted successfully!');
                       } catch (err) {
                         setError('Failed to delete facility');
                       }

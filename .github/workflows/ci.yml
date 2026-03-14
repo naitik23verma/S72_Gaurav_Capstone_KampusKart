@@ -20,20 +20,17 @@ jobs:
         with:
           node-version: '18'
       
-      - name: Get npm cache directory
-        id: npm-cache-dir
-        shell: bash
-        run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
-      
-      - name: Cache npm dependencies
+      - name: Cache node modules
         uses: actions/cache@v4
+        id: cache-npm
         with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-frontend-npm-${{ hashFiles('frontend/package-lock.json') }}
+          path: frontend/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('frontend/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-frontend-npm-
+            ${{ runner.os }}-node-modules-
       
       - name: Install dependencies
+        if: steps.cache-npm.outputs.cache-hit != 'true'
         working-directory: ./frontend
         run: npm ci
       
@@ -67,20 +64,17 @@ jobs:
         with:
           node-version: '18'
       
-      - name: Get npm cache directory
-        id: npm-cache-dir
-        shell: bash
-        run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
-      
-      - name: Cache npm dependencies
+      - name: Cache node modules
         uses: actions/cache@v4
+        id: cache-npm
         with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-backend-npm-${{ hashFiles('backend/package-lock.json') }}
+          path: backend/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('backend/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-backend-npm-
+            ${{ runner.os }}-node-modules-
       
       - name: Install dependencies
+        if: steps.cache-npm.outputs.cache-hit != 'true'
         working-directory: ./backend
         run: npm ci
       
@@ -109,10 +103,18 @@ jobs:
         with:
           node-version: '18'
       
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+      
       - name: Audit frontend dependencies
         working-directory: ./frontend
         run: npm audit --audit-level=moderate
         continue-on-error: true
+      
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
       
       - name: Audit backend dependencies
         working-directory: ./backend

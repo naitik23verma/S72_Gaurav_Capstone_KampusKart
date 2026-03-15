@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FiX } from 'react-icons/fi';
 import { ErrorMessage } from './ErrorMessage';
 
@@ -30,36 +30,74 @@ export const FeatureModal: React.FC<FeatureModalProps> = ({
   error,
   size = 'md',
 }) => {
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  // Handle escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
+
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 safe-top safe-bottom"
-      onClick={onClose}
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200"
+      onClick={handleBackdropClick}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
     >
       <div
-        className={`bg-white rounded-lg border-2 border-gray-200 p-4 sm:p-6 md:p-8 ${sizeClasses[size]} w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative`}
+        className={`bg-white rounded-xl shadow-2xl border border-gray-200 p-6 sm:p-8 ${sizeClasses[size]} w-full mx-auto max-h-[90vh] overflow-y-auto relative animate-in zoom-in-95 duration-200`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex justify-between items-start mb-4 sm:mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 pr-12">
+        <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
+          <h2 id="modal-title" className="text-2xl sm:text-3xl font-bold text-gray-900">
             {title}
           </h2>
           <button
             onClick={onClose}
-            aria-label="Close"
-            className="bg-[#181818] hover:bg-[#00C6A7] text-white rounded-lg p-2.5 transition-colors duration-200 min-h-touch min-w-touch flex-shrink-0 flex items-center justify-center"
+            aria-label="Close modal"
+            className="bg-gray-100 hover:bg-red-500 hover:text-white text-gray-700 rounded-lg p-2 transition-all duration-200 flex-shrink-0 flex items-center justify-center group"
           >
-            <FiX className="w-5 h-5" />
+            <FiX className="w-5 h-5 group-hover:scale-110 transition-transform" />
           </button>
         </div>
 
         {/* Error Message */}
-        <ErrorMessage message={error} />
+        {error && (
+          <div className="mb-4">
+            <ErrorMessage message={error} />
+          </div>
+        )}
 
         {/* Content */}
-        {children}
+        <div className="modal-content">
+          {children}
+        </div>
       </div>
     </div>
   );

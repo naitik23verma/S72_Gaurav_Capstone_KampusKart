@@ -35,8 +35,8 @@ const Home = () => {
     <div className="bg-white font-sans pt-[72px]">
 
       {/* Hero with Map */}
-      <div className="h-[calc(100vh-72px)] w-full flex items-center overflow-hidden">
-        <section className="w-full h-full px-4 sm:px-8 grid grid-cols-1 md:grid-cols-2 items-center gap-10 max-w-6xl mx-auto">
+      <div className="w-full py-16 sm:py-20 md:h-[calc(100vh-72px)] md:py-0 md:flex md:items-center">
+        <section className="w-full px-4 sm:px-8 grid grid-cols-1 md:grid-cols-2 items-center gap-10 max-w-6xl mx-auto">
           {/* Left: text */}
           <div className="text-center md:text-left">
             <span className="inline-flex items-center gap-2 mb-4 md:mb-5 px-3 py-1.5 rounded-lg bg-gray-50 border-2 border-gray-200 text-xs font-semibold text-[#00C6A7] uppercase tracking-widest">

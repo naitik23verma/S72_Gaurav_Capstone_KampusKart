@@ -495,8 +495,10 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                         setSearchInput(suggestion);
                         setSearchQuery(suggestion);
                         setShowSuggestions(false);
-                        if (matchingLocation) {
-                          setTimeout(() => handleLocationClick(matchingLocation), 100);
+                        // Pan to location without opening info window
+                        if (matchingLocation && mapRef) {
+                          mapRef.panTo({ lat: matchingLocation.lat, lng: matchingLocation.lng });
+                          mapRef.setZoom(18);
                         }
                       }}
                       className="flex items-center px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0"
@@ -723,8 +725,10 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                         setSearchInput(suggestion);
                         setSearchQuery(suggestion);
                         setShowSuggestions(false);
-                        if (matchingLocation) {
-                          setTimeout(() => handleLocationClick(matchingLocation), 100);
+                        // Pan to location without opening info window
+                        if (matchingLocation && mapRef) {
+                          mapRef.panTo({ lat: matchingLocation.lat, lng: matchingLocation.lng });
+                          mapRef.setZoom(18);
                         }
                       }}
                       className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0"

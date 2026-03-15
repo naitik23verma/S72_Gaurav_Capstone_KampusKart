@@ -617,7 +617,7 @@ const Complaints = () => {
             </div>
           </div>
           {/* Search Bar */}
-          <div className="relative w-full lg:w-[520px]" ref={searchRef}>
+          <div className="relative w-full sm:w-[380px] md:w-[440px] lg:w-[520px]" ref={searchRef}>
             <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
               <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
               <input
@@ -674,7 +674,7 @@ const Complaints = () => {
           </div>
         </div>
         {/* Card Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
           {complaints.filter(complaint => complaint).map((complaint, idx) => (
             <div
               key={complaint._id}
@@ -683,7 +683,7 @@ const Complaints = () => {
               onClick={() => setSelectedComplaintForDetails(complaint)}
             >
               {/* Image Section with Overlay */}
-              <div className="relative h-64 sm:h-80 overflow-hidden">
+              <div className="relative h-48 sm:h-56 md:h-64 overflow-hidden">
                 {complaint.images && complaint.images.length > 0 ? (
                   <>
                     <img

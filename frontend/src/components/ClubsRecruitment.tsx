@@ -54,7 +54,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg border-2 border-gray-200 p-8 max-w-3xl w-full mx-auto max-h-[90vh] overflow-y-auto relative">
+            <div className="bg-white rounded-lg border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[90vh] overflow-y-auto relative">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -70,7 +70,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
         <div className="flex flex-col md:flex-row gap-8">
           {club.image?.url ? (
             <div 
-              className="relative group mb-6 md:mb-0 rounded-lg overflow-hidden border-2 border-gray-200 w-full md:w-1/2 lg:w-1/2 h-128 flex-shrink-0 mx-auto md:mx-0 max-w-xl cursor-pointer"
+              className="relative group mb-6 md:mb-0 rounded-lg overflow-hidden border-2 border-gray-200 w-full md:w-1/2 lg:w-1/2 h-48 sm:h-64 md:h-80 flex-shrink-0 mx-auto md:mx-0 max-w-xl cursor-pointer"
               onClick={() => handleImageClick(club.image?.url || '')}
             >
               <img 
@@ -90,7 +90,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
               </div>
             </div>
           ) : (
-            <div className="w-full md:w-1/2 lg:w-1/2 h-128 bg-gray-100 rounded-lg mb-6 md:mb-0 flex flex-col items-center justify-center text-gray-400 flex-shrink-0 mx-auto md:mx-0 max-w-xl">
+            <div className="w-full md:w-1/2 lg:w-1/2 h-48 sm:h-64 md:h-80 bg-gray-100 rounded-lg mb-6 md:mb-0 flex flex-col items-center justify-center text-gray-400 flex-shrink-0 mx-auto md:mx-0 max-w-xl">
               <FiCalendar className="w-16 h-16 mb-2" />
               <span className="text-sm font-medium">No Image Available</span>
             </div>
@@ -490,7 +490,7 @@ const ClubsRecruitment = () => {
             </div>
           </div>
           {/* Search Bar with Autocomplete */}
-          <div className="relative w-full lg:w-[520px]" ref={searchRef}>
+          <div className="relative w-full sm:w-[380px] md:w-[440px] lg:w-[520px]" ref={searchRef}>
             <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
               <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
               <input
@@ -546,14 +546,14 @@ const ClubsRecruitment = () => {
             )}
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
           {filteredClubs.map(club => (
             <div 
               key={club._id} 
               className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden cursor-pointer hover:border-gray-300 transition-colors duration-200"
               onClick={() => openClubDetailsModal(club)}
             >
-              <div className="relative h-60 sm:h-80 overflow-hidden">
+              <div className="relative h-48 sm:h-56 md:h-64 overflow-hidden">
                 {club.image?.url ? (
                   <>
                     <img 

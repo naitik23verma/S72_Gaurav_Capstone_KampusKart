@@ -274,14 +274,3 @@ body {
   }
 }
 
-/* Dark Mode Support (Future Enhancement) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background-primary: #1F2937;
-    --color-background-secondary: #374151;
-    --color-text-primary: #F9FAFB;
-    --color-text-secondary: #D1D5DB;
-    --color-gray-200: #374151;
-    --color-gray-300: #4B5563;
-  }
-} 

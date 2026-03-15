@@ -251,7 +251,7 @@ const Profile = () => {
 
           {/* Profile Picture + Completion */}
           <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 p-6 bg-white border-2 border-gray-200 rounded-lg">
-            <div className="relative w-24 h-24 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-gray-200 flex-shrink-0">
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-gray-200 flex-shrink-0">
               {profileData.profilePicture?.url || previewUrl ? (
                 <img
                   src={previewUrl || profileData.profilePicture?.url}

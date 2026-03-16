@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 interface FooterProps {
@@ -23,10 +24,10 @@ export function Footer({
       <div className="max-w-6xl mx-auto px-4 sm:px-8">
         {/* Top row: brand + socials */}
         <div className="md:flex md:items-start md:justify-between">
-          <a href="/" className="flex items-center gap-x-2" aria-label={brandName}>
+          <Link to="/" className="flex items-center gap-x-2" aria-label={brandName}>
             {logo}
             <span className="font-extrabold text-xl text-black tracking-tight">{brandName}</span>
-          </a>
+          </Link>
           <ul className="flex list-none mt-6 md:mt-0 space-x-2">
             {socialLinks.map((link, i) => (
               <li key={i}>
@@ -51,12 +52,12 @@ export function Footer({
             <ul className="list-none flex flex-wrap -my-1 -mx-2 lg:justify-end">
               {mainLinks.map((link, i) => (
                 <li key={i} className="my-1 mx-2 shrink-0">
-                  <a
-                    href={link.href}
+                  <Link
+                    to={link.href}
                     className="text-sm font-semibold text-black hover:text-[#00C6A7] transition-colors duration-200"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -66,12 +67,12 @@ export function Footer({
             <ul className="list-none flex flex-wrap -my-1 -mx-3 lg:justify-end">
               {legalLinks.map((link, i) => (
                 <li key={i} className="my-1 mx-3 shrink-0">
-                  <a
-                    href={link.href}
+                  <Link
+                    to={link.href}
                     className="text-sm text-gray-600 hover:text-[#00C6A7] transition-colors duration-200"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

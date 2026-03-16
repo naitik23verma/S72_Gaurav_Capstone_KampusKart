@@ -49,7 +49,6 @@ const profileRoutes = require('./routes/profile');
 const complaintsRoutes = require('./routes/complaints');
 const startDeletionCronJob = require('./cron/deleteItems');
 const { startKeepAlive } = require('./cron/keepAlive');
-require('./cron/lostFoundCron'); // Import lost/found cron job
 const http = require('http');
 const { Server } = require('socket.io');
 const newsRoutes = require('./routes/news');
@@ -82,6 +81,7 @@ app.use(cors({
   origin: function(origin, callback) {
     const allowedOrigins = [
       'http://localhost:3000',
+      'http://localhost:5173',
       'https://kampuskart.netlify.app',
       'https://s72-gaurav-capstone.onrender.com'
     ];
@@ -206,6 +206,7 @@ const io = new Server(server, {
     origin: function(origin, callback) {
       const allowedOrigins = [
         'http://localhost:3000',
+        'http://localhost:5173',
         'https://kampuskart.netlify.app',
         'https://s72-gaurav-capstone.onrender.com'
       ];

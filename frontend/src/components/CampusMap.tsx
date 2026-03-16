@@ -392,8 +392,13 @@ const CampusMap: React.FC<CampusMapProps> = () => {
     }
   }, [hasRequestedLocation, mapRef, userLocation]);
 
-  // Panel is always open on desktop, hidden on mobile
-  const isPanelOpen = window.innerWidth >= 768;
+  // Panel is always open on desktop, hidden on mobile — reactive to window resize
+  const [isPanelOpen, setIsPanelOpen] = useState(window.innerWidth >= 768);
+  useEffect(() => {
+    const handleResize = () => setIsPanelOpen(window.innerWidth >= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
 
   // Cleanup zoom listener on unmount
@@ -521,9 +526,9 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                 ...MAP_OPTIONS,
                 // Adjust controls for mobile and desktop
                 zoomControl: true,
-                mapTypeControl: window.innerWidth >= 768,
-                streetViewControl: window.innerWidth >= 768,
-                fullscreenControl: window.innerWidth >= 768,
+                mapTypeControl: isPanelOpen,
+                streetViewControl: isPanelOpen,
+                fullscreenControl: isPanelOpen,
               }}
               onClick={handleMapClick}
               onLoad={onMapLoad}
@@ -557,7 +562,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                   }}
                   options={{
                     pixelOffset: new window.google.maps.Size(0, -50),
-                    maxWidth: window.innerWidth < 768 ? 300 : 400,
+                    maxWidth: isPanelOpen ? 400 : 300,
                     disableAutoPan: false
                   }}
                 >
@@ -655,14 +660,34 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                 <line x1="18" y1="12" x2="22" y2="12" stroke="currentColor" strokeWidth={2} />
               </svg>
             </button>
+            {/* Locations List Toggle - Mobile Only */}
+            {!isPanelOpen && (
+              <button
+                onClick={() => setIsPanelOpen(true)}
+                className="md:hidden absolute bottom-3 right-3 z-10 bg-[#181818] hover:bg-[#00C6A7] text-white border-2 border-gray-200 rounded-lg px-3 py-2.5 flex items-center gap-2 text-sm font-semibold transition-colors duration-200"
+                aria-label="Show locations list"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                Locations
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Locations List Panel Container - Full width on mobile, 1/3 on desktop */}
-        {/* Added hidden class for mobile, removed mobile toggle button */}
-        <div className={`hidden md:flex w-full md:w-1/3 flex-col md:h-full relative transition-all duration-300 ease-in-out md:opacity-100 md:h-full`}>
-          {/* Toggle Panel Button - Mobile Only, positioned at the top center */}
-          {/* Removed this button as the panel is now hidden on mobile */}
+        {/* Locations List Panel Container - Full width on mobile (overlay), 1/3 on desktop (side) */}
+        <div className={`${isPanelOpen ? 'flex' : 'hidden'} md:flex absolute md:relative inset-0 md:inset-auto w-full md:w-1/3 flex-col md:h-full z-20 md:z-auto transition-all duration-300 ease-in-out`}>
+          {/* Mobile close button */}
+          <button
+            className="md:hidden absolute top-2 right-2 z-20 bg-white border-2 border-gray-200 rounded-lg p-1.5 text-gray-600 hover:bg-gray-50"
+            onClick={() => setIsPanelOpen(false)}
+            aria-label="Close locations panel"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
 
           {/* Inner container with padding, shadow, and overflow for list */}
           {/* Added pt-4 to prevent button overlap */}

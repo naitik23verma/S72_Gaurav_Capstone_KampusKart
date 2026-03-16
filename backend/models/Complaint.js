@@ -97,6 +97,19 @@ complaintSchema.pre('save', function(next) {
   next();
 });
 
+// Add indexes for frequently queried fields
+complaintSchema.index({ status: 1 });
+complaintSchema.index({ category: 1 });
+complaintSchema.index({ department: 1 });
+complaintSchema.index({ priority: 1 });
+complaintSchema.index({ user: 1 });
+complaintSchema.index({ createdAt: -1 });
+complaintSchema.index({ isDeleted: 1 });
+// Compound indexes for common queries
+complaintSchema.index({ status: 1, category: 1 });
+complaintSchema.index({ isDeleted: 1, createdAt: -1 });
+complaintSchema.index({ department: 1, status: 1 });
+
 const Complaint = mongoose.model('Complaint', complaintSchema);
 
 module.exports = Complaint; 

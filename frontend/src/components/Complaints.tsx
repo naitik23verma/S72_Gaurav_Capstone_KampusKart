@@ -1,7 +1,6 @@
-import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { FiPlus, FiEdit2, FiTrash2, FiX, FiCheckCircle, FiUser, FiCalendar, FiTag, FiFileText, FiSearch, FiInfo } from 'react-icons/fi';
-import { Instagram, Linkedin, Globe, Github } from 'lucide-react';
+import { FiEdit2, FiTrash2, FiCheckCircle, FiUser, FiCalendar, FiTag, FiFileText, FiSearch, FiInfo } from 'react-icons/fi';
 import { format } from 'date-fns';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
@@ -9,13 +8,7 @@ import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { validateMultipleRequired } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
-
-const socialLinks = [
-  { href: 'https://www.instagram.com/gaurav_khandelwal_/', label: 'Instagram', icon: <Instagram className="h-4 w-4" /> },
-  { href: 'https://www.linkedin.com/in/gaurav-khandelwal-17a127358/', label: 'LinkedIn', icon: <Linkedin className="h-4 w-4" /> },
-  { href: 'https://gaurav-khandelwal.vercel.app/', label: 'Portfolio', icon: <Globe className="h-4 w-4" /> },
-  { href: 'https://github.com/Gaurav-205', label: 'GitHub', icon: <Github className="h-4 w-4" /> },
-];
+import { socialLinks } from '../utils/socialLinks';
 
 interface Complaint {
   _id: string;
@@ -263,7 +256,7 @@ const Complaints = () => {
     setNewComplaint({
       title: complaint?.title || '',
       description: complaint?.description || '',
-      category: complaint?.category || 'General',
+      category: complaint?.category || 'Other',
       priority: complaint?.priority || 'Medium',
       department: complaint?.department || '',
       status: complaint?.status || 'Open',
@@ -291,6 +284,7 @@ const Complaints = () => {
       department: 'Student Services' as Complaint['department'],
       status: 'Open' as Complaint['status'],
     });
+    setImages([]);
     setFormError(null);
     setFieldErrors({});
   };
@@ -552,7 +546,7 @@ const Complaints = () => {
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         {/* Success Message Banner */}
         {successMessage && (
           <div className="mb-6 bg-green-50 border-2 border-green-200 rounded-lg p-4 flex items-center gap-3 animate-fade-in">
@@ -762,14 +756,14 @@ const Complaints = () => {
                   <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t-2 border-gray-200">
                     <button
                       onClick={(e) => { e.stopPropagation(); openEditComplaintModal(complaint); }}
-                      className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-4 sm:py-2.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 active:bg-blue-200 transition-colors duration-200 text-xs sm:text-sm min-w-0 min-h-touch"
+                      className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-4 sm:py-2.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200 text-xs sm:text-sm min-w-0 min-h-touch"
                     >
                       <FiEdit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                       <span className="truncate text-xs sm:text-sm">Edit</span>
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDeleteComplaint(complaint._id); }}
-                      className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-4 sm:py-2.5 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 active:bg-red-200 transition-colors duration-200 text-xs sm:text-sm min-w-0 min-h-touch"
+                      className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-4 sm:py-2.5 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200 text-xs sm:text-sm min-w-0 min-h-touch"
                     >
                       <FiTrash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                       <span className="truncate text-xs sm:text-sm">Delete</span>
@@ -915,7 +909,7 @@ const Complaints = () => {
                           }
                         }}
                         onBlur={(e) => handleFieldBlur('description', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
+                        className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm resize-none`}
                         rows={4}
                         placeholder="Describe the issue, any relevant details, etc."
                         required
@@ -968,8 +962,8 @@ const Complaints = () => {
 
          {/* Complaint Details Modal */}
          {selectedComplaintForDetails && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 safe-top safe-bottom">
-                <div className="bg-white rounded-lg border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4">
+                <div className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
                   {/* Close Button */}
                   <button
                     onClick={() => setSelectedComplaintForDetails(null)}
@@ -1047,7 +1041,7 @@ const Complaints = () => {
 
          {/* Zoomed Image Modal */}
          {zoomedImage && selectedComplaintForDetails && selectedComplaintForDetails.images && selectedComplaintForDetails.images.length > 0 && (
-           <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[60] p-4 safe-top safe-bottom" onClick={() => setZoomedImage(null)}>
+           <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[10000] p-4 safe-top safe-bottom" onClick={() => setZoomedImage(null)}>
              {/* Image */}
              <img 
                src={zoomedImage} 

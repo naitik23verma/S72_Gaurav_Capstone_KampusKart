@@ -1,65 +1,145 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { FiUser, FiMail, FiPhone, FiMapPin, FiEdit2, FiSave, FiXCircle, FiUpload, FiAlertCircle, FiCheckCircle, FiCalendar, FiTag, FiBriefcase } from 'react-icons/fi';
-import { Instagram, Linkedin, Globe, Github } from 'lucide-react';
+import {
+  FiUser, FiMail, FiPhone, FiEdit2, FiSave, FiXCircle,
+  FiAlertCircle, FiCheckCircle, FiCalendar, FiTag, FiBriefcase, FiCamera
+} from 'react-icons/fi';
 import { API_BASE } from '../config';
-import { ProfileSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
+import { socialLinks } from '../utils/socialLinks';
 
-const socialLinks = [
-  { href: 'https://www.instagram.com/gaurav_khandelwal_/', label: 'Instagram', icon: <Instagram className="h-4 w-4" /> },
-  { href: 'https://www.linkedin.com/in/gaurav-khandelwal-17a127358/', label: 'LinkedIn', icon: <Linkedin className="h-4 w-4" /> },
-  { href: 'https://gaurav-khandelwal.vercel.app/', label: 'Portfolio', icon: <Globe className="h-4 w-4" /> },
-  { href: 'https://github.com/Gaurav-205', label: 'GitHub', icon: <Github className="h-4 w-4" /> },
-];
-
-// Helper function to format date for display
 const formatDate = (dateString: string | null | undefined) => {
-    if (!dateString) return 'N/A';
-    try {
-        const date = new Date(dateString);
-        // Check if the date is valid
-        if (isNaN(date.getTime())) {
-            return 'N/A';
-        }
-        return date.toLocaleDateString(); // Format as per local conventions
-    } catch (error) {
-        console.error('Error formatting date:', error);
-        return 'N/A';
-    }
+  if (!dateString) return 'Not set';
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Not set';
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  } catch {
+    return 'Not set';
+  }
 };
 
-// Helper function to calculate profile completion percentage
-const calculateCompletion = (profileData: any) => {
-    const fields = ['name', 'email', 'phone', 'gender', 'dateOfBirth', 'major', 'program', 'yearOfStudy'];
-    const filledFields = fields.filter(field => {
-        const value = profileData[field];
-        return value && typeof value === 'string' && value.trim() !== '';
-    });
-    return Math.round((filledFields.length / fields.length) * 100);
+const calculateCompletion = (data: Record<string, any>) => {
+  const fields = ['name', 'email', 'phone', 'gender', 'dateOfBirth', 'major', 'program', 'yearOfStudy'];
+  const filled = fields.filter(f => data[f] && String(data[f]).trim() !== '');
+  return Math.round((filled.length / fields.length) * 100);
 };
+
+// ─── Skeleton ────────────────────────────────────────────────────────────────
+
+const ProfileSkeleton: React.FC = () => (
+  <div className="min-h-screen bg-white font-sans">
+    <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
+      <div className="max-w-3xl mx-auto">
+        {/* Header row */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="h-9 w-40 bg-gray-200 rounded-lg animate-pulse" />
+          <div className="h-10 w-32 bg-gray-200 rounded-lg animate-pulse" />
+        </div>
+
+        {/* Avatar card */}
+        <div className="bg-white border-2 border-gray-200 rounded-lg p-6 mb-6 flex flex-col sm:flex-row items-center gap-5">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-gray-200 animate-pulse flex-shrink-0" />
+          <div className="flex-1 w-full space-y-3">
+            <div className="h-5 w-36 bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
+            <div className="space-y-1.5">
+              <div className="flex justify-between">
+                <div className="h-3 w-28 bg-gray-200 rounded animate-pulse" />
+                <div className="h-3 w-8 bg-gray-200 rounded animate-pulse" />
+              </div>
+              <div className="h-2 w-full bg-gray-200 rounded-full animate-pulse" />
+            </div>
+          </div>
+        </div>
+
+        {/* Info card */}
+        <div className="bg-white border-2 border-gray-200 rounded-lg p-6 space-y-8">
+          {[0, 1].map(section => (
+            <div key={section}>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-7 h-7 bg-gray-200 rounded-lg animate-pulse" />
+                <div className="h-5 w-44 bg-gray-200 rounded animate-pulse" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {Array.from({ length: section === 0 ? 5 : 3 }).map((_, i) => (
+                  <div key={i} className="p-4 bg-gray-50 border-2 border-gray-200 rounded-lg space-y-2">
+                    <div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+          <div className="flex justify-end pt-2 border-t-2 border-gray-200">
+            <div className="h-10 w-32 bg-gray-200 rounded-lg animate-pulse" />
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+);
+
+// ─── Field display ────────────────────────────────────────────────────────────
+
+const InfoField: React.FC<{ label: string; value: string; icon: React.ReactNode }> = ({ label, value, icon }) => (
+  <div className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+    <p className="text-xs font-semibold text-gray-500 mb-1.5">{label}</p>
+    <div className="flex items-center gap-2 text-gray-900 font-medium text-sm">
+      <span className="text-gray-400 flex-shrink-0">{icon}</span>
+      <span className={value === 'Not set' ? 'text-gray-400 italic' : ''}>{value}</span>
+    </div>
+  </div>
+);
+
+// ─── Edit field ───────────────────────────────────────────────────────────────
+
+const EditField: React.FC<{
+  id: string; label: string; icon: React.ReactNode;
+  value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string; placeholder?: string; disabled?: boolean; note?: string;
+  max?: string;
+}> = ({ id, label, icon, value, onChange, type = 'text', placeholder, disabled, note, max }) => (
+  <div className="flex flex-col">
+    <label htmlFor={id} className="block text-xs font-semibold text-gray-700 mb-1.5">{label}</label>
+    <div className="relative">
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">{icon}</span>
+      <input
+        id={id} type={type} name={id} value={value} onChange={onChange}
+        disabled={disabled} placeholder={placeholder} max={max}
+        className={`w-full pl-10 pr-3 py-2.5 border-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-colors
+          ${disabled ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white text-gray-900 border-gray-200'}`}
+      />
+    </div>
+    {note && <p className="text-xs text-gray-400 mt-1">{note}</p>}
+  </div>
+);
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 const Profile = () => {
   const { user, token } = useAuth();
-  const [profileData, setProfileData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    major: user?.major || '',
-    yearOfStudy: user?.yearOfStudy || '',
-    profilePicture: user?.profilePicture || null,
-    gender: user?.gender || '',
-    dateOfBirth: user?.dateOfBirth ? user.dateOfBirth.split('T')[0] : '',
-    program: user?.program || '',
-  });
-  
-  const [initialProfileData, setInitialProfileData] = useState(profileData);
+
+  const emptyProfile = {
+    name: '', email: '', phone: '', major: '',
+    yearOfStudy: '', profilePicture: null as { url: string; public_id: string } | null,
+    gender: '', dateOfBirth: '', program: '',
+  };
+
+  const [profileData, setProfileData] = useState(emptyProfile);
+  const [initialProfileData, setInitialProfileData] = useState(emptyProfile);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [pageLoading, setPageLoading] = useState(true);
 
+  // Seed from AuthContext immediately, then fetch fresh data
   useEffect(() => {
     if (user) {
-      const initialData = {
+      const seed = {
         name: user.name || '',
         email: user.email || '',
         phone: user.phone || '',
@@ -70,105 +150,85 @@ const Profile = () => {
         dateOfBirth: user.dateOfBirth ? user.dateOfBirth.split('T')[0] : '',
         program: user.program || '',
       };
-      setProfileData(initialData);
-      setInitialProfileData(initialData);
+      setProfileData(seed);
+      setInitialProfileData(seed);
     }
   }, [user]);
 
+  // Fetch fresh profile from API
   useEffect(() => {
-    if (!selectedFile) {
-      setPreviewUrl(null);
-      return;
-    }
-
-    const objectUrl = URL.createObjectURL(selectedFile);
-    setPreviewUrl(objectUrl);
-
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [selectedFile]);
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [saveLoading, setSaveLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [pageLoading, setPageLoading] = useState(true);
-
-  useEffect(() => {
+    if (!token || !user) { setPageLoading(false); return; }
     const fetchProfile = async () => {
-      if (!token || !user) {
-         setPageLoading(false);
-         return;
-      }
-      setPageLoading(true);
-
       try {
-        const response = await fetch(`${API_BASE}/api/profile`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
+        const res = await fetch(`${API_BASE}/api/profile`, {
+          headers: { 'Authorization': `Bearer ${token}` },
         });
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          setError(errorData.message || 'Failed to fetch profile data.');
-          return;
-        }
-        const data = await response.json();
-        if (data) {
-          const fetchedData = {
-             name: data.name || '',
-             email: data.email || '',
-             phone: data.phone || '',
-             major: data.major || '',
-             yearOfStudy: data.yearOfStudy || '',
-             profilePicture: data.profilePicture || null,
-             gender: data.gender || '',
-             dateOfBirth: data.dateOfBirth ? data.dateOfBirth.split('T')[0] : '',
-             program: data.program || '',
-          };
-          setProfileData(fetchedData);
-          setInitialProfileData(fetchedData);
-        }
-      } catch (err: any) {
-        setError('An error occurred while fetching profile data.');
+        if (!res.ok) { setPageLoading(false); return; }
+        const data = await res.json();
+        const fresh = {
+          name: data.name || '',
+          email: data.email || '',
+          phone: data.phone || '',
+          major: data.major || '',
+          yearOfStudy: data.yearOfStudy || '',
+          profilePicture: data.profilePicture || null,
+          gender: data.gender || '',
+          dateOfBirth: data.dateOfBirth ? data.dateOfBirth.split('T')[0] : '',
+          program: data.program || '',
+        };
+        setProfileData(fresh);
+        setInitialProfileData(fresh);
+      } catch {
+        // silently fall back to AuthContext data
       } finally {
         setPageLoading(false);
       }
     };
-    
-    if (user && token) {
-       fetchProfile();
-    } else {
-        setPageLoading(false);
-    }
-
+    fetchProfile();
   }, [token, user]);
 
+  // Preview URL for selected file
+  useEffect(() => {
+    if (!selectedFile) { setPreviewUrl(null); return; }
+    const url = URL.createObjectURL(selectedFile);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [selectedFile]);
+
+  // Auto-dismiss success message
+  useEffect(() => {
+    if (!successMessage) return;
+    const t = setTimeout(() => setSuccessMessage(null), 4000);
+    return () => clearTimeout(t);
+  }, [successMessage]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setProfileData({ ...profileData, [name]: value });
+    setProfileData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     setSuccessMessage(null);
   };
-  
-   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setProfileData({ ...profileData, [name]: value });
+
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setProfileData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     setSuccessMessage(null);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files?.[0]) {
       setSelectedFile(e.target.files[0]);
       setError(null);
-      setSuccessMessage(null);
     }
   };
 
-  const handleSave = async () => {
-     if (!profileData.name.trim()) {
-         setError('Name cannot be empty.');
-         return;
-     }
+  const handleCancelEdit = () => {
+    setProfileData({ ...initialProfileData });
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    setError(null);
+    setIsEditing(false);
+  };
 
+  const handleSave = async () => {
+    if (!profileData.name.trim()) { setError('Name cannot be empty.'); return; }
     setSaveLoading(true);
     setError(null);
     setSuccessMessage(null);
@@ -181,177 +241,160 @@ const Profile = () => {
     formData.append('gender', profileData.gender.trim());
     formData.append('dateOfBirth', profileData.dateOfBirth.trim());
     formData.append('program', profileData.program.trim());
-
-    if (selectedFile) {
-        formData.append('profilePicture', selectedFile);
-    }
+    if (selectedFile) formData.append('profilePicture', selectedFile);
 
     try {
-        const response = await fetch(`${API_BASE}/api/profile`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
-            body: formData,
-        });
-        const data = await response.json();
-
-        if (response.ok) {
-            const updatedData = {
-                name: data.name || '',
-                email: data.email || '',
-                phone: data.phone || '',
-                major: data.major || '',
-                yearOfStudy: data.yearOfStudy || '',
-                profilePicture: data.profilePicture || null,
-                gender: data.gender || '',
-                dateOfBirth: data.dateOfBirth ? data.dateOfBirth.split('T')[0] : '',
-                program: data.program || '',
-            };
-            setProfileData(updatedData);
-            setInitialProfileData(updatedData);
-            setSelectedFile(null);
-            setPreviewUrl(null);
-            setSuccessMessage('Profile updated successfully!');
-            setIsEditing(false);
-        } else {
-            setError(data.message || 'Failed to save profile.');
-        }
-    } catch (err: any) {
-        setError('An error occurred while saving the profile.');
+      const res = await fetch(`${API_BASE}/api/profile`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const updated = {
+          name: data.name || '',
+          email: data.email || '',
+          phone: data.phone || '',
+          major: data.major || '',
+          yearOfStudy: data.yearOfStudy || '',
+          profilePicture: data.profilePicture || null,
+          gender: data.gender || '',
+          dateOfBirth: data.dateOfBirth ? data.dateOfBirth.split('T')[0] : '',
+          program: data.program || '',
+        };
+        setProfileData(updated);
+        setInitialProfileData(updated);
+        setSelectedFile(null);
+        setPreviewUrl(null);
+        setSuccessMessage('Profile updated successfully!');
+        setIsEditing(false);
+      } else {
+        setError(data.message || 'Failed to save profile.');
+      }
+    } catch {
+      setError('An error occurred while saving. Please try again.');
     } finally {
-        setSaveLoading(false);
+      setSaveLoading(false);
     }
   };
 
-   const handleCancelEdit = () => {
-        setProfileData({
-            ...initialProfileData,
-            dateOfBirth: initialProfileData.dateOfBirth ? initialProfileData.dateOfBirth.split('T')[0] : '',
-        });
-        setSelectedFile(null);
-        setPreviewUrl(null);
-        setError(null);
-        setSuccessMessage(null);
-        setIsEditing(false);
-    };
+  if (pageLoading) return <ProfileSkeleton />;
 
-  if (pageLoading || !user) {
-    return <ProfileSkeleton />;
-  }
+  const avatarSrc = previewUrl || profileData.profilePicture?.url;
+  const completion = calculateCompletion(profileData);
 
   return (
-    <div className="min-h-screen flex flex-col bg-white font-sans overflow-x-hidden">
-      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
+    <div className="min-h-screen flex flex-col bg-white font-sans">
+      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         <div className="max-w-3xl mx-auto">
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
-            <h1 className="text-h2 font-extrabold text-black">My Profile</h1>
-          </div>
 
-          {/* Profile Picture + Completion */}
-          <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 p-6 bg-white border-2 border-gray-200 rounded-lg">
-            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-gray-200 flex-shrink-0">
-              {profileData.profilePicture?.url || previewUrl ? (
-                <img
-                  src={previewUrl || profileData.profilePicture?.url}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <FiUser className="w-10 h-10 text-gray-300" />
-              )}
-              {isEditing && (
-                <label
-                  htmlFor="profilePicture-upload"
-                  className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white cursor-pointer opacity-0 hover:opacity-100 transition-opacity rounded-lg"
-                >
-                  <FiUpload className="w-5 h-5 mr-1" /> Upload
-                </label>
-              )}
-              <input
-                id="profilePicture-upload"
-                type="file"
-                accept="image/*"
-                className="sr-only"
-                onChange={handleFileChange}
-                disabled={!isEditing}
-              />
-            </div>
-            <div className="flex-1 w-full">
-              <p className="text-lg font-bold text-gray-900 mb-1">{profileData.name || 'Your Name'}</p>
-              <p className="text-sm text-gray-500 mb-3">{profileData.email}</p>
-              {/* Completion bar */}
-              <div className="w-full">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs font-medium text-gray-600">Profile Completion</span>
-                  <span className="text-xs font-semibold text-gray-700">{calculateCompletion(profileData)}%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-lg h-2">
-                  <div className="bg-[#00C6A7] h-2 rounded-lg transition-all duration-300" style={{ width: `${calculateCompletion(profileData)}%` }} />
-                </div>
-              </div>
-            </div>
+          {/* Page header */}
+          <div className="flex items-center justify-between mb-8 gap-4">
+            <h1 className="text-h2 font-extrabold text-black">My Profile</h1>
+            {!isEditing && (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] transition-colors duration-200 min-h-touch"
+              >
+                <FiEdit2 className="w-4 h-4" /> Edit Profile
+              </button>
+            )}
           </div>
 
           {/* Alerts */}
           {error && (
-            <div className="mb-6 bg-red-50 border-2 border-red-200 rounded-lg p-4 flex items-center gap-3">
+            <div className="mb-5 bg-red-50 border-2 border-red-200 rounded-lg p-4 flex items-center gap-3">
               <FiAlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
               <p className="text-red-800 font-medium text-sm">{error}</p>
+              <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600 p-1">
+                <FiXCircle className="w-4 h-4" />
+              </button>
             </div>
           )}
           {successMessage && (
-            <div className="mb-6 bg-green-50 border-2 border-green-200 rounded-lg p-4 flex items-center gap-3">
+            <div className="mb-5 bg-green-50 border-2 border-green-200 rounded-lg p-4 flex items-center gap-3">
               <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
               <p className="text-green-800 font-medium text-sm">{successMessage}</p>
             </div>
           )}
 
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-6 w-full">
+          {/* Avatar + completion card */}
+          <div className="flex flex-col sm:flex-row items-center gap-5 mb-6 p-5 sm:p-6 bg-white border-2 border-gray-200 rounded-lg">
+            {/* Avatar */}
+            <div className="relative flex-shrink-0">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-gray-100 border-2 border-gray-200 overflow-hidden flex items-center justify-center">
+                {avatarSrc ? (
+                  <img src={avatarSrc} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <FiUser className="w-10 h-10 text-gray-300" />
+                )}
+              </div>
+              {isEditing && (
+                <label
+                  htmlFor="profilePicture-upload"
+                  className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-white cursor-pointer rounded-lg gap-1"
+                  title="Upload photo"
+                >
+                  <FiCamera className="w-5 h-5" />
+                  <span className="text-xs font-semibold">Change</span>
+                  <input
+                    id="profilePicture-upload"
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={handleFileChange}
+                  />
+                </label>
+              )}
+            </div>
+
+            {/* Name + email + completion */}
+            <div className="flex-1 w-full text-center sm:text-left">
+              <p className="text-lg font-bold text-gray-900 leading-tight">{profileData.name || 'Your Name'}</p>
+              <p className="text-sm text-gray-500 mb-3 truncate">{profileData.email}</p>
+              <div className="w-full">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-xs font-medium text-gray-600">Profile Completion</span>
+                  <span className="text-xs font-bold text-gray-700">{completion}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="h-2 rounded-full transition-all duration-500"
+                    style={{
+                      width: `${completion}%`,
+                      backgroundColor: completion === 100 ? '#10B981' : '#00C6A7',
+                    }}
+                  />
+                </div>
+                {completion < 100 && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    {isEditing ? 'Fill in all fields to reach 100%' : 'Click Edit Profile to complete your profile'}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Main info card */}
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-5 sm:p-6">
             {isEditing ? (
               <div className="space-y-8">
                 {/* Personal Info */}
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <span className="bg-[#181818] text-white rounded-lg p-1.5"><FiUser className="w-4 h-4" /></span>
-                    <h2 className="text-lg font-extrabold text-black">Personal Information</h2>
+                    <h2 className="text-base font-extrabold text-black">Personal Information</h2>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {/* Name */}
-                    <div className="flex flex-col">
-                      <label htmlFor="name" className="block text-xs font-semibold text-gray-700 mb-1">Full Name</label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FiUser className="w-4 h-4"/></span>
-                        <input id="name" type="text" name="name" value={profileData.name} onChange={handleInputChange}
-                          className="w-full pl-10 pr-3 py-2.5 bg-white text-gray-900 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent placeholder-gray-400 text-sm"
-                          placeholder="Your full name" required />
-                      </div>
-                    </div>
-                    {/* Email */}
-                    <div className="flex flex-col">
-                      <label htmlFor="email" className="block text-xs font-semibold text-gray-700 mb-1">Email</label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FiMail className="w-4 h-4"/></span>
-                        <input id="email" type="email" name="email" value={profileData.email}
-                          className="w-full pl-10 pr-3 py-2.5 bg-gray-100 text-gray-500 border-2 border-gray-200 rounded-lg cursor-not-allowed text-sm"
-                          disabled />
-                      </div>
-                      <p className="text-xs text-gray-400 mt-1">Cannot be changed.</p>
-                    </div>
-                    {/* Phone */}
-                    <div className="flex flex-col">
-                      <label htmlFor="phone" className="block text-xs font-semibold text-gray-700 mb-1">Phone</label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FiPhone className="w-4 h-4"/></span>
-                        <input id="phone" type="text" name="phone" value={profileData.phone} onChange={handleInputChange}
-                          className="w-full pl-10 pr-3 py-2.5 bg-white text-gray-900 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent placeholder-gray-400 text-sm"
-                          placeholder="Your phone number" />
-                      </div>
-                    </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <EditField id="name" label="Full Name" icon={<FiUser className="w-4 h-4" />}
+                      value={profileData.name} onChange={handleInputChange} placeholder="Your full name" />
+                    <EditField id="email" label="Email" icon={<FiMail className="w-4 h-4" />}
+                      value={profileData.email} onChange={handleInputChange} disabled note="Cannot be changed." />
+                    <EditField id="phone" label="Phone" icon={<FiPhone className="w-4 h-4" />}
+                      value={profileData.phone} onChange={handleInputChange} placeholder="Your phone number" />
                     {/* Gender */}
                     <div className="flex flex-col">
-                      <label htmlFor="gender" className="block text-xs font-semibold text-gray-700 mb-1">Gender</label>
+                      <label htmlFor="gender" className="block text-xs font-semibold text-gray-700 mb-1.5">Gender</label>
                       <div className="relative">
                         <select id="gender" name="gender" value={profileData.gender} onChange={handleSelectChange}
                           className="appearance-none w-full px-4 py-2.5 bg-white text-gray-900 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm cursor-pointer">
@@ -362,19 +405,15 @@ const Profile = () => {
                           <option value="Prefer not to say">Prefer not to say</option>
                         </select>
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                          </svg>
                         </div>
                       </div>
                     </div>
-                    {/* Date of Birth */}
-                    <div className="flex flex-col">
-                      <label htmlFor="dateOfBirth" className="block text-xs font-semibold text-gray-700 mb-1">Date of Birth</label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FiCalendar className="w-4 h-4"/></span>
-                        <input id="dateOfBirth" type="date" name="dateOfBirth" value={profileData.dateOfBirth} onChange={handleInputChange}
-                          className="w-full pl-10 pr-3 py-2.5 bg-white text-gray-900 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm" />
-                      </div>
-                    </div>
+                    <EditField id="dateOfBirth" label="Date of Birth" icon={<FiCalendar className="w-4 h-4" />}
+                      value={profileData.dateOfBirth} onChange={handleInputChange}
+                      type="date" max={new Date().toISOString().split('T')[0]} />
                   </div>
                 </div>
 
@@ -382,153 +421,76 @@ const Profile = () => {
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <span className="bg-[#181818] text-white rounded-lg p-1.5"><FiBriefcase className="w-4 h-4" /></span>
-                    <h2 className="text-lg font-extrabold text-black">Academic Information</h2>
+                    <h2 className="text-base font-extrabold text-black">Academic Information</h2>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {/* Major */}
-                    <div className="flex flex-col">
-                      <label htmlFor="major" className="block text-xs font-semibold text-gray-700 mb-1">Major / Department</label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FiTag className="w-4 h-4"/></span>
-                        <input id="major" type="text" name="major" value={profileData.major} onChange={handleInputChange}
-                          className="w-full pl-10 pr-3 py-2.5 bg-white text-gray-900 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent placeholder-gray-400 text-sm"
-                          placeholder="e.g., Computer Science" />
-                      </div>
-                    </div>
-                    {/* Program */}
-                    <div className="flex flex-col">
-                      <label htmlFor="program" className="block text-xs font-semibold text-gray-700 mb-1">Program</label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FiBriefcase className="w-4 h-4"/></span>
-                        <input id="program" type="text" name="program" value={profileData.program} onChange={handleInputChange}
-                          className="w-full pl-10 pr-3 py-2.5 bg-white text-gray-900 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent placeholder-gray-400 text-sm"
-                          placeholder="e.g., Bachelor of Science" />
-                      </div>
-                    </div>
-                    {/* Year */}
-                    <div className="flex flex-col">
-                      <label htmlFor="yearOfStudy" className="block text-xs font-semibold text-gray-700 mb-1">Year Interval</label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FiCalendar className="w-4 h-4"/></span>
-                        <input id="yearOfStudy" type="text" name="yearOfStudy" value={profileData.yearOfStudy} onChange={handleInputChange}
-                          className="w-full pl-10 pr-3 py-2.5 bg-white text-gray-900 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent placeholder-gray-400 text-sm"
-                          placeholder="e.g., 2024 - 2028" />
-                      </div>
-                    </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <EditField id="major" label="Major / Department" icon={<FiTag className="w-4 h-4" />}
+                      value={profileData.major} onChange={handleInputChange} placeholder="e.g., Computer Science" />
+                    <EditField id="program" label="Program" icon={<FiBriefcase className="w-4 h-4" />}
+                      value={profileData.program} onChange={handleInputChange} placeholder="e.g., Bachelor of Science" />
+                    <EditField id="yearOfStudy" label="Year Interval" icon={<FiCalendar className="w-4 h-4" />}
+                      value={profileData.yearOfStudy} onChange={handleInputChange} placeholder="e.g., 2024 - 2028" />
                   </div>
                 </div>
 
-                {/* Buttons */}
-                <div className="flex flex-col md:flex-row justify-end gap-3 pt-2 border-t-2 border-gray-200">
-                  <button type="button" onClick={handleCancelEdit}
-                    className="px-6 py-3 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-gray-300 transition">
+                {/* Action buttons */}
+                <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t-2 border-gray-200">
+                  <button onClick={handleCancelEdit}
+                    className="px-6 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-gray-300 transition-colors min-h-touch">
                     Cancel
                   </button>
-                  <button type="button" onClick={handleSave} disabled={saveLoading}
-                    className={`px-6 py-3 rounded-lg text-sm font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 ${saveLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  <button onClick={handleSave} disabled={saveLoading}
+                    className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 min-h-touch ${saveLoading ? 'opacity-60 cursor-not-allowed' : ''}`}>
                     {saveLoading ? (
-                      <span className="flex items-center gap-2">
-                        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <>
+                        <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                         </svg>
                         Saving...
-                      </span>
-                    ) : 'Save Changes'}
+                      </>
+                    ) : (
+                      <><FiSave className="w-4 h-4" /> Save Changes</>
+                    )}
                   </button>
                 </div>
               </div>
             ) : (
               <div className="space-y-8">
-                {/* Personal Info */}
+                {/* Personal Info view */}
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <span className="bg-[#181818] text-white rounded-lg p-1.5"><FiUser className="w-4 h-4" /></span>
-                    <h2 className="text-lg font-extrabold text-black">Personal Information</h2>
+                    <h2 className="text-base font-extrabold text-black">Personal Information</h2>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-                      <p className="text-xs font-semibold text-gray-500 mb-1">Name</p>
-                      <div className="flex items-center gap-2 text-gray-900 font-medium">
-                        <FiUser className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        <span>{profileData.name || 'N/A'}</span>
-                      </div>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-                      <p className="text-xs font-semibold text-gray-500 mb-1">Email</p>
-                      <div className="flex items-center gap-2 text-gray-900 font-medium">
-                        <FiMail className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        <span className="truncate">{profileData.email || 'N/A'}</span>
-                      </div>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-                      <p className="text-xs font-semibold text-gray-500 mb-1">Phone</p>
-                      <div className="flex items-center gap-2 text-gray-900 font-medium">
-                        <FiPhone className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        <span>{profileData.phone || 'N/A'}</span>
-                      </div>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-                      <p className="text-xs font-semibold text-gray-500 mb-1">Gender</p>
-                      <div className="flex items-center gap-2 text-gray-900 font-medium">
-                        <FiUser className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        <span>{profileData.gender || 'N/A'}</span>
-                      </div>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-                      <p className="text-xs font-semibold text-gray-500 mb-1">Date of Birth</p>
-                      <div className="flex items-center gap-2 text-gray-900 font-medium">
-                        <FiCalendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        <span>{formatDate(profileData.dateOfBirth)}</span>
-                      </div>
-                    </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <InfoField label="Full Name" value={profileData.name || 'Not set'} icon={<FiUser className="w-4 h-4" />} />
+                    <InfoField label="Email" value={profileData.email || 'Not set'} icon={<FiMail className="w-4 h-4" />} />
+                    <InfoField label="Phone" value={profileData.phone || 'Not set'} icon={<FiPhone className="w-4 h-4" />} />
+                    <InfoField label="Gender" value={profileData.gender || 'Not set'} icon={<FiUser className="w-4 h-4" />} />
+                    <InfoField label="Date of Birth" value={formatDate(profileData.dateOfBirth)} icon={<FiCalendar className="w-4 h-4" />} />
                   </div>
                 </div>
 
-                {/* Academic Info */}
+                {/* Academic Info view */}
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <span className="bg-[#181818] text-white rounded-lg p-1.5"><FiBriefcase className="w-4 h-4" /></span>
-                    <h2 className="text-lg font-extrabold text-black">Academic Information</h2>
+                    <h2 className="text-base font-extrabold text-black">Academic Information</h2>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-                      <p className="text-xs font-semibold text-gray-500 mb-1">Major / Department</p>
-                      <div className="flex items-center gap-2 text-gray-900 font-medium">
-                        <FiTag className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        <span>{profileData.major || 'N/A'}</span>
-                      </div>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-                      <p className="text-xs font-semibold text-gray-500 mb-1">Program</p>
-                      <div className="flex items-center gap-2 text-gray-900 font-medium">
-                        <FiBriefcase className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        <span>{profileData.program || 'N/A'}</span>
-                      </div>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-                      <p className="text-xs font-semibold text-gray-500 mb-1">Year Interval</p>
-                      <div className="flex items-center gap-2 text-gray-900 font-medium">
-                        <FiCalendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        <span>{profileData.yearOfStudy || 'N/A'}</span>
-                      </div>
-                    </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <InfoField label="Major / Department" value={profileData.major || 'Not set'} icon={<FiTag className="w-4 h-4" />} />
+                    <InfoField label="Program" value={profileData.program || 'Not set'} icon={<FiBriefcase className="w-4 h-4" />} />
+                    <InfoField label="Year Interval" value={profileData.yearOfStudy || 'Not set'} icon={<FiCalendar className="w-4 h-4" />} />
                   </div>
-                </div>
-
-                <div className="flex justify-end pt-2 border-t-2 border-gray-200">
-                  <button type="button" onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] transition-colors duration-200">
-                    <FiEdit2 className="w-4 h-4" /> Edit Profile
-                  </button>
                 </div>
               </div>
             )}
           </div>
+
         </div>
       </main>
 
-      {/* Footer */}
       <Footer
         logo={<img src="/Logo.png" alt="KampusKart Logo" className="h-7 w-7" />}
         brandName="KampusKart"
@@ -552,4 +514,4 @@ const Profile = () => {
   );
 };
 
-export default Profile; 
+export default Profile;

@@ -75,12 +75,12 @@ export const buttonClasses = {
 } as const;
 
 /**
- * Responsive modal classes
+ * Responsive modal classes — bottom-sheet on mobile, centered dialog on sm+
  */
 export const modalClasses = {
-  overlay: 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4',
-  container: 'bg-white rounded-lg md:rounded-xl p-4 md:p-6 lg:p-8 max-w-full md:max-w-2xl lg:max-w-3xl w-full mx-4 max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative',
-  closeButton: 'absolute top-2 right-2 md:top-4 md:right-4 text-red-500 hover:text-red-700 transition-colors duration-200 p-2',
+  overlay: 'fixed inset-0 bg-black bg-opacity-20 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4',
+  container: 'bg-white rounded-t-xl sm:rounded-xl p-4 sm:p-6 lg:p-8 w-full sm:max-w-2xl lg:max-w-3xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto relative',
+  closeButton: 'absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-500 hover:text-gray-700 transition-colors duration-200 p-2 rounded-lg hover:bg-gray-100',
 } as const;
 
 /**

@@ -2,18 +2,11 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware'); // Assuming you have an auth middleware
 const LostFoundItem = require('../models/LostFoundItem');
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
 const streamifier = require('streamifier');
 const rateLimit = require('express-rate-limit'); // Import rate-limit
 const { sanitizeInput, validateLostFoundItem } = require('../middleware/validation');
-
-// Cloudinary configuration
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 // Multer configuration for file uploads
 const storage = multer.memoryStorage(); // Store files in memory

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Navbar1 } from '../components/ui/shadcnblocks-com-navbar1';
@@ -6,17 +6,17 @@ import { Navbar1 } from '../components/ui/shadcnblocks-com-navbar1';
 const KampusKartNavbar: React.FC = () => {
   const { user, token, logout } = useAuth();
   const navigate = useNavigate();
+  const isLoggedIn = Boolean(token && user);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     navigate('/login');
-  };
+  }, [logout, navigate]);
 
-  // Menu structure - same for both authenticated and unauthenticated
-  const menuItems = [
+  const menuItems = useMemo(() => [
     {
       title: "Home",
-      url: token && user ? "/home" : "/",
+      url: isLoggedIn ? "/home" : "/",
     },
     {
       title: "Features",
@@ -25,38 +25,38 @@ const KampusKartNavbar: React.FC = () => {
         {
           title: "Lost & Found",
           description: "Report or find lost items on campus",
-          url: token && user ? "/lostfound" : "/login",
-          locked: !token || !user,
+          url: isLoggedIn ? "/lostfound" : "/login",
+          locked: !isLoggedIn,
         },
         {
           title: "Complaints",
           description: "Submit and track campus complaints",
-          url: token && user ? "/complaints" : "/login",
-          locked: !token || !user,
+          url: isLoggedIn ? "/complaints" : "/login",
+          locked: !isLoggedIn,
         },
         {
           title: "Events",
           description: "Discover and join campus events",
-          url: token && user ? "/events" : "/login",
-          locked: !token || !user,
+          url: isLoggedIn ? "/events" : "/login",
+          locked: !isLoggedIn,
         },
         {
           title: "Clubs Recruitment",
           description: "Join student clubs and organizations",
-          url: token && user ? "/clubs-recruitment" : "/login",
-          locked: !token || !user,
+          url: isLoggedIn ? "/clubs-recruitment" : "/login",
+          locked: !isLoggedIn,
         },
         {
           title: "News",
           description: "Stay updated with campus news",
-          url: token && user ? "/news" : "/login",
-          locked: !token || !user,
+          url: isLoggedIn ? "/news" : "/login",
+          locked: !isLoggedIn,
         },
         {
           title: "Facilities",
           description: "Explore campus facilities",
-          url: token && user ? "/facilities" : "/login",
-          locked: !token || !user,
+          url: isLoggedIn ? "/facilities" : "/login",
+          locked: !isLoggedIn,
         },
       ],
     },
@@ -67,51 +67,39 @@ const KampusKartNavbar: React.FC = () => {
         {
           title: "Campus Map",
           description: "Navigate the campus with interactive map",
-          url: token && user ? "/campus-map" : "/login",
-          locked: !token || !user,
+          url: isLoggedIn ? "/campus-map" : "/login",
+          locked: !isLoggedIn,
         },
         {
           title: "Chat",
           description: "Connect with students and staff",
-          url: token && user ? "/chat" : "/login",
-          locked: !token || !user,
+          url: isLoggedIn ? "/chat" : "/login",
+          locked: !isLoggedIn,
         },
       ],
     },
-  ];
+  ], [isLoggedIn]);
 
-  const mobileExtraLinks = token && user ? [
-    { name: "Chat", url: "/chat" },
-  ] : [];
+  const mobileExtraLinks = useMemo(() =>
+    isLoggedIn ? [{ name: "Chat", url: "/chat" }] : []
+  , [isLoggedIn]);
 
-  const authConfig = token && user ? {
-    login: { 
-      text: "Profile", 
-      url: "/profile" 
-    },
-    signup: { 
-      text: "Logout", 
-      url: "#",
-      onClick: handleLogout
-    },
-  } : {
-    login: { 
-      text: "Log in", 
-      url: "/login" 
-    },
-    signup: { 
-      text: "Sign up", 
-      url: "/signup" 
-    },
-  };
-
-  // Logo navigation: Home page if authenticated, Landing page if not
-  const logoUrl = token && user ? "/home" : "/";
+  const authConfig = useMemo(() =>
+    isLoggedIn
+      ? {
+          login: { text: "Profile", url: "/profile" },
+          signup: { text: "Logout", url: "#", onClick: handleLogout },
+        }
+      : {
+          login: { text: "Log in", url: "/login" },
+          signup: { text: "Sign up", url: "/signup" },
+        }
+  , [isLoggedIn, handleLogout]);
 
   return (
     <Navbar1
       logo={{
-        url: logoUrl,
+        url: isLoggedIn ? "/home" : "/",
         src: "/Logo.png",
         alt: "KampusKart Logo",
         title: "KampusKart",
@@ -124,4 +112,3 @@ const KampusKartNavbar: React.FC = () => {
 };
 
 export default KampusKartNavbar;
-

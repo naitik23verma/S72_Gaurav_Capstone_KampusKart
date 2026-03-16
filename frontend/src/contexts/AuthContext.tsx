@@ -74,7 +74,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     if (token) {
-      fetchProfile();
+      fetchProfile().catch(err => {
+        console.error('Failed to fetch profile:', err);
+        // If profile fetch fails, clear the token to prevent infinite loops
+        if (err.response?.status === 401) {
+          logout();
+        }
+      });
       // Set up token refresh
       setupTokenRefresh();
     } else {
@@ -159,7 +165,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Always set token in state and storage together
   const login = async (email: string, password: string, remember?: boolean) => {
     try {
       // Frontend validation
@@ -189,11 +194,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const { token, user } = response.data;
           setToken(token);
           setUser(user);
-          // Always save token to localStorage with expiry for persistent login
+          // Persist token based on remember preference
           const expiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-          localStorage.setItem('token', token);
-          localStorage.setItem('token_expiry', expiry.toString());
-          sessionStorage.removeItem('token');
+          if (remember === false) {
+            sessionStorage.setItem('token', token);
+            localStorage.removeItem('token');
+            localStorage.removeItem('token_expiry');
+          } else {
+            localStorage.setItem('token', token);
+            localStorage.setItem('token_expiry', expiry.toString());
+            sessionStorage.removeItem('token');
+          }
           return; // Success, exit the retry loop
         } catch (error) {
           lastError = error;
@@ -279,11 +290,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setToken(token);
           setUser(user);
           
-          // Always save token to localStorage with expiry for persistent login
+          // Persist token based on remember preference
           const expiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-          localStorage.setItem('token', token);
-          localStorage.setItem('token_expiry', expiry.toString());
-          sessionStorage.removeItem('token');
+          if (remember === false) {
+            sessionStorage.setItem('token', token);
+            localStorage.removeItem('token');
+            localStorage.removeItem('token_expiry');
+          } else {
+            localStorage.setItem('token', token);
+            localStorage.setItem('token_expiry', expiry.toString());
+            sessionStorage.removeItem('token');
+          }
           return; // Success, exit the retry loop
         } catch (error) {
           lastError = error;
@@ -307,9 +324,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .map(([key, value]) => `${key}: ${value}`)
             .join(', ');
           throw new Error(errorMessages);
-        }
-        if (error.code === 'ECONNREFUSED') {
-          throw new Error('Cannot connect to the server. Please make sure the backend server is running.');
         }
         if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
           throw new Error('Server is starting up. Please try again in a few seconds.');
@@ -359,7 +373,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const loginWithGoogle = () => {
-    const backendUrl = isProduction 
+    const backendUrl = isProduction
       ? 'https://s72-gaurav-capstone.onrender.com'
       : 'http://localhost:5000';
     

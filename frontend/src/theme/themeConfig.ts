@@ -30,7 +30,6 @@ export const themeConfig = {
     background: {
       primary: '#FFFFFF',
       secondary: '#F7F7FA',
-      dark: '#1F2937',
     },
     
     // Text Colors

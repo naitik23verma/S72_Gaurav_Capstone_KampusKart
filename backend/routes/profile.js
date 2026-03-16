@@ -3,15 +3,8 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const User = require('../models/User');
 const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
-
-// Cloudinary configuration (ensure you have CLOUDINARY_URL in your .env)
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
 
 // Multer setup for memory storage
 const storage = multer.memoryStorage();

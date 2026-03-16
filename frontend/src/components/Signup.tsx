@@ -93,14 +93,14 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-screen flex flex-col font-sans bg-white">
-      <div className="flex-1 flex">
+    <div className="h-screen w-screen flex flex-col font-sans bg-white overflow-hidden">
+      <div className="flex flex-1 min-h-0">
         {/* Left: form */}
-        <div className="flex flex-col justify-center items-center w-full md:w-1/2 px-4 sm:px-6 md:px-8 py-6 md:py-8 bg-white overflow-y-auto">
+        <div className="flex flex-col justify-center items-center w-full md:w-1/2 px-4 sm:px-6 md:px-8 py-4 bg-white overflow-y-auto">
         <div className="w-full max-w-sm">
 
           {/* Logo */}
-          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-6 sm:mb-8">
+          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4 sm:mb-5">
             <Link to="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity duration-200">
               <img src="/Logo.png" alt="KampusKart Logo" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" />
               <span className="text-lg sm:text-xl font-extrabold text-black tracking-tight">KampusKart</span>
@@ -108,23 +108,23 @@ const Signup: React.FC = () => {
           </div>
 
           <h2 className="mb-1 text-xl sm:text-2xl font-extrabold text-black text-center">Create an account</h2>
-          <p className="text-xs sm:text-sm text-gray-500 text-center mb-6 sm:mb-8">Join KampusKart today</p>
+          <p className="text-xs sm:text-sm text-gray-500 text-center mb-4 sm:mb-5">Join KampusKart today</p>
 
           {/* Error */}
           {error && (
-            <div className="mb-4 rounded-lg bg-red-50 border-2 border-red-200 p-3">
+            <div className="mb-3 rounded-lg bg-red-50 border-2 border-red-200 p-3">
               <p className="text-sm text-red-700">{error}</p>
             </div>
           )}
 
-          <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit}>
+          <form className="space-y-3" onSubmit={handleSubmit}>
             {/* Name */}
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Full Name</label>
               <input
                 type="text"
                 required
-                className="w-full px-3 py-3 sm:py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200 min-h-touch"
+                className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200 min-h-touch"
                 placeholder="Your full name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -138,13 +138,13 @@ const Signup: React.FC = () => {
                 type="email"
                 autoComplete="email"
                 required
-                className={`w-full px-3 py-3 sm:py-2.5 border-2 ${emailError ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200 min-h-touch`}
+                className={`w-full px-3 py-2.5 border-2 ${emailError ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200 min-h-touch`}
                 placeholder="you@example.com"
                 value={email}
                 onChange={handleEmailChange}
                 onBlur={handleEmailBlur}
               />
-              {emailError && <p className="mt-1.5 text-xs text-red-500">{emailError}</p>}
+              {emailError && <p className="mt-1 text-xs text-red-500">{emailError}</p>}
             </div>
 
             {/* Password */}
@@ -155,7 +155,7 @@ const Signup: React.FC = () => {
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   required
-                  className={`w-full px-3 py-3 sm:py-2.5 pr-12 border-2 ${passwordErrors.length > 0 ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200 min-h-touch`}
+                  className={`w-full px-3 py-2.5 pr-12 border-2 ${passwordErrors.length > 0 ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200 min-h-touch`}
                   placeholder="••••••••"
                   value={password}
                   onChange={handlePasswordChange}
@@ -172,7 +172,7 @@ const Signup: React.FC = () => {
                 </button>
               </div>
               {passwordErrors.length > 0 && (
-                <ul className="mt-1.5 space-y-0.5">
+                <ul className="mt-1 space-y-0.5">
                   {passwordErrors.map((e, i) => (
                     <li key={i} className="text-xs text-red-500">• {e}</li>
                   ))}
@@ -195,13 +195,13 @@ const Signup: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 px-4 rounded-lg text-sm sm:text-base font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 min-h-touch ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full py-2.5 px-4 rounded-lg text-sm font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 min-h-touch ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {loading ? 'Creating account...' : 'Create account'}
             </button>
 
             {/* Divider */}
-            <div className="relative my-4">
+            <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t-2 border-gray-200" />
               </div>
@@ -214,13 +214,13 @@ const Signup: React.FC = () => {
             <button
               type="button"
               onClick={() => loginWithGoogle()}
-              className="w-full flex items-center justify-center gap-2 sm:gap-3 py-3 px-4 rounded-lg text-sm sm:text-base font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors duration-200 min-h-touch"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors duration-200 min-h-touch"
             >
               <img src="/google-icon.svg" alt="Google" className="w-4 h-4 sm:w-5 sm:h-5" />
               Sign up with Google
             </button>
 
-            <p className="text-center text-sm text-gray-500 mt-4">
+            <p className="text-center text-sm text-gray-500">
               Already have an account?{' '}
               <Link to="/login" className="text-[#F05A25] font-semibold hover:underline">Sign in</Link>
             </p>

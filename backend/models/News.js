@@ -29,4 +29,10 @@ const newsSchema = new mongoose.Schema({
   },
 });
 
+// Add indexes for frequently queried fields
+newsSchema.index({ date: -1 });
+newsSchema.index({ category: 1 });
+newsSchema.index({ createdAt: -1 });
+newsSchema.index({ category: 1, date: -1 }); // Compound index for filtered queries
+
 module.exports = mongoose.model('News', newsSchema); 

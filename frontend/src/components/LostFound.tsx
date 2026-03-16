@@ -1,20 +1,13 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { FiSearch, FiMapPin, FiUser, FiCalendar, FiEdit2, FiTrash2, FiCheckCircle, FiInfo, FiTag, FiFileText, FiMail } from 'react-icons/fi';
-import { Instagram, Linkedin, Globe, Github } from 'lucide-react';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { validateEmail, validatePhone } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
-
-const socialLinks = [
-  { href: 'https://www.instagram.com/gaurav_khandelwal_/', label: 'Instagram', icon: <Instagram className="h-4 w-4" /> },
-  { href: 'https://www.linkedin.com/in/gaurav-khandelwal-17a127358/', label: 'LinkedIn', icon: <Linkedin className="h-4 w-4" /> },
-  { href: 'https://gaurav-khandelwal.vercel.app/', label: 'Portfolio', icon: <Globe className="h-4 w-4" /> },
-  { href: 'https://github.com/Gaurav-205', label: 'GitHub', icon: <Github className="h-4 w-4" /> },
-];
+import { socialLinks } from '../utils/socialLinks';
 
 interface LostFoundItem {
   _id: string;
@@ -43,6 +36,7 @@ interface LostFoundItem {
 const LostFound = () => {
   const [items, setItems] = useState<LostFoundItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { token, user } = useAuth();
@@ -90,10 +84,11 @@ const LostFound = () => {
 
   // Generate autocomplete suggestions from existing items
   useEffect(() => {
+    // Skip if user just selected a suggestion
     if (isSelectingSuggestion.current) {
-      isSelectingSuggestion.current = false;
       return;
     }
+    
     if (searchInput.trim().length > 0) {
       const suggestions = new Set<string>();
       items.forEach(item => {
@@ -218,7 +213,6 @@ const LostFound = () => {
       date: formattedDate,
       contact: item?.contact || '',
       images: (item.images || []).map(img => ({
-        existing: img,
         previewUrl: img.url,
         public_id: img.public_id,
         url: img.url,
@@ -344,8 +338,15 @@ const LostFound = () => {
         throw new Error(error.message || 'Failed to mark as resolved');
       }
       await response.json();
-      setItems(items.map(i => i._id === id ? { ...i, resolved: true } : i));
-      setSelectedItemForDetails(prev => prev ? { ...prev, resolved: true } : prev);
+      // If filtering by unresolved, remove the item from the list since it no longer matches
+      if (filterResolved === 'unresolved') {
+        setItems(prev => prev.filter(i => i._id !== id));
+        setSelectedItemForDetails(null);
+      } else {
+        setItems(prev => prev.map(i => i._id === id ? { ...i, resolved: true } : i));
+        setSelectedItemForDetails(prev => prev ? { ...prev, resolved: true } : prev);
+      }
+      setSuccessMessage('Item marked as resolved!');
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Failed to mark as resolved');
     }
@@ -385,7 +386,7 @@ const LostFound = () => {
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         {/* Success Message Banner */}
         {successMessage && (
           <div className="mb-6 bg-green-50 border-2 border-green-200 rounded-lg p-4 flex items-center gap-3 animate-fade-in">
@@ -488,6 +489,10 @@ const LostFound = () => {
                       setSearchInput(suggestion);
                       setSearchQuery(suggestion);
                       setShowSuggestions(false);
+                      // Reset the ref after a short delay to allow the effect to skip
+                      setTimeout(() => {
+                        isSelectingSuggestion.current = false;
+                      }, 100);
                     }}
                     onMouseDown={(e) => {
                       e.preventDefault();
@@ -597,20 +602,18 @@ const LostFound = () => {
                 {/* Action Buttons */}
                 {token && user && item.user && (
                   // Check if user can edit/delete this item
-                  (user._id === item.user._id || 
-                   user.id === item.user._id || 
-                   user.isAdmin) && (
-                    <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t-2 border-gray-200">
+                  (user._id === item.user._id || user.isAdmin) && (
+                    <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t-2 border-gray-200">
                       {!item.resolved && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleMarkResolved(item._id);
                           }}
-                          className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-4 sm:py-2.5 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 active:bg-green-200 transition-colors duration-200 text-xs sm:text-sm min-w-0 min-h-touch"
+                          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors duration-200 text-xs font-medium min-w-0 min-h-touch"
                         >
-                          <FiCheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                          <span className="truncate text-xs sm:text-sm">Resolve</span>
+                          <FiCheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                          <span className="truncate">Resolve</span>
                         </button>
                       )}
                       {!item.resolved && (
@@ -619,10 +622,10 @@ const LostFound = () => {
                             e.stopPropagation();
                             openEditItemModal(item);
                           }}
-                          className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-4 sm:py-2.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 active:bg-blue-200 transition-colors duration-200 text-xs sm:text-sm min-w-0 min-h-touch"
+                          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200 text-xs font-medium min-w-0 min-h-touch"
                         >
-                          <FiEdit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                          <span className="truncate text-xs sm:text-sm">Edit</span>
+                          <FiEdit2 className="w-3.5 h-3.5 flex-shrink-0" />
+                          <span className="truncate">Edit</span>
                         </button>
                       )}
                       <button
@@ -630,10 +633,10 @@ const LostFound = () => {
                           e.stopPropagation();
                           handleDeleteItem(item._id);
                         }}
-                        className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-4 sm:py-2.5 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 active:bg-red-200 transition-colors duration-200 text-xs sm:text-sm min-w-0 min-h-touch"
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200 text-xs font-medium min-w-0 min-h-touch"
                       >
-                        <FiTrash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                        <span className="truncate text-xs sm:text-sm">Delete</span>
+                        <FiTrash2 className="w-3.5 h-3.5 flex-shrink-0" />
+                        <span className="truncate">Delete</span>
                       </button>
                     </div>
                   )
@@ -661,7 +664,7 @@ const LostFound = () => {
 
               <form onSubmit={async (e) => {
                 e.preventDefault();
-                setLoading(true);
+                setIsSubmitting(true);
                 setFormError(null);
                 setFieldErrors({});
 
@@ -682,7 +685,7 @@ const LostFound = () => {
                 if (Object.keys(errors).length > 0) {
                   setFieldErrors(errors);
                   setFormError('Please fix the errors below');
-                  setLoading(false);
+                  setIsSubmitting(false);
                   return;
                 }
 
@@ -740,11 +743,11 @@ const LostFound = () => {
                   console.error('Error saving item:', err);
                   setFormError('An error occurred while saving the item. Please try again.');
                 } finally {
-                  setLoading(false);
+                  setIsSubmitting(false);
                 }
               }} className="space-y-8">
                 {/* Item Details Section */}
-                <div className="border-b pb-6 mb-6 bg-gray-50 rounded-lg p-6">
+                <div className="border-2 border-gray-200 rounded-lg p-6 mb-6">
                   <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Item Details <FiInfo className="text-gray-400" title="Fill in the details of your lost or found item." /></h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -825,7 +828,7 @@ const LostFound = () => {
                           }
                         }}
                         onBlur={(e) => handleFieldBlur('description', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
+                        className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm resize-none`}
                         rows={4}
                         placeholder="Describe the item, any unique features, etc."
                         required
@@ -861,7 +864,7 @@ const LostFound = () => {
                 </div>
 
                 {/* Contact Section */}
-                <div className="bg-gray-50 rounded-lg p-6">
+                <div className="border-2 border-gray-200 rounded-lg p-6">
                   <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Contact <FiInfo className="text-gray-400" title="Contact is linked to your account." /></h3>
                   <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Contact Information <FiMail className="inline text-gray-400" /></label>
                   <div className="relative">
@@ -899,16 +902,16 @@ const LostFound = () => {
                     type="button"
                     onClick={closeItemModal}
                     className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
-                    disabled={loading}
+                    disabled={isSubmitting}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    disabled={loading}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={isSubmitting}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    {loading ? (
+                    {isSubmitting ? (
                       <span className="flex items-center">
                         <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -927,8 +930,8 @@ const LostFound = () => {
 
       {/* Item Details Modal */}
       {selectedItemForDetails && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 safe-top safe-bottom">
-          <div className="bg-white rounded-lg border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4">
+          <div className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative" style={{ colorScheme: 'light', backgroundColor: '#ffffff', color: '#213547' }}>
             {/* Close Button */}
             <button
               onClick={() => setSelectedItemForDetails(null)}
@@ -1007,27 +1010,27 @@ const LostFound = () => {
 
             {/* Owner/Admin Actions */}
             {(user && (user._id === selectedItemForDetails.user._id || user.isAdmin)) && (
-              <div className="flex gap-3 mt-6">
+              <div className="flex flex-wrap gap-2 mt-6 pt-6 border-t-2 border-gray-200">
                 {!selectedItemForDetails.resolved && (
                   <button
                     onClick={() => { setSelectedItemForDetails(null); openEditItemModal(selectedItemForDetails); }}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 flex items-center"
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors duration-200"
                   >
-                    <FiEdit2 className="mr-1" /> Edit
+                    <FiEdit2 className="w-4 h-4" /> Edit
                   </button>
                 )}
                 <button
                   onClick={() => handleDeleteItem(selectedItemForDetails._id)}
-                  className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 flex items-center"
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 transition-colors duration-200"
                 >
-                  <FiTrash2 className="mr-1" /> Delete
+                  <FiTrash2 className="w-4 h-4" /> Delete
                 </button>
                 {!selectedItemForDetails.resolved && (
                   <button
                     onClick={() => handleMarkResolved(selectedItemForDetails._id)}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#00C6A7] hover:bg-[#009e86] flex items-center"
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#00C6A7] hover:bg-[#009e86] transition-colors duration-200"
                   >
-                    <FiCheckCircle className="mr-1" /> Mark as Resolved
+                    <FiCheckCircle className="w-4 h-4" /> Mark as Resolved
                   </button>
                 )}
               </div>
@@ -1037,20 +1040,19 @@ const LostFound = () => {
       )}
 
       {/* Zoomed Image Modal */}
-      {zoomedImage && selectedItemForDetails && selectedItemForDetails.images && selectedItemForDetails.images.length > 0 && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4" onClick={() => setZoomedImage(null)}>
+      {zoomedImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[10000] p-4" onClick={() => setZoomedImage(null)}>
           {/* Image */}
           <img 
             src={zoomedImage} 
             alt="Zoomed"
             className="max-h-[90vh] max-w-full lg:max-w-[80vw] rounded-lg object-contain"
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the image
+            onClick={(e) => e.stopPropagation()}
           />
           
           {/* Navigation Buttons */}
-          {selectedItemForDetails.images.length > 1 && (
+          {selectedItemForDetails && selectedItemForDetails.images && selectedItemForDetails.images.length > 1 && (
             <>
-              {/* Previous Button */}
               <button
                 className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/30 rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
                 onClick={(e) => {
@@ -1065,7 +1067,6 @@ const LostFound = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>
               </button>
-              {/* Next Button */}
               <button
                 className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/30 rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
                 onClick={(e) => {
@@ -1084,7 +1085,7 @@ const LostFound = () => {
           )}
 
           {/* Close Button */}
-           <button
+          <button
             onClick={() => setZoomedImage(null)}
             aria-label="Close zoomed image"
             className="absolute top-4 right-4 bg-white/30 rounded-lg p-2 text-white hover:bg-white/50 transition-colors duration-200 z-50"
@@ -1094,7 +1095,6 @@ const LostFound = () => {
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
-
         </div>
       )}
 

@@ -6,7 +6,7 @@ const User = require('../models/User');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
-const _bcrypt = require('bcryptjs');
+
 const { validateSignup, validateLogin, sanitizeInput } = require('../middleware/validation');
 
 // Create Nodemailer transporter with better error handling
@@ -82,7 +82,7 @@ router.get('/google/callback',
       // Determine the frontend URL based on environment
       const frontendUrl = process.env.NODE_ENV === 'production'
         ? 'https://kampuskart.netlify.app'
-        : 'http://localhost:3000';
+        : 'http://localhost:5173';
 
       console.log('Redirecting to frontend:', frontendUrl);
       // Redirect to frontend with token
@@ -210,7 +210,7 @@ router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -262,7 +262,7 @@ router.post('/reset-password', async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }

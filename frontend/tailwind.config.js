@@ -30,6 +30,7 @@ export default {
         'safe-bottom': 'env(safe-area-inset-bottom)',
         'safe-left': 'env(safe-area-inset-left)',
         'safe-right': 'env(safe-area-inset-right)',
+        'navbar': '72px',
       },
       colors: {
         'deep-purple': {

@@ -9,6 +9,9 @@
   --color-warning: #F59E0B;
   --color-error: #EF4444;
   --color-info: #3B82F6;
+
+  /* Layout */
+  --navbar-height: 72px;
   
   /* Neutral Colors */
   --color-white: #FFFFFF;
@@ -27,7 +30,6 @@
   /* Background Colors */
   --color-background-primary: #FFFFFF;
   --color-background-secondary: #F7F7FA;
-  --color-background-dark: #1F2937;
   
   /* Text Colors */
   --color-text-primary: #111827;

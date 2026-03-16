@@ -1,20 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FiCalendar, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiUser, FiPhone, FiCheckCircle } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
-import { Instagram, Linkedin, Globe, Github } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
-
-const socialLinks = [
-  { href: 'https://www.instagram.com/gaurav_khandelwal_/', label: 'Instagram', icon: <Instagram className="h-4 w-4" /> },
-  { href: 'https://www.linkedin.com/in/gaurav-khandelwal-17a127358/', label: 'LinkedIn', icon: <Linkedin className="h-4 w-4" /> },
-  { href: 'https://gaurav-khandelwal.vercel.app/', label: 'Portfolio', icon: <Globe className="h-4 w-4" /> },
-  { href: 'https://github.com/Gaurav-205', label: 'GitHub', icon: <Github className="h-4 w-4" /> },
-];
+import { socialLinks } from '../utils/socialLinks';
 
 interface ClubRecruitment {
   _id: string;
@@ -53,20 +46,20 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[90vh] overflow-y-auto relative">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4">
+      <div className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto relative">
         {/* Close Button */}
         <button
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-4 right-4 bg-[#181818] hover:bg-black text-white rounded-lg p-2 transition-colors duration-200"
+          className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
-        <h2 className="text-2xl font-bold text-gray-900 mb-4 pr-8">{club.title}</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12 sm:pr-14">{club.title}</h2>
         <div className="flex flex-col md:flex-row gap-8">
           {club.image?.url ? (
             <div 
@@ -176,7 +169,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
         </div>
         {/* Zoomed Image Modal */}
         {zoomedImage && (
-          <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50" onClick={closeZoomedImageModal}>
+          <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[10000]" onClick={closeZoomedImageModal}>
             <img src={zoomedImage} alt="Zoomed" className="max-h-[80vh] max-w-[90vw] rounded-lg" />
           </div>
         )}
@@ -448,7 +441,7 @@ const ClubsRecruitment = () => {
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         
         {/* Success Message Banner */}
         {successMessage && (
@@ -574,9 +567,9 @@ const ClubsRecruitment = () => {
                   <span className={`px-3 py-1.5 rounded-lg text-xs font-medium ${club.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>{club.status}</span>
                 </div>
               </div>
-              <div className="p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">{club.title}</h2>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-3">{club.description}</p>
+              <div className="p-4 sm:p-5 md:p-6">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{club.title}</h2>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">{club.description}</p>
                 <div className="space-y-3 pt-4 border-t-2 border-gray-200">
                   <div className="flex items-center text-sm text-gray-500">
                     <FiTag className="mr-2 flex-shrink-0 text-gray-400" />
@@ -677,7 +670,7 @@ const ClubsRecruitment = () => {
                       <textarea
                         value={newClub.description}
                         onChange={e => setNewClub({...newClub, description: e.target.value})}
-                        className="w-full px-10 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
+                        className="w-full px-10 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm resize-none"
                         rows={4}
                         placeholder="Provide a detailed description of the recruitment. Include requirements, process, and highlights."
                         required
@@ -719,7 +712,7 @@ const ClubsRecruitment = () => {
                   </div>
                   <div className="mt-6">
                     <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Contact Info</label>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <input
                         type="text"
                         value={newClub.contactInfo.name}

@@ -6,6 +6,8 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Base ─────────────────────────────────────────────────────────────────── */
+
 html, body, #root {
   min-height: 100vh;
   height: 100%;
@@ -13,25 +15,29 @@ html, body, #root {
   font-family: 'Work Sans', ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Hide scrollbar but keep scroll functionality */
 html {
   overflow-y: scroll;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-
-html::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
+html::-webkit-scrollbar { display: none; }
 
 body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
   overflow-x: hidden;
+  background-color: #ffffff;
+  color: #213547;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 :root {
   line-height: 1.5;
   font-weight: 400;
-  color-scheme: light;
+  color-scheme: light only;
   color: #213547;
   background-color: #ffffff;
   font-synthesis: none;
@@ -40,26 +46,105 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Force light mode globally - prevent any dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: light only !important;
+    background-color: #ffffff !important;
+    color: #213547 !important;
+  }
+  
+  body {
+    background-color: #ffffff !important;
+    color: #213547 !important;
+  }
+}
+
+h1 { line-height: 1.1; }
+
 a {
   font-weight: 500;
   color: inherit;
   text-decoration: inherit;
 }
-a:hover {
-  color: inherit;
+
+/* ─── Tap highlight — remove ALL tap effects completely ─────────────────────── */
+
+*,
+*::before,
+*::after {
+  -webkit-tap-highlight-color: transparent !important;
+  tap-highlight-color: transparent !important;
+  -webkit-user-drag: none;
 }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  background-color: #ffffff;
-  color: #213547;
+/* Prevent any tap/touch feedback colors */
+button,
+a,
+input,
+textarea,
+select,
+[role="button"],
+[tabindex],
+.cursor-pointer {
+  -webkit-tap-highlight-color: transparent !important;
+  tap-highlight-color: transparent !important;
 }
 
-h1 {
-  line-height: 1.1;
+/* Prevent iOS/Safari specific tap effects */
+@supports (-webkit-touch-callout: none) {
+  * {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+    -webkit-touch-callout: none !important;
+  }
+  
+  button:active,
+  a:active,
+  [role="button"]:active {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+    background-color: inherit !important;
+  }
 }
+
+/* ─── User select — disable on interactive elements only ───────────────────── */
+
+button,
+[role="button"],
+label,
+select,
+.cursor-pointer {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Re-enable text selection where needed */
+input,
+textarea,
+[contenteditable],
+p, span, li,
+h1, h2, h3, h4, h5, h6 {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* ─── Focus outlines ────────────────────────────────────────────────────────── */
+
+/* Remove default outline on non-input interactive elements */
+button:focus,
+[role="button"]:focus,
+a:focus,
+[tabindex]:focus,
+select:focus {
+  outline: none;
+}
+
+/* Restore visible outline for keyboard navigation only */
+*:focus-visible {
+  outline: 2px solid #00C6A7 !important;
+  outline-offset: 2px !important;
+}
+
+/* ─── Buttons — prevent white-flash on click ────────────────────────────────── */
 
 button {
   border-radius: 8px;
@@ -72,57 +157,148 @@ button {
   transition: border-color 0.25s;
 }
 
-/* Prevent buttons from turning white on click/active */
+/* Prevent grey/dark flashes on button click - NO visual feedback */
 button:active,
-button:focus,
-button:focus-visible,
 [role="button"]:active,
+[type="button"]:active,
+[type="submit"]:active,
+.btn:active {
+  /* No transform, no filter, no visual change */
+}
+
+button:focus,
 [role="button"]:focus,
-.btn:active,
+[type="button"]:focus,
+[type="submit"]:focus,
 .btn:focus {
-  background-color: inherit !important;
-  filter: brightness(0.95);
+  outline: none !important;
 }
 
-/* Remove default focus outline but keep accessibility */
 button:focus-visible {
-  outline: 2px solid #00C6A7;
-  outline-offset: 2px;
-  filter: none;
+  outline: 2px solid #00C6A7 !important;
+  outline-offset: 2px !important;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
+/* ─── Links — prevent flashes ───────────────────────────────────────────────── */
+
+a:active,
+nav a:active,
+header a:active {
+  /* No visual change on tap */
 }
 
-/* Mobile-specific styles to fix hover issues */
+a:focus,
+nav a:focus,
+header a:focus {
+  outline: none !important;
+}
+
+nav button:active,
+header button:active {
+  /* No visual change on tap */
+}
+
+/* ─── Specific bg classes — prevent flashes on active ───────────────────────── */
+
+/* Remove all active state background changes */
+*:active {
+  background-color: inherit !important;
+}
+
+.bg-\[\#181818\]:active,
+.bg-\[\#00C6A7\]:active,
+.bg-\[\#F05A25\]:active,
+.bg-blue-50:active,
+.bg-red-50:active,
+.bg-green-50:active,
+.bg-gray-50:active,
+.bg-gray-100:active,
+.bg-white:active {
+  background-color: inherit !important;
+}
+
+/* ─── Form inputs — force light theme ───────────────────────────────────────── */
+
+input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+input[type="search"],
+input[type="url"],
+input[type="date"],
+textarea,
+select {
+  background-color: #ffffff !important;
+  color: #374151 !important;
+  color-scheme: light only !important;
+  -webkit-text-fill-color: #374151 !important;
+  touch-action: manipulation;
+  -webkit-touch-callout: default;
+}
+
+input:focus,
+input:active,
+textarea:focus,
+textarea:active,
+select:focus,
+select:active {
+  background-color: #ffffff !important;
+  color: #374151 !important;
+  -webkit-text-fill-color: #374151 !important;
+}
+
+/* Autofill light theme override */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+  -webkit-text-fill-color: #374151 !important;
+  caret-color: #374151 !important;
+  color-scheme: light only !important;
+}
+
+/* Date input - force light mode */
+input[type="date"] { 
+  color-scheme: light only !important;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.5) brightness(1.2);
+  cursor: pointer;
+}
+input[type="date"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field { color: #374151; }
+input[type="date"]::-webkit-datetime-edit-text { color: #6b7280; }
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-clear-button { display: none; }
+input[type="date"]:invalid::-webkit-datetime-edit { color: #9ca3af; }
+
+/* ─── Mobile touch devices ──────────────────────────────────────────────────── */
+
 @media (hover: none) and (pointer: coarse) {
-  /* Disable hover effects on touch devices */
+  /* Disable hover transforms */
   *:hover {
     transform: none !important;
     scale: none !important;
   }
-  
-  /* Improve button touch targets */
-  button, 
+
+  /* Touch targets */
+  button,
   [role="button"],
   .btn,
-  .button,
   a[role="button"],
   .cursor-pointer {
     min-height: 44px;
     min-width: 44px;
     touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
   }
-  
-  /* Remove all hover states on touch devices */
+
+  /* Remove hover bg overrides */
   .hover\:bg-\[\#FFD166\]:hover,
   .hover\:bg-\[\#00C6A7\]:hover,
   .hover\:bg-gray-100:hover,
@@ -155,378 +331,67 @@ button:focus-visible {
     text-decoration: inherit !important;
     box-shadow: inherit !important;
   }
-  
-  /* Active states for better touch feedback - prevent white background */
+
+  /* Active feedback - NO visual change to prevent dark flashes */
   button:active,
   [role="button"]:active,
   .btn:active,
-  .button:active,
   a[role="button"]:active,
   .cursor-pointer:active {
     background-color: inherit !important;
-    transform: scale(0.98);
-    transition: transform 0.1s ease;
-    filter: brightness(0.9);
+    transform: none !important;
   }
-  
-  /* Focus states for accessibility */
-  button:focus,
-  [role="button"]:focus,
-  .btn:focus,
-  .button:focus,
-  a[role="button"]:focus,
-  .cursor-pointer:focus {
-    outline: 2px solid #00C6A7;
-    outline-offset: 2px;
-    background-color: inherit !important;
-  }
-  
-  /* Remove transition delays on mobile for immediate feedback */
-  * {
-    transition-delay: 0s !important;
-  }
+
+  /* No transition delays */
+  * { transition-delay: 0s !important; }
 }
 
-/* Global fix for all buttons - prevent white background on active/focus */
-button:active,
-button:focus,
-button:focus-within,
-[role="button"]:active,
-[role="button"]:focus,
-[type="button"]:active,
-[type="button"]:focus,
-[type="submit"]:active,
-[type="submit"]:focus {
-  background-color: inherit !important;
-  filter: brightness(0.95);
-}
+/* ─── Utility classes ───────────────────────────────────────────────────────── */
 
-/* Fix for links and anchor tags - prevent white background */
-a:active,
-a:focus,
-a:focus-within,
-.nav-link:active,
-.nav-link:focus,
-[role="link"]:active,
-[role="link"]:focus {
-  background-color: inherit !important;
-  color: inherit !important;
-  filter: brightness(0.95);
-}
-
-/* Fix for navbar items specifically */
-nav a:active,
-nav button:active,
-nav [role="button"]:active,
-header a:active,
-header button:active,
-header [role="button"]:active {
-  background-color: inherit !important;
-  color: inherit !important;
-  filter: brightness(0.95);
-}
-
-/* Prevent Tailwind's default active states from turning buttons white */
-.bg-\[\#181818\]:active,
-.bg-\[\#00C6A7\]:active,
-.bg-\[\#F05A25\]:active,
-.bg-blue-50:active,
-.bg-red-50:active,
-.bg-green-50:active,
-.bg-gray-50:active,
-.bg-gray-100:active,
-.bg-white:active {
-  background-color: inherit !important;
-  filter: brightness(0.9);
-}
-
-/* Prevent text color from changing to white on active */
-.text-black:active,
-.text-gray-700:active,
-.text-gray-900:active,
-.text-white:active {
-  color: inherit !important;
-}
-
-/* Fix for any clickable elements */
-*[onclick]:active,
-*[role="button"]:active,
-.cursor-pointer:active {
-  background-color: inherit !important;
-  color: inherit !important;
-  filter: brightness(0.95);
-}
-
-/* Remove webkit tap highlight that can cause white flash */
-*,
-*::before,
-*::after {
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
-  -webkit-tap-highlight-color: transparent !important;
-  -webkit-touch-callout: none;
-  tap-highlight-color: rgba(0, 0, 0, 0) !important;
-  tap-highlight-color: transparent !important;
-}
-
-/* Prevent any overlay or highlight on active/focus */
-*:active,
-*:focus,
-*:focus-visible,
-*:focus-within {
-  outline: none !important;
-  -webkit-tap-highlight-color: transparent !important;
-  tap-highlight-color: transparent !important;
-}
-
-/* Only show focus outline for keyboard navigation */
-*:focus-visible {
-  outline: 2px solid #00C6A7 !important;
-  outline-offset: 2px !important;
-}
-
-/* Disable user select to prevent flashing on click */
-* {
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
-/* Re-enable text selection for inputs and content */
-input,
-textarea,
-[contenteditable],
-p,
-span,
-h1, h2, h3, h4, h5, h6,
-div:not([role="button"]):not(.cursor-pointer):not([onclick]) {
-  -webkit-user-select: text;
-  -khtml-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
-  user-select: text;
-}
-
-/* Desktop hover effects (only on devices that support hover) */
-@media (hover: hover) and (pointer: fine) {
-  /* Keep existing hover effects for desktop */
-}
-
-/* Utility classes for better mobile handling */
 @layer utilities {
   .mobile-touch-friendly {
     @apply min-h-[44px] min-w-[44px] touch-manipulation;
     -webkit-tap-highlight-color: transparent;
   }
-  
-  .mobile-no-hover {
-    @media (hover: none) and (pointer: coarse) {
-      &:hover {
-        transform: none !important;
-        scale: none !important;
-        background-color: inherit !important;
-        color: inherit !important;
-      }
-    }
-  }
-  
-  .mobile-active-feedback {
-    @media (hover: none) and (pointer: coarse) {
-      &:active {
-        transform: scale(0.98);
-        transition: transform 0.1s ease;
-      }
-    }
-  }
 }
 
-/* Custom Scrollbar Styles */
-::-webkit-scrollbar {
-  width: 8px;
-}
+/* ─── Scrollbar ─────────────────────────────────────────────────────────────── */
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1; /* Light grey track */
-  border-radius: 10px;
-}
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
+* { scrollbar-width: thin; scrollbar-color: #888 #f1f1f1; }
 
-::-webkit-scrollbar-thumb {
-  background: #888; /* Dark grey thumb */
-  border-radius: 10px;
-}
+/* ─── Google Maps InfoWindow ────────────────────────────────────────────────── */
 
-::-webkit-scrollbar-thumb:hover {
-  background: #555; /* Even darker grey on hover */
-}
-
-/* For Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #888 #f1f1f1; /* thumb track */
-}
-
-/* Google Maps InfoWindow - Remove white space and scroll bars */
 .gm-style .gm-style-iw-c {
-  padding: 0 !important;
-  margin: 0 !important;
-  overflow: hidden !important;
-  top: 0 !important;
+  padding: 0 !important; margin: 0 !important;
+  overflow: hidden !important; top: 0 !important;
   box-shadow: none !important;
-}
-
-.gm-style .gm-style-iw-d {
-  overflow: hidden !important;
-  overflow-x: hidden !important;
-  overflow-y: hidden !important;
-  max-height: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  box-shadow: none !important;
-}
-
-.gm-style .gm-style-iw-t {
-  padding: 0 !important;
-  margin: 0 !important;
-  top: 0 !important;
-}
-
-.gm-style-iw {
-  padding: 0 !important;
-  margin: 0 !important;
-  overflow: hidden !important;
-  top: 0 !important;
-}
-
-/* Remove default close button area (white bar) */
-.gm-style .gm-style-iw-t::before {
-  display: none !important;
-  content: none !important;
-  background: none !important;
-}
-
-.gm-style .gm-style-iw-t::after {
-  display: none !important;
-  content: none !important;
-  background: none !important;
-}
-
-/* Hide default InfoWindow close button */
-.gm-ui-hover-effect {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-}
-
-/* Remove any default padding/margin from InfoWindow content wrapper */
-.gm-style .gm-style-iw-c > div {
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
-/* Target the InfoWindow content area specifically */
-.gm-style .gm-style-iw-d > div {
-  padding: 0 !important;
-  margin: 0 !important;
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-}
-
-/* Remove any white space from InfoWindow tip/arrow area */
-.gm-style .gm-style-iw-tc {
-  top: 0 !important;
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  filter: none !important;
-  box-shadow: none !important;
-}
-
-/* Remove white bar from InfoWindow close button area */
-.gm-style .gm-style-iw-c > button {
-  display: none !important;
-  visibility: hidden !important;
-}
-
-/* Target all possible InfoWindow container elements */
-.gm-style-iw-c,
-.gm-style-iw-d,
-.gm-style-iw-t,
-.gm-style-iw {
-  background: transparent !important;
-  filter: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-/* Remove any default background from InfoWindow that creates white bar */
-.gm-style .gm-style-iw-c {
   background-color: transparent !important;
   background: transparent !important;
-  box-shadow: none !important;
 }
-
-/* Ensure the InfoWindow content starts at the very top */
-.gm-style .gm-style-iw-d > div:first-child {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  top: 0 !important;
+.gm-style .gm-style-iw-d {
+  overflow: hidden !important; max-height: none !important;
+  padding: 0 !important; margin: 0 !important; box-shadow: none !important;
 }
-
-/* Remove any overlay or shadow effects */
-.gm-style .gm-style-iw-c::before,
-.gm-style .gm-style-iw-c::after,
-.gm-style .gm-style-iw-d::before,
-.gm-style .gm-style-iw-d::after {
-  display: none !important;
-  content: none !important;
-  background: none !important;
-  box-shadow: none !important;
+.gm-style .gm-style-iw-t { padding: 0 !important; margin: 0 !important; top: 0 !important; }
+.gm-style-iw { padding: 0 !important; margin: 0 !important; overflow: hidden !important; top: 0 !important; }
+.gm-style .gm-style-iw-t::before,
+.gm-style .gm-style-iw-t::after { display: none !important; content: none !important; background: none !important; }
+.gm-ui-hover-effect { display: none !important; visibility: hidden !important; opacity: 0 !important; }
+.gm-style .gm-style-iw-c > div,
+.gm-style .gm-style-iw-d > div { padding: 0 !important; margin: 0 !important; }
+.gm-style .gm-style-iw-tc { top: 0 !important; margin-top: 0 !important; filter: none !important; box-shadow: none !important; }
+.gm-style .gm-style-iw-c > button { display: none !important; visibility: hidden !important; }
+.gm-style-iw-c, .gm-style-iw-d, .gm-style-iw-t, .gm-style-iw {
+  background: transparent !important; filter: none !important;
+  backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
 }
-
-/* Remove the tip/pointer shadow and background */
-.gm-style .gm-style-iw-tc::after {
-  background: white !important;
-  box-shadow: none !important;
+.gm-style .gm-style-iw-d > div:first-child { margin-top: 0 !important; padding-top: 0 !important; top: 0 !important; }
+.gm-style .gm-style-iw-c::before, .gm-style .gm-style-iw-c::after,
+.gm-style .gm-style-iw-d::before, .gm-style .gm-style-iw-d::after {
+  display: none !important; content: none !important; background: none !important; box-shadow: none !important;
 }
-
-/* Custom Date Picker Styling - Light Theme */
-input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(0.5) brightness(1.2);
-  cursor: pointer;
-}
-
-input[type="date"]::-webkit-datetime-edit {
-  color: #374151;
-}
-
-input[type="date"]::-webkit-datetime-edit-fields-wrapper {
-  color: #374151;
-}
-
-input[type="date"]::-webkit-datetime-edit-text {
-  color: #6b7280;
-}
-
-input[type="date"]::-webkit-datetime-edit-month-field,
-input[type="date"]::-webkit-datetime-edit-day-field,
-input[type="date"]::-webkit-datetime-edit-year-field {
-  color: #374151;
-}
-
-input[type="date"]::-webkit-inner-spin-button {
-  display: none;
-}
-
-input[type="date"]::-webkit-clear-button {
-  display: none;
-}
-
-/* Firefox date picker styling */
-input[type="date"] {
-  color-scheme: light;
-}
-
-/* Ensure date input placeholder is visible */
-input[type="date"]:invalid::-webkit-datetime-edit {
-  color: #9ca3af;
-}
+.gm-style .gm-style-iw-tc::after { background: white !important; box-shadow: none !important; }

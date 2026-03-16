@@ -48,4 +48,10 @@ const eventSchema = new mongoose.Schema({
   },
 });
 
+// Add indexes for frequently queried fields
+eventSchema.index({ date: 1 });
+eventSchema.index({ status: 1 });
+eventSchema.index({ createdAt: -1 });
+eventSchema.index({ date: 1, status: 1 }); // Compound index for common queries
+
 module.exports = mongoose.model('Event', eventSchema); 

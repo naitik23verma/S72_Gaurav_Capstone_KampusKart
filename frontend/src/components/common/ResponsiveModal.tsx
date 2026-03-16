@@ -11,11 +11,11 @@ interface ResponsiveModalProps {
 }
 
 const sizeClasses = {
-  sm: 'max-w-md',
-  md: 'max-w-2xl',
-  lg: 'max-w-3xl',
-  xl: 'max-w-4xl',
-  full: 'max-w-full mx-2',
+  sm: 'sm:max-w-md',
+  md: 'sm:max-w-2xl',
+  lg: 'sm:max-w-3xl',
+  xl: 'sm:max-w-4xl',
+  full: 'sm:max-w-full sm:mx-2',
 };
 
 /**

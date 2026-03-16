@@ -1,20 +1,12 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { FiPlus, FiCalendar, FiFileText, FiSearch, FiInfo, FiTag, FiEdit2, FiTrash2, FiCheckCircle } from 'react-icons/fi';
-import { Instagram, Linkedin, Globe, Github } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { FiCalendar, FiFileText, FiSearch, FiInfo, FiTag, FiEdit2, FiTrash2, FiCheckCircle } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
-import { validateMultipleRequired } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
-
-const socialLinks = [
-  { href: 'https://www.instagram.com/gaurav_khandelwal_/', label: 'Instagram', icon: <Instagram className="h-4 w-4" /> },
-  { href: 'https://www.linkedin.com/in/gaurav-khandelwal-17a127358/', label: 'LinkedIn', icon: <Linkedin className="h-4 w-4" /> },
-  { href: 'https://gaurav-khandelwal.vercel.app/', label: 'Portfolio', icon: <Globe className="h-4 w-4" /> },
-  { href: 'https://github.com/Gaurav-205', label: 'GitHub', icon: <Github className="h-4 w-4" /> },
-];
+import { socialLinks } from '../utils/socialLinks';
 
 interface NewsItem {
   _id: string;
@@ -257,7 +249,7 @@ const News = () => {
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         
         {/* Success Message Banner */}
         {successMessage && (
@@ -405,9 +397,9 @@ const News = () => {
               </div>
 
               {/* Content Section */}
-              <div className="p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">{item.title}</h2>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-3">{item.description}</p>
+              <div className="p-4 sm:p-5 md:p-6">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{item.title}</h2>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">{item.description}</p>
 
                 {/* Action Buttons */}
                 {user && user.isAdmin && (
@@ -483,7 +475,7 @@ const News = () => {
                       <textarea
                         value={newNews.description}
                         onChange={e => setNewNews({...newNews, description: e.target.value})}
-                        className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                        className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm resize-none"
                         rows={4}
                         placeholder="Describe the news, any important details, etc."
                         required
@@ -536,7 +528,7 @@ const News = () => {
 
         {/* Zoomed Image Modal */}
         {zoomedImage && (
-          <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50" onClick={() => setZoomedImage(null)}>
+          <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[10000]" onClick={() => setZoomedImage(null)}>
             <img src={zoomedImage} alt="Zoomed" className="max-h-[90vh] max-w-[90vw] rounded-lg" />
           </div>
         )}

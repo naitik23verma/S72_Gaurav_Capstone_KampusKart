@@ -69,152 +69,212 @@ const Navbar1 = ({
   },
 }: Navbar1Props) => {
   return (
-    <section className="fixed top-0 left-0 right-0 z-50 bg-white w-full border-b-2 border-gray-200 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-6 py-4">
-        <nav className="hidden justify-between lg:flex items-center">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white w-full border-b border-gray-200 shadow-sm">
+      <div className="max-w-7xl mx-auto px-6 py-4 bg-white">
+        {/* Desktop nav */}
+        <nav className="hidden lg:flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link to={logo.url} className="flex items-center gap-2.5 focus:outline-none rounded-lg transition-colors duration-200" aria-label="Go to home page">
+            <Link
+              to={logo.url}
+              className="flex items-center gap-2.5 rounded-lg focus:outline-none"
+              aria-label="Go to home page"
+            >
               <img src={logo.src} className="w-8 h-8" alt={logo.alt} />
-              <span className="text-xl font-extrabold text-black tracking-tight">{logo.title}</span>
+              <span className="text-xl font-extrabold text-black tracking-tight">
+                {logo.title}
+              </span>
             </Link>
-            <div className="flex items-center">
-              <NavigationMenu>
-                <NavigationMenuList>
-                  {menu.map((item) => renderMenuItem(item))}
-                </NavigationMenuList>
-              </NavigationMenu>
-            </div>
+            <NavigationMenu>
+              <NavigationMenuList>
+                {menu.map((item) => renderMenuItem(item))}
+              </NavigationMenuList>
+            </NavigationMenu>
           </div>
           <div className="flex gap-3 items-center">
-            <Button asChild variant="outline" className="h-10 px-4 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 transition-colors duration-200 focus:outline-none focus:ring-0 rounded-lg">
+            <Button
+              asChild
+              variant="outline"
+              className="h-10 px-4 text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 transition-colors duration-200 focus:outline-none focus:ring-0 rounded-lg"
+            >
               <Link to={auth.login.url}>{auth.login.text}</Link>
             </Button>
             {auth.signup.onClick ? (
-              <Button onClick={auth.signup.onClick} className="h-10 px-4 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] transition-colors duration-200 focus:outline-none focus:ring-0 rounded-lg border-0" aria-label={auth.signup.text}>
+              <Button
+                onClick={auth.signup.onClick}
+                className="h-10 px-4 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] transition-colors duration-200 focus:outline-none focus:ring-0 rounded-lg border-0"
+                aria-label={auth.signup.text}
+              >
                 {auth.signup.text}
               </Button>
             ) : (
-              <Button asChild className="h-10 px-4 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] transition-colors duration-200 focus:outline-none focus:ring-0 rounded-lg border-0">
+              <Button
+                asChild
+                className="h-10 px-4 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] transition-colors duration-200 focus:outline-none focus:ring-0 rounded-lg border-0"
+              >
                 <Link to={auth.signup.url}>{auth.signup.text}</Link>
               </Button>
             )}
           </div>
         </nav>
-        <div className="block lg:hidden">
-          <div className="flex items-center justify-between h-10">
-            <Link to={logo.url} className="flex items-center gap-2.5 focus:outline-none rounded-lg transition-colors duration-200" aria-label="Go to home page">
-              <img src={logo.src} className="w-8 h-8" alt={logo.alt} />
-              <span className="text-xl font-extrabold text-black tracking-tight">{logo.title}</span>
-            </Link>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  className="h-9 w-9 bg-transparent hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-0 rounded-lg p-0"
-                  aria-label="Open navigation menu"
-                >
-                  <Menu className="h-5 w-5 text-black" strokeWidth={2} />
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="bg-white w-[85vw] sm:w-[380px] p-0 border-l-2 border-gray-200 animate-in slide-in-from-right duration-300">
-                  <SheetHeader className="px-6 border-b-2 border-gray-200 min-h-[72px] flex flex-row items-center justify-start">
-                    <SheetTitle className="text-left flex-1">
-                      <Link to={logo.url} className="flex items-center gap-2.5 focus:outline-none rounded-lg transition-colors duration-200" aria-label="Go to home page">
-                        <img src={logo.src} className="w-8 h-8" alt={logo.alt} />
-                        <span className="text-xl font-extrabold text-black tracking-tight">
-                          {logo.title}
-                        </span>
-                      </Link>
-                    </SheetTitle>
-                    <SheetDescription className="sr-only">
-                      Navigation menu for KampusKart
-                    </SheetDescription>
-                  </SheetHeader>
-                <div className="px-5 py-6 flex flex-col gap-5">
-                  <Accordion
-                    type="single"
-                    collapsible
-                    className="flex w-full flex-col gap-3 bg-transparent [&_[data-state=open]]:animate-accordion-down [&_[data-state=closed]]:animate-accordion-up"
+
+        {/* Mobile nav */}
+        <div className="flex lg:hidden items-center justify-between h-10">
+          <Link
+            to={logo.url}
+            className="flex items-center gap-2.5 rounded-lg focus:outline-none"
+            aria-label="Go to home page"
+          >
+            <img src={logo.src} className="w-8 h-8" alt={logo.alt} />
+            <span className="text-xl font-extrabold text-black tracking-tight">
+              {logo.title}
+            </span>
+          </Link>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 bg-transparent hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-0 rounded-lg p-0"
+                aria-label="Open navigation menu"
+              >
+                <Menu className="h-5 w-5 text-black" strokeWidth={2} />
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="bg-white w-[85vw] sm:w-[380px] p-0 border-l border-gray-200">
+              <SheetHeader className="px-6 border-b border-gray-200 min-h-[72px] flex flex-row items-center">
+                <SheetTitle className="text-left flex-1">
+                  <Link
+                    to={logo.url}
+                    className="flex items-center gap-2.5 rounded-lg focus:outline-none"
+                    aria-label="Go to home page"
                   >
-                    {menu.map((item) => renderMobileMenuItem(item))}
-                  </Accordion>
-                  {mobileExtraLinks.length > 0 && (
-                    <div className="border-t border-gray-200 pt-4 mt-2 animate-in fade-in-50 duration-300">
-                      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-1">Quick Access</h3>
-                      <div className="flex flex-col gap-2">
-                        {mobileExtraLinks.map((link, idx) => (
-                          <SheetClose key={idx} asChild>
-                            <Link
-                              to={link.url}
-                              className="inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 py-3 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 transition-colors duration-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 focus:outline-none focus:ring-0"
-                              aria-label={`Go to ${link.name}`}
-                            >
-                              {link.name}
-                            </Link>
-                          </SheetClose>
-                        ))}
-                      </div>
+                    <img src={logo.src} className="w-8 h-8" alt={logo.alt} />
+                    <span className="text-xl font-extrabold text-black tracking-tight">
+                      {logo.title}
+                    </span>
+                  </Link>
+                </SheetTitle>
+                <SheetDescription className="sr-only">
+                  Navigation menu for KampusKart
+                </SheetDescription>
+              </SheetHeader>
+              <div className="px-5 py-6 flex flex-col gap-5">
+                <Accordion
+                  type="single"
+                  collapsible
+                  className="flex w-full flex-col gap-3 bg-transparent"
+                >
+                  {menu.map((item) => renderMobileMenuItem(item))}
+                </Accordion>
+                {mobileExtraLinks.length > 0 && (
+                  <div className="border-t border-gray-200 pt-4 mt-2">
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-1">
+                      Quick Access
+                    </h3>
+                    <div className="flex flex-col gap-2">
+                      {mobileExtraLinks.map((link, idx) => (
+                        <SheetClose key={idx} asChild>
+                          <Link
+                            to={link.url}
+                            className="inline-flex h-11 items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold text-gray-700 bg-white border border-gray-200 transition-colors duration-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 focus:outline-none focus:ring-0"
+                            aria-label={`Go to ${link.name}`}
+                          >
+                            {link.name}
+                          </Link>
+                        </SheetClose>
+                      ))}
                     </div>
+                  </div>
+                )}
+                <div className="flex flex-col gap-2 pt-4 mt-2 border-t border-gray-200">
+                  <SheetClose asChild>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full h-11 text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 transition-colors duration-200 rounded-lg focus:outline-none focus:ring-0"
+                    >
+                      <Link to={auth.login.url}>{auth.login.text}</Link>
+                    </Button>
+                  </SheetClose>
+                  {auth.signup.onClick ? (
+                    <SheetClose asChild>
+                      <Button
+                        onClick={auth.signup.onClick}
+                        className="w-full h-11 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] transition-colors duration-200 rounded-lg focus:outline-none focus:ring-0"
+                        aria-label={auth.signup.text}
+                      >
+                        {auth.signup.text}
+                      </Button>
+                    </SheetClose>
+                  ) : (
+                    <SheetClose asChild>
+                      <Button
+                        asChild
+                        className="w-full h-11 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] transition-colors duration-200 rounded-lg focus:outline-none focus:ring-0"
+                      >
+                        <Link to={auth.signup.url}>{auth.signup.text}</Link>
+                      </Button>
+                    </SheetClose>
                   )}
-                    <div className="flex flex-col gap-2 pt-4 mt-2 border-t border-gray-200 animate-in fade-in-50 duration-300">
-                      <SheetClose asChild>
-                        <Button asChild variant="outline" className="w-full h-11 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 transition-colors duration-200 rounded-lg focus:outline-none focus:ring-0">
-                          <Link to={auth.login.url}>{auth.login.text}</Link>
-                        </Button>
-                      </SheetClose>
-                      {auth.signup.onClick ? (
-                        <SheetClose asChild>
-                          <Button onClick={auth.signup.onClick} className="w-full h-11 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] transition-colors duration-200 rounded-lg focus:outline-none focus:ring-0" aria-label={auth.signup.text}>
-                            {auth.signup.text}
-                          </Button>
-                        </SheetClose>
-                      ) : (
-                        <SheetClose asChild>
-                          <Button asChild className="w-full h-11 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] transition-colors duration-200 rounded-lg focus:outline-none focus:ring-0">
-                            <Link to={auth.signup.url}>{auth.signup.text}</Link>
-                          </Button>
-                        </SheetClose>
-                      )}
-                    </div>
                 </div>
-              </SheetContent>
-            </Sheet>
-          </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
-    </section>
+    </header>
   );
 };
 
 const renderMenuItem = (item: MenuItem) => {
   if (item.items) {
     return (
-      <NavigationMenuItem key={item.title} className="text-black">
-        <NavigationMenuTrigger className="text-gray-700 font-semibold bg-transparent hover:bg-gray-100 hover:text-gray-900 data-[state=open]:bg-gray-100 data-[state=open]:text-gray-900 focus:bg-gray-100 focus:text-gray-900 transition-colors rounded-lg px-4 py-2 border-0 focus:outline-none focus:ring-0 [&>svg]:text-gray-700 data-[state=open]:[&>svg]:text-gray-900" aria-label={`${item.title} menu`}>{item.title}</NavigationMenuTrigger>
+      <NavigationMenuItem key={item.title}>
+        <NavigationMenuTrigger
+          className="text-gray-700 font-semibold px-4 py-2 rounded-lg focus:outline-none focus:ring-0"
+          aria-label={`${item.title} menu`}
+        >
+          {item.title}
+        </NavigationMenuTrigger>
         <NavigationMenuContent>
-          <ul className="w-80 p-2 bg-white border-2 border-gray-200 rounded-lg">
+          <ul className="w-80 p-2 bg-white border border-gray-200 rounded-lg shadow-lg">
             {item.items.map((subItem) => (
               <li key={subItem.title}>
                 <NavigationMenuLink asChild>
                   <Link
-                    className={`flex select-none gap-3 rounded-lg p-3 leading-none no-underline outline-none transition-colors duration-200 border-0 focus:ring-0 ${
-                      subItem.locked 
-                        ? 'bg-gray-50 text-gray-400 cursor-not-allowed hover:bg-gray-50' 
-                        : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
+                    to={subItem.locked ? "#" : subItem.url}
+                    className={`flex select-none gap-3 rounded-lg p-3 leading-none no-underline outline-none transition-colors duration-200 focus:ring-0 ${
+                      subItem.locked
+                        ? "bg-gray-50 text-gray-400 cursor-not-allowed pointer-events-none"
+                        : "hover:bg-gray-50 text-gray-700 hover:text-gray-900"
                     }`}
-                    to={subItem.url}
                     aria-label={`Go to ${subItem.title}`}
+                    tabIndex={subItem.locked ? -1 : undefined}
+                    aria-disabled={subItem.locked}
+                    onClick={(e) => {
+                      if (subItem.locked) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }
+                    }}
                   >
                     <div className="flex-1">
-                      <div className={`text-sm font-semibold flex items-center gap-2 ${subItem.locked ? 'text-gray-400' : 'text-gray-900'}`}>
+                      <div
+                        className={`text-sm font-semibold flex items-center gap-2 ${
+                          subItem.locked ? "text-gray-400" : "text-gray-900"
+                        }`}
+                      >
                         {subItem.title}
                         {subItem.locked && <Lock className="h-3 w-3" />}
                       </div>
                       {subItem.description && (
-                        <p className={`text-xs leading-snug mt-1 ${subItem.locked ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <p
+                          className={`text-xs leading-snug mt-1 ${
+                            subItem.locked ? "text-gray-400" : "text-gray-600"
+                          }`}
+                        >
                           {subItem.description}
-                          {subItem.locked && ' • Sign in to access'}
+                          {subItem.locked && " • Sign in to access"}
                         </p>
                       )}
                     </div>
@@ -233,7 +293,7 @@ const renderMenuItem = (item: MenuItem) => {
       <NavigationMenuLink asChild>
         <Link
           to={item.url}
-          className="group inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-gray-700 bg-transparent border-0 transition-colors duration-200 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-0"
+          className="inline-flex h-9 items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-gray-700 bg-transparent transition-colors duration-200 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-0"
           aria-label={`Go to ${item.title}`}
         >
           {item.title}
@@ -247,36 +307,60 @@ const renderMobileMenuItem = (item: MenuItem) => {
   if (item.items) {
     return (
       <AccordionItem key={item.title} value={item.title} className="border-none">
-        <AccordionTrigger className="py-3 px-4 font-semibold hover:no-underline !text-gray-700 bg-white hover:!bg-gray-50 hover:!text-gray-900 data-[state=open]:!text-gray-900 data-[state=open]:!bg-gray-50 transition-colors duration-200 rounded-lg text-sm focus:outline-none focus:ring-0 border-2 border-gray-200 hover:border-gray-300 data-[state=open]:border-gray-300 [&>svg]:!text-gray-700 data-[state=open]:[&>svg]:!text-gray-900 [&>svg]:transition-transform [&>svg]:duration-300 [&>svg]:ease-in-out" aria-label={`${item.title} menu`}>
+        <AccordionTrigger
+          className="py-3 px-4 font-semibold text-gray-700 bg-white hover:bg-gray-50 hover:text-gray-900 data-[state=open]:text-gray-900 data-[state=open]:bg-gray-50 transition-colors duration-200 rounded-lg text-sm focus:outline-none focus:ring-0 border border-gray-200 hover:no-underline"
+          aria-label={`${item.title} menu`}
+        >
           {item.title}
         </AccordionTrigger>
-        <AccordionContent className="mt-2 pb-2 transition-all duration-300 ease-in-out">
+        <AccordionContent className="mt-2 pb-2">
           <div className="flex flex-col gap-2 pl-2">
             {item.items.map((subItem) => (
-              <SheetClose key={subItem.title} asChild>
+              subItem.locked ? (
                 <Link
-                  to={subItem.url}
-                  className={`flex select-none gap-3 rounded-lg p-3 leading-none outline-none transition-colors duration-200 border-2 focus:ring-0 ${
-                    subItem.locked
-                      ? 'bg-gray-50 !text-gray-400 cursor-not-allowed border-gray-200'
-                      : 'bg-white hover:bg-gray-50 !text-gray-700 hover:!text-gray-900 border-gray-200 hover:border-gray-300 focus:!text-gray-900'
-                  }`}
+                  key={subItem.title}
+                  to="#"
+                  className="flex select-none gap-3 rounded-lg p-3 leading-none outline-none transition-colors duration-200 border focus:ring-0 bg-gray-50 text-gray-400 cursor-not-allowed border-gray-200"
                   aria-label={`Go to ${subItem.title}`}
+                  tabIndex={-1}
+                  aria-disabled={true}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
                 >
                   <div className="flex-1">
-                    <div className={`text-sm font-semibold flex items-center gap-2 mb-1 ${subItem.locked ? '!text-gray-400' : '!text-gray-900'}`}>
+                    <div className="text-sm font-semibold flex items-center gap-2 mb-1 text-gray-400">
                       {subItem.title}
-                      {subItem.locked && <Lock className="h-3 w-3" />}
+                      <Lock className="h-3 w-3" />
                     </div>
                     {subItem.description && (
-                      <p className={`text-xs leading-snug ${subItem.locked ? '!text-gray-400' : '!text-gray-600'}`}>
-                        {subItem.description}
-                        {subItem.locked && ' • Sign in to access'}
+                      <p className="text-xs leading-snug text-gray-400">
+                        {subItem.description} • Sign in to access
                       </p>
                     )}
                   </div>
                 </Link>
-              </SheetClose>
+              ) : (
+                <SheetClose key={subItem.title} asChild>
+                  <Link
+                    to={subItem.url}
+                    className="flex select-none gap-3 rounded-lg p-3 leading-none outline-none transition-colors duration-200 border focus:ring-0 bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border-gray-200 hover:border-gray-300"
+                    aria-label={`Go to ${subItem.title}`}
+                  >
+                    <div className="flex-1">
+                      <div className="text-sm font-semibold flex items-center gap-2 mb-1 text-gray-900">
+                        {subItem.title}
+                      </div>
+                      {subItem.description && (
+                        <p className="text-xs leading-snug text-gray-600">
+                          {subItem.description}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                </SheetClose>
+              )
             ))}
           </div>
         </AccordionContent>
@@ -286,9 +370,9 @@ const renderMobileMenuItem = (item: MenuItem) => {
 
   return (
     <SheetClose key={item.title} asChild>
-      <Link 
-        to={item.url} 
-        className="block py-3 px-4 font-semibold !text-gray-700 bg-white hover:bg-gray-50 hover:!text-gray-900 transition-colors duration-200 rounded-lg text-sm h-11 flex items-center focus:outline-none focus:ring-0 border-2 border-gray-200 hover:border-gray-300 focus:!text-gray-900"
+      <Link
+        to={item.url}
+        className="flex h-11 items-center rounded-lg px-4 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 hover:text-gray-900 transition-colors duration-200 border border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-0"
         aria-label={`Go to ${item.title}`}
       >
         {item.title}
@@ -298,4 +382,3 @@ const renderMobileMenuItem = (item: MenuItem) => {
 };
 
 export { Navbar1 };
-

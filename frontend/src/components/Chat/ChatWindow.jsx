@@ -775,7 +775,7 @@ const ChatWindow = () => {
           overflow: 'hidden',
           height: '100vh',
           minHeight: 0,
-          pt: '72px', // Padding to match navbar height
+          pt: 'var(--navbar-height, 72px)', // Padding to match navbar height
         }}
       >
         {/* Chat Header during error */}
@@ -889,7 +889,7 @@ const ChatWindow = () => {
           overflow: 'hidden',
           height: '100vh',
           minHeight: 0,
-          pt: '72px', // Padding to match navbar height
+          pt: 'var(--navbar-height, 72px)', // Padding to match navbar height
         }}
       >
         <ChatSkeleton messageCount={8} />
@@ -911,7 +911,7 @@ const ChatWindow = () => {
       overflow: 'hidden',
       height: '100vh',
       minHeight: 0,
-      pt: '72px', // Padding to match navbar height
+      pt: 'var(--navbar-height, 72px)', // Padding to match navbar height
       '&::before': {
         content: '""',
         position: 'absolute',

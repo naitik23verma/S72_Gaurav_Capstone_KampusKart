@@ -170,54 +170,6 @@ export const PageSkeleton: React.FC<{
   );
 };
 
-// Profile Page Skeleton
-export const ProfileSkeleton: React.FC = () => {
-  return (
-    <div className="min-h-screen flex flex-col bg-[#fafbfc] font-sans">
-      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
-        <div className="max-w-3xl mx-auto">
-          <div className="mb-8 flex flex-col items-center">
-            <div className="w-full flex flex-col items-center">
-              <div className="bg-white rounded-2xl shadow-md p-0 w-full flex flex-col items-center relative mt-24" style={{ minHeight: 220 }}>
-                {/* Profile Picture Skeleton */}
-                <div className="w-32 h-32 rounded-lg bg-gray-200 flex items-center justify-center overflow-hidden border-2 border-gray-200 shadow-md absolute left-1/2 -translate-x-1/2 -top-20 z-10 animate-pulse" />
-                
-                <div className="pt-24 pb-8 px-6 w-full flex flex-col items-center">
-                  <Skeleton height="32px" width="200px" className="mb-2 mt-8" />
-                  
-                  {/* Profile Completion Meter Skeleton */}
-                  <div className="mb-6 w-full max-w-xs">
-                    <div className="flex justify-between items-center mb-2">
-                      <Skeleton height="14px" width="120px" />
-                      <Skeleton height="14px" width="40px" />
-                    </div>
-                    <Skeleton height="8px" width="100%" rounded="full" />
-                  </div>
-                  
-                  {/* Form Fields Skeleton */}
-                  <div className="w-full max-w-xs space-y-4">
-                    {Array.from({ length: 8 }).map((_, index) => (
-                      <div key={index} className="space-y-2">
-                        <Skeleton height="16px" width="80px" />
-                        <Skeleton height="40px" width="100%" rounded="md" />
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {/* Save Button Skeleton */}
-                  <div className="mt-6 w-full max-w-xs">
-                    <Skeleton height="48px" width="100%" rounded="full" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-};
-
 // Chat Message Skeleton
 export const ChatMessageSkeleton: React.FC<{ count?: number }> = ({ count = 5 }) => {
   return (

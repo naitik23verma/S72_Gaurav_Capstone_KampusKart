@@ -3,15 +3,8 @@ const router = express.Router();
 const Chat = require('../models/Chat');
 const auth = require('../middleware/authMiddleware');
 const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
-
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
 
 // Configure multer for file uploads
 const storage = multer.memoryStorage();
@@ -139,6 +132,11 @@ router.post('/messages', auth, upload.array('attachments', 5), async (req, res) 
           mimeType: file.mimetype
         });
       }
+    }
+
+    // Validate that message is not empty if no attachments
+    if (!message?.trim() && (!attachments || attachments.length === 0)) {
+      return res.status(400).json({ message: 'Message cannot be empty' });
     }
 
     const chatMessage = new Chat({

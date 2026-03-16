@@ -7,7 +7,7 @@ interface AuthenticatedLayoutProps {
 
 const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) => {
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col min-h-screen">
       <KampusKartNavbar />
       <main className="flex-grow">
         {children}

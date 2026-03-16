@@ -2,9 +2,8 @@ const express = require('express');
 const router = express.Router();
 const protect = require('../middleware/authMiddleware');
 const Complaint = require('../models/Complaint');
-const _User = require('../models/User');
 const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
 const { sanitizeInput, validateComplaint } = require('../middleware/validation');
 
@@ -12,13 +11,6 @@ const { sanitizeInput, validateComplaint } = require('../middleware/validation')
 const escapeRegex = (string) => {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 };
-
-// Cloudinary configuration
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 // Multer configuration for file uploads
 const storage = multer.memoryStorage();

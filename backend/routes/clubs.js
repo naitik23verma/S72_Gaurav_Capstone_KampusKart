@@ -3,14 +3,8 @@ const router = express.Router();
 const ClubRecruitment = require('../models/ClubRecruitment');
 const authMiddleware = require('../middleware/authMiddleware');
 const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -34,6 +28,23 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
   const { title, description, clubName, startDate, endDate, formUrl, contactInfo, status } = req.body;
   if (!title || !description || !clubName || !startDate || !endDate || !formUrl) {
     return res.status(400).json({ message: 'All fields are required.' });
+  }
+
+  // Validate date range
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    return res.status(400).json({ message: 'Invalid date format.' });
+  }
+  if (start >= end) {
+    return res.status(400).json({ message: 'Start date must be before end date.' });
+  }
+
+  // Validate formUrl
+  try {
+    new URL(formUrl);
+  } catch (e) {
+    return res.status(400).json({ message: 'Invalid form URL format.' });
   }
 
   let image = undefined;
@@ -95,6 +106,24 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
   if (!title || !description || !clubName || !startDate || !endDate || !formUrl || !status) {
     return res.status(400).json({ message: 'Missing required fields.' });
   }
+
+  // Validate date range
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    return res.status(400).json({ message: 'Invalid date format.' });
+  }
+  if (start >= end) {
+    return res.status(400).json({ message: 'Start date must be before end date.' });
+  }
+
+  // Validate formUrl
+  try {
+    new URL(formUrl);
+  } catch (e) {
+    return res.status(400).json({ message: 'Invalid form URL format.' });
+  }
+
   try {
     const club = await ClubRecruitment.findById(req.params.id);
     if (!club) return res.status(404).json({ message: 'Club recruitment not found.' });

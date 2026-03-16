@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { FiMapPin, FiSearch, FiPlus, FiEdit2, FiTag, FiCalendar, FiUser, FiTrash2, FiCheckCircle } from 'react-icons/fi';
+import { FiMapPin, FiSearch, FiEdit2, FiTag, FiCalendar, FiUser, FiTrash2, FiCheckCircle } from 'react-icons/fi';
 import { MdSchool, MdRestaurant, MdLocalLaundryService, MdHotel, MdLibraryBooks, MdFastfood, MdLocalCafe, MdRoomService, MdBed, MdApartment } from 'react-icons/md';
-import { Instagram, Linkedin, Globe, Github } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
@@ -9,13 +8,7 @@ import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { validateMultipleRequired } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
-
-const socialLinks = [
-  { href: 'https://www.instagram.com/gaurav_khandelwal_/', label: 'Instagram', icon: <Instagram className="h-4 w-4" /> },
-  { href: 'https://www.linkedin.com/in/gaurav-khandelwal-17a127358/', label: 'LinkedIn', icon: <Linkedin className="h-4 w-4" /> },
-  { href: 'https://gaurav-khandelwal.vercel.app/', label: 'Portfolio', icon: <Globe className="h-4 w-4" /> },
-  { href: 'https://github.com/Gaurav-205', label: 'GitHub', icon: <Github className="h-4 w-4" /> },
-];
+import { socialLinks } from '../utils/socialLinks';
 
 interface Facility {
   _id: string;
@@ -252,7 +245,7 @@ const Facilities = () => {
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         
         {/* Success Message Banner */}
         {successMessage && (
@@ -409,9 +402,9 @@ const Facilities = () => {
               </div>
 
               {/* Content Section */}
-              <div className="p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">{facility?.name || 'Facility'}</h2>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-3">{facility?.description || ''}</p>
+              <div className="p-4 sm:p-5 md:p-6">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{facility?.name || 'Facility'}</h2>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">{facility?.description || ''}</p>
 
                 {/* Meta Info Row */}
                 <div className="space-y-3 pt-4 border-t-2 border-gray-200">
@@ -543,7 +536,7 @@ const Facilities = () => {
                     <textarea
                       value={newFacility.description}
                       onChange={e => setNewFacility({ ...newFacility, description: e.target.value })}
-                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm resize-none"
                       rows={3}
                       required
                       placeholder="Describe the facility, features, etc."
@@ -718,7 +711,7 @@ const Facilities = () => {
                     <textarea
                       value={editFacility?.description || ''}
                       onChange={e => setEditFacility(editFacility ? { ...editFacility, description: e.target.value } : null)}
-                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm resize-none"
                       rows={3}
                       required
                       placeholder="Describe the facility, features, etc."
@@ -814,8 +807,8 @@ const Facilities = () => {
 
         {/* Facility Details Modal */}
         {selectedFacility && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4">
+            <div className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
               {/* Close Button */}
               <button
                 onClick={() => setSelectedFacility(null)}
@@ -918,7 +911,7 @@ const Facilities = () => {
         )}
         {/* Zoomed Image Modal */}
         {zoomedImage && selectedFacility && selectedFacility.images && selectedFacility.images.length > 0 && (
-          <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4" onClick={() => setZoomedImage(null)}>
+          <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[10000] p-4" onClick={() => setZoomedImage(null)}>
             {/* Image */}
             <img 
               src={zoomedImage} 

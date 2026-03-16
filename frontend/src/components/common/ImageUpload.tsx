@@ -87,7 +87,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     : `PNG, JPG, GIF up to ${maxSizeMB}MB each. Add clear images to help illustrate.`;
 
   return (
-    <div className="bg-gray-50 rounded-lg p-6">
+    <div className="bg-gray-50 rounded-lg p-6" style={{ colorScheme: 'light', backgroundColor: '#f9fafb' }}>
       <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">
         {label} {!single && `(Optional, Max ${maxImages})`}
       </h3>
@@ -123,21 +123,21 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 
       {/* Image Previews */}
       {images.length > 0 && (
-        <div className={`mt-4 grid gap-2 ${single ? 'grid-cols-1' : 'grid-cols-5'}`}>
+        <div className={`mt-4 grid gap-2 ${single ? 'grid-cols-1' : 'grid-cols-3 xs:grid-cols-4 sm:grid-cols-5'}`}>
           {images.map((image, index) => (
             <div key={index} className="relative group">
               <img
                 src={image.previewUrl || image.url}
                 alt={`Preview ${index + 1}`}
-                className={`${single ? 'h-48 w-full' : 'h-28 w-28'} object-cover rounded-lg border-2 border-gray-200`}
+                className={`${single ? 'h-48 w-full' : 'h-20 w-full xs:h-24 sm:h-28'} object-cover rounded-lg border-2 border-gray-200`}
               />
               <button
                 type="button"
                 onClick={() => handleRemoveImage(index)}
-                className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-lg p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-lg p-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                 aria-label="Remove image"
               >
-                <FiX className="w-4 h-4" />
+                <FiX className="w-3 h-3 sm:w-4 sm:h-4" />
               </button>
             </div>
           ))}

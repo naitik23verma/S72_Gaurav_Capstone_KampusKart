@@ -1,14 +1,7 @@
 const cron = require('node-cron');
 const LostFoundItem = require('../models/LostFoundItem');
 const Complaint = require('../models/Complaint');
-const cloudinary = require('cloudinary').v2;
-
-// Cloudinary configuration
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+const cloudinary = require('../config/cloudinary');
 
 // Helper function to delete images from Cloudinary
 const deleteImages = async (images) => {

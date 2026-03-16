@@ -1,17 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Instagram, Linkedin, Globe, Github } from 'lucide-react';
 import { FiMap, FiSearch, FiCalendar, FiFileText, FiAlertCircle, FiHome, FiUsers, FiMessageSquare } from 'react-icons/fi';
-import KampusKartNavbar from './KampusKartNavbar';
 import { ShuffleHero } from './ui/shuffle-grid';
 import { Footer } from './ui/footer';
-
-const socialLinks = [
-  { href: 'https://www.instagram.com/gaurav_khandelwal_/', label: 'Instagram', icon: <Instagram className="h-4 w-4" /> },
-  { href: 'https://www.linkedin.com/in/gaurav-khandelwal-17a127358/', label: 'LinkedIn', icon: <Linkedin className="h-4 w-4" /> },
-  { href: 'https://gaurav-khandelwal.vercel.app/', label: 'Portfolio', icon: <Globe className="h-4 w-4" /> },
-  { href: 'https://github.com/Gaurav-205', label: 'GitHub', icon: <Github className="h-4 w-4" /> },
-];
+import { socialLinks } from '../utils/socialLinks';
 
 const features = [
   { name: 'Campus Map',        description: 'Explore the campus and find locations easily.',          icon: <FiMap className="w-6 h-6 sm:w-7 sm:h-7" />,           link: '/login',        iconBg: 'bg-[#181818]' },
@@ -32,11 +24,9 @@ const steps = [
 
 const Landing: React.FC = () => {
   return (
-    <>
-      <KampusKartNavbar />
-      <div className="bg-white font-sans pt-[72px]">
+    <div className="bg-white font-sans pt-[72px]">
 
-        {/* Hero Section */}
+      {/* Hero Section */}
         <div className="w-full py-16 sm:py-20 md:h-[calc(100vh-72px)] md:py-0 md:flex md:items-center">
           <ShuffleHero />
         </div>
@@ -142,7 +132,6 @@ const Landing: React.FC = () => {
         />
 
       </div>
-    </>
   );
 };
 

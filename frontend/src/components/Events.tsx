@@ -1,21 +1,13 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { FiPlus, FiCalendar, FiMapPin, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiClock, FiUser, FiPhone, FiCheckCircle, FiEdit2, FiTrash2 } from 'react-icons/fi';
-import { FaSearch } from 'react-icons/fa';
-import { Instagram, Linkedin, Globe, Github } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { FiCalendar, FiMapPin, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiClock, FiUser, FiPhone, FiCheckCircle, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
-import { validateMultipleRequired, validateEmail, validatePhone, validateUrl } from '../utils/formValidation';
+import { validateEmail, validatePhone, validateUrl } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
-
-const socialLinks = [
-  { href: 'https://www.instagram.com/gaurav_khandelwal_/', label: 'Instagram', icon: <Instagram className="h-4 w-4" /> },
-  { href: 'https://www.linkedin.com/in/gaurav-khandelwal-17a127358/', label: 'LinkedIn', icon: <Linkedin className="h-4 w-4" /> },
-  { href: 'https://gaurav-khandelwal.vercel.app/', label: 'Portfolio', icon: <Globe className="h-4 w-4" /> },
-  { href: 'https://github.com/Gaurav-205', label: 'GitHub', icon: <Github className="h-4 w-4" /> },
-];
+import { socialLinks } from '../utils/socialLinks';
 
 interface Event {
   _id: string;
@@ -94,8 +86,8 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4">
+      <div className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
         {/* Close Button */}
                   <button
             onClick={onClose}
@@ -225,12 +217,14 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
               <button
                 onClick={() => onEdit?.(event)}
                 className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 flex items-center"
+                aria-label="Edit event"
               >
                 <FiEdit2 className="mr-1" /> Edit Event
               </button>
               <button
                 onClick={() => onDelete?.(event._id)}
                 className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 flex items-center"
+                aria-label="Delete event"
               >
                 <FiTrash2 className="mr-1" /> Delete Event
               </button>
@@ -242,7 +236,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
       {/* Zoomed Image Modal */}
       {zoomedImage && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[60] p-4" 
+          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[10000] p-4" 
           onClick={closeZoomedImageModal}
         >
           <img 
@@ -276,7 +270,6 @@ const Events = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [events, setEvents] = useState<Event[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [newEvent, setNewEvent] = useState({
     title: '',
@@ -413,14 +406,6 @@ const Events = () => {
     }
   };
 
-  const handleFieldBlur = (fieldName: string, value: string) => {
-    const error = validateField(fieldName, value);
-    setFieldErrors(prev => ({
-      ...prev,
-      [fieldName]: error || ''
-    }));
-  };
-
   const renderStatus = (status: Event['status']) => {
     let bgColorClass;
     let textColorClass;
@@ -476,53 +461,6 @@ const Events = () => {
     }
   };
 
-  const handleAddEvent = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!token) return;
-    try {
-      const formData = new FormData();
-      formData.append('title', newEvent.title);
-      formData.append('description', newEvent.description);
-      formData.append('date', newEvent.date);
-      formData.append('location', newEvent.location || '');
-      formData.append('status', newEvent.status);
-      formData.append('registerUrl', newEvent.registerUrl);
-      formData.append('operatingHours', newEvent.operatingHours);
-      formData.append('contactInfo', JSON.stringify(newEvent.contactInfo));
-      formData.append('mapLocation', JSON.stringify(newEvent.mapLocation || { building: undefined, floor: undefined, room: undefined, coordinates: undefined }));
-      if (newEvent.images.length > 0 && newEvent.images[0].file) {
-        formData.append('image', newEvent.images[0].file);
-      }
-      const response = await fetch(`${API_BASE}/api/events`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to add event');
-      }
-      const savedEvent = await response.json();
-      setEvents([savedEvent, ...events]);
-      setIsModalOpen(false);
-      setNewEvent({ 
-        title: '', 
-        description: '', 
-        date: '', 
-        location: '', 
-        status: 'Upcoming', 
-        registerUrl: '', 
-        images: [],
-        operatingHours: '',
-        contactInfo: { name: undefined, email: undefined, phone: undefined },
-        mapLocation: { building: undefined, floor: undefined, room: undefined, coordinates: undefined }
-      });
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to add event');
-    }
-  };
 
   const handleEditEvent = (event: Event) => {
     setEditingEvent(event);
@@ -699,7 +637,7 @@ const Events = () => {
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         {/* Success Message Banner */}
         {successMessage && (
           <div className="mb-6 bg-green-50 border-2 border-green-200 rounded-lg p-4 flex items-center gap-3 animate-fade-in">
@@ -713,6 +651,7 @@ const Events = () => {
             <button 
               onClick={() => setIsModalOpen(true)}
               className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] transition-colors duration-200"
+              aria-label="Add new event"
             >
               + Add New Event
             </button>
@@ -806,7 +745,7 @@ const Events = () => {
               onClick={() => openEventDetailsModal(event)}
             >
               {/* Image Section with Overlay */}
-              <div className="relative h-64 sm:h-80 overflow-hidden">
+              <div className="relative h-48 sm:h-56 md:h-64 overflow-hidden">
                 {event.image?.url ? (
                   <>
                     <img 
@@ -882,7 +821,7 @@ const Events = () => {
           title={editingEvent ? 'Edit Event' : 'Add New Event'}
           error={error}
         >
-              <form onSubmit={editingEvent ? handleSaveEvent : handleAddEvent} className="space-y-8">
+              <form onSubmit={handleSaveEvent} className="space-y-8">
                 {/* Event Details Section */}
                 <div className="border-2 border-gray-200 rounded-lg p-6 mb-6">
                   <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Event Details <FiInfo className="text-gray-400" title="Fill in the details of your event." /></h3>
@@ -893,14 +832,15 @@ const Events = () => {
                         <input
                           type="text"
                           value={newEvent.title}
-                          onChange={e => setNewEvent({...newEvent, title: e.target.value})}
-                          className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                          onChange={e => { setNewEvent({...newEvent, title: e.target.value}); if (fieldErrors.title) setFieldErrors(prev => ({...prev, title: ''})); }}
+                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.title ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm`}
                           placeholder="Enter event title (e.g., Annual Tech Symposium 2024)"
                           required
                           aria-label="Event Title"
                         />
                         <FiTag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                       </div>
+                      {fieldErrors.title && <p className="text-xs text-red-500 mt-1">{fieldErrors.title}</p>}
                       <p className="text-xs text-gray-500 mt-1">Give a short, descriptive title for the event.</p>
                     </div>
                     <div>
@@ -915,12 +855,13 @@ const Events = () => {
                         <input
                           type="date"
                           value={newEvent.date}
-                          onChange={e => setNewEvent({...newEvent, date: e.target.value})}
-                          className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm cursor-pointer [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                          onChange={e => { setNewEvent({...newEvent, date: e.target.value}); if (fieldErrors.date) setFieldErrors(prev => ({...prev, date: ''})); }}
+                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.date ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm cursor-pointer [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
                           required
                           aria-label="Event Date"
                         />
                       </div>
+                      {fieldErrors.date && <p className="text-xs text-red-500 mt-1">{fieldErrors.date}</p>}
                       <p className="text-xs text-gray-500 mt-1">When will the event take place?</p>
                     </div>
                   </div>
@@ -929,8 +870,8 @@ const Events = () => {
                     <div className="relative">
                       <textarea
                         value={newEvent.description}
-                        onChange={e => setNewEvent({...newEvent, description: e.target.value})}
-                        className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                        onChange={e => { setNewEvent({...newEvent, description: e.target.value}); if (fieldErrors.description) setFieldErrors(prev => ({...prev, description: ''})); }}
+                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.description ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm resize-none`}
                         rows={4}
                         placeholder="Provide a detailed description of the event. Include key highlights, agenda, target audience, and any special requirements."
                         required
@@ -938,6 +879,7 @@ const Events = () => {
                       ></textarea>
                       <FiFileText className="absolute left-3 top-3 text-gray-400" />
                     </div>
+                    {fieldErrors.description && <p className="text-xs text-red-500 mt-1">{fieldErrors.description}</p>}
                     <p className="text-xs text-gray-500 mt-1">Provide details to help users understand the event.</p>
                   </div>
                   <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -947,14 +889,15 @@ const Events = () => {
                         <input
                           type="text"
                           value={newEvent.location}
-                          onChange={e => setNewEvent({...newEvent, location: e.target.value})}
-                          className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                          onChange={e => { setNewEvent({...newEvent, location: e.target.value}); if (fieldErrors.location) setFieldErrors(prev => ({...prev, location: ''})); }}
+                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.location ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm`}
                           placeholder="Enter venue details (e.g., Main Auditorium, Block A, Floor 3)"
                           required
                           aria-label="Event Location"
                         />
                         <FiMapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                       </div>
+                      {fieldErrors.location && <p className="text-xs text-red-500 mt-1">{fieldErrors.location}</p>}
                       <p className="text-xs text-gray-500 mt-1">Where will the event be held?</p>
                     </div>
                     <div>

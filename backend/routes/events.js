@@ -3,15 +3,8 @@ const router = express.Router();
 const Event = require('../models/Event');
 const authMiddleware = require('../middleware/authMiddleware');
 const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
-
-// Cloudinary config (reuse from other routes)
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -46,6 +39,28 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
 
   if (!title || !description || !date || !location) {
     return res.status(400).json({ message: 'All fields are required.' });
+  }
+
+  // Validate date is not in the past
+  const eventDate = new Date(date);
+  if (isNaN(eventDate.getTime())) {
+    return res.status(400).json({ message: 'Invalid date format.' });
+  }
+  
+  // Check if event date is in the past
+  const now = new Date();
+  now.setHours(0, 0, 0, 0); // Reset to start of day for fair comparison
+  if (eventDate < now) {
+    return res.status(400).json({ message: 'Event date cannot be in the past.' });
+  }
+
+  // Validate registerUrl if provided
+  if (registerUrl) {
+    try {
+      new URL(registerUrl);
+    } catch (e) {
+      return res.status(400).json({ message: 'Invalid registration URL format.' });
+    }
   }
 
   let image = undefined;
@@ -128,6 +143,22 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
   if (!title || !description || !date || !location || !status) {
     return res.status(400).json({ message: 'Missing required fields.' });
   }
+
+  // Validate date format
+  const eventDate = new Date(date);
+  if (isNaN(eventDate.getTime())) {
+    return res.status(400).json({ message: 'Invalid date format.' });
+  }
+
+  // Validate registerUrl if provided
+  if (registerUrl) {
+    try {
+      new URL(registerUrl);
+    } catch (e) {
+      return res.status(400).json({ message: 'Invalid registration URL format.' });
+    }
+  }
+
   try {
     const event = await Event.findById(req.params.id);
     if (!event) return res.status(404).json({ message: 'Event not found.' });
@@ -200,6 +231,11 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
 
 // Delete an event (admin only)
 router.delete('/:id', authMiddleware, async (req, res) => {
+  // Validate user exists
+  if (!req.user) {
+    return res.status(401).json({ message: 'Authentication required.' });
+  }
+  
   if (!req.user.isAdmin) {
     return res.status(403).json({ message: 'Only admin can delete events.' });
   }

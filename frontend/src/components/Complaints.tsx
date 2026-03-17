@@ -40,7 +40,7 @@ interface Complaint {
   }>;
   createdAt: string;
   lastUpdated: string;
-  images?: { url: string }[];
+  images?: { url: string; public_id?: string }[];
 }
 
 // Use ImageFile type from ImageUpload component
@@ -264,7 +264,6 @@ const Complaints = () => {
     });
     setImages(
       (complaint.images || []).map(img => ({
-        existing: img,
         previewUrl: img.url,
         public_id: img.public_id,
         url: img.url,
@@ -411,7 +410,7 @@ const Complaints = () => {
         }
         setComplaints(complaints.filter(comp => comp._id !== id));
         setSelectedComplaintForDetails(null); // Close details modal if open
-        // Optionally show a success message
+        setSuccessMessage('Complaint deleted successfully!');
       } catch (err: any) {
         console.error('Error deleting complaint:', err);
         setError(err.message || 'Failed to delete complaint.');
@@ -538,7 +537,7 @@ const Complaints = () => {
   };
 
   if (isLoading && complaints.length === 0) {
-    return <PageSkeleton contentType="cards4col" itemCount={8} filterCount={2} showAddButton={true} />;
+    return <PageSkeleton contentType="cards" itemCount={8} filterCount={2} showAddButton={true} />;
   }
 
   if (error) {
@@ -935,7 +934,7 @@ const Complaints = () => {
                   <button
                     type="button"
                     onClick={closeComplaintModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100"
                     disabled={isSubmitting}
                   >
                     Cancel
@@ -1030,7 +1029,7 @@ const Complaints = () => {
                         <div className="flex gap-3 mt-6">
                             <button
                                 onClick={() => { setSelectedComplaintForDetails(null); openEditComplaintModal(selectedComplaintForDetails); }}
-                                className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white flex items-center"
+                                className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100 flex items-center"
                             >
                                 <FiEdit2 className="mr-1" /> Edit
                             </button>

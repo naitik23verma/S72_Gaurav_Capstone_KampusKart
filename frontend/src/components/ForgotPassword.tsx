@@ -105,10 +105,10 @@ const ForgotPassword = () => {
         
         {/* Logo */}
         <div className="flex items-center justify-center gap-2 sm:gap-3 mb-6 sm:mb-8">
-          <Link to="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity duration-200">
-            <img src="/Logo.png" alt="KampusKart Logo" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" />
-            <span className="text-lg sm:text-xl font-extrabold text-black tracking-tight">KampusKart</span>
-          </Link>
+          <Link to="/" className="flex items-center gap-2 sm:gap-3">
+              <img src="/Logo.png" alt="KampusKart Logo" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" />
+              <span className="text-lg sm:text-xl font-extrabold text-black tracking-tight">KampusKart</span>
+            </Link>
         </div>
 
         <h2 className="mb-1 text-xl sm:text-2xl font-extrabold text-black text-center">

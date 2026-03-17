@@ -649,7 +649,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
             {/* Recenter Button - Optimized for mobile */}
             <button
               onClick={handleRecenter}
-              className="absolute bottom-3 left-3 z-10 bg-white border-2 border-gray-200 rounded-lg p-2.5 flex items-center justify-center hover:bg-gray-50 active:bg-white transition-colors duration-200"
+              className="absolute bottom-3 left-3 z-10 bg-white border-2 border-gray-200 rounded-lg p-2.5 flex items-center justify-center hover:bg-gray-50 active:bg-gray-100 transition-colors duration-200"
               title="Re-center map on your location"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#00C6A7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -681,7 +681,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
         <div className={`${isPanelOpen ? 'flex' : 'hidden'} md:flex absolute md:relative inset-0 md:inset-auto w-full md:w-1/3 flex-col md:h-full z-20 md:z-auto transition-all duration-300 ease-in-out`}>
           {/* Mobile close button */}
           <button
-            className="md:hidden absolute top-2 right-2 z-20 bg-white border-2 border-gray-200 rounded-lg p-1.5 text-gray-600 hover:bg-gray-50 active:bg-white"
+            className="md:hidden absolute top-2 right-2 z-20 bg-white border-2 border-gray-200 rounded-lg p-1.5 text-gray-600 hover:bg-gray-50 active:bg-gray-100"
             onClick={() => setIsPanelOpen(false)}
             aria-label="Close locations panel"
           >
@@ -774,8 +774,8 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                 {filteredLocations.map((location) => (
                   <li
                     key={location.id}
-                    className={`mb-2 pb-2 border-b border-gray-200 text-gray-800 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors duration-150 ${
-                      selectedLocation?.id === location.id ? 'bg-blue-100' : ''
+                    className={`mb-2 pb-2 border-b-2 border-gray-200 text-gray-800 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors duration-150 ${
+                      selectedLocation?.id === location.id ? 'bg-[#00C6A7]/10' : ''
                     }`}
                     onClick={() => {
                       handleLocationClick(location);

@@ -605,7 +605,7 @@ const Facilities = () => {
                   <button
                     type="button"
                     onClick={closeAddModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100"
                     disabled={addLoading}
                   >
                     Cancel
@@ -780,7 +780,7 @@ const Facilities = () => {
                   <button
                     type="button"
                     onClick={closeEditModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100"
                     disabled={editLoading}
                   >
                     Cancel
@@ -890,7 +890,7 @@ const Facilities = () => {
                       setIsEditModalOpen(true);
                       setSelectedFacility(null);
                     }}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white flex items-center"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100 flex items-center"
                   ><span className="truncate">Edit</span></button>
                   <button
                     onClick={async () => {

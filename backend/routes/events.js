@@ -192,6 +192,16 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
       } catch (error) {
         return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
       }
+    } else if (req.body.removeImage === 'true') {
+      // Remove existing image if requested
+      if (event.image && event.image.public_id) {
+        try {
+          await cloudinary.uploader.destroy(event.image.public_id);
+        } catch (err) {
+          console.error('Error deleting event image:', err);
+        }
+      }
+      event.image = undefined;
     }
 
     let parsedContactInfo, parsedMapLocation;

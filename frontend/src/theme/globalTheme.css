@@ -137,7 +137,6 @@ body {
 
 .btn-primary:hover {
   background-color: #009e87;
-  transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
@@ -154,7 +153,6 @@ body {
 
 .btn-secondary:hover {
   background-color: var(--color-warning);
-  transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
@@ -172,7 +170,6 @@ body {
 .btn-outline:hover {
   background-color: var(--color-primary);
   color: var(--color-text-white);
-  transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
@@ -188,7 +185,6 @@ body {
 
 .card:hover {
   box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
 }
 
 /* Input Theme Classes */

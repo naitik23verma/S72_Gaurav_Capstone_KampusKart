@@ -132,27 +132,7 @@ h1, h2, h3, h4, h5, h6 {
   user-select: text;
 }
 
-/* Prevent body and all elements from becoming transparent on click */
-body,
-body *,
-div,
-section,
-main,
-article,
-aside,
-nav,
-header,
-footer {
-  -webkit-user-select: none !important;
-  user-select: none !important;
-}
-
-/* Re-enable selection for text content */
-p, span, li, h1, h2, h3, h4, h5, h6,
-input, textarea, [contenteditable] {
-  -webkit-user-select: text !important;
-  user-select: text !important;
-}
+/* (duplicate user-select block removed) */
 
 /* ─── Focus outlines ────────────────────────────────────────────────────────── */
 
@@ -201,16 +181,17 @@ header button:active {
 
 /* ─── Form inputs — force light theme ───────────────────────────────────────── */
 
-input,
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="tel"],
-input[type="number"],
-input[type="search"],
-input[type="url"],
-input[type="date"],
-textarea,
+/* Force light theme on native inputs — excludes MUI components */
+input:not(.MuiInputBase-input),
+input[type="text"]:not(.MuiInputBase-input),
+input[type="email"]:not(.MuiInputBase-input),
+input[type="password"]:not(.MuiInputBase-input),
+input[type="tel"]:not(.MuiInputBase-input),
+input[type="number"]:not(.MuiInputBase-input),
+input[type="search"]:not(.MuiInputBase-input),
+input[type="url"]:not(.MuiInputBase-input),
+input[type="date"]:not(.MuiInputBase-input),
+textarea:not(.MuiInputBase-input),
 select {
   background-color: #ffffff !important;
   color: #374151 !important;
@@ -221,10 +202,10 @@ select {
 }
 
 /* CRITICAL: Prevent page dimming when focusing inputs */
-input:focus,
-input:active,
-textarea:focus,
-textarea:active,
+input:not(.MuiInputBase-input):focus,
+input:not(.MuiInputBase-input):active,
+textarea:not(.MuiInputBase-input):focus,
+textarea:not(.MuiInputBase-input):active,
 select:focus,
 select:active {
   background-color: #ffffff !important;
@@ -235,10 +216,10 @@ select:active {
 
 
 /* Autofill light theme override */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
+input:not(.MuiInputBase-input):-webkit-autofill,
+input:not(.MuiInputBase-input):-webkit-autofill:hover,
+input:not(.MuiInputBase-input):-webkit-autofill:focus,
+input:not(.MuiInputBase-input):-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
   -webkit-text-fill-color: #374151 !important;
   caret-color: #374151 !important;

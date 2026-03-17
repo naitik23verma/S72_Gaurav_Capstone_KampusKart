@@ -149,7 +149,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
                 <div className="flex flex-col sm:flex-row gap-2">
                   <button
                     onClick={() => onEdit?.(club)}
-                    className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white transition-colors duration-200"
+                    className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-colors duration-200"
                   >
                     Edit
                   </button>
@@ -306,6 +306,17 @@ const ClubsRecruitment = () => {
   const handleAddClub = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) return;
+
+    // Validate required fields
+    if (!newClub.title.trim() || !newClub.description.trim() || !newClub.clubName.trim() || !newClub.startDate || !newClub.endDate || !newClub.formUrl.trim()) {
+      setError('Please fill in all required fields.');
+      return;
+    }
+    if (new Date(newClub.startDate) >= new Date(newClub.endDate)) {
+      setError('Start date must be before end date.');
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append('title', newClub.title);
@@ -393,6 +404,17 @@ const ClubsRecruitment = () => {
   const handleSaveClub = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token || !editingClub) return;
+
+    // Validate required fields
+    if (!newClub.title.trim() || !newClub.description.trim() || !newClub.clubName.trim() || !newClub.startDate || !newClub.endDate || !newClub.formUrl.trim()) {
+      setError('Please fill in all required fields.');
+      return;
+    }
+    if (new Date(newClub.startDate) >= new Date(newClub.endDate)) {
+      setError('Start date must be before end date.');
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append('title', newClub.title);
@@ -459,7 +481,7 @@ const ClubsRecruitment = () => {
   );
 
   if (isLoading) {
-    return <PageSkeleton />;
+    return <PageSkeleton contentType="cards" itemCount={6} filterCount={1} showAddButton={user?.isAdmin} />;
   }
 
   return (
@@ -782,7 +804,7 @@ const ClubsRecruitment = () => {
                   <button
                     type="button"
                     onClick={closeClubModal}
-                    className="px-6 py-3 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white transition-colors"
+                    className="px-6 py-3 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-colors"
                   >
                     Cancel
                   </button>

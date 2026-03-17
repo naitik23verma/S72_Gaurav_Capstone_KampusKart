@@ -15,7 +15,7 @@ interface NewsItem {
   description: string;
   date: string;
   category: string;
-  images?: { url: string }[];
+  images?: { url: string; public_id?: string }[];
 }
 
 const News = () => {
@@ -121,41 +121,6 @@ const News = () => {
     }
   };
 
-  const handleAddNews = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!token) return;
-
-    try {
-      const response = await fetch(`${API_BASE}/api/news`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(newNews)
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to add news');
-      }
-
-      const savedNews = await response.json();
-      setNews([savedNews, ...news]);
-      setIsModalOpen(false);
-      setNewNews({
-        title: '',
-        description: '',
-        date: '',
-        category: 'Campus'
-      });
-      setSuccessMessage('News added successfully!');
-    } catch (error) {
-      console.error('Error adding news:', error);
-      setError(error instanceof Error ? error.message : 'Failed to add news');
-    }
-  };
-
   const handleEditNews = (item: NewsItem) => {
     setEditingNews(item);
     setNewNews({
@@ -164,6 +129,7 @@ const News = () => {
       date: item.date.split('T')[0],
       category: item.category
     });
+    setNewsImages((item.images || []).map(img => ({ previewUrl: img.url, url: img.url, public_id: img.public_id })));
     setIsModalOpen(true);
   };
 
@@ -189,6 +155,9 @@ const News = () => {
   const handleSaveNews = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) return;
+    if (!newNews.title.trim()) { setError('Title is required'); return; }
+    if (!newNews.description.trim()) { setError('Description is required'); return; }
+    if (!newNews.date) { setError('Date is required'); return; }
     try {
       const method = editingNews ? 'PUT' : 'POST';
       const url = editingNews ? `${API_BASE}/api/news/${editingNews._id}` : `${API_BASE}/api/news`;
@@ -200,6 +169,11 @@ const News = () => {
       newsImages.forEach((img) => {
         if (img.file) formData.append('images', img.file);
       });
+      // When editing, tell the backend which existing images to keep
+      if (editingNews) {
+        const keepPublicIds = newsImages.filter(img => img.public_id).map(img => img.public_id);
+        formData.append('keepImages', JSON.stringify(keepPublicIds));
+      }
       const response = await fetch(url, {
         method,
         headers: {
@@ -513,7 +487,7 @@ const News = () => {
                   <button
                     type="button"
                     onClick={closeNewsModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100"
                   >
                     Cancel
                   </button>
@@ -530,7 +504,16 @@ const News = () => {
         {/* Zoomed Image Modal */}
         {zoomedImage && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[10000]" onClick={() => setZoomedImage(null)}>
-            <img src={zoomedImage} alt="Zoomed" className="max-h-[90vh] max-w-[90vw] rounded-lg" />
+            <img src={zoomedImage} alt="Zoomed" className="max-h-[90vh] max-w-[90vw] rounded-lg" onClick={(e) => e.stopPropagation()} />
+            <button
+              onClick={() => setZoomedImage(null)}
+              aria-label="Close zoomed image"
+              className="absolute top-4 right-4 bg-gray-800 rounded-lg p-2 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
+            >
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
           </div>
         )}
       </main>

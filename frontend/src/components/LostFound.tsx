@@ -301,6 +301,7 @@ const LostFound = () => {
   // Reset currentPage when filters or search changes
   useEffect(() => {
     setCurrentPage(1);
+    setIsFiltering(true);
   }, [filterType, filterResolved, searchQuery]);
 
   useEffect(() => {
@@ -376,7 +377,7 @@ const LostFound = () => {
 
 
   if (loading) {
-    return <PageSkeleton contentType="cards4col" itemCount={8} filterCount={2} showAddButton={true} />;
+    return <PageSkeleton contentType="cards" itemCount={8} filterCount={2} showAddButton={true} />;
   }
 
   if (error) {
@@ -910,7 +911,7 @@ const LostFound = () => {
                   <button
                     type="button"
                     onClick={closeItemModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100"
                     disabled={isSubmitting}
                   >
                     Cancel
@@ -1037,7 +1038,7 @@ const LostFound = () => {
                 {!selectedItemForDetails.resolved && (
                   <button
                     onClick={() => { setSelectedItemForDetails(null); openEditItemModal(selectedItemForDetails); }}
-                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white transition-colors duration-200"
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-colors duration-200"
                   >
                     <FiEdit2 className="w-4 h-4" /> Edit
                   </button>

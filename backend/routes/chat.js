@@ -99,6 +99,9 @@ router.get('/messages', auth, async (req, res) => {
 router.get('/search', auth, async (req, res) => {
   try {
     const { query } = req.query;
+    if (!query || !query.trim()) {
+      return res.status(400).json({ message: 'Search query is required' });
+    }
     const messages = await Chat.find(
       { $text: { $search: query }, isDeleted: false },
       { score: { $meta: 'textScore' } }

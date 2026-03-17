@@ -219,7 +219,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
             <div className="flex gap-3">
               <button
                 onClick={() => onEdit?.(event)}
-                className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white flex items-center"
+                className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100 flex items-center"
                 aria-label="Edit event"
               >
                 <FiEdit2 className="mr-1" /> Edit Event
@@ -303,6 +303,7 @@ const Events = () => {
     }
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedEventForDetails, setSelectedEventForDetails] = useState<Event | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
@@ -512,6 +513,8 @@ const Events = () => {
         throw new Error(error.message || 'Failed to delete event');
       }
       setEvents(events.filter(e => e._id !== id));
+      setSelectedEventForDetails(null);
+      setSuccessMessage('Event deleted successfully!');
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to delete event');
     }
@@ -521,7 +524,7 @@ const Events = () => {
     e.preventDefault();
     if (!token) return;
     
-    setIsLoading(true);
+    setIsSubmitting(true);
     setError(null);
     setFieldErrors({});
 
@@ -546,7 +549,7 @@ const Events = () => {
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       setError('Please fix the errors below');
-      setIsLoading(false);
+      setIsSubmitting(false);
       return;
     }
 
@@ -563,6 +566,10 @@ const Events = () => {
       formData.append('mapLocation', JSON.stringify(newEvent.mapLocation || { building: undefined, floor: undefined, room: undefined, coordinates: undefined }));
       if (newEvent.images.length > 0 && newEvent.images[0].file) {
         formData.append('image', newEvent.images[0].file);
+      }
+      // When editing and image was removed, signal backend to clear it
+      if (editingEvent && newEvent.images.length === 0) {
+        formData.append('removeImage', 'true');
       }
       const method = editingEvent ? 'PUT' : 'POST';
       const url = editingEvent ? `${API_BASE}/api/events/${editingEvent._id}` : `${API_BASE}/api/events`;
@@ -588,7 +595,7 @@ const Events = () => {
         } else {
           throw new Error(data.message || 'Failed to save event');
         }
-        setIsLoading(false);
+        setIsSubmitting(false);
         return;
       }
       
@@ -603,7 +610,7 @@ const Events = () => {
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to save event. Please try again.');
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -971,7 +978,7 @@ const Events = () => {
                       <div className="relative">
                         <input
                           type="text"
-                          value={newEvent.contactInfo.name}
+                          value={newEvent.contactInfo.name ?? ''}
                           onChange={e => setNewEvent({...newEvent, contactInfo: {...newEvent.contactInfo, name: e.target.value}})}
                           className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                           placeholder="Contact Person Name"
@@ -981,7 +988,7 @@ const Events = () => {
                       <div className="relative">
                         <input
                           type="email"
-                          value={newEvent.contactInfo.email}
+                          value={newEvent.contactInfo.email ?? ''}
                           onChange={e => setNewEvent({...newEvent, contactInfo: {...newEvent.contactInfo, email: e.target.value}})}
                           className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                           placeholder="contact@example.com"
@@ -991,7 +998,7 @@ const Events = () => {
                       <div className="relative">
                         <input
                           type="tel"
-                          value={newEvent.contactInfo.phone}
+                          value={newEvent.contactInfo.phone ?? ''}
                           onChange={e => setNewEvent({...newEvent, contactInfo: {...newEvent.contactInfo, phone: e.target.value}})}
                           className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                           placeholder="+1 (555) 123-4567"
@@ -1006,7 +1013,7 @@ const Events = () => {
                       <div className="relative">
                         <input
                           type="text"
-                          value={newEvent.mapLocation.building}
+                          value={newEvent.mapLocation.building ?? ''}
                           onChange={e => setNewEvent({...newEvent, mapLocation: {...newEvent.mapLocation, building: e.target.value}})}
                           className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                           placeholder="Building Name"
@@ -1016,7 +1023,7 @@ const Events = () => {
                       <div className="relative">
                         <input
                           type="text"
-                          value={newEvent.mapLocation.floor}
+                          value={newEvent.mapLocation.floor ?? ''}
                           onChange={e => setNewEvent({...newEvent, mapLocation: {...newEvent.mapLocation, floor: e.target.value}})}
                           className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                           placeholder="Floor"
@@ -1026,7 +1033,7 @@ const Events = () => {
                       <div className="relative">
                         <input
                           type="text"
-                          value={newEvent.mapLocation.room}
+                          value={newEvent.mapLocation.room ?? ''}
                           onChange={e => setNewEvent({...newEvent, mapLocation: {...newEvent.mapLocation, room: e.target.value}})}
                           className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
                           placeholder="Room Number"
@@ -1051,15 +1058,27 @@ const Events = () => {
                   <button
                     type="button"
                     onClick={closeEventModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100"
+                    disabled={isSubmitting}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200"
+                    disabled={isSubmitting}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    {editingEvent ? 'Save Changes' : 'Add Event'}
+                    {isSubmitting ? (
+                      <span className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        {editingEvent ? 'Saving...' : 'Adding...'}
+                      </span>
+                    ) : (
+                      editingEvent ? 'Save Changes' : 'Add Event'
+                    )}
                   </button>
                 </div>
               </form>

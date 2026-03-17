@@ -38,11 +38,16 @@ export const CardSkeleton: React.FC<{ count?: number }> = ({ count = 6 }) => {
           key={index}
           className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden"
         >
-          <Skeleton height="200px" rounded="none" className="mb-0" />
+          {/* Matches actual card image: h-48 sm:h-56 md:h-64 */}
+          <div className="h-48 sm:h-56 md:h-64 bg-gray-200 animate-pulse" />
           <div className="p-6">
             <Skeleton height="24px" width="70%" className="mb-3" />
             <Skeleton height="16px" width="90%" className="mb-2" />
-            <Skeleton height="16px" width="60%" />
+            <Skeleton height="16px" width="60%" className="mb-4" />
+            <div className="border-t border-gray-100 pt-3 flex items-center justify-between">
+              <Skeleton height="14px" width="40%" />
+              <Skeleton height="14px" width="30%" />
+            </div>
           </div>
         </div>
       ))}
@@ -59,11 +64,16 @@ export const CardSkeleton4Col: React.FC<{ count?: number }> = ({ count = 8 }) =>
           key={index}
           className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden"
         >
-          <Skeleton height="280px" rounded="none" className="mb-0" />
+          {/* Matches actual card image: h-48 sm:h-56 md:h-64 */}
+          <div className="h-48 sm:h-56 md:h-64 bg-gray-200 animate-pulse" />
           <div className="p-4">
             <Skeleton height="20px" width="70%" className="mb-2" />
             <Skeleton height="16px" width="85%" className="mb-1" />
-            <Skeleton height="16px" width="50%" />
+            <Skeleton height="16px" width="50%" className="mb-3" />
+            <div className="border-t border-gray-100 pt-2 flex items-center justify-between">
+              <Skeleton height="14px" width="40%" />
+              <Skeleton height="14px" width="25%" />
+            </div>
           </div>
         </div>
       ))}
@@ -143,13 +153,13 @@ export const PageSkeleton: React.FC<{
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         {showHeader && (
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
-            <Skeleton height="40px" width="300px" />
+            <Skeleton height="40px" className="w-48 sm:w-64 md:w-72" />
             {showAddButton && <Skeleton height="48px" width="180px" rounded="lg" />}
           </div>
         )}
         
         {showFilters && (
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4 px-4 md:px-0">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
             <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
               {Array.from({ length: filterCount }).map((_, index) => (
                 <Skeleton key={index} height="40px" width="150px" rounded="md" />

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { modalClasses } from '../../utils/responsive';
 
 interface ResponsiveModalProps {
@@ -29,10 +29,28 @@ export const ResponsiveModal: React.FC<ResponsiveModalProps> = ({
   size = 'md',
   showCloseButton = true,
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className={modalClasses.overlay} onClick={onClose}>
+    <div
+      className={modalClasses.overlay}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+    >
       <div
         className={`${modalClasses.container} ${sizeClasses[size]}`}
         onClick={(e) => e.stopPropagation()}

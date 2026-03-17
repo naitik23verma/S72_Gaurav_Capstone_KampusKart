@@ -9,6 +9,7 @@ import { validateMultipleRequired } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
+import { sanitizeText } from '../utils/sanitize';
 
 interface Complaint {
   _id: string;
@@ -561,7 +562,7 @@ const Complaints = () => {
           <button
             onClick={openAddComplaintModal}
             aria-label="Add Complaint"
-            className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] transition-colors duration-200"
+            className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200"
           >
             + Add Complaint
           </button>
@@ -635,7 +636,7 @@ const Complaints = () => {
                   setSearchQuery(searchInput);
                   setShowSuggestions(false);
                 }}
-                className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
+                className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] active:bg-[#181818] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
                 aria-label="Search"
               >
                 <FiSearch className="w-4 h-4" />
@@ -718,8 +719,8 @@ const Complaints = () => {
 
               {/* Content Section */}
               <div className="p-4 sm:p-5 md:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{complaint.title}</h2>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{complaint.description}</p>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{sanitizeText(complaint.title)}</h2>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{sanitizeText(complaint.description)}</p>
 
                 {/* Meta Info Row */}
                 <div className="space-y-3 pt-4 border-t-2 border-gray-200">
@@ -934,7 +935,7 @@ const Complaints = () => {
                   <button
                     type="button"
                     onClick={closeComplaintModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white"
                     disabled={isSubmitting}
                   >
                     Cancel
@@ -942,7 +943,7 @@ const Complaints = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {isSubmitting ? (
                       <span className="flex items-center">
@@ -968,7 +969,7 @@ const Complaints = () => {
                   <button
                     onClick={() => setSelectedComplaintForDetails(null)}
                     aria-label="Close"
-                    className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
+                    className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
                   >
                     <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
@@ -999,7 +1000,7 @@ const Complaints = () => {
                         </div>
                         <div>
                             <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
-                            <p className="text-gray-700 whitespace-pre-wrap">{selectedComplaintForDetails.description}</p>
+                            <p className="text-gray-700 whitespace-pre-wrap">{sanitizeText(selectedComplaintForDetails.description)}</p>
                         </div>
                         {/* Meta Info - Posted By, Posted At */}
                         <div className="space-y-3 pt-4 border-t-2 border-gray-200">
@@ -1023,13 +1024,13 @@ const Complaints = () => {
                         <div className="flex gap-3 mt-6">
                             <button
                                 onClick={() => { setSelectedComplaintForDetails(null); openEditComplaintModal(selectedComplaintForDetails); }}
-                                className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 flex items-center"
+                                className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white flex items-center"
                             >
                                 <FiEdit2 className="mr-1" /> Edit
                             </button>
                             <button
                                 onClick={() => handleDeleteComplaint(selectedComplaintForDetails._id)}
-                                className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 flex items-center"
+                                className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 active:bg-[#F05A25] flex items-center"
                             >
                                 <FiTrash2 className="mr-1" /> Delete
                             </button>

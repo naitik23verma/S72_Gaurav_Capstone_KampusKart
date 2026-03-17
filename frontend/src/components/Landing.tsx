@@ -104,7 +104,7 @@ const Landing: React.FC = () => {
             <Link
               to="/signup"
               aria-label="Sign up for free account"
-              className="inline-block min-h-[48px] px-6 sm:px-8 py-3 rounded-lg font-bold text-white bg-[#181818] hover:bg-[#00C6A7] focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:ring-offset-2 transition-colors duration-200 text-sm sm:text-base"
+              className="inline-block min-h-[48px] px-6 sm:px-8 py-3 rounded-lg font-bold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:ring-offset-2 transition-colors duration-200 text-sm sm:text-base"
             >
               Sign up free
             </Link>

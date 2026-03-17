@@ -195,7 +195,7 @@ const Signup: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-2.5 px-4 rounded-lg text-sm font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 min-h-touch ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full py-2.5 px-4 rounded-lg text-sm font-bold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 min-h-touch ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {loading ? 'Creating account...' : 'Create account'}
             </button>
@@ -214,7 +214,7 @@ const Signup: React.FC = () => {
             <button
               type="button"
               onClick={() => loginWithGoogle()}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors duration-200 min-h-touch"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white transition-colors duration-200 min-h-touch"
             >
               <img src="/google-icon.svg" alt="Google" className="w-4 h-4 sm:w-5 sm:h-5" />
               Sign up with Google

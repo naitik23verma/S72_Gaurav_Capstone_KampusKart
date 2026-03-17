@@ -47,13 +47,13 @@ const Home = () => {
             <div className="flex flex-col xs:flex-row gap-2 sm:gap-3 justify-center md:justify-start pt-1 sm:pt-2">
               <Link
                 to="/campus-map"
-                className="min-h-[48px] px-6 sm:px-8 py-3 rounded-lg font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 text-sm sm:text-base text-center"
+                className="min-h-[48px] px-6 sm:px-8 py-3 rounded-lg font-bold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 text-sm sm:text-base text-center"
               >
                 Explore Full Map
               </Link>
               <button
                 onClick={scrollToFeatures}
-                className="min-h-[48px] px-6 sm:px-8 py-3 rounded-lg font-bold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors duration-200 text-sm sm:text-base"
+                className="min-h-[48px] px-6 sm:px-8 py-3 rounded-lg font-bold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white transition-colors duration-200 text-sm sm:text-base"
               >
                 View Features
               </button>

@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import './theme/globalTheme.css';
+@import './theme/transparencyFix.css';
+@import './theme/buttonFix.css';
 
 @tailwind base;
 @tailwind components;
@@ -13,6 +15,14 @@ html, body, #root {
   height: 100%;
   width: 100%;
   font-family: 'Work Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* CRITICAL: Prevent root elements from becoming transparent */
+html:active,
+body:active,
+#root:active {
+  opacity: 1 !important;
+  background-color: #ffffff !important;
 }
 
 html {
@@ -32,6 +42,14 @@ body {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
+}
+
+/* CRITICAL: Prevent body from becoming transparent on click */
+body:active,
+body:focus {
+  opacity: 1 !important;
+  background-color: #ffffff !important;
+  filter: none !important;
 }
 
 :root {
@@ -127,6 +145,28 @@ h1, h2, h3, h4, h5, h6 {
   user-select: text;
 }
 
+/* Prevent body and all elements from becoming transparent on click */
+body,
+body *,
+div,
+section,
+main,
+article,
+aside,
+nav,
+header,
+footer {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+/* Re-enable selection for text content */
+p, span, li, h1, h2, h3, h4, h5, h6,
+input, textarea, [contenteditable] {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+}
+
 /* ─── Focus outlines ────────────────────────────────────────────────────────── */
 
 /* Remove default outline on non-input interactive elements */
@@ -203,6 +243,28 @@ header button:active {
 /* Remove all active state background changes */
 *:active {
   background-color: inherit !important;
+  opacity: 1 !important;
+}
+
+/* Prevent ANY element from becoming transparent on click */
+*:active,
+*:focus,
+div:active,
+section:active,
+main:active,
+article:active,
+aside:active,
+nav:active,
+header:active,
+footer:active,
+.bg-white:active,
+.bg-gray-50:active,
+.bg-gray-100:active,
+.bg-gray-200:active {
+  opacity: 1 !important;
+  background-color: inherit !important;
+  filter: none !important;
+  -webkit-tap-highlight-color: transparent !important;
 }
 
 .bg-\[\#181818\]:active,
@@ -210,11 +272,9 @@ header button:active {
 .bg-\[\#F05A25\]:active,
 .bg-blue-50:active,
 .bg-red-50:active,
-.bg-green-50:active,
-.bg-gray-50:active,
-.bg-gray-100:active,
-.bg-white:active {
+.bg-green-50:active {
   background-color: inherit !important;
+  opacity: 1 !important;
 }
 
 /* ─── Form inputs — force light theme ───────────────────────────────────────── */

@@ -7,6 +7,7 @@ import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
+import { sanitizeText } from '../utils/sanitize';
 
 interface NewsItem {
   _id: string;
@@ -264,7 +265,7 @@ const News = () => {
           {user?.isAdmin && (
             <button 
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] transition-colors duration-200"
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200"
             >
               + Add News
             </button>
@@ -316,7 +317,7 @@ const News = () => {
                   setSearchQuery(searchInput);
                   setShowSuggestions(false);
                 }}
-                className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
+                className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] active:bg-[#181818] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
                 aria-label="Search"
               >
                 <FiSearch className="w-4 h-4" />
@@ -398,8 +399,8 @@ const News = () => {
 
               {/* Content Section */}
               <div className="p-4 sm:p-5 md:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{item.title}</h2>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">{item.description}</p>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{sanitizeText(item.title)}</h2>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">{sanitizeText(item.description)}</p>
 
                 {/* Action Buttons */}
                 {user && user.isAdmin && (
@@ -512,13 +513,13 @@ const News = () => {
                   <button
                     type="button"
                     onClick={closeNewsModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-3 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200"
+                    className="px-6 py-3 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200"
                   >
                     {editingNews ? 'Save Changes' : 'Add News'}
                   </button>

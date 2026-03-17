@@ -1,0 +1,321 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   TRANSPARENCY FIX - Prevent all elements from becoming transparent on click
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* CRITICAL: Prevent transparency on ANY click/tap */
+*,
+*::before,
+*::after {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-drag: none !important;
+}
+
+/* Prevent ALL elements from becoming transparent when clicked */
+*:active,
+*:focus:not(input):not(textarea):not([contenteditable]),
+body:active,
+html:active,
+div:active,
+section:active,
+main:active,
+article:active,
+aside:active,
+nav:active,
+header:active,
+footer:active,
+ul:active,
+ol:active,
+li:active,
+a:active,
+span:active,
+label:active,
+form:active {
+  opacity: 1 !important;
+  background-color: inherit !important;
+  filter: none !important;
+  transform: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Specific fixes for common containers */
+.container:active,
+.wrapper:active,
+.content:active,
+.card:active,
+.panel:active,
+.modal:active,
+.dialog:active {
+  opacity: 1 !important;
+  background-color: inherit !important;
+}
+
+/* Prevent user-select from causing transparency */
+body,
+body * {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+}
+
+/* Re-enable text selection for text elements */
+p,
+span,
+li,
+h1, h2, h3, h4, h5, h6,
+input,
+textarea,
+[contenteditable],
+.selectable-text {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+}
+
+/* Prevent iOS Safari specific transparency issues */
+@supports (-webkit-touch-callout: none) {
+  *:active {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+    -webkit-touch-callout: none !important;
+    opacity: 1 !important;
+    background-color: inherit !important;
+  }
+  
+  body:active,
+  div:active,
+  section:active {
+    opacity: 1 !important;
+    background-color: inherit !important;
+  }
+}
+
+/* Prevent Android Chrome specific transparency issues */
+@media (hover: none) and (pointer: coarse) {
+  *:active,
+  *:focus:not(input):not(textarea) {
+    opacity: 1 !important;
+    background-color: inherit !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+}
+
+/* Ensure white backgrounds stay white */
+.bg-white:active,
+.bg-gray-50:active,
+.bg-gray-100:active {
+  background-color: inherit !important;
+  opacity: 1 !important;
+}
+
+/* Prevent map and interactive elements from becoming transparent */
+#map:active,
+.map-container:active,
+.leaflet-container:active,
+.google-map:active {
+  opacity: 1 !important;
+  background-color: inherit !important;
+}
+
+/* Prevent cards and panels from becoming transparent */
+.rounded-lg:active,
+.border-2:active,
+.shadow:active,
+.shadow-lg:active {
+  opacity: 1 !important;
+  background-color: inherit !important;
+}
+
+
+/* Additional fixes for specific Tailwind classes */
+.min-h-screen:active,
+.h-screen:active,
+.w-screen:active,
+.flex:active,
+.grid:active,
+.block:active,
+.inline-block:active,
+.relative:active,
+.absolute:active,
+.fixed:active {
+  opacity: 1 !important;
+  background-color: inherit !important;
+}
+
+/* Prevent transparency on all padding/margin containers */
+.p-4:active, .p-6:active, .p-8:active,
+.px-4:active, .px-6:active, .px-8:active,
+.py-4:active, .py-6:active, .py-8:active,
+.m-4:active, .m-6:active, .m-8:active {
+  opacity: 1 !important;
+  background-color: inherit !important;
+}
+
+/* Prevent transparency on flex/grid containers */
+.flex-col:active,
+.flex-row:active,
+.items-center:active,
+.justify-center:active,
+.justify-between:active,
+.gap-4:active, .gap-6:active, .gap-8:active {
+  opacity: 1 !important;
+  background-color: inherit !important;
+}
+
+/* Prevent transparency on text elements */
+.text-black:active,
+.text-white:active,
+.text-gray-700:active,
+.text-gray-900:active {
+  opacity: 1 !important;
+  color: inherit !important;
+}
+
+/* Prevent transparency on rounded elements */
+.rounded:active,
+.rounded-lg:active,
+.rounded-xl:active,
+.rounded-full:active {
+  opacity: 1 !important;
+  background-color: inherit !important;
+}
+
+/* Prevent transparency on bordered elements */
+.border:active,
+.border-2:active,
+.border-4:active {
+  opacity: 1 !important;
+  background-color: inherit !important;
+  border-color: inherit !important;
+}
+
+/* Prevent transparency on shadow elements */
+.shadow:active,
+.shadow-sm:active,
+.shadow-md:active,
+.shadow-lg:active,
+.shadow-xl:active {
+  opacity: 1 !important;
+  background-color: inherit !important;
+  box-shadow: inherit !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MODAL & OVERLAY FIXES - Prevent bg-opacity from causing transparency
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Fix modal overlays - prevent them from becoming more transparent on click */
+.bg-black.bg-opacity-50:active,
+.bg-black.bg-opacity-80:active {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  opacity: 1 !important;
+}
+
+.bg-black.bg-opacity-80:active {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Prevent group-hover opacity changes from being affected by clicks */
+.group-hover\:bg-opacity-20:active,
+.group-hover\:opacity-100:active {
+  opacity: inherit !important;
+}
+
+/* Fix image zoom overlays */
+.fixed.inset-0:active {
+  opacity: 1 !important;
+  background-color: inherit !important;
+}
+
+/* Ensure modal backgrounds stay solid */
+.z-\[9999\]:active,
+.z-\[10000\]:active {
+  opacity: 1 !important;
+  background-color: inherit !important;
+}
+
+/* Prevent spinner opacity from being affected */
+.animate-spin:active,
+.animate-spin circle:active,
+.animate-spin path:active {
+  opacity: inherit !important;
+}
+
+/* Protect intentional opacity classes */
+.opacity-25:active,
+.opacity-75:active,
+.opacity-0:active,
+.opacity-100:active {
+  opacity: inherit !important;
+}
+
+/* Prevent image upload remove button from losing opacity */
+.sm\:opacity-0:active,
+.sm\:group-hover\:opacity-100:active {
+  opacity: inherit !important;
+}
+
+/* Additional bg-opacity protection */
+[class*='bg-opacity-']:active {
+  opacity: 1 !important;
+}
+
+/* Protect all opacity utility classes */
+[class*='opacity-']:active {
+  opacity: inherit !important;
+}
+
+/* Ensure group hover states work correctly */
+.group:active .group-hover\:bg-opacity-20,
+.group:active .group-hover\:opacity-100 {
+  opacity: inherit !important;
+  background-color: inherit !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HOVER OPACITY FIXES - Prevent hover states from being affected by clicks
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Protect hover:opacity transitions */
+.hover\:opacity-80:active,
+.hover\:opacity-90:active {
+  opacity: inherit !important;
+}
+
+/* Protect active:opacity transitions */
+.active\:opacity-75:active {
+  opacity: 0.75 !important;
+}
+
+/* Protect logo links from transparency */
+a.hover\:opacity-80:active {
+  opacity: 1 !important;
+}
+
+/* Protect image zoom hover states */
+.cursor-zoom-in:active {
+  opacity: inherit !important;
+}
+
+/* Protect group hover states on images */
+.group:active .absolute.inset-0 {
+  opacity: inherit !important;
+  background-color: inherit !important;
+}
+
+/* Ensure bg-opacity-0 stays at 0 */
+.bg-opacity-0:active {
+  background-color: rgba(0, 0, 0, 0) !important;
+}
+
+/* Ensure group-hover:bg-opacity-20 works correctly */
+.group:hover .group-hover\:bg-opacity-20 {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+.group:active .group-hover\:bg-opacity-20 {
+  background-color: inherit !important;
+}

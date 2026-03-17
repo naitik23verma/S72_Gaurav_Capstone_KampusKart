@@ -8,6 +8,7 @@ import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
+import { sanitizeText } from '../utils/sanitize';
 
 interface ClubRecruitment {
   _id: string;
@@ -52,7 +53,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
         <button
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
+          className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
         >
           <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
@@ -94,7 +95,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
             </div>
             <div>
               <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
-              <p className="text-gray-700 whitespace-pre-wrap text-sm">{club.description}</p>
+              <p className="text-gray-700 whitespace-pre-wrap text-sm">{sanitizeText(club.description)}</p>
             </div>
             <div className="space-y-3 pt-4 border-t-2 border-gray-200">
               <div className="flex items-center text-sm text-gray-500">
@@ -131,7 +132,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
                     href={club.formUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block w-full text-center px-6 py-3 rounded-lg font-bold text-white bg-[#00C6A7] hover:bg-[#009e87] transition mb-2"
+                    className="inline-block w-full text-center px-6 py-3 rounded-lg font-bold text-white bg-[#00C6A7] hover:bg-[#009e87] active:bg-[#00C6A7] transition mb-2"
                   >
                     Apply Now
                   </a>
@@ -152,13 +153,13 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
                 <div className="flex flex-col sm:flex-row gap-2">
                   <button
                     onClick={() => onEdit?.(club)}
-                    className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors duration-200"
+                    className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white transition-colors duration-200"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => onDelete?.(club._id)}
-                    className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 transition-colors duration-200"
+                    className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 active:bg-[#F05A25] transition-colors duration-200"
                   >
                     Delete
                   </button>
@@ -456,7 +457,7 @@ const ClubsRecruitment = () => {
           {user?.isAdmin && (
             <button 
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] transition-colors duration-200"
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200"
             >
               + Add New Recruitment
             </button>
@@ -507,7 +508,7 @@ const ClubsRecruitment = () => {
                   setSearchQuery(searchInput);
                   setShowSuggestions(false);
                 }}
-                className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
+                className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] active:bg-[#181818] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
                 aria-label="Search"
               >
                 <FiSearch className="w-4 h-4" />
@@ -568,8 +569,8 @@ const ClubsRecruitment = () => {
                 </div>
               </div>
               <div className="p-4 sm:p-5 md:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{club.title}</h2>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">{club.description}</p>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{sanitizeText(club.title)}</h2>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">{sanitizeText(club.description)}</p>
                 <div className="space-y-3 pt-4 border-t-2 border-gray-200">
                   <div className="flex items-center text-sm text-gray-500">
                     <FiTag className="mr-2 flex-shrink-0 text-gray-400" />
@@ -584,7 +585,7 @@ const ClubsRecruitment = () => {
                   <button
                     className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
                       club.formUrl 
-                        ? 'bg-[#00C6A7] text-white hover:bg-[#009e87]' 
+                        ? 'bg-[#00C6A7] text-white hover:bg-[#009e87] active:bg-[#00C6A7]' 
                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     }`}
                     disabled={!club.formUrl}
@@ -754,13 +755,13 @@ const ClubsRecruitment = () => {
                   <button
                     type="button"
                     onClick={closeClubModal}
-                    className="px-6 py-3 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors"
+                    className="px-6 py-3 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-3 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200"
+                    className="px-6 py-3 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200"
                   >
                     {editingClub ? 'Save Changes' : 'Add Recruitment'}
                   </button>

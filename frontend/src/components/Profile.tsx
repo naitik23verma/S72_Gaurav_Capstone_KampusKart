@@ -7,6 +7,7 @@ import {
 import { API_BASE } from '../config';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
+import { sanitizeText } from '../utils/sanitize';
 
 const formatDate = (dateString: string | null | undefined) => {
   if (!dateString) return 'Not set';
@@ -294,7 +295,7 @@ const Profile = () => {
             {!isEditing && (
               <button
                 onClick={() => setIsEditing(true)}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] transition-colors duration-200 min-h-touch"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 min-h-touch"
               >
                 <FiEdit2 className="w-4 h-4" /> Edit Profile
               </button>
@@ -350,8 +351,8 @@ const Profile = () => {
 
             {/* Name + email + completion */}
             <div className="flex-1 w-full text-center sm:text-left">
-              <p className="text-lg font-bold text-gray-900 leading-tight">{profileData.name || 'Your Name'}</p>
-              <p className="text-sm text-gray-500 mb-3 truncate">{profileData.email}</p>
+              <p className="text-lg font-bold text-gray-900 leading-tight">{sanitizeText(profileData.name || 'Your Name')}</p>
+              <p className="text-sm text-gray-500 mb-3 truncate">{sanitizeText(profileData.email)}</p>
               <div className="w-full">
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-xs font-medium text-gray-600">Profile Completion</span>
@@ -440,7 +441,7 @@ const Profile = () => {
                     Cancel
                   </button>
                   <button onClick={handleSave} disabled={saveLoading}
-                    className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 min-h-touch ${saveLoading ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                    className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 min-h-touch ${saveLoading ? 'opacity-60 cursor-not-allowed' : ''}`}>
                     {saveLoading ? (
                       <>
                         <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">

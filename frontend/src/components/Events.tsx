@@ -8,6 +8,7 @@ import { validateEmail, validatePhone, validateUrl } from '../utils/formValidati
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
+import { sanitizeText } from '../utils/sanitize';
 
 interface Event {
   _id: string;
@@ -92,7 +93,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
                   <button
             onClick={onClose}
             aria-label="Close"
-            className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
+            className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
           >
             <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
@@ -144,7 +145,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
             {/* Description */}
             <div>
               <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
-              <p className="text-gray-700 whitespace-pre-wrap text-sm">{event.description}</p>
+              <p className="text-gray-700 whitespace-pre-wrap text-sm">{sanitizeText(event.description)}</p>
             </div>
 
             {/* Meta Info */}
@@ -206,7 +207,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
               href={event.registerUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block w-full text-center px-6 py-3 rounded-lg font-bold text-white bg-[#00C6A7] hover:bg-[#009e87] transition mb-4"
+              className="inline-block w-full text-center px-6 py-3 rounded-lg font-bold text-white bg-[#00C6A7] hover:bg-[#009e87] active:bg-[#00C6A7] transition mb-4"
             >
               Register Now
             </a>
@@ -216,14 +217,14 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
             <div className="flex gap-3">
               <button
                 onClick={() => onEdit?.(event)}
-                className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 flex items-center"
+                className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white flex items-center"
                 aria-label="Edit event"
               >
                 <FiEdit2 className="mr-1" /> Edit Event
               </button>
               <button
                 onClick={() => onDelete?.(event._id)}
-                className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 flex items-center"
+                className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 active:bg-[#F05A25] flex items-center"
                 aria-label="Delete event"
               >
                 <FiTrash2 className="mr-1" /> Delete Event
@@ -650,7 +651,7 @@ const Events = () => {
           {user?.isAdmin && (
             <button 
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] transition-colors duration-200"
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200"
               aria-label="Add new event"
             >
               + Add New Event
@@ -704,7 +705,7 @@ const Events = () => {
                   setSearchQuery(searchInput);
                   setShowSuggestions(false);
                 }}
-                className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
+                className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] active:bg-[#181818] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
                 aria-label="Search"
               >
                 <FiSearch className="w-4 h-4" />
@@ -770,8 +771,8 @@ const Events = () => {
 
               {/* Content Section */}
               <div className="p-4 sm:p-5 md:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{event.title}</h2>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{event.description}</p>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{sanitizeText(event.title)}</h2>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{sanitizeText(event.description)}</p>
 
                 {/* Meta Info Row */}
                 <div className="space-y-3 pt-4 border-t-2 border-gray-200">
@@ -794,7 +795,7 @@ const Events = () => {
                   <button
                     className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
                       event.registerUrl 
-                        ? 'bg-[#00C6A7] text-white hover:bg-[#009e87]' 
+                        ? 'bg-[#00C6A7] text-white hover:bg-[#009e87] active:bg-[#00C6A7]' 
                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     }`}
                     disabled={!event.registerUrl}
@@ -1033,13 +1034,13 @@ const Events = () => {
                   <button
                     type="button"
                     onClick={closeEventModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200"
                   >
                     {editingEvent ? 'Save Changes' : 'Add Event'}
                   </button>

@@ -1,0 +1,122 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   BUTTON FIX - Prevent transparency, fading, and color changes on click
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Remove ALL active state visual changes globally */
+*:active,
+*:focus:not(input):not(textarea),
+button:active,
+[role="button"]:active,
+[type="button"]:active,
+[type="submit"]:active,
+.btn:active,
+a[role="button"]:active,
+div:active,
+section:active,
+main:active,
+article:active,
+aside:active,
+nav:active,
+header:active,
+footer:active {
+  opacity: 1 !important;
+  background-color: inherit !important;
+  transform: none !important;
+  filter: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+}
+
+/* Prevent disabled button transparency issues */
+button:disabled,
+[role="button"]:disabled,
+[type="button"]:disabled,
+[type="submit"]:disabled {
+  cursor: not-allowed !important;
+}
+
+/* Fix for specific button color classes - prevent active state changes */
+.bg-\[\#181818\]:active,
+.bg-\[\#00C6A7\]:active,
+.bg-\[\#F05A25\]:active,
+.bg-\[\#009e87\]:active,
+.bg-\[\#009e86\]:active,
+.bg-red-600:active,
+.bg-green-600:active,
+.bg-blue-600:active {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* Hover states should work, but active states should not change appearance */
+button:hover:not(:disabled),
+[role="button"]:hover:not(:disabled),
+[type="button"]:hover:not(:disabled),
+[type="submit"]:hover:not(:disabled) {
+  opacity: 1 !important;
+}
+
+/* Remove focus ring on click, but keep for keyboard navigation */
+button:focus:not(:focus-visible),
+[role="button"]:focus:not(:focus-visible),
+[type="button"]:focus:not(:focus-visible),
+[type="submit"]:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Ensure focus-visible works for accessibility */
+button:focus-visible,
+[role="button"]:focus-visible,
+[type="button"]:focus-visible,
+[type="submit"]:focus-visible {
+  outline: 2px solid #00C6A7 !important;
+  outline-offset: 2px !important;
+}
+
+/* Fix for touch devices - prevent any visual feedback */
+@media (hover: none) and (pointer: coarse) {
+  button:active,
+  [role="button"]:active,
+  [type="button"]:active,
+  [type="submit"]:active,
+  .btn:active {
+    opacity: 1 !important;
+    background-color: inherit !important;
+    transform: none !important;
+    filter: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+}
+
+/* Prevent link buttons from changing on active */
+a.inline-block:active,
+a.flex:active,
+a.inline-flex:active {
+  opacity: 1 !important;
+  background-color: inherit !important;
+  transform: none !important;
+}
+
+/* Fix for Material-UI buttons if used */
+.MuiButton-root:active,
+.MuiIconButton-root:active {
+  opacity: 1 !important;
+  background-color: inherit !important;
+}
+
+/* Prevent any transition delays that might cause flashing */
+button,
+[role="button"],
+[type="button"],
+[type="submit"],
+.btn {
+  transition-property: background-color, border-color, color !important;
+  transition-duration: 200ms !important;
+  transition-timing-function: ease-in-out !important;
+}
+
+/* Remove webkit tap highlight completely */
+* {
+  -webkit-tap-highlight-color: transparent !important;
+}

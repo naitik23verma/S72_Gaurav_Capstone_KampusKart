@@ -347,27 +347,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateProfile = async (data: Partial<User>) => {
+    if (!token) {
+      throw new Error('No authentication token available');
+    }
+    
     try {
       const formData = new FormData();
+      
       for (const key in data) {
-          if (data[key as keyof Partial<User>] !== undefined) {
-              if (key === 'dateOfBirth') {
-                   formData.append(key, data[key] === null ? '' : data[key] as string);
-              } else if (key === 'profilePicture' && data[key]) {
-                   formData.append(key, data[key] as Blob);
-          } else {
-                formData.append(key, String(data[key]));
-              }
-          }
+        const value = data[key as keyof Partial<User>];
+        
+        // Skip undefined values
+        if (value === undefined) {
+          continue;
+        }
+        
+        // Handle null dateOfBirth
+        if (key === 'dateOfBirth') {
+          formData.append(key, value === null ? '' : String(value));
+        } 
+        // Handle File objects (profile picture upload)
+        else if (value instanceof File || value instanceof Blob) {
+          formData.append(key, value);
+        }
+        // Handle objects (like profilePicture metadata)
+        else if (typeof value === 'object' && value !== null) {
+          formData.append(key, JSON.stringify(value));
+        }
+        // Handle primitive values
+        else {
+          formData.append(key, String(value));
+        }
       }
 
       const response = await axios.put(`${API_BASE}/api/profile`, formData, {
         headers: { 
-            Authorization: `Bearer ${token}`,
-        }
+          Authorization: `Bearer ${token}`,
+        },
+        timeout: 30000, // 30 second timeout
       });
+      
       setUser(response.data);
     } catch (error) {
+      console.error('Profile update failed:', error);
       throw error;
     }
   };
@@ -383,20 +405,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, 100);
   };
 
-  const handleGoogleCallback = async (token: string) => {
-    setToken(token);
+  const handleGoogleCallback = async (receivedToken: string) => {
+    // Validate token format
+    if (!receivedToken || typeof receivedToken !== 'string' || receivedToken.trim() === '') {
+      console.error('Invalid token: empty or not a string');
+      logout();
+      return;
+    }
+    
+    // Basic JWT format validation (three parts separated by dots)
+    const tokenParts = receivedToken.trim().split('.');
+    if (tokenParts.length !== 3) {
+      console.error('Invalid JWT format: expected 3 parts');
+      logout();
+      return;
+    }
+    
+    setToken(receivedToken);
     try {
       const response = await axios.get(`${API_BASE}/api/profile`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${receivedToken}` }
       });
       setUser(response.data);
       // Always save token to localStorage with expiry for persistent login
       const expiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-      localStorage.setItem('token', token);
+      localStorage.setItem('token', receivedToken);
       localStorage.setItem('token_expiry', expiry.toString());
       sessionStorage.removeItem('token');
       return response.data;
     } catch (error) {
+      console.error('Failed to fetch profile after Google login:', error);
       setUser(null);
       logout();
       throw error;

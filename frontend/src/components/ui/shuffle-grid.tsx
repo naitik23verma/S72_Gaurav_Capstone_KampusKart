@@ -133,14 +133,14 @@ export const ShuffleHero = () => {
           <Link
             to="/signup"
             aria-label="Sign up for free account"
-            className="min-h-[48px] px-6 sm:px-8 py-3 rounded-lg font-bold text-white bg-[#181818] hover:bg-[#00C6A7] focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:ring-offset-2 transition-colors duration-200 text-sm sm:text-base text-center"
+            className="min-h-[48px] px-6 sm:px-8 py-3 rounded-lg font-bold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:ring-offset-2 transition-colors duration-200 text-sm sm:text-base text-center"
           >
             Get started
           </Link>
           <Link
             to="/login"
             aria-label="Log in to your account"
-            className="min-h-[48px] px-6 sm:px-8 py-3 rounded-lg font-bold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 transition-colors duration-200 text-sm sm:text-base text-center"
+            className="min-h-[48px] px-6 sm:px-8 py-3 rounded-lg font-bold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 transition-colors duration-200 text-sm sm:text-base text-center"
           >
             Log in
           </Link>

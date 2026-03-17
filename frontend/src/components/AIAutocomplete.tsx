@@ -175,7 +175,7 @@ const AIAutocomplete: React.FC<AIAutocompleteProps> = ({
             type="button"
             onClick={() => onSubmit && onSubmit()}
             disabled={disabled || isLoading}
-            className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-xl rounded-l-none"
+            className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] active:bg-[#181818] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-xl rounded-l-none"
             aria-label={submitLabel}
           >
             {isLoading ? (
@@ -199,7 +199,7 @@ const AIAutocomplete: React.FC<AIAutocompleteProps> = ({
             <div
               key={suggestion.id}
               onClick={() => handleSuggestionClick(suggestion)}
-              className={`flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0 ${index === highlightedIndex ? 'bg-[#00C6A7]/5 border-l-4 border-l-[#00C6A7]' : ''}`}
+              className={`flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 active:bg-white transition-colors border-b-2 border-gray-200 last:border-b-0 ${index === highlightedIndex ? 'bg-[#00C6A7]/5 border-l-4 border-l-[#00C6A7]' : ''}`}
             >
               <div className="flex items-center space-x-3 flex-1 min-w-0">
                 {getSuggestionIcon(suggestion.type)}

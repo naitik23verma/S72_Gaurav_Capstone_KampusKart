@@ -152,7 +152,7 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 px-4 rounded-lg text-sm sm:text-base font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 min-h-touch ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full py-3 px-4 rounded-lg text-sm sm:text-base font-bold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 min-h-touch ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {loading ? 'Sending OTP...' : 'Send OTP'}
             </button>
@@ -234,7 +234,7 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 px-4 rounded-lg text-sm sm:text-base font-bold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 min-h-touch ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full py-3 px-4 rounded-lg text-sm sm:text-base font-bold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 min-h-touch ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {loading ? 'Resetting Password...' : 'Reset Password'}
             </button>

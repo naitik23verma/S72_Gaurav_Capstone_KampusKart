@@ -94,14 +94,14 @@ const Navbar1 = ({
             <Button
               asChild
               variant="outline"
-              className="h-10 px-4 text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 transition-colors duration-200 focus:outline-none focus:ring-0 rounded-lg"
+              className="h-10 px-4 text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 active:bg-white hover:text-gray-900 hover:border-gray-300 transition-colors duration-200 focus:outline-none focus:ring-0 rounded-lg"
             >
               <Link to={auth.login.url}>{auth.login.text}</Link>
             </Button>
             {auth.signup.onClick ? (
               <Button
                 onClick={auth.signup.onClick}
-                className="h-10 px-4 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] transition-colors duration-200 focus:outline-none focus:ring-0 rounded-lg border-0"
+                className="h-10 px-4 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 focus:outline-none focus:ring-0 rounded-lg border-0"
                 aria-label={auth.signup.text}
               >
                 {auth.signup.text}
@@ -109,7 +109,7 @@ const Navbar1 = ({
             ) : (
               <Button
                 asChild
-                className="h-10 px-4 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] transition-colors duration-200 focus:outline-none focus:ring-0 rounded-lg border-0"
+                className="h-10 px-4 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 focus:outline-none focus:ring-0 rounded-lg border-0"
               >
                 <Link to={auth.signup.url}>{auth.signup.text}</Link>
               </Button>
@@ -176,7 +176,7 @@ const Navbar1 = ({
                         <SheetClose key={idx} asChild>
                           <Link
                             to={link.url}
-                            className="inline-flex h-11 items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold text-gray-700 bg-white border border-gray-200 transition-colors duration-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 focus:outline-none focus:ring-0"
+                            className="inline-flex h-11 items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold text-gray-700 bg-white border border-gray-200 transition-colors duration-200 hover:bg-gray-50 active:bg-white hover:text-gray-900 hover:border-gray-300 focus:outline-none focus:ring-0"
                             aria-label={`Go to ${link.name}`}
                           >
                             {link.name}
@@ -191,7 +191,7 @@ const Navbar1 = ({
                     <Button
                       asChild
                       variant="outline"
-                      className="w-full h-11 text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 transition-colors duration-200 rounded-lg focus:outline-none focus:ring-0"
+                      className="w-full h-11 text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 active:bg-white hover:text-gray-900 hover:border-gray-300 transition-colors duration-200 rounded-lg focus:outline-none focus:ring-0"
                     >
                       <Link to={auth.login.url}>{auth.login.text}</Link>
                     </Button>
@@ -200,7 +200,7 @@ const Navbar1 = ({
                     <SheetClose asChild>
                       <Button
                         onClick={auth.signup.onClick}
-                        className="w-full h-11 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] transition-colors duration-200 rounded-lg focus:outline-none focus:ring-0"
+                        className="w-full h-11 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 rounded-lg focus:outline-none focus:ring-0"
                         aria-label={auth.signup.text}
                       >
                         {auth.signup.text}
@@ -210,7 +210,7 @@ const Navbar1 = ({
                     <SheetClose asChild>
                       <Button
                         asChild
-                        className="w-full h-11 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] transition-colors duration-200 rounded-lg focus:outline-none focus:ring-0"
+                        className="w-full h-11 text-sm font-semibold bg-[#181818] text-white hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 rounded-lg focus:outline-none focus:ring-0"
                       >
                         <Link to={auth.signup.url}>{auth.signup.text}</Link>
                       </Button>
@@ -308,7 +308,7 @@ const renderMobileMenuItem = (item: MenuItem) => {
     return (
       <AccordionItem key={item.title} value={item.title} className="border-none">
         <AccordionTrigger
-          className="py-3 px-4 font-semibold text-gray-700 bg-white hover:bg-gray-50 hover:text-gray-900 data-[state=open]:text-gray-900 data-[state=open]:bg-gray-50 transition-colors duration-200 rounded-lg text-sm focus:outline-none focus:ring-0 border border-gray-200 hover:no-underline"
+          className="py-3 px-4 font-semibold text-gray-700 bg-white hover:bg-gray-50 active:bg-white hover:text-gray-900 data-[state=open]:text-gray-900 data-[state=open]:bg-gray-50 transition-colors duration-200 rounded-lg text-sm focus:outline-none focus:ring-0 border border-gray-200 hover:no-underline"
           aria-label={`${item.title} menu`}
         >
           {item.title}
@@ -345,7 +345,7 @@ const renderMobileMenuItem = (item: MenuItem) => {
                 <SheetClose key={subItem.title} asChild>
                   <Link
                     to={subItem.url}
-                    className="flex select-none gap-3 rounded-lg p-3 leading-none outline-none transition-colors duration-200 border focus:ring-0 bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border-gray-200 hover:border-gray-300"
+                    className="flex select-none gap-3 rounded-lg p-3 leading-none outline-none transition-colors duration-200 border focus:ring-0 bg-white hover:bg-gray-50 active:bg-white text-gray-700 hover:text-gray-900 border-gray-200 hover:border-gray-300"
                     aria-label={`Go to ${subItem.title}`}
                   >
                     <div className="flex-1">
@@ -372,7 +372,7 @@ const renderMobileMenuItem = (item: MenuItem) => {
     <SheetClose key={item.title} asChild>
       <Link
         to={item.url}
-        className="flex h-11 items-center rounded-lg px-4 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 hover:text-gray-900 transition-colors duration-200 border border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-0"
+        className="flex h-11 items-center rounded-lg px-4 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 active:bg-white hover:text-gray-900 transition-colors duration-200 border border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-0"
         aria-label={`Go to ${item.title}`}
       >
         {item.title}

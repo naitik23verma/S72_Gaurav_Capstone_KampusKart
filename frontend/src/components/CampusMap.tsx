@@ -2,6 +2,7 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { GoogleMap, useLoadScript, InfoWindow, Marker, Libraries } from '@react-google-maps/api';
 import { MapSkeleton } from './common/SkeletonLoader';
+import { sanitizeText } from '../utils/sanitize';
 
 // Define libraries as a proper static constant with correct type
 const GOOGLE_MAPS_LIBRARIES: Libraries = ["places"];
@@ -425,7 +426,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
           <p className="text-gray-600 mb-4">Unable to load the campus map. Please check your internet connection and try again.</p>
           <button 
             onClick={() => window.location.reload()} 
-            className="px-6 py-2 bg-[#00C6A7] text-white rounded-lg font-semibold hover:bg-[#009e87] transition-colors"
+            className="px-6 py-2 bg-[#00C6A7] text-white rounded-lg font-semibold hover:bg-[#009e87] active:bg-[#00C6A7] transition-colors"
           >
             Retry
           </button>
@@ -472,7 +473,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                     setSearchQuery(searchInput);
                     setShowSuggestions(false);
                   }}
-                  className="px-4 py-2.5 bg-[#181818] text-white font-bold text-xs hover:bg-[#00C6A7] flex items-center justify-center gap-1.5 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
+                  className="px-4 py-2.5 bg-[#181818] text-white font-bold text-xs hover:bg-[#00C6A7] active:bg-[#181818] flex items-center justify-center gap-1.5 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
                   aria-label="Search"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -613,7 +614,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                           </div>
                           <h4 className="text-sm font-bold text-gray-900">About</h4>
                         </div>
-                        <p className="text-sm text-gray-700 leading-relaxed">{selectedLocation.description}</p>
+                        <p className="text-sm text-gray-700 leading-relaxed">{sanitizeText(selectedLocation.description)}</p>
                       </div>
 
                       {/* Location ID Badge */}
@@ -629,7 +630,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
 
                       {/* Action Button */}
                       <button
-                        className="w-full px-4 py-3 bg-[#181818] text-white rounded-lg hover:bg-[#00C6A7] transition-colors duration-200 flex items-center justify-center gap-2 font-bold text-sm"
+                        className="w-full px-4 py-3 bg-[#181818] text-white rounded-lg hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 flex items-center justify-center gap-2 font-bold text-sm"
                         onClick={() => {
                           const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedLocation.lat},${selectedLocation.lng}`;
                           window.open(url, '_blank');
@@ -648,7 +649,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
             {/* Recenter Button - Optimized for mobile */}
             <button
               onClick={handleRecenter}
-              className="absolute bottom-3 left-3 z-10 bg-white border-2 border-gray-200 rounded-lg p-2.5 flex items-center justify-center hover:bg-gray-50 transition-colors duration-200"
+              className="absolute bottom-3 left-3 z-10 bg-white border-2 border-gray-200 rounded-lg p-2.5 flex items-center justify-center hover:bg-gray-50 active:bg-white transition-colors duration-200"
               title="Re-center map on your location"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#00C6A7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -664,7 +665,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
             {!isPanelOpen && (
               <button
                 onClick={() => setIsPanelOpen(true)}
-                className="md:hidden absolute bottom-3 right-3 z-10 bg-[#181818] hover:bg-[#00C6A7] text-white border-2 border-gray-200 rounded-lg px-3 py-2.5 flex items-center gap-2 text-sm font-semibold transition-colors duration-200"
+                className="md:hidden absolute bottom-3 right-3 z-10 bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] text-white border-2 border-gray-200 rounded-lg px-3 py-2.5 flex items-center gap-2 text-sm font-semibold transition-colors duration-200"
                 aria-label="Show locations list"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -680,7 +681,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
         <div className={`${isPanelOpen ? 'flex' : 'hidden'} md:flex absolute md:relative inset-0 md:inset-auto w-full md:w-1/3 flex-col md:h-full z-20 md:z-auto transition-all duration-300 ease-in-out`}>
           {/* Mobile close button */}
           <button
-            className="md:hidden absolute top-2 right-2 z-20 bg-white border-2 border-gray-200 rounded-lg p-1.5 text-gray-600 hover:bg-gray-50"
+            className="md:hidden absolute top-2 right-2 z-20 bg-white border-2 border-gray-200 rounded-lg p-1.5 text-gray-600 hover:bg-gray-50 active:bg-white"
             onClick={() => setIsPanelOpen(false)}
             aria-label="Close locations panel"
           >
@@ -722,7 +723,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                     setSearchQuery(searchInput);
                     setShowSuggestions(false);
                   }}
-                  className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
+                  className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] active:bg-[#181818] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
                   aria-label="Search"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -784,7 +785,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                     <div className="flex flex-wrap items-start gap-2">
                       <div className="flex-1 min-w-0">
                         <span className="font-semibold text-sm md:text-base block truncate">{location.id}. {location.name}</span>
-                        <p className="text-xs md:text-sm text-gray-600 mt-1 line-clamp-2">{location.description}</p>
+                        <p className="text-xs md:text-sm text-gray-600 mt-1 line-clamp-2">{sanitizeText(location.description)}</p>
                       </div>
                       <span className="text-xs bg-gray-200 px-2 py-1 rounded-full flex-shrink-0 whitespace-nowrap">
                         {location.category}

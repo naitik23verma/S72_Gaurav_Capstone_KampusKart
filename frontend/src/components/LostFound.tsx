@@ -8,6 +8,7 @@ import { validateEmail, validatePhone } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
+import { sanitizeText } from '../utils/sanitize';
 
 interface LostFoundItem {
   _id: string;
@@ -401,7 +402,7 @@ const LostFound = () => {
           <button
             onClick={openAddItemModal}
             aria-label="Add New Item"
-            className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] transition-colors duration-200"
+            className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200"
           >
             + Add New Item
           </button>
@@ -468,7 +469,7 @@ const LostFound = () => {
                   setSearchQuery(searchInput);
                   setShowSuggestions(false);
                 }}
-                className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
+                className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] active:bg-[#181818] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
                 aria-label="Search"
               >
                 <FiSearch className="w-4 h-4" />
@@ -570,8 +571,8 @@ const LostFound = () => {
 
               {/* Content Section */}
               <div className="p-4 sm:p-5 md:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{item?.title || 'Item'}</h2>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{item.description}</p>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{sanitizeText(item?.title || 'Item')}</h2>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{sanitizeText(item.description)}</p>
 
                 {/* Meta Info Row - Location, Date, User */}
                 <div className="space-y-3 pt-4 border-t-2 border-gray-200">
@@ -901,7 +902,7 @@ const LostFound = () => {
                   <button
                     type="button"
                     onClick={closeItemModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white"
                     disabled={isSubmitting}
                   >
                     Cancel
@@ -909,7 +910,7 @@ const LostFound = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] transition-colors duration-200 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {isSubmitting ? (
                       <span className="flex items-center">
@@ -936,7 +937,7 @@ const LostFound = () => {
             <button
               onClick={() => setSelectedItemForDetails(null)}
               aria-label="Close"
-              className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
+              className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
             >
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
@@ -968,7 +969,7 @@ const LostFound = () => {
               </div>
               <div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
-                <p className="text-gray-700 whitespace-pre-wrap">{selectedItemForDetails.description}</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{sanitizeText(selectedItemForDetails.description)}</p>
               </div>
 
               {/* Meta Info - Location, Date, Posted By */}
@@ -1014,21 +1015,21 @@ const LostFound = () => {
                 {!selectedItemForDetails.resolved && (
                   <button
                     onClick={() => { setSelectedItemForDetails(null); openEditItemModal(selectedItemForDetails); }}
-                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors duration-200"
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-white transition-colors duration-200"
                   >
                     <FiEdit2 className="w-4 h-4" /> Edit
                   </button>
                 )}
                 <button
                   onClick={() => handleDeleteItem(selectedItemForDetails._id)}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 transition-colors duration-200"
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 active:bg-[#F05A25] transition-colors duration-200"
                 >
                   <FiTrash2 className="w-4 h-4" /> Delete
                 </button>
                 {!selectedItemForDetails.resolved && (
                   <button
                     onClick={() => handleMarkResolved(selectedItemForDetails._id)}
-                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#00C6A7] hover:bg-[#009e86] transition-colors duration-200"
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#00C6A7] hover:bg-[#009e86] active:bg-[#00C6A7] transition-colors duration-200"
                   >
                     <FiCheckCircle className="w-4 h-4" /> Mark as Resolved
                   </button>

@@ -142,6 +142,11 @@ router.post('/messages', auth, upload.array('attachments', 5), async (req, res) 
       return res.status(400).json({ message: 'Message cannot be empty' });
     }
 
+    // Enforce max message length
+    if (message && message.length > 2000) {
+      return res.status(400).json({ message: 'Message cannot exceed 2000 characters' });
+    }
+
     const chatMessage = new Chat({
       sender: req.user._id,
       message: message || (attachments.length > 0 ? '📎 Attachment' : ''),

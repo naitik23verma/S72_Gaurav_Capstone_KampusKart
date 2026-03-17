@@ -44,6 +44,12 @@ const signupLimiter = rateLimit({
   message: { message: 'Too many signup attempts, please try again after an hour' }
 });
 
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5, // limit each IP to 5 forgot-password requests per hour
+  message: { message: 'Too many password reset requests, please try again after an hour' }
+});
+
 // Google OAuth routes
 router.get('/google',
   (req, res, next) => {
@@ -79,8 +85,8 @@ router.get('/google/callback',
         { expiresIn: '24h' }
       );
 
-      // Determine the frontend URL based on environment
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      // Determine the frontend URL based on environment (strip trailing slash)
+      const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
 
       console.log('Redirecting to frontend:', frontendUrl);
       // Redirect to frontend with token
@@ -204,7 +210,7 @@ router.post('/login', loginLimiter, sanitizeInput, validateLogin, async (req, re
 });
 
 // Request Password Reset OTP
-router.post('/forgot-password', async (req, res) => {
+router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
   try {
     const { email } = req.body;
 

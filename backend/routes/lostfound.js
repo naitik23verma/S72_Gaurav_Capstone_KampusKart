@@ -251,174 +251,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get a single lost or found item by ID
-router.get('/:id', async (req, res) => {
-  try {
-    const item = await LostFoundItem.findById(req.params.id).populate('user', 'name email');
-    if (!item) {
-      return res.status(404).json({ message: 'Item not found' });
-    }
-    res.status(200).json(item);
-  } catch (error) {
-    console.error('Get single lost/found item error:', error);
-    res.status(500).json({ message: 'Error fetching item' });
-  }
-});
-
-// Update a lost or found item by ID
-router.put('/:id', authMiddleware, itemRateLimiter, upload.array('images', 5), async (req, res) => {
-  try {
-    const { type, title, description, location, date, resolved, contact, keepImages } = req.body;
-    const userId = req.user._id;
-    const itemId = req.params.id;
-
-    // Validate required fields
-    if (!title || !description || !date || !contact) {
-      return res.status(400).json({ message: 'Please provide title, description, date, and contact information.' });
-    }
-
-    const item = await LostFoundItem.findById(itemId);
-
-    if (!item) {
-      return res.status(404).json({ message: 'Item not found' });
-    }
-
-    // Check if the item is resolved
-    if (item.resolved) {
-      return res.status(409).json({ message: 'Resolved items cannot be updated' });
-    }
-
-    // Check if the logged-in user is the owner of the item or an admin
-    if (item.user.toString() !== userId.toString() && !req.user.isAdmin) {
-      return res.status(403).json({ message: 'You are not authorized to update this item' });
-    }
-
-    // Handle image updates
-    let keepPublicIds = [];
-    if (keepImages) {
-      try {
-        keepPublicIds = JSON.parse(keepImages);
-      } catch (e) {
-        keepPublicIds = [];
-      }
-    }
-
-    // Remove images not in keepPublicIds from Cloudinary
-    if (Array.isArray(item.images)) {
-      for (const img of item.images) {
-        if (!keepPublicIds.includes(img.public_id)) {
-          try {
-            await cloudinary.uploader.destroy(img.public_id);
-          } catch (err) {
-            console.error(`Error deleting image ${img.public_id}:`, err);
-          }
-        }
-      }
-    }
-
-    // Keep only images whose public_id is in keepPublicIds, preserving order
-    let keptImages = [];
-    if (Array.isArray(item.images)) {
-      keptImages = keepPublicIds
-        .map(pid => item.images.find(img => img.public_id === pid))
-        .filter(Boolean);
-    }
-
-    // Handle new images if provided
-    if (req.files && req.files.length > 0) {
-      try {
-        const newImages = await uploadImages(req.files);
-        keptImages = [...keptImages, ...newImages];
-      } catch (error) {
-        return res.status(400).json({ message: error.message });
-      }
-    }
-
-    // Update item fields
-    item.type = type || item.type;
-    item.title = title || item.title;
-    item.description = description || item.description;
-    item.location = location || item.location;
-    item.date = date || item.date;
-    item.contact = contact || item.contact;
-    item.images = keptImages;
-    
-    // Only update resolved if it's explicitly provided in the request body
-    if (resolved !== undefined) {
-      item.resolved = resolved;
-    }
-
-    await item.save();
-
-    // Populate user before sending the response
-    await item.populate('user', 'name email');
-
-    res.status(200).json(item);
-
-  } catch (error) {
-    console.error('Update lost/found item error:', error);
-    res.status(500).json({ message: 'Error updating item' });
-  }
-});
-
-// Delete a lost or found item by ID
-router.delete('/:id', authMiddleware, itemRateLimiter, async (req, res) => {
-  try {
-    const itemId = req.params.id;
-    const userId = req.user._id;
-
-    const item = await LostFoundItem.findById(itemId);
-
-    if (!item) {
-      return res.status(404).json({ message: 'Item not found' });
-    }
-
-    // Allow owner or admin to delete (removed resolved item restriction)
-    if (item.user.toString() !== userId.toString() && !req.user.isAdmin) {
-      return res.status(403).json({ message: 'You are not authorized to delete this item' });
-    }
-
-    // Soft delete - do NOT delete images from Cloudinary so they remain if restored
-    item.isDeleted = true;
-    item.deletedAt = new Date();
-    await item.save();
-
-    res.status(200).json({ message: 'Item soft-deleted successfully' });
-  } catch (error) {
-    console.error('Delete lost/found item error:', error);
-    res.status(500).json({ message: 'Error deleting item' });
-  }
-});
-
-// Mark a lost or found item as resolved (allow owner or admin)
-router.patch('/:id/resolve', authMiddleware, async (req, res) => {
-  try {
-    const itemId = req.params.id;
-    const userId = req.user._id;
-
-    const item = await LostFoundItem.findById(itemId);
-
-    if (!item) {
-      return res.status(404).json({ message: 'Item not found' });
-    }
-
-    // Allow owner or admin
-    if (item.user.toString() !== userId.toString() && !req.user.isAdmin) {
-      return res.status(403).json({ message: 'You are not authorized to mark this item as resolved' });
-    }
-
-    item.resolved = true;
-    item.resolvedAt = new Date();
-    await item.save();
-
-    res.status(200).json({ message: 'Item marked as resolved' });
-  } catch (error) {
-    console.error('Mark item as resolved error:', error);
-    res.status(500).json({ message: 'Error marking item as resolved' });
-  }
-});
-
 // Admin-only route to get all lost/found items (including deleted ones)
+// NOTE: Must be defined before /:id to prevent Express matching 'admin' as an id
 router.get('/admin/all', authMiddleware, async (req, res) => {
   try {
     // Only admins can access this route
@@ -569,6 +403,178 @@ router.post('/admin/cleanup-expired', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Manual cleanup error:', error);
     res.status(500).json({ message: 'Error during manual cleanup', error: error.message });
+  }
+});
+
+// Get a single lost or found item by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const item = await LostFoundItem.findById(req.params.id).populate('user', 'name email');
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+    res.status(200).json(item);
+  } catch (error) {
+    console.error('Get single lost/found item error:', error);
+    res.status(500).json({ message: 'Error fetching item' });
+  }
+});
+
+// Update a lost or found item by ID
+router.put('/:id', authMiddleware, itemRateLimiter, upload.array('images', 5), async (req, res) => {
+  try {
+    const { type, title, description, location, date, resolved, contact, keepImages } = req.body;
+    const userId = req.user._id;
+    const itemId = req.params.id;
+
+    // Validate required fields
+    if (!title || !description || !date || !contact) {
+      return res.status(400).json({ message: 'Please provide title, description, date, and contact information.' });
+    }
+
+    const item = await LostFoundItem.findById(itemId);
+
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+
+    // Prevent updating soft-deleted items
+    if (item.isDeleted) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+
+    // Check if the item is resolved
+    if (item.resolved) {
+      return res.status(409).json({ message: 'Resolved items cannot be updated' });
+    }
+
+    // Check if the logged-in user is the owner of the item or an admin
+    if (item.user.toString() !== userId.toString() && !req.user.isAdmin) {
+      return res.status(403).json({ message: 'You are not authorized to update this item' });
+    }
+
+    // Handle image updates
+    let keepPublicIds = [];
+    if (keepImages) {
+      try {
+        keepPublicIds = JSON.parse(keepImages);
+      } catch (e) {
+        keepPublicIds = [];
+      }
+    }
+
+    // Remove images not in keepPublicIds from Cloudinary
+    if (Array.isArray(item.images)) {
+      for (const img of item.images) {
+        if (!keepPublicIds.includes(img.public_id)) {
+          try {
+            await cloudinary.uploader.destroy(img.public_id);
+          } catch (err) {
+            console.error(`Error deleting image ${img.public_id}:`, err);
+          }
+        }
+      }
+    }
+
+    // Keep only images whose public_id is in keepPublicIds, preserving order
+    let keptImages = [];
+    if (Array.isArray(item.images)) {
+      keptImages = keepPublicIds
+        .map(pid => item.images.find(img => img.public_id === pid))
+        .filter(Boolean);
+    }
+
+    // Handle new images if provided
+    if (req.files && req.files.length > 0) {
+      try {
+        const newImages = await uploadImages(req.files);
+        keptImages = [...keptImages, ...newImages];
+      } catch (error) {
+        return res.status(400).json({ message: error.message });
+      }
+    }
+
+    // Update item fields
+    item.type = type || item.type;
+    item.title = title || item.title;
+    item.description = description || item.description;
+    item.location = location || item.location;
+    item.date = date || item.date;
+    item.contact = contact || item.contact;
+    item.images = keptImages;
+    
+    // Only update resolved if it's explicitly provided in the request body
+    if (resolved !== undefined) {
+      item.resolved = resolved;
+    }
+
+    await item.save();
+
+    // Populate user before sending the response
+    await item.populate('user', 'name email');
+
+    res.status(200).json(item);
+
+  } catch (error) {
+    console.error('Update lost/found item error:', error);
+    res.status(500).json({ message: 'Error updating item' });
+  }
+});
+
+// Delete a lost or found item by ID
+router.delete('/:id', authMiddleware, itemRateLimiter, async (req, res) => {
+  try {
+    const itemId = req.params.id;
+    const userId = req.user._id;
+
+    const item = await LostFoundItem.findById(itemId);
+
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+
+    // Allow owner or admin to delete (removed resolved item restriction)
+    if (item.user.toString() !== userId.toString() && !req.user.isAdmin) {
+      return res.status(403).json({ message: 'You are not authorized to delete this item' });
+    }
+
+    // Soft delete - do NOT delete images from Cloudinary so they remain if restored
+    item.isDeleted = true;
+    item.deletedAt = new Date();
+    await item.save();
+
+    res.status(200).json({ message: 'Item soft-deleted successfully' });
+  } catch (error) {
+    console.error('Delete lost/found item error:', error);
+    res.status(500).json({ message: 'Error deleting item' });
+  }
+});
+
+// Mark a lost or found item as resolved (allow owner or admin)
+router.patch('/:id/resolve', authMiddleware, async (req, res) => {
+  try {
+    const itemId = req.params.id;
+    const userId = req.user._id;
+
+    const item = await LostFoundItem.findById(itemId);
+
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+
+    // Allow owner or admin
+    if (item.user.toString() !== userId.toString() && !req.user.isAdmin) {
+      return res.status(403).json({ message: 'You are not authorized to mark this item as resolved' });
+    }
+
+    item.resolved = true;
+    item.resolvedAt = new Date();
+    await item.save();
+
+    res.status(200).json({ message: 'Item marked as resolved' });
+  } catch (error) {
+    console.error('Mark item as resolved error:', error);
+    res.status(500).json({ message: 'Error marking item as resolved' });
   }
 });
 

@@ -126,6 +126,11 @@ router.put('/:id', protect, upload.array('images', 5), async (req, res) => {
       return res.status(404).json({ message: 'Complaint not found.' });
     }
 
+    // Prevent updating soft-deleted complaints
+    if (complaint.isDeleted) {
+      return res.status(404).json({ message: 'Complaint not found.' });
+    }
+
     // Ensure the logged-in user is the creator of the complaint or an admin
     if (complaint.user.toString() !== req.user._id.toString() && !req.user.isAdmin) {
       return res.status(403).json({ message: 'Not authorized to update this complaint.' });
@@ -213,6 +218,7 @@ router.delete('/:id', protect, async (req, res) => {
 });
 
 // Admin-only route to get all complaints (including deleted ones)
+// NOTE: Must be defined before /:id to prevent Express matching 'admin' as an id
 router.get('/admin/all', protect, async (req, res) => {
   try {
     // Only admins can access this route

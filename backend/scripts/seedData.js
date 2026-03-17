@@ -13,6 +13,7 @@ const LostFoundItem = require('../models/LostFoundItem');
 const Complaint = require('../models/Complaint');
 const ClubRecruitment = require('../models/ClubRecruitment');
 const User = require('../models/User');
+const Chat = require('../models/Chat');
 
 // Connect to MongoDB
 const connectDB = async () => {
@@ -25,12 +26,16 @@ const connectDB = async () => {
   }
 };
 
+// Helper for relative dates
+const daysFromNow = (d) => new Date(Date.now() + d * 24 * 60 * 60 * 1000);
+const daysAgo = (d) => new Date(Date.now() - d * 24 * 60 * 60 * 1000);
+
 // Dummy data
 const dummyEvents = [
   {
-    title: 'Annual Tech Fest 2025',
+    title: 'Annual Tech Fest',
     description: 'Join us for the biggest technology festival of the year! Featuring coding competitions, tech talks, workshops, and networking opportunities with industry leaders.',
-    date: new Date('2025-02-15T10:00:00'),
+    date: daysFromNow(20),
     location: 'Main Auditorium',
     status: 'Upcoming',
     registerUrl: 'https://forms.google.com/techfest2025',
@@ -54,9 +59,9 @@ const dummyEvents = [
     }
   },
   {
-    title: 'Cultural Night 2025',
+    title: 'Cultural Night',
     description: 'Experience the vibrant culture of our campus with music, dance, drama, and food stalls. A night to remember with performances from various student clubs.',
-    date: new Date('2025-01-25T18:00:00'),
+    date: daysFromNow(10),
     location: 'Open Air Theatre',
     status: 'Upcoming',
     registerUrl: 'https://forms.google.com/culturalnight2025',
@@ -80,9 +85,9 @@ const dummyEvents = [
     }
   },
   {
-    title: 'Career Fair 2025',
+    title: 'Career Fair',
     description: 'Connect with top recruiters and explore career opportunities. Over 50 companies participating with on-the-spot interviews and job offers.',
-    date: new Date('2025-03-10T09:00:00'),
+    date: daysFromNow(35),
     location: 'Sports Complex',
     status: 'Upcoming',
     registerUrl: 'https://forms.google.com/careerfair2025',
@@ -106,9 +111,9 @@ const dummyEvents = [
     }
   },
   {
-    title: 'Hackathon 2025',
+    title: 'Hackathon',
     description: '48-hour coding marathon to build innovative solutions. Prizes worth ₹1,00,000. Open to all students. Food and refreshments provided.',
-    date: new Date('2025-02-01T08:00:00'),
+    date: daysFromNow(14),
     location: 'IT Building',
     status: 'Upcoming',
     registerUrl: 'https://forms.google.com/hackathon2025',
@@ -132,9 +137,9 @@ const dummyEvents = [
     }
   },
   {
-    title: 'Sports Day 2025',
+    title: 'Sports Day',
     description: 'Annual inter-department sports competition. Events include cricket, football, basketball, athletics, and more. Cheer for your department!',
-    date: new Date('2025-01-20T07:00:00'),
+    date: daysFromNow(5),
     location: 'Cricket Ground & Sports Complex',
     status: 'Ongoing',
     registerUrl: 'https://forms.google.com/sportsday2025',
@@ -158,9 +163,9 @@ const dummyEvents = [
     }
   },
   {
-    title: 'Alumni Meet 2025',
+    title: 'Alumni Meet',
     description: 'Reconnect with your batchmates and network with alumni from various industries. Panel discussions, workshops, and networking dinner.',
-    date: new Date('2024-12-20T10:00:00'),
+    date: daysAgo(30),
     location: 'World Peace Dome',
     status: 'Completed',
     registerUrl: '',
@@ -186,7 +191,7 @@ const dummyEvents = [
   {
     title: 'Workshop on Machine Learning',
     description: 'Learn the fundamentals of machine learning with hands-on projects. Suitable for beginners. Certificate of participation will be provided.',
-    date: new Date('2025-01-30T14:00:00'),
+    date: daysFromNow(7),
     location: 'IT Building, Lab 201',
     status: 'Upcoming',
     registerUrl: 'https://forms.google.com/ml-workshop',
@@ -212,7 +217,7 @@ const dummyEvents = [
   {
     title: 'Blood Donation Camp',
     description: 'Join us for a noble cause. Blood donation camp organized in collaboration with Red Cross. All donors will receive a certificate and refreshments.',
-    date: new Date('2025-02-05T09:00:00'),
+    date: daysFromNow(18),
     location: 'Medical Center',
     status: 'Upcoming',
     registerUrl: 'https://forms.google.com/blood-donation',
@@ -241,7 +246,7 @@ const dummyNews = [
   {
     title: 'New Research Lab Inaugurated',
     description: 'The university has inaugurated a state-of-the-art research laboratory equipped with the latest technology and equipment. The lab will support research in AI, robotics, and biotechnology.',
-    date: new Date('2025-01-05'),
+    date: daysAgo(10),
     category: 'Campus',
     images: [{
       url: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&h=600&fit=crop'
@@ -249,8 +254,8 @@ const dummyNews = [
   },
   {
     title: 'Students Win National Coding Competition',
-    description: 'Our students secured first place in the National Coding Championship 2024. The team developed an innovative solution for sustainable energy management.',
-    date: new Date('2024-12-15'),
+    description: 'Our students secured first place in the National Coding Championship. The team developed an innovative solution for sustainable energy management.',
+    date: daysAgo(20),
     category: 'Achievements',
     images: [{
       url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=600&fit=crop'
@@ -258,8 +263,8 @@ const dummyNews = [
   },
   {
     title: 'New Scholarship Program Announced',
-    description: 'The university has announced a new merit-based scholarship program for deserving students. Applications are now open for the academic year 2025-26.',
-    date: new Date('2025-01-10'),
+    description: 'The university has announced a new merit-based scholarship program for deserving students. Applications are now open for the upcoming academic year.',
+    date: daysAgo(5),
     category: 'Academic',
     images: [{
       url: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&h=600&fit=crop'
@@ -268,7 +273,7 @@ const dummyNews = [
   {
     title: 'Campus Wi-Fi Upgraded',
     description: 'The entire campus now has high-speed Wi-Fi connectivity. Students can enjoy seamless internet access in all buildings, libraries, and common areas.',
-    date: new Date('2024-12-28'),
+    date: daysAgo(15),
     category: 'Infrastructure',
     images: [{
       url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop'
@@ -277,7 +282,7 @@ const dummyNews = [
   {
     title: 'Guest Lecture by Industry Expert',
     description: 'Renowned tech entrepreneur will deliver a guest lecture on "Future of Technology" next week. All students are invited to attend.',
-    date: new Date('2025-01-12'),
+    date: daysAgo(3),
     category: 'Academic',
     images: [{
       url: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800&h=600&fit=crop'
@@ -286,7 +291,7 @@ const dummyNews = [
   {
     title: 'Library Extended Hours',
     description: 'The central library will now remain open until 11 PM on weekdays to accommodate students preparing for exams. Additional study spaces have been added.',
-    date: new Date('2025-01-08'),
+    date: daysAgo(7),
     category: 'Campus',
     images: [{
       url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&h=600&fit=crop'
@@ -295,7 +300,7 @@ const dummyNews = [
   {
     title: 'New Student Portal Launched',
     description: 'The new student portal is now live with enhanced features including online fee payment, course registration, and academic records access.',
-    date: new Date('2025-01-15'),
+    date: daysAgo(2),
     category: 'Infrastructure',
     images: [{
       url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop'
@@ -304,7 +309,7 @@ const dummyNews = [
   {
     title: 'Inter-College Sports Tournament',
     description: 'Our teams have qualified for the inter-college sports tournament. Support our athletes as they compete for the championship title.',
-    date: new Date('2024-12-10'),
+    date: daysAgo(25),
     category: 'Achievements',
     images: [{
       url: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop'
@@ -313,7 +318,7 @@ const dummyNews = [
   {
     title: 'Research Paper Published',
     description: 'Faculty members from the Computer Science department have published a groundbreaking research paper in a top-tier international journal.',
-    date: new Date('2025-01-03'),
+    date: daysAgo(12),
     category: 'Academic',
     images: [{
       url: 'https://images.unsplash.com/photo-1532619675605-1ede6c4ed2b4?w=800&h=600&fit=crop'
@@ -464,7 +469,7 @@ const seedData = async () => {
         title: 'Lost: Black Laptop Bag',
         description: 'Lost a black laptop bag near the library. Contains laptop, charger, and some books. Please contact if found.',
         location: 'Central Library',
-        date: new Date('2025-01-10'),
+        date: daysAgo(5),
         contact: testUser.email,
         images: [{
           public_id: 'lostfound/laptop-bag',
@@ -478,7 +483,7 @@ const seedData = async () => {
         title: 'Found: Blue Water Bottle',
         description: 'Found a blue water bottle in the canteen. Has a sticker with "MIT-ADT" on it. Please claim at the lost & found desk.',
         location: 'MANET Canteen',
-        date: new Date('2025-01-08'),
+        date: daysAgo(7),
         contact: testUser.email,
         images: [{
           public_id: 'lostfound/water-bottle',
@@ -490,13 +495,13 @@ const seedData = async () => {
         user: testUser._id,
         type: 'lost',
         title: 'Lost: Student ID Card',
-        description: 'Lost my student ID card somewhere on campus. Name: John Doe, ID: MIT2024001. Please return if found.',
+        description: 'Lost my student ID card somewhere on campus. Please return if found.',
         location: 'Near IT Building',
-        date: new Date('2025-01-05'),
+        date: daysAgo(10),
         contact: testUser.email,
         images: [],
         resolved: true,
-        resolvedAt: new Date('2025-01-06')
+        resolvedAt: daysAgo(9)
       },
       {
         user: testUser._id,
@@ -504,7 +509,7 @@ const seedData = async () => {
         title: 'Found: Wallet with Cash',
         description: 'Found a wallet containing cash and cards near the sports complex. Please contact with identification to claim.',
         location: 'Sports Complex',
-        date: new Date('2025-01-12'),
+        date: daysAgo(3),
         contact: testUser.email,
         images: [{
           public_id: 'lostfound/wallet',
@@ -518,7 +523,7 @@ const seedData = async () => {
         title: 'Lost: AirPods Case',
         description: 'Lost a white AirPods case in the auditorium during the event. Please contact if found.',
         location: 'Main Auditorium',
-        date: new Date('2025-01-03'),
+        date: daysAgo(12),
         contact: testUser.email,
         images: [{
           public_id: 'lostfound/airpods',
@@ -532,7 +537,7 @@ const seedData = async () => {
         title: 'Found: Calculator',
         description: 'Found a scientific calculator in the library. It has a sticker with "MIT-ADT" on it. Please claim at the front desk.',
         location: 'Central Library',
-        date: new Date('2025-01-11'),
+        date: daysAgo(4),
         contact: testUser.email,
         images: [{
           public_id: 'lostfound/calculator',
@@ -546,7 +551,7 @@ const seedData = async () => {
         title: 'Lost: Textbooks',
         description: 'Lost two textbooks - "Data Structures" and "Algorithms" near the IT Building. Please return if found.',
         location: 'IT Building',
-        date: new Date('2025-01-07'),
+        date: daysAgo(8),
         contact: testUser.email,
         images: [{
           public_id: 'lostfound/books',
@@ -560,7 +565,7 @@ const seedData = async () => {
         title: 'Found: Keys',
         description: 'Found a set of keys with a keychain near the canteen. Please contact to identify and claim.',
         location: 'MANET Canteen',
-        date: new Date('2025-01-09'),
+        date: daysAgo(6),
         contact: testUser.email,
         images: [{
           public_id: 'lostfound/keys',
@@ -587,12 +592,12 @@ const seedData = async () => {
           status: 'Open',
           comment: 'Complaint registered',
           updatedBy: testUser._id,
-          timestamp: new Date('2025-01-08')
+          timestamp: daysAgo(7)
         }, {
           status: 'In Progress',
           comment: 'IT team is investigating the issue',
           updatedBy: testUser._id,
-          timestamp: new Date('2025-01-09')
+          timestamp: daysAgo(6)
         }]
       },
       {
@@ -607,7 +612,7 @@ const seedData = async () => {
           status: 'Open',
           comment: 'Complaint registered',
           updatedBy: testUser._id,
-          timestamp: new Date('2025-01-10')
+          timestamp: daysAgo(5)
         }]
       },
       {
@@ -622,17 +627,17 @@ const seedData = async () => {
           status: 'Open',
           comment: 'Complaint registered',
           updatedBy: testUser._id,
-          timestamp: new Date('2024-12-15')
+          timestamp: daysAgo(30)
         }, {
           status: 'In Progress',
           comment: 'Reviewing space availability',
           updatedBy: testUser._id,
-          timestamp: new Date('2024-12-20')
+          timestamp: daysAgo(25)
         }, {
           status: 'Resolved',
           comment: 'Additional study spaces have been added to the library',
           updatedBy: testUser._id,
-          timestamp: new Date('2025-01-05')
+          timestamp: daysAgo(10)
         }]
       },
       {
@@ -647,12 +652,12 @@ const seedData = async () => {
           status: 'Open',
           comment: 'Complaint registered',
           updatedBy: testUser._id,
-          timestamp: new Date('2025-01-11')
+          timestamp: daysAgo(4)
         }, {
           status: 'In Progress',
           comment: 'Food quality inspection scheduled',
           updatedBy: testUser._id,
-          timestamp: new Date('2025-01-12')
+          timestamp: daysAgo(3)
         }]
       },
       {
@@ -667,12 +672,12 @@ const seedData = async () => {
           status: 'Open',
           comment: 'Complaint registered - High priority',
           updatedBy: testUser._id,
-          timestamp: new Date('2025-01-13')
+          timestamp: daysAgo(2)
         }, {
           status: 'In Progress',
           comment: 'Security team is reviewing access protocols',
           updatedBy: testUser._id,
-          timestamp: new Date('2025-01-14')
+          timestamp: daysAgo(1)
         }]
       },
       {
@@ -687,7 +692,7 @@ const seedData = async () => {
           status: 'Open',
           comment: 'Complaint registered',
           updatedBy: testUser._id,
-          timestamp: new Date('2025-01-15')
+          timestamp: daysAgo(1)
         }]
       },
       {
@@ -702,7 +707,7 @@ const seedData = async () => {
           status: 'Open',
           comment: 'Complaint registered',
           updatedBy: testUser._id,
-          timestamp: new Date('2025-01-14')
+          timestamp: daysAgo(2)
         }]
       },
       {
@@ -717,12 +722,12 @@ const seedData = async () => {
           status: 'Open',
           comment: 'Complaint registered',
           updatedBy: testUser._id,
-          timestamp: new Date('2025-01-12')
+          timestamp: daysAgo(3)
         }, {
           status: 'In Progress',
           comment: 'Academic office is reviewing the grade',
           updatedBy: testUser._id,
-          timestamp: new Date('2025-01-13')
+          timestamp: daysAgo(2)
         }]
       }
     ];
@@ -736,8 +741,8 @@ const seedData = async () => {
         title: 'Join the Coding Club',
         description: 'Are you passionate about coding? Join our coding club and participate in hackathons, coding competitions, and tech workshops. Open to all skill levels!',
         clubName: 'Coding Club',
-        startDate: new Date('2025-01-15'),
-        endDate: new Date('2025-02-15'),
+        startDate: daysAgo(2),
+        endDate: daysFromNow(28),
         formUrl: 'https://forms.google.com/coding-club',
         status: 'Open',
         contactInfo: {
@@ -753,8 +758,8 @@ const seedData = async () => {
         title: 'Drama Club Auditions',
         description: 'Calling all actors and theatre enthusiasts! Join our drama club and be part of exciting productions. Auditions are open for all students.',
         clubName: 'Drama Club',
-        startDate: new Date('2025-01-20'),
-        endDate: new Date('2025-02-20'),
+        startDate: daysFromNow(3),
+        endDate: daysFromNow(33),
         formUrl: 'https://forms.google.com/drama-club',
         status: 'Open',
         contactInfo: {
@@ -770,8 +775,8 @@ const seedData = async () => {
         title: 'Photography Club Recruitment',
         description: 'Love photography? Join our photography club to learn new techniques, participate in photo walks, and showcase your work in exhibitions.',
         clubName: 'Photography Club',
-        startDate: new Date('2025-01-10'),
-        endDate: new Date('2025-02-10'),
+        startDate: daysAgo(5),
+        endDate: daysFromNow(25),
         formUrl: 'https://forms.google.com/photography-club',
         status: 'Open',
         contactInfo: {
@@ -787,8 +792,8 @@ const seedData = async () => {
         title: 'Music Club Open House',
         description: 'Join our music club and be part of the campus band, choir, or start your own music group. Instruments and practice rooms available.',
         clubName: 'Music Club',
-        startDate: new Date('2025-01-18'),
-        endDate: new Date('2025-02-18'),
+        startDate: daysFromNow(1),
+        endDate: daysFromNow(31),
         formUrl: 'https://forms.google.com/music-club',
         status: 'Open',
         contactInfo: {
@@ -804,8 +809,8 @@ const seedData = async () => {
         title: 'Sports Club Registration',
         description: 'Join various sports teams including cricket, football, basketball, and badminton. Represent the university in inter-college tournaments.',
         clubName: 'Sports Club',
-        startDate: new Date('2024-12-20'),
-        endDate: new Date('2025-01-20'),
+        startDate: daysAgo(30),
+        endDate: daysAgo(5),
         formUrl: 'https://forms.google.com/sports-club',
         status: 'Closed',
         contactInfo: {
@@ -821,8 +826,8 @@ const seedData = async () => {
         title: 'Debate Society Recruitment',
         description: 'Sharpen your public speaking and argumentation skills. Join the debate society and participate in inter-college debate competitions.',
         clubName: 'Debate Society',
-        startDate: new Date('2025-01-22'),
-        endDate: new Date('2025-02-22'),
+        startDate: daysFromNow(5),
+        endDate: daysFromNow(35),
         formUrl: 'https://forms.google.com/debate-society',
         status: 'Open',
         contactInfo: {
@@ -838,6 +843,80 @@ const seedData = async () => {
     const clubs = await ClubRecruitment.insertMany(dummyClubs);
     console.log(`✓ Seeded ${clubs.length} club recruitments`);
 
+    // Seed Chats
+    console.log('Seeding Chats...');
+    await Chat.deleteMany({});
+
+    // Create a few extra dummy users for realistic chat variety
+    const bcrypt = require('bcryptjs');
+    const hashedPw = await bcrypt.hash('Dummy@1234', 10);
+    const dummyUserDefs = [
+      { name: 'Priya Sharma',   email: 'priya.sharma@mitadt.edu',   password: hashedPw },
+      { name: 'Rahul Mehta',    email: 'rahul.mehta@mitadt.edu',    password: hashedPw },
+      { name: 'Ananya Joshi',   email: 'ananya.joshi@mitadt.edu',   password: hashedPw },
+      { name: 'Karan Patel',    email: 'karan.patel@mitadt.edu',    password: hashedPw },
+      { name: 'Sneha Kulkarni', email: 'sneha.kulkarni@mitadt.edu', password: hashedPw },
+    ];
+
+    const chatUsers = [];
+    for (const def of dummyUserDefs) {
+      let u = await User.findOne({ email: def.email });
+      if (!u) u = await User.create(def);
+      chatUsers.push(u);
+    }
+    // Include the main test user too
+    const allChatUsers = [testUser, ...chatUsers];
+    const u = (i) => allChatUsers[i % allChatUsers.length]._id;
+
+    // Helper: timestamp spread over last 2 days
+    const minsAgo = (m) => new Date(Date.now() - m * 60 * 1000);
+
+    const dummyChats = [
+      { sender: u(0), message: 'Hey everyone! 👋 Welcome to KampusKart chat!', timestamp: minsAgo(2880) },
+      { sender: u(1), message: 'Hi! Finally a campus chat app. This is so useful 🙌', timestamp: minsAgo(2870) },
+      { sender: u(2), message: 'Has anyone seen the Tech Fest schedule? When is the hackathon?', timestamp: minsAgo(2850) },
+      { sender: u(3), message: 'Hackathon is in 14 days I think. Check the Events section!', timestamp: minsAgo(2840) },
+      { sender: u(4), message: 'Just registered for it. The prizes are insane — ₹1 lakh total 🔥', timestamp: minsAgo(2820) },
+      { sender: u(5), message: 'Anyone forming teams? I need 2 more members, I\'m a backend dev', timestamp: minsAgo(2800) },
+      { sender: u(1), message: 'I\'m in! I do frontend. @Karan you should join too', timestamp: minsAgo(2780) },
+      { sender: u(3), message: 'Sure, count me in. What\'s the theme this year?', timestamp: minsAgo(2760) },
+      { sender: u(0), message: 'Open theme I heard. Build anything innovative.', timestamp: minsAgo(2740) },
+      { sender: u(2), message: 'BTW the library Wi-Fi on 2nd floor is terrible today. Anyone else facing this?', timestamp: minsAgo(2700) },
+      { sender: u(4), message: 'Yes! I filed a complaint on KampusKart. IT team said they\'re on it', timestamp: minsAgo(2690) },
+      { sender: u(5), message: 'Good to know. I\'ll use the computer lab for now', timestamp: minsAgo(2670) },
+      { sender: u(1), message: 'Canteen food was actually really good today ngl 😋', timestamp: minsAgo(2400) },
+      { sender: u(3), message: 'What did they have?', timestamp: minsAgo(2395) },
+      { sender: u(1), message: 'Pav bhaji and masala dosa. Both were fresh!', timestamp: minsAgo(2390) },
+      { sender: u(0), message: 'Okay going to canteen rn 😂', timestamp: minsAgo(2385) },
+      { sender: u(2), message: 'Don\'t forget the blood donation camp on the 18th. Please register!', timestamp: minsAgo(2200) },
+      { sender: u(4), message: 'Already signed up. It\'s a great cause 🩸', timestamp: minsAgo(2190) },
+      { sender: u(5), message: 'Same. The Medical Center team is really well organized', timestamp: minsAgo(2180) },
+      { sender: u(3), message: 'Anyone have notes for CS301? I missed the last lecture', timestamp: minsAgo(1800) },
+      { sender: u(1), message: 'I have them! Will share on the class group', timestamp: minsAgo(1795) },
+      { sender: u(3), message: 'You\'re a lifesaver, thanks! 🙏', timestamp: minsAgo(1790) },
+      { sender: u(0), message: 'Reminder: Cultural Night is in 10 days. Get your tickets from the student office!', timestamp: minsAgo(1440) },
+      { sender: u(2), message: 'Is it free for students?', timestamp: minsAgo(1435) },
+      { sender: u(0), message: 'Yes, free entry with student ID 🎉', timestamp: minsAgo(1430) },
+      { sender: u(4), message: 'Our dance group is performing. Come support us! 💃', timestamp: minsAgo(1420) },
+      { sender: u(5), message: 'Will definitely be there!', timestamp: minsAgo(1415) },
+      { sender: u(1), message: 'Lost my student ID somewhere near IT building 😭 anyone found it?', timestamp: minsAgo(900) },
+      { sender: u(3), message: 'Check the Lost & Found section on KampusKart, someone might have posted it', timestamp: minsAgo(895) },
+      { sender: u(1), message: 'Oh nice, I didn\'t know that feature existed. Checking now!', timestamp: minsAgo(890) },
+      { sender: u(2), message: 'The campus map feature is really helpful btw. Found the medical center easily', timestamp: minsAgo(600) },
+      { sender: u(0), message: 'Agreed! The whole app is super useful. Shoutout to the devs 👏', timestamp: minsAgo(595) },
+      { sender: u(4), message: 'ML Workshop tomorrow at 2 PM in Lab 201. Don\'t miss it!', timestamp: minsAgo(480) },
+      { sender: u(5), message: 'Is it beginner friendly?', timestamp: minsAgo(475) },
+      { sender: u(4), message: 'Yes, totally! No prior experience needed', timestamp: minsAgo(470) },
+      { sender: u(3), message: 'Registered! See you all there 🤖', timestamp: minsAgo(465) },
+      { sender: u(1), message: 'Someone found my ID and posted it on Lost & Found! KampusKart is amazing 🙌', timestamp: minsAgo(300) },
+      { sender: u(2), message: 'That\'s awesome! Glad it worked out', timestamp: minsAgo(295) },
+      { sender: u(0), message: 'Good morning everyone! Sports Day is ongoing today. Go cheer for your department! 🏆', timestamp: minsAgo(120) },
+      { sender: u(5), message: 'CS department is crushing it in cricket rn 🏏', timestamp: minsAgo(60) },
+    ];
+
+    const chats = await Chat.insertMany(dummyChats);
+    console.log(`✓ Seeded ${chats.length} chat messages`);
+
     console.log('\n✅ All dummy data seeded successfully!');
     console.log('\nSummary:');
     console.log(`- Events: ${events.length}`);
@@ -846,6 +925,7 @@ const seedData = async () => {
     console.log(`- Lost & Found Items: ${lostFoundItems.length}`);
     console.log(`- Complaints: ${complaints.length}`);
     console.log(`- Club Recruitments: ${clubs.length}`);
+    console.log(`- Chat Messages: ${chats.length}`);
 
     process.exit(0);
   } catch (error) {

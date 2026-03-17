@@ -41,6 +41,8 @@ if (!process.env.CI) {
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const helmet = require('helmet');
+const hpp = require('hpp');
 const passport = require('./config/passport');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
@@ -62,19 +64,39 @@ const User = require('./models/User');
 const app = express();
 
 // Security middleware
-app.use((req, res, next) => {
-  // Security headers
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-  
-  // Remove server information
-  res.removeHeader('X-Powered-By');
-  
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  contentSecurityPolicy: false // handled separately if needed
+}));
+// Custom NoSQL injection sanitizer — compatible with Express 5 (req.query is read-only)
+app.use((req, _res, next) => {
+  const sanitizeValue = (val) => {
+    if (val && typeof val === 'object') {
+      Object.keys(val).forEach(key => {
+        if (key.startsWith('$')) {
+          delete val[key];
+        } else {
+          sanitizeValue(val[key]);
+        }
+      });
+    }
+    return val;
+  };
+  if (req.body) sanitizeValue(req.body);
+  if (req.params) sanitizeValue(req.params);
+  // Sanitize query values in-place without reassigning req.query
+  if (req.query) {
+    Object.keys(req.query).forEach(key => {
+      if (key.startsWith('$')) {
+        delete req.query[key];
+      } else {
+        sanitizeValue(req.query[key]);
+      }
+    });
+  }
   next();
 });
+app.use(hpp()); // prevent HTTP parameter pollution
 
 // Middleware
 // Build allowed origins from env var (comma-separated) plus localhost defaults
@@ -105,7 +127,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 // Explicitly handle preflight requests for all routes (Express 5 / path-to-regexp v8 syntax)
 app.options('/{*path}', cors(corsOptions));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(passport.initialize());
 
 // Routes
@@ -304,13 +326,14 @@ io.on('connection', (socket) => {
   // Handle new messages (this is a fallback, main message handling is via HTTP API)
   socket.on('send-message', async (messageData) => {
     try {
-      if (!messageData || !messageData.senderId || !messageData.message || !messageData.message.trim()) {
+      if (!messageData || !messageData.message || !messageData.message.trim()) {
         socket.emit('error', 'Invalid message data');
         return;
       }
 
+      // Always use the authenticated socket.userId, never trust client-provided senderId
       const chatMessage = new Chat({
-        sender: messageData.senderId,
+        sender: socket.userId,
         message: messageData.message
       });
       

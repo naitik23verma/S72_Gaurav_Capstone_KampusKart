@@ -23,7 +23,7 @@ export const useLoading = (options: UseLoadingOptions = {}) => {
     progress: 0
   });
 
-  const startLoading = useCallback((title?: string) => {
+  const startLoading = useCallback(() => {
     setState(prev => ({
       ...prev,
       isLoading: true,

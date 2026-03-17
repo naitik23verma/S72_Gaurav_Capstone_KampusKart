@@ -395,13 +395,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const loginWithGoogle = () => {
-    const backendUrl = isProduction
-      ? 'https://s72-gaurav-capstone.onrender.com'
-      : 'http://localhost:5000';
-    
-    // Add a small delay to ensure the server wakeup loader has time to show
     setTimeout(() => {
-      window.location.href = `${backendUrl}/api/auth/google`;
+      window.location.href = `${API_BASE}/api/auth/google`;
     }, 100);
   };
 

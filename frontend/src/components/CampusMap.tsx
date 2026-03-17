@@ -394,10 +394,11 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   }, [hasRequestedLocation, mapRef, userLocation]);
 
   // Panel is always open on desktop, hidden on mobile — reactive to window resize
-  const [isPanelOpen, setIsPanelOpen] = useState(window.innerWidth >= 768);
+  const [isPanelOpen, setIsPanelOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
   useEffect(() => {
     const handleResize = () => setIsPanelOpen(window.innerWidth >= 768);
     window.addEventListener('resize', handleResize);
+    handleResize();
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -769,7 +770,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
               )}
             </div>
             {/* Locations List - Always in panel on desktop, hidden on mobile */}
-            <div className="hidden md:block transition-all duration-300 ease-in-out opacity-100">
+            <div className="block transition-all duration-300 ease-in-out opacity-100">
               <ul className="space-y-2">
                 {filteredLocations.map((location) => (
                   <li

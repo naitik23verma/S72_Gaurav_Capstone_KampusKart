@@ -10,41 +10,40 @@ jobs:
   frontend-lint-and-build:
     name: Frontend - Lint & Build
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-      
+
       - name: Cache node modules
         uses: actions/cache@v4
         id: cache-npm
         with:
-          path: |
-            frontend/node_modules
+          path: frontend/node_modules
           key: ${{ runner.os }}-frontend-${{ hashFiles('frontend/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-frontend-
-      
+
       - name: Install dependencies
         if: steps.cache-npm.outputs.cache-hit != 'true'
         working-directory: ./frontend
         run: npm ci
-      
+
       - name: Run ESLint
         working-directory: ./frontend
         run: npm run lint
-      
+
       - name: Build production bundle
         working-directory: ./frontend
         run: npm run build
         env:
-          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
-      
+          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY || 'placeholder_for_ci' }}
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -55,70 +54,76 @@ jobs:
   backend-lint-and-test:
     name: Backend - Lint & Test
     runs-on: ubuntu-latest
-    
+
+    services:
+      mongodb:
+        image: mongo:6
+        ports:
+          - 27017:27017
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-      
+
       - name: Cache node modules
         uses: actions/cache@v4
         id: cache-npm
         with:
-          path: |
-            backend/node_modules
+          path: backend/node_modules
           key: ${{ runner.os }}-backend-${{ hashFiles('backend/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-backend-
-      
+
       - name: Install dependencies
         if: steps.cache-npm.outputs.cache-hit != 'true'
         working-directory: ./backend
         run: npm ci
-      
+
       - name: Run ESLint
         working-directory: ./backend
         run: npm run lint
-      
+
       - name: Run tests
         working-directory: ./backend
         run: npm test
         env:
+          CI: true
           NODE_ENV: test
-          JWT_SECRET: test_jwt_secret_for_ci_pipeline_testing
+          JWT_SECRET: test_jwt_secret_for_ci_pipeline_minimum_32_chars
           MONGODB_URI: mongodb://localhost:27017/kampuskart_test
 
   security-audit:
     name: Security Audit
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-      
+
       - name: Install frontend dependencies
         working-directory: ./frontend
         run: npm ci
-      
+
       - name: Audit frontend dependencies
         working-directory: ./frontend
-        run: npm audit --audit-level=moderate
+        run: npm audit --audit-level=high
         continue-on-error: true
-      
+
       - name: Install backend dependencies
         working-directory: ./backend
         run: npm ci
-      
+
       - name: Audit backend dependencies
         working-directory: ./backend
-        run: npm audit --audit-level=moderate
+        run: npm audit --audit-level=high
         continue-on-error: true

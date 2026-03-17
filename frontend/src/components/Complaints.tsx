@@ -9,7 +9,6 @@ import { validateMultipleRequired } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
-import { sanitizeText } from '../utils/sanitize';
 
 interface Complaint {
   _id: string;
@@ -73,6 +72,7 @@ const Complaints = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [isFiltering, setIsFiltering] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const itemsPerPage = 9;
   const observer = useRef<IntersectionObserver | null>(null);
@@ -225,12 +225,14 @@ const Complaints = () => {
       if (currentPage === 1) {
         setIsLoading(false);
       }
+      setIsFiltering(false);
       setIsFetchingMore(false);
     }
   };
 
   useEffect(() => {
     setCurrentPage(1);
+    setIsFiltering(true);
   }, [filterStatus, filterCategory, searchQuery]);
 
   useEffect(() => {
@@ -669,7 +671,18 @@ const Complaints = () => {
         </div>
         {/* Card Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
-          {complaints.filter(complaint => complaint).map((complaint, idx) => (
+          {isFiltering ? (
+            Array.from({ length: 6 }).map((_, idx) => (
+              <div key={idx} className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden animate-pulse">
+                <div className="h-48 sm:h-56 md:h-64 bg-gray-200"></div>
+                <div className="p-6 space-y-3">
+                  <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                </div>
+              </div>
+            ))
+          ) : complaints.filter(complaint => complaint).map((complaint, idx) => (
             <div
               key={complaint._id}
               ref={idx === complaints.length - 1 ? lastComplaintRef : undefined}
@@ -718,8 +731,8 @@ const Complaints = () => {
 
               {/* Content Section */}
               <div className="p-4 sm:p-5 md:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{sanitizeText(complaint.title)}</h2>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{sanitizeText(complaint.description)}</p>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{complaint.title}</h2>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{complaint.description}</p>
 
                 {/* Meta Info Row */}
                 <div className="space-y-3 pt-4 border-t-2 border-gray-200">
@@ -742,25 +755,21 @@ const Complaints = () => {
                 </div>
 
                 {/* Action Buttons */}
-                {(() => {
-                  // Check if user can edit/delete this complaint
-                  const canEdit = user && complaint.user && (
-                    // User owns the complaint OR user is admin
-                    complaint.user._id === user._id || 
-                    complaint.user._id === user.id || 
-                    user.isAdmin
-                  ) && !['Resolved', 'Closed'].includes(complaint.status);
-                  
-                  return canEdit;
-                })() && (
+                {user && complaint.user && (
+                  complaint.user._id === user._id || 
+                  complaint.user._id === user.id || 
+                  user.isAdmin
+                ) && (
                   <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t-2 border-gray-200">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); openEditComplaintModal(complaint); }}
-                      className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-4 sm:py-2.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200 text-xs sm:text-sm min-w-0 min-h-touch"
-                    >
-                      <FiEdit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                      <span className="truncate text-xs sm:text-sm">Edit</span>
-                    </button>
+                    {!['Resolved', 'Closed'].includes(complaint.status) && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); openEditComplaintModal(complaint); }}
+                        className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-4 sm:py-2.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200 text-xs sm:text-sm min-w-0 min-h-touch"
+                      >
+                        <FiEdit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                        <span className="truncate text-xs sm:text-sm">Edit</span>
+                      </button>
+                    )}
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDeleteComplaint(complaint._id); }}
                       className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-4 sm:py-2.5 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200 text-xs sm:text-sm min-w-0 min-h-touch"
@@ -773,6 +782,11 @@ const Complaints = () => {
               </div>
             </div>
           ))}
+          {!isFiltering && complaints.filter(c => c).length === 0 && (
+            <div className="col-span-full text-center py-12">
+              <p className="text-gray-500 text-lg">No complaints found.</p>
+            </div>
+          )}
         </div>
 
         {/* Add/Edit Complaint Modal */}
@@ -1005,7 +1019,7 @@ const Complaints = () => {
                         </div>
                         <div>
                             <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
-                            <p className="text-gray-700 whitespace-pre-wrap">{sanitizeText(selectedComplaintForDetails.description)}</p>
+                            <p className="text-gray-700 whitespace-pre-wrap">{selectedComplaintForDetails.description}</p>
                         </div>
                         {/* Meta Info - Posted By, Posted At */}
                         <div className="space-y-3 pt-4 border-t-2 border-gray-200">
@@ -1023,16 +1037,17 @@ const Complaints = () => {
                         // Check if user can edit/delete this complaint
                         (selectedComplaintForDetails.user._id === user._id || 
                          selectedComplaintForDetails.user._id === user.id || 
-                         user.isAdmin) && 
-                        !['Resolved', 'Closed'].includes(selectedComplaintForDetails.status)
+                         user.isAdmin)
                      ) && (
                         <div className="flex gap-3 mt-6">
-                            <button
-                                onClick={() => { setSelectedComplaintForDetails(null); openEditComplaintModal(selectedComplaintForDetails); }}
-                                className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100 flex items-center"
-                            >
-                                <FiEdit2 className="mr-1" /> Edit
-                            </button>
+                            {!['Resolved', 'Closed'].includes(selectedComplaintForDetails.status) && (
+                              <button
+                                  onClick={() => { setSelectedComplaintForDetails(null); openEditComplaintModal(selectedComplaintForDetails); }}
+                                  className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100 flex items-center"
+                              >
+                                  <FiEdit2 className="mr-1" /> Edit
+                              </button>
+                            )}
                             <button
                                 onClick={() => handleDeleteComplaint(selectedComplaintForDetails._id)}
                                 className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 active:bg-[#F05A25] flex items-center"

@@ -8,7 +8,6 @@ import { validateEmail, validatePhone, validateUrl } from '../utils/formValidati
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
-import { sanitizeText } from '../utils/sanitize';
 
 interface Event {
   _id: string;
@@ -147,7 +146,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
             {/* Description */}
             <div>
               <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
-              <p className="text-gray-700 whitespace-pre-wrap text-sm">{sanitizeText(event.description)}</p>
+              <p className="text-gray-700 whitespace-pre-wrap text-sm">{event.description}</p>
             </div>
 
             {/* Meta Info */}
@@ -793,8 +792,8 @@ const Events = () => {
 
               {/* Content Section */}
               <div className="p-4 sm:p-5 md:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{sanitizeText(event.title)}</h2>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{sanitizeText(event.description)}</p>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{event.title}</h2>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{event.description}</p>
 
                 {/* Meta Info Row */}
                 <div className="space-y-3 pt-4 border-t-2 border-gray-200">

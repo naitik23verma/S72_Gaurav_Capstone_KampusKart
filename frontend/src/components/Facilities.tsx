@@ -9,7 +9,6 @@ import { validateMultipleRequired } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
-import { sanitizeText } from '../utils/sanitize';
 
 interface Facility {
   _id: string;
@@ -46,7 +45,6 @@ const Facilities = () => {
   const [facilityImages, setFacilityImages] = useState<ImageFile[]>([]);
   const dragImage = useRef<number | null>(null);
   const dragOverImage = useRef<number | null>(null);
-  const [editingFacility, setEditingFacility] = useState<Facility | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editFacility, setEditFacility] = useState<Facility | null>(null);
   const [editFacilityImages, setEditFacilityImages] = useState<ImageFile[]>([]);
@@ -235,7 +233,6 @@ const Facilities = () => {
 
   const closeEditModal = () => {
     setIsEditModalOpen(false);
-    setEditingFacility(null);
     setEditFacility(null);
     setFormError(null);
   };
@@ -434,7 +431,6 @@ const Facilities = () => {
                       onClick={(e) => { 
                         e.stopPropagation(); 
                         if (!facility) return;
-                        setEditingFacility(facility); 
                         setEditFacility({ ...facility }); 
                         setEditFacilityImages((facility.images || []).map(img => ({ ...img, previewUrl: img.url })));
                         setIsEditModalOpen(true); 
@@ -443,6 +439,28 @@ const Facilities = () => {
                     >
                       <FiEdit2 className="w-4 h-4 flex-shrink-0" />
                       <span className="truncate">Edit</span>
+                    </button>
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        if (!facility) return;
+                        if (!window.confirm('Are you sure you want to delete this facility?')) return;
+                        try {
+                          const res = await fetch(`${API_BASE}/api/facilities/${facility._id}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': `Bearer ${token}` },
+                          });
+                          if (!res.ok) throw new Error('Failed to delete facility');
+                          setFacilities(facilities.filter(f => f._id !== facility._id));
+                          setSuccessMessage('Facility deleted successfully!');
+                        } catch (err) {
+                          setError('Failed to delete facility');
+                        }
+                      }}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 sm:py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200 text-sm sm:text-base min-w-0"
+                    >
+                      <FiTrash2 className="w-4 h-4 flex-shrink-0" />
+                      <span className="truncate">Delete</span>
                     </button>
                   </div>
                 )}
@@ -884,7 +902,6 @@ const Facilities = () => {
                   <button
                     onClick={() => {
                       if (!selectedFacility) return;
-                      setEditingFacility(selectedFacility);
                       setEditFacility({ ...selectedFacility });
                       setEditFacilityImages((selectedFacility.images || []).map(img => ({ ...img, previewUrl: img.url })));
                       setIsEditModalOpen(true);

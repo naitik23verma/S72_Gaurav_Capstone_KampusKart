@@ -8,7 +8,6 @@ import { validateEmail, validatePhone } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
-import { sanitizeText } from '../utils/sanitize';
 
 interface LostFoundItem {
   _id: string;
@@ -580,8 +579,8 @@ const LostFound = () => {
 
               {/* Content Section */}
               <div className="p-4 sm:p-5 md:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{sanitizeText(item?.title || 'Item')}</h2>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{sanitizeText(item.description)}</p>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{item?.title || 'Item'}</h2>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{item.description}</p>
 
                 {/* Meta Info Row - Location, Date, User */}
                 <div className="space-y-3 pt-4 border-t-2 border-gray-200">
@@ -992,7 +991,7 @@ const LostFound = () => {
               </div>
               <div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
-                <p className="text-gray-700 whitespace-pre-wrap">{sanitizeText(selectedItemForDetails.description)}</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{selectedItemForDetails.description}</p>
               </div>
 
               {/* Meta Info - Location, Date, Posted By */}

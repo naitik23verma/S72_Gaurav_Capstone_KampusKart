@@ -8,7 +8,6 @@ import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
-import { sanitizeText } from '../utils/sanitize';
 
 interface ClubRecruitment {
   _id: string;
@@ -91,7 +90,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
             </div>
             <div>
               <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
-              <p className="text-gray-700 whitespace-pre-wrap text-sm">{sanitizeText(club.description)}</p>
+              <p className="text-gray-700 whitespace-pre-wrap text-sm">{club.description}</p>
             </div>
             <div className="space-y-3 pt-4 border-t-2 border-gray-200">
               <div className="flex items-center text-sm text-gray-500">
@@ -228,6 +227,7 @@ const ClubsRecruitment = () => {
   const searchRef = useRef<HTMLDivElement>(null);
   const isSelectingSuggestion = useRef(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchClubs();
@@ -317,6 +317,7 @@ const ClubsRecruitment = () => {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const formData = new FormData();
       formData.append('title', newClub.title);
@@ -358,6 +359,8 @@ const ClubsRecruitment = () => {
       setSuccessMessage('Club recruitment added successfully!');
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to add club recruitment');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -415,6 +418,7 @@ const ClubsRecruitment = () => {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const formData = new FormData();
       formData.append('title', newClub.title);
@@ -445,6 +449,8 @@ const ClubsRecruitment = () => {
       closeClubModal();
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to save club recruitment');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -618,8 +624,8 @@ const ClubsRecruitment = () => {
                 </div>
               </div>
               <div className="p-4 sm:p-5 md:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{sanitizeText(club.title)}</h2>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">{sanitizeText(club.description)}</p>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{club.title}</h2>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">{club.description}</p>
                 <div className="space-y-3 pt-4 border-t-2 border-gray-200">
                   <div className="flex items-center text-sm text-gray-500">
                     <FiTag className="mr-2 flex-shrink-0 text-gray-400" />
@@ -805,14 +811,26 @@ const ClubsRecruitment = () => {
                     type="button"
                     onClick={closeClubModal}
                     className="px-6 py-3 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                    disabled={isSubmitting}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-3 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200"
+                    disabled={isSubmitting}
+                    className={`px-6 py-3 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    {editingClub ? 'Save Changes' : 'Add Recruitment'}
+                    {isSubmitting ? (
+                      <span className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        {editingClub ? 'Saving...' : 'Adding...'}
+                      </span>
+                    ) : (
+                      editingClub ? 'Save Changes' : 'Add Recruitment'
+                    )}
                   </button>
                 </div>
               </form>

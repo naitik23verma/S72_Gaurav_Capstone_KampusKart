@@ -4,6 +4,9 @@ const User = require('../models/User');
 
 // Determine the callback URL based on environment
 const getCallbackURL = () => {
+  if (process.env.BACKEND_URL) {
+    return `${process.env.BACKEND_URL}/api/auth/google/callback`;
+  }
   if (process.env.NODE_ENV === 'production') {
     return 'https://s72-gaurav-capstone.onrender.com/api/auth/google/callback';
   }

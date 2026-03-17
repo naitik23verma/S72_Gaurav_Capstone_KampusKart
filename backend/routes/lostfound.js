@@ -289,7 +289,7 @@ router.put('/:id', authMiddleware, itemRateLimiter, upload.array('images', 5), a
     }
 
     // Check if the logged-in user is the owner of the item or an admin
-    if (item.user.toString() !== userId && !req.user.isAdmin) {
+    if (item.user.toString() !== userId.toString() && !req.user.isAdmin) {
       return res.status(403).json({ message: 'You are not authorized to update this item' });
     }
 
@@ -374,7 +374,7 @@ router.delete('/:id', authMiddleware, itemRateLimiter, async (req, res) => {
     }
 
     // Allow owner or admin to delete (removed resolved item restriction)
-    if (item.user.toString() !== userId && !req.user.isAdmin) {
+    if (item.user.toString() !== userId.toString() && !req.user.isAdmin) {
       return res.status(403).json({ message: 'You are not authorized to delete this item' });
     }
 
@@ -403,7 +403,7 @@ router.patch('/:id/resolve', authMiddleware, async (req, res) => {
     }
 
     // Allow owner or admin
-    if (item.user.toString() !== userId && !req.user.isAdmin) {
+    if (item.user.toString() !== userId.toString() && !req.user.isAdmin) {
       return res.status(403).json({ message: 'You are not authorized to mark this item as resolved' });
     }
 

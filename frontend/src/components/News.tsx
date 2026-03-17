@@ -7,7 +7,6 @@ import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
-import { sanitizeText } from '../utils/sanitize';
 
 interface NewsItem {
   _id: string;
@@ -43,6 +42,7 @@ const News = () => {
   const searchRef = useRef<HTMLDivElement>(null);
   const isSelectingSuggestion = useRef(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [selectedNewsForDetails, setSelectedNewsForDetails] = useState<NewsItem | null>(null);
 
   // Generate autocomplete suggestions from existing news
   useEffect(() => {
@@ -330,7 +330,7 @@ const News = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
           {filteredNews.map(item => (
-            <div key={item._id} className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden cursor-pointer hover:border-gray-300 transition-colors duration-200">
+            <div key={item._id} className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden cursor-pointer hover:border-gray-300 transition-colors duration-200" onClick={() => setSelectedNewsForDetails(item)}>
               {/* Image Section with Overlay */}
               <div className="relative h-48 sm:h-56 md:h-64 overflow-hidden">
                 {item.images && item.images.length > 0 ? (
@@ -373,21 +373,21 @@ const News = () => {
 
               {/* Content Section */}
               <div className="p-4 sm:p-5 md:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{sanitizeText(item.title)}</h2>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">{sanitizeText(item.description)}</p>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{item.title}</h2>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">{item.description}</p>
 
                 {/* Action Buttons */}
                 {user && user.isAdmin && (
                   <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t-2 border-gray-200">
                     <button
-                      onClick={() => handleEditNews(item)}
+                      onClick={(e) => { e.stopPropagation(); handleEditNews(item); }}
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-3 sm:py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200 text-sm sm:text-base min-w-0"
                     >
                       <FiEdit2 className="w-4 h-4 flex-shrink-0" />
                       <span className="truncate">Edit</span>
                     </button>
                     <button
-                      onClick={() => handleDeleteNews(item._id)}
+                      onClick={(e) => { e.stopPropagation(); handleDeleteNews(item._id); }}
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-3 sm:py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200 text-sm sm:text-base min-w-0"
                     >
                       <FiTrash2 className="w-4 h-4 flex-shrink-0" />
@@ -500,6 +500,73 @@ const News = () => {
                 </div>
               </form>
         </FeatureModal>
+
+        {/* News Details Modal */}
+        {selectedNewsForDetails && (
+          <div
+            className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-label="News details"
+            onClick={() => setSelectedNewsForDetails(null)}
+          >
+            <div className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto relative" onClick={(e) => e.stopPropagation()}>
+              <button
+                onClick={() => setSelectedNewsForDetails(null)}
+                aria-label="Close"
+                className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
+              >
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12 sm:pr-14">{selectedNewsForDetails.title}</h2>
+              {selectedNewsForDetails.images && selectedNewsForDetails.images.length > 0 && (
+                <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {selectedNewsForDetails.images.map((img, idx) => (
+                    <img
+                      key={idx}
+                      src={img.url}
+                      alt={`News image ${idx + 1}`}
+                      className="w-full h-56 object-cover rounded-lg cursor-zoom-in"
+                      onClick={() => setZoomedImage(img.url)}
+                    />
+                  ))}
+                </div>
+              )}
+              <div className="space-y-4 text-gray-700">
+                <div className="flex flex-wrap gap-2">
+                  <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white border border-gray-200 text-gray-800 flex items-center gap-1">
+                    <FiTag className="w-3 h-3" />{selectedNewsForDetails.category}
+                  </span>
+                  <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white border border-gray-200 text-gray-800 flex items-center gap-1">
+                    <FiCalendar className="w-3 h-3" />{new Date(selectedNewsForDetails.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  </span>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
+                  <p className="text-gray-700 whitespace-pre-wrap text-sm">{selectedNewsForDetails.description}</p>
+                </div>
+              </div>
+              {user?.isAdmin && (
+                <div className="flex gap-3 mt-6 pt-6 border-t border-gray-200">
+                  <button
+                    onClick={() => { setSelectedNewsForDetails(null); handleEditNews(selectedNewsForDetails); }}
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 flex items-center gap-1"
+                  >
+                    <FiEdit2 className="w-4 h-4" /> Edit
+                  </button>
+                  <button
+                    onClick={() => { setSelectedNewsForDetails(null); handleDeleteNews(selectedNewsForDetails._id); }}
+                    className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 flex items-center gap-1"
+                  >
+                    <FiTrash2 className="w-4 h-4" /> Delete
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Zoomed Image Modal */}
         {zoomedImage && (

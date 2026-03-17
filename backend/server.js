@@ -77,7 +77,7 @@ app.use((req, res, next) => {
 });
 
 // Middleware
-app.use(cors({
+const corsOptions = {
   origin: function(origin, callback) {
     const allowedOrigins = [
       'http://localhost:3000',
@@ -87,9 +87,6 @@ app.use(cors({
     ];
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    if (!Array.isArray(allowedOrigins)) {
-      return callback(new Error('CORS misconfiguration: allowedOrigins is not an array'), false);
-    }
     if (allowedOrigins.indexOf(origin) === -1) {
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
       return callback(new Error(msg), false);
@@ -99,7 +96,11 @@ app.use(cors({
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
-}));
+};
+
+app.use(cors(corsOptions));
+// Explicitly handle preflight requests for all routes (Express 5 / path-to-regexp v8 syntax)
+app.options('/{*path}', cors(corsOptions));
 app.use(express.json());
 app.use(passport.initialize());
 

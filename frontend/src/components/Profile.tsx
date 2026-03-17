@@ -7,7 +7,6 @@ import {
 import { API_BASE } from '../config';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
-import { sanitizeText } from '../utils/sanitize';
 
 const formatDate = (dateString: string | null | undefined) => {
   if (!dateString) return 'Not set';
@@ -351,8 +350,8 @@ const Profile = () => {
 
             {/* Name + email + completion */}
             <div className="flex-1 w-full text-center sm:text-left">
-              <p className="text-lg font-bold text-gray-900 leading-tight">{sanitizeText(profileData.name || 'Your Name')}</p>
-              <p className="text-sm text-gray-500 mb-3 truncate">{sanitizeText(profileData.email)}</p>
+              <p className="text-lg font-bold text-gray-900 leading-tight">{profileData.name || 'Your Name'}</p>
+              <p className="text-sm text-gray-500 mb-3 truncate">{profileData.email}</p>
               <div className="w-full">
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-xs font-medium text-gray-600">Profile Completion</span>

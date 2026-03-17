@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { API_BASE } from '../config';
 
 interface ServerStatus {
@@ -13,7 +13,7 @@ export const useServerStatus = (): ServerStatus => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const checkStatus = async () => {
+  const checkStatus = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     
@@ -29,7 +29,8 @@ export const useServerStatus = (): ServerStatus => {
         setIsReady(true);
         setError(null);
       } else {
-        throw new Error('Server not ready');
+        setError('Server not ready');
+        setIsReady(false);
       }
     } catch (err) {
       setError('Server is starting up...');
@@ -37,12 +38,12 @@ export const useServerStatus = (): ServerStatus => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     // Initial check
     checkStatus();
-  }, []);
+  }, [checkStatus]);
 
   return {
     isReady,

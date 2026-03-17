@@ -6,7 +6,7 @@
   All-in-one campus portal for MIT ADT University
 
   [![Live Demo](https://img.shields.io/badge/Live%20Demo-kampuskart.netlify.app-00C7B7?style=flat-square&logo=netlify&logoColor=white)](https://kampuskart.netlify.app)
-  [![CI](https://img.shields.io/github/actions/workflow/status/Gaurav-205/KampusKart/ci.yml?label=CI&style=flat-square&logo=github-actions&logoColor=white)](https://github.com/Gaurav-205/KampusKart/actions)
+  [![CI](https://github.com/kalviumcommunity/S72_Gaurav_Capstone_KampusKart/actions/workflows/ci.yml/badge.svg)](https://github.com/kalviumcommunity/S72_Gaurav_Capstone_KampusKart/actions/)
   [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
   [![Node](https://img.shields.io/badge/Node.js-%3E%3D16-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
 

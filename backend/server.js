@@ -304,7 +304,7 @@ io.on('connection', (socket) => {
   // Handle new messages (this is a fallback, main message handling is via HTTP API)
   socket.on('send-message', async (messageData) => {
     try {
-      if (!messageData || !messageData.senderId || !messageData.message) {
+      if (!messageData || !messageData.senderId || !messageData.message || !messageData.message.trim()) {
         socket.emit('error', 'Invalid message data');
         return;
       }

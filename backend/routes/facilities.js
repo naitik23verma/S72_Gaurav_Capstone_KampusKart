@@ -81,8 +81,12 @@ router.put('/:id', auth, upload.array('images', 5), async (req, res) => {
         const keepPublicIds = JSON.parse(keepImages);
         images = facility.images.filter(img => keepPublicIds.includes(img.public_id));
       } catch (e) {
-        images = [];
+        // If JSON parse fails, keep all existing images to avoid data loss
+        images = [...facility.images];
       }
+    } else {
+      // No keepImages provided means keep all existing images
+      images = [...facility.images];
     }
 
     // Upload new images
@@ -104,7 +108,11 @@ router.put('/:id', auth, upload.array('images', 5), async (req, res) => {
     // Delete removed images from Cloudinary
     const removedImages = facility.images.filter(img => !images.some(newImg => newImg.public_id === img.public_id));
     for (const img of removedImages) {
-      await cloudinary.uploader.destroy(img.public_id);
+      try {
+        await cloudinary.uploader.destroy(img.public_id);
+      } catch (err) {
+        console.error('Error deleting facility image from Cloudinary:', err);
+      }
     }
 
     facility.name = name;
@@ -136,7 +144,11 @@ router.delete('/:id', auth, async (req, res) => {
 
     // Delete images from Cloudinary
     for (const img of facility.images) {
-      await cloudinary.uploader.destroy(img.public_id);
+      try {
+        await cloudinary.uploader.destroy(img.public_id);
+      } catch (err) {
+        console.error('Error deleting facility image from Cloudinary:', err);
+      }
     }
 
     await facility.deleteOne();

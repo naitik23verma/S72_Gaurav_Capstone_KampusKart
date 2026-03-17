@@ -17,6 +17,7 @@ export interface SearchContext {
 
 class AIService {
   private cache = new Map<string, AutocompleteSuggestion[]>();
+  private readonly MAX_CACHE_SIZE = 200;
   private recentSearches: string[] = [];
   private searchHistory: Map<string, number> = new Map();
 
@@ -56,6 +57,11 @@ class AIService {
     const uniqueSuggestions = this.removeDuplicates(suggestions);
     const sortedSuggestions = this.sortByRelevance(uniqueSuggestions, input);
 
+    // Evict oldest entry if cache is at max capacity
+    if (this.cache.size >= this.MAX_CACHE_SIZE) {
+      const firstKey = this.cache.keys().next().value;
+      if (firstKey !== undefined) this.cache.delete(firstKey);
+    }
     this.cache.set(cacheKey, sortedSuggestions);
     return sortedSuggestions;
   }

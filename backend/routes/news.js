@@ -58,6 +58,10 @@ router.post('/', authMiddleware, upload.array('images', 5), async (req, res) => 
   if (!title || !description || !date || !category) {
     return res.status(400).json({ message: 'All fields are required.' });
   }
+  // Validate date format
+  if (isNaN(new Date(date).getTime())) {
+    return res.status(400).json({ message: 'Invalid date format.' });
+  }
   try {
     const images = req.files && req.files.length > 0 ? await uploadImages(req.files) : [];
     const news = new News({
@@ -82,6 +86,10 @@ router.put('/:id', authMiddleware, upload.array('images', 5), async (req, res) =
   const { title, description, date, category, keepImages } = req.body;
   if (!title || !description || !date || !category) {
     return res.status(400).json({ message: 'Missing required fields.' });
+  }
+  // Validate date format
+  if (isNaN(new Date(date).getTime())) {
+    return res.status(400).json({ message: 'Invalid date format.' });
   }
   try {
     const news = await News.findById(req.params.id);

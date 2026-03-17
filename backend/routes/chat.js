@@ -125,7 +125,16 @@ router.post('/messages', auth, upload.array('attachments', 5), async (req, res) 
 
     // Handle file uploads
     if (req.files && req.files.length > 0) {
+      const allowedMimeTypes = [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        'application/pdf', 'text/plain',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
       for (const file of req.files) {
+        if (!allowedMimeTypes.includes(file.mimetype)) {
+          return res.status(400).json({ message: `File type not allowed: ${file.mimetype}` });
+        }
         const result = await uploadToCloudinary(file);
         attachments.push({
           type: file.mimetype.startsWith('image/') ? 'image' : 'file',

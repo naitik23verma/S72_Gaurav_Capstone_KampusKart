@@ -21,7 +21,7 @@ const validateSignup = [
     .withMessage('Please provide a valid email address'),
   body('password')
     .isLength({ min: 8 })
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/)
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d])[^\s]+$/)
     .withMessage('Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character'),
   body('name')
     .isLength({ min: 2, max: 50 })

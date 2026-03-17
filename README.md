@@ -7,7 +7,7 @@
 
   [![Live Demo](https://img.shields.io/badge/Live%20Demo-kampuskart.netlify.app-00C7B7?style=flat-square&logo=netlify&logoColor=white)](https://kampuskart.netlify.app)
   [![CI](https://github.com/kalviumcommunity/S72_Gaurav_Capstone_KampusKart/actions/workflows/ci.yml/badge.svg)](https://github.com/kalviumcommunity/S72_Gaurav_Capstone_KampusKart/actions/)
-  [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
+  [![License](https://img.shields.io/badge/License-Proprietary-red?style=flat-square)](LICENSE)
   [![Node](https://img.shields.io/badge/Node.js-%3E%3D16-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
 
 </div>
@@ -245,7 +245,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. For questions or ideas, u
 
 ## License
 
-MIT — see [LICENSE](LICENSE)
+All Rights Reserved — see [LICENSE](LICENSE)
+
+This project is proprietary software. Unauthorized copying, distribution, or use is strictly prohibited.
 
 ---
 

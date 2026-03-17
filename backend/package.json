@@ -20,7 +20,7 @@
     "mongodb"
   ],
   "author": "KampusKart Team",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "type": "commonjs",
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.4.2",

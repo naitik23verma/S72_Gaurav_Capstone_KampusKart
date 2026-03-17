@@ -75,6 +75,13 @@ const LostFound = () => {
       });
       if (node) observer.current.observe(node);
     }, [isFetchingMore, currentPage, totalPages]);
+
+  // Cleanup observer on unmount
+  useEffect(() => {
+    return () => {
+      if (observer.current) observer.current.disconnect();
+    };
+  }, []);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);

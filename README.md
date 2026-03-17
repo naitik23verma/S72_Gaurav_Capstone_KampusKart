@@ -16,7 +16,7 @@
 
 ## Overview
 
-KampusKart is a full-stack campus management portal. Students and faculty can navigate the campus, stay updated on news and events, report lost items, submit complaints, and chat in real time — all in one place.
+KampusKart is a full-stack campus management portal. Students and faculty can navigate the campus, stay updated on news and events, report lost items, submit complaints, and chat in real time, all in one place.
 
 ---
 

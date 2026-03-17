@@ -256,8 +256,9 @@ const News = () => {
               >
                 <option value="All">All Categories</option>
                 <option value="Campus">Campus</option>
-                <option value="Food">Food</option>
-                <option value="Academics">Academics</option>
+                <option value="Academic">Academic</option>
+                <option value="Infrastructure">Infrastructure</option>
+                <option value="Achievements">Achievements</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -470,8 +471,9 @@ const News = () => {
                       aria-label="News Category"
                     >
                       <option value="Campus">Campus</option>
-                      <option value="Food">Food</option>
-                      <option value="Academics">Academics</option>
+                      <option value="Academic">Academic</option>
+                      <option value="Infrastructure">Infrastructure</option>
+                      <option value="Achievements">Achievements</option>
                     </select>
                     <p className="text-xs text-gray-500 mt-1">Select the category for this news item.</p>
                   </div>

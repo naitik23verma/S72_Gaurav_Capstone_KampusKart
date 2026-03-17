@@ -51,7 +51,7 @@ KampusKart is a full-stack campus management portal built for MIT ADT University
 
 | Campus Map | Global Chat | Lost & Found |
 |:---:|:---:|:---:|
-| ![Map](frontend/public/images/1.jpg) | ![Chat](frontend/public/images/3.jpg) | ![LostFound](frontend/public/images/4.jpg) |
+| ![Map](frontend/public/images/1.png) | ![Chat](frontend/public/images/3.png) | ![LostFound](frontend/public/images/2.png) |
 
 ---
 

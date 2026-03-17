@@ -134,10 +134,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { token: newToken } = response.data;
       setToken(newToken);
       
-      // Update storage
+      // Update storage — respect original storage preference
       const expiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-      localStorage.setItem('token', newToken);
-      localStorage.setItem('token_expiry', expiry.toString());
+      if (sessionStorage.getItem('token')) {
+        sessionStorage.setItem('token', newToken);
+      } else {
+        localStorage.setItem('token', newToken);
+        localStorage.setItem('token_expiry', expiry.toString());
+      }
       
       console.log('Token refreshed successfully');
     } catch (error) {
@@ -153,8 +157,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchProfile = async () => {
     try {
+      const currentToken = tokenRef.current;
       const response = await axios.get(`${API_BASE}/api/profile`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${currentToken}` }
       });
       setUser(response.data);
     } catch (error) {

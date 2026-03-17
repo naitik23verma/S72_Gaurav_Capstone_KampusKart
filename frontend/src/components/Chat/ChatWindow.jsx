@@ -54,6 +54,9 @@ const CHAT_THEME = {
 };
 
 const ChatWindow = () => {
+  // Helper to get auth token from either storage (sessionStorage used when remember=false)
+  const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
+
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [onlineUsers, setOnlineUsers] = useState([]);
@@ -84,7 +87,7 @@ const ChatWindow = () => {
       await fetch(`${API_BASE}/api/chat/messages/${messageId}/read`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
       });
     } catch {
@@ -93,7 +96,7 @@ const ChatWindow = () => {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     // Initialize socket connection
     socketRef.current = io(API_BASE, {
       withCredentials: true,
@@ -212,7 +215,7 @@ const ChatWindow = () => {
         `${API_BASE}/api/chat/messages?page=${page + 1}`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${getToken()}`,
           },
         }
       );
@@ -289,7 +292,7 @@ const ChatWindow = () => {
       const response = await fetch(`${API_BASE}/api/chat/messages`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
         body: formData,
       });
@@ -349,7 +352,7 @@ const ChatWindow = () => {
       const response = await fetch(`${API_BASE}/api/chat/messages/${selectedMessage._id}`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
       });
       if (response.ok) {
@@ -375,7 +378,7 @@ const ChatWindow = () => {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify({ message: editText.trim() }),
       });

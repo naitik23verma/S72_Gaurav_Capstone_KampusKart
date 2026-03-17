@@ -482,7 +482,7 @@ const Events = () => {
       location: event.location || '',
       status: event.status,
       registerUrl: event.registerUrl || '',
-      images: event.image?.url ? [{ url: event.image.url, public_id: event.image.public_id }] : [],
+      images: event.image?.url ? [{ url: event.image.url, public_id: event.image.public_id, previewUrl: event.image.url }] : [],
       operatingHours: event.operatingHours || '',
       contactInfo: {
         name: event.contactInfo?.name ?? undefined,

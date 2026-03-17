@@ -373,7 +373,7 @@ const ClubsRecruitment = () => {
       startDate: club.startDate.split('T')[0],
       endDate: club.endDate.split('T')[0],
       formUrl: club.formUrl,
-      images: club.image?.url ? [{ url: club.image.url, public_id: club.image.public_id }] : [],
+      images: club.image?.url ? [{ url: club.image.url, public_id: club.image.public_id, previewUrl: club.image.url }] : [],
       contactInfo: {
         name: club.contactInfo?.name || '',
         email: club.contactInfo?.email || '',

@@ -1,33 +1,47 @@
-# KampusKart
+<div align="center">
+  <img src="frontend/public/Logo.png" alt="KampusKart Logo" width="120" />
+  <h1>KampusKart</h1>
+  <p>All-in-one campus portal for MIT ADT University</p>
 
-A campus management portal for MIT ADT University. Students and faculty can navigate the campus, stay updated on news and events, report lost items, submit complaints, and chat in real time.
-
-Live: [kampuskart.netlify.app](https://kampuskart.netlify.app)
+  [![Live Demo](https://img.shields.io/badge/Live%20Demo-kampuskart.netlify.app-00C7B7?style=flat-square&logo=netlify)](https://kampuskart.netlify.app)
+  [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
+  [![CI](https://img.shields.io/github/actions/workflow/status/Gaurav-205/KampusKart/ci.yml?label=CI&style=flat-square)](https://github.com/Gaurav-205/KampusKart/actions)
+  [![Node](https://img.shields.io/badge/Node.js-%3E%3D16-339933?style=flat-square&logo=node.js)](https://nodejs.org)
+</div>
 
 ---
 
-## Tech Stack
+## What is KampusKart?
 
-**Frontend:** React 18, TypeScript, Vite, Tailwind CSS, Material UI, Socket.IO client, Framer Motion
-
-**Backend:** Node.js, Express 5, MongoDB, Mongoose, JWT, Passport (Google OAuth), Socket.IO, Cloudinary, Nodemailer
-
-**Infra:** Netlify (frontend), Render (backend), MongoDB Atlas
+KampusKart is a full-stack campus management portal. Students and faculty can navigate the campus, stay updated on news and events, report lost items, submit complaints, and chat in real time — all in one place.
 
 ---
 
 ## Features
 
-- Interactive campus map with Google Maps
-- News and events with admin management
-- Lost and found with image uploads
-- Complaints system with status tracking
-- Facilities directory
-- Clubs and recruitment listings
-- Real-time global chat with reactions and replies
-- Google OAuth and email/password authentication
-- Password reset via OTP email
-- Role-based access (User / Admin)
+| Module | Description |
+|--------|-------------|
+| Campus Map | Google Maps integration with facility markers and search |
+| News & Events | Rich media posts with admin management |
+| Lost & Found | Report and search items with image uploads |
+| Complaints | Submit, track, and resolve complaints with priority levels |
+| Facilities | Directory with hours, contacts, and categories |
+| Clubs | Recruitment listings with application deadlines |
+| Global Chat | Real-time messaging with reactions, replies, and typing indicators |
+| Auth | Email/password + Google OAuth, JWT sessions, password reset via OTP |
+
+---
+
+## Tech Stack
+
+**Frontend**
+React 18 · TypeScript · Vite · Tailwind CSS · Material UI · Socket.IO · Framer Motion
+
+**Backend**
+Node.js · Express 5 · MongoDB · Mongoose · JWT · Passport · Socket.IO · Cloudinary · Nodemailer
+
+**Infrastructure**
+Netlify (frontend) · Render (backend) · MongoDB Atlas · GitHub Actions (CI/CD)
 
 ---
 
@@ -36,9 +50,9 @@ Live: [kampuskart.netlify.app](https://kampuskart.netlify.app)
 ### Prerequisites
 
 - Node.js >= 16
-- MongoDB (local or Atlas)
+- MongoDB (local or [Atlas](https://www.mongodb.com/cloud/atlas))
 
-### Clone and install
+### 1. Clone and install
 
 ```bash
 git clone https://github.com/Gaurav-205/KampusKart.git
@@ -48,16 +62,14 @@ cd frontend && npm install
 cd ../backend && npm install
 ```
 
-### Environment variables
-
-Copy the examples and fill in your values:
+### 2. Configure environment variables
 
 ```bash
 cp .env.example .env
 cp backend/.env.example backend/.env
 ```
 
-Key variables for `backend/.env`:
+Fill in `backend/.env`:
 
 ```env
 PORT=5000
@@ -66,39 +78,36 @@ MONGODB_URI=mongodb://localhost:27017/kampuskart
 JWT_SECRET=your_jwt_secret_minimum_32_characters
 FRONTEND_URL=http://localhost:5173
 
-# Google OAuth
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
+BACKEND_URL=http://localhost:5000
 
-# Email (for password reset)
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_app_password
 
-# Cloudinary (for image uploads)
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 ```
 
-Key variables for `frontend/.env`:
+Fill in `frontend/.env`:
 
 ```env
-VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 VITE_API_URL=http://localhost:5000
+VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 ```
 
-### Run
+### 3. Run
 
 ```bash
-# Terminal 1 — backend
+# Terminal 1
 cd backend && npm run dev
 
-# Terminal 2 — frontend
+# Terminal 2
 cd frontend && npm run dev
 ```
 
-Frontend: `http://localhost:5173`  
-Backend: `http://localhost:5000`
+App runs at `http://localhost:5173`, API at `http://localhost:5000`.
 
 ---
 
@@ -106,28 +115,34 @@ Backend: `http://localhost:5000`
 
 ```
 KampusKart/
-├── frontend/          # React + TypeScript (Vite)
+├── frontend/               # React + TypeScript (Vite)
 │   └── src/
-│       ├── components/
-│       ├── contexts/
-│       ├── hooks/
+│       ├── components/     # Feature and UI components
+│       ├── contexts/       # Auth and app context
+│       ├── hooks/          # Custom hooks
 │       └── utils/
-├── backend/           # Node.js + Express
-│   ├── config/
-│   ├── cron/
-│   ├── middleware/
-│   ├── models/
-│   ├── routes/
+├── backend/                # Node.js + Express
+│   ├── config/             # Passport, Cloudinary setup
+│   ├── cron/               # Scheduled jobs
+│   ├── middleware/         # Auth, validation
+│   ├── models/             # Mongoose schemas
+│   ├── routes/             # API route handlers
 │   └── utils/
 └── .github/
-    └── workflows/     # CI and CD pipelines
+    └── workflows/          # CI, CD, keep-alive pipelines
 ```
 
 ---
 
 ## CI/CD
 
-GitHub Actions handles linting, testing, and deployment automatically.
+Three GitHub Actions workflows run automatically:
+
+| Workflow | Trigger | What it does |
+|----------|---------|--------------|
+| `ci.yml` | Push / PR to `main`, `develop` | Lint, build, test, security audit |
+| `cd.yml` | Push to `main` | Deploy frontend to Netlify, trigger Render deploy |
+| `keep-alive.yml` | Every 14 minutes | Ping backend to prevent Render cold starts |
 
 ### Required GitHub Secrets
 
@@ -137,34 +152,35 @@ GitHub Actions handles linting, testing, and deployment automatically.
 | `NETLIFY_AUTH_TOKEN` | Netlify personal access token |
 | `NETLIFY_SITE_ID` | Netlify site ID |
 | `RENDER_API_KEY` | Render API key |
-| `RENDER_SERVICE_ID` | Render service ID for backend |
-| `BACKEND_URL` | Full backend URL (used by keep-alive ping) |
-
-### Workflows
-
-- `ci.yml` — runs on every push/PR: lint, build, test, security audit
-- `cd.yml` — runs on push to `main`: deploys frontend to Netlify, triggers Render deploy
-- `keep-alive.yml` — pings the backend every 14 minutes to prevent Render cold starts
+| `RENDER_SERVICE_ID` | Render backend service ID |
+| `BACKEND_URL` | Full backend URL for keep-alive ping |
 
 ---
 
 ## Google OAuth Setup
 
 1. Create a project in [Google Cloud Console](https://console.cloud.google.com)
-2. Enable the Google+ API / People API
-3. Create OAuth 2.0 credentials
-4. Add authorized redirect URI: `http://localhost:5000/api/auth/google/callback` (dev) and your production backend URL + `/api/auth/google/callback`
-5. Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `backend/.env`
-6. Set `BACKEND_URL` in `backend/.env` for production callback resolution
+2. Enable the Google+ API
+3. Create OAuth 2.0 credentials (Web application)
+4. Add authorized redirect URIs:
+   - Development: `http://localhost:5000/api/auth/google/callback`
+   - Production: `https://your-backend.onrender.com/api/auth/google/callback`
+5. Set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `BACKEND_URL` in `backend/.env`
 
 ---
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on submitting issues and pull requests.
 
 ---
 
 ## License
 
 MIT — see [LICENSE](LICENSE)
+
+---
+
+<div align="center">
+  Made by <a href="https://github.com/Gaurav-205">Gaurav Khandelwal</a>
+</div>

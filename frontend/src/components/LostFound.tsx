@@ -1032,7 +1032,7 @@ const LostFound = () => {
             </div>
 
             {/* Owner/Admin Actions */}
-            {(user && (user._id === selectedItemForDetails.user._id || user.isAdmin)) && (
+            {(user && (user._id === selectedItemForDetails.user._id || user.id === selectedItemForDetails.user._id || user.isAdmin)) && (
               <div className="flex flex-wrap gap-2 mt-6 pt-6 border-t-2 border-gray-200">
                 {!selectedItemForDetails.resolved && (
                   <button

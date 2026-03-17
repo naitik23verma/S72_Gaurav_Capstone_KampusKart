@@ -1,17 +1,20 @@
 <div align="center">
-  <img src="frontend/public/Logo.png" alt="KampusKart Logo" width="120" />
-  <h1>KampusKart</h1>
-  <p>All-in-one campus portal for MIT ADT University</p>
+  <img src="frontend/public/Logo.png" alt="KampusKart Logo" width="100" />
 
-  [![Live Demo](https://img.shields.io/badge/Live%20Demo-kampuskart.netlify.app-00C7B7?style=flat-square&logo=netlify)](https://kampuskart.netlify.app)
+  # KampusKart
+
+  All-in-one campus portal for MIT ADT University
+
+  [![Live Demo](https://img.shields.io/badge/Live%20Demo-kampuskart.netlify.app-00C7B7?style=flat-square&logo=netlify&logoColor=white)](https://kampuskart.netlify.app)
+  [![CI](https://img.shields.io/github/actions/workflow/status/Gaurav-205/KampusKart/ci.yml?label=CI&style=flat-square&logo=github-actions&logoColor=white)](https://github.com/Gaurav-205/KampusKart/actions)
   [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
-  [![CI](https://img.shields.io/github/actions/workflow/status/Gaurav-205/KampusKart/ci.yml?label=CI&style=flat-square)](https://github.com/Gaurav-205/KampusKart/actions)
-  [![Node](https://img.shields.io/badge/Node.js-%3E%3D16-339933?style=flat-square&logo=node.js)](https://nodejs.org)
+  [![Node](https://img.shields.io/badge/Node.js-%3E%3D16-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
+
 </div>
 
 ---
 
-## What is KampusKart?
+## Overview
 
 KampusKart is a full-stack campus management portal. Students and faculty can navigate the campus, stay updated on news and events, report lost items, submit complaints, and chat in real time — all in one place.
 
@@ -34,14 +37,11 @@ KampusKart is a full-stack campus management portal. Students and faculty can na
 
 ## Tech Stack
 
-**Frontend**
-React 18 · TypeScript · Vite · Tailwind CSS · Material UI · Socket.IO · Framer Motion
-
-**Backend**
-Node.js · Express 5 · MongoDB · Mongoose · JWT · Passport · Socket.IO · Cloudinary · Nodemailer
-
-**Infrastructure**
-Netlify (frontend) · Render (backend) · MongoDB Atlas · GitHub Actions (CI/CD)
+| Layer | Technologies |
+|-------|-------------|
+| Frontend | React 18, TypeScript, Vite, Tailwind CSS, Material UI, Socket.IO, Framer Motion |
+| Backend | Node.js, Express 5, MongoDB, Mongoose, JWT, Passport, Socket.IO, Cloudinary, Nodemailer |
+| Infrastructure | Netlify, Render, MongoDB Atlas, GitHub Actions |
 
 ---
 
@@ -77,10 +77,10 @@ NODE_ENV=development
 MONGODB_URI=mongodb://localhost:27017/kampuskart
 JWT_SECRET=your_jwt_secret_minimum_32_characters
 FRONTEND_URL=http://localhost:5173
+BACKEND_URL=http://localhost:5000
 
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
-BACKEND_URL=http://localhost:5000
 
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_app_password
@@ -100,10 +100,10 @@ VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 ### 3. Run
 
 ```bash
-# Terminal 1
+# Terminal 1 — backend
 cd backend && npm run dev
 
-# Terminal 2
+# Terminal 2 — frontend
 cd frontend && npm run dev
 ```
 
@@ -118,7 +118,7 @@ KampusKart/
 ├── frontend/               # React + TypeScript (Vite)
 │   └── src/
 │       ├── components/     # Feature and UI components
-│       ├── contexts/       # Auth and app context
+│       ├── contexts/       # Auth context
 │       ├── hooks/          # Custom hooks
 │       └── utils/
 ├── backend/                # Node.js + Express
@@ -135,8 +135,6 @@ KampusKart/
 ---
 
 ## CI/CD
-
-Three GitHub Actions workflows run automatically:
 
 | Workflow | Trigger | What it does |
 |----------|---------|--------------|

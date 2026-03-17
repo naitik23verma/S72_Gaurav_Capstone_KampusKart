@@ -75,6 +75,7 @@ const ChatWindow = () => {
   const { user } = useAuth();
   const socketRef = useRef();
   const messagesEndRef = useRef(null);
+  const loadMoreRef = useRef(null); // Separate ref for load-more trigger (top of list)
   const typingTimeoutRef = useRef(null);
   const observerRef = useRef(null);
 
@@ -249,8 +250,8 @@ const ChatWindow = () => {
 
     observerRef.current = new IntersectionObserver(handleObserver, options);
 
-    if (messagesEndRef.current) {
-      observerRef.current.observe(messagesEndRef.current);
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
     }
 
     return () => {
@@ -258,7 +259,7 @@ const ChatWindow = () => {
         observerRef.current.disconnect();
       }
     };
-  }, [messages, hasMore, loading, loadMoreMessages]);
+  }, [hasMore, loading, loadMoreMessages]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -406,40 +407,19 @@ const ChatWindow = () => {
     setAnchorEl(null);
   };
 
-  // Auto-scroll to latest message
+  // Scroll to bottom only when a new message is added (not when loading older messages)
+  const prevMessageCountRef = useRef(0);
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]);
-
-  // Scroll to bottom when component mounts or when new messages arrive
-  useEffect(() => {
-    const scrollToBottom = () => {
+    const prev = prevMessageCountRef.current;
+    const curr = messages.length;
+    // Only scroll if messages were appended (new message), not prepended (load more)
+    if (curr > prev && messages[curr - 1] !== messages[prev - 1]) {
       if (messagesEndRef.current) {
         messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
       }
-    };
-
-    // Scroll immediately when component mounts
-    scrollToBottom();
-
-    // Also scroll when new messages are added
-    if (messages.length > 0) {
-      scrollToBottom();
     }
-  }, [messages.length]);
-
-  // Force scroll to bottom when chat is first loaded
-  useEffect(() => {
-    if (!loading && messages.length > 0) {
-      setTimeout(() => {
-        if (messagesEndRef.current) {
-          messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 100);
-    }
-  }, [loading, messages.length]);
+    prevMessageCountRef.current = curr;
+  }, [messages]);
 
   // Fix logo import for Avatar
   const logoUrl = '/Logo.png';
@@ -980,6 +960,7 @@ const ChatWindow = () => {
           </Box>
         )}
         <List sx={{ p: { xs: 2, sm: 3 } }}>
+          <div ref={loadMoreRef} />
           {Array.isArray(messages) && messages.map((message) => (
             message && message._id ? (
               <React.Fragment key={message._id}>

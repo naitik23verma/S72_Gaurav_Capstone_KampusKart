@@ -890,7 +890,7 @@ const Complaints = () => {
                        <p className="text-xs text-gray-500 mt-1">The department responsible for handling this complaint.</p>
                     </div>
 
-                    {editingComplaint && ( // Only show status dropdown in edit mode
+                    {editingComplaint && user?.isAdmin && ( // Only admins can change status
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                         <select

@@ -1,123 +1,101 @@
 # Contributing to KampusKart
 
-Thank you for your interest in contributing to KampusKart! This document provides guidelines and instructions for contributing to this project.
+Thanks for taking the time to contribute. Here's everything you need to get started.
+
+---
 
 ## Code of Conduct
 
-By participating in this project, you agree to maintain a respectful and inclusive environment for everyone.
+By participating you agree to uphold a respectful and inclusive environment. See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
-## How Can I Contribute?
+---
 
-### Reporting Bugs
+## Ways to Contribute
 
-- Check if the bug has already been reported in the Issues section
-- Use the bug report template when creating a new issue
-- Include detailed steps to reproduce the bug
-- Include screenshots if applicable
-- Specify your environment (OS, browser, etc.)
+- Report bugs via the [bug report template](https://github.com/Gaurav-205/KampusKart/issues/new?template=bug_report.md)
+- Suggest features via the [feature request template](https://github.com/Gaurav-205/KampusKart/issues/new?template=feature_request.md)
+- Submit a pull request for a fix or improvement
+- Improve documentation
 
-### Suggesting Features
+---
 
-- Check if the feature has already been suggested
-- Use the feature request template
-- Provide a clear description of the feature
-- Explain why this feature would be useful
-- Include any relevant mockups or examples
+## Development Setup
 
-### Pull Requests
+```bash
+git clone https://github.com/Gaurav-205/KampusKart.git
+cd KampusKart
 
-1. Fork the repository
-2. Create a new branch for your feature/fix
-3. Make your changes
-4. Write or update tests as needed
-5. Update documentation
-6. Submit a pull request
+# Install dependencies
+cd frontend && npm install
+cd ../backend && npm install
 
-### Development Process
+# Copy env files and fill in values
+cp .env.example .env
+cp backend/.env.example backend/.env
+```
 
-1. Set up your development environment:
+Run locally:
+
+```bash
+# Terminal 1 — backend
+cd backend && npm run dev
+
+# Terminal 2 — frontend
+cd frontend && npm run dev
+```
+
+---
+
+## Submitting a Pull Request
+
+1. Fork the repo and create a branch from `main`:
    ```bash
-   # Clone the repository
-   git clone https://github.com/yourusername/KampusKart.git
-   cd KampusKart
-
-   # Install frontend dependencies
-   cd frontend
-   npm install
-
-   # Install backend dependencies
-   cd ../backend
-   npm install
+   git checkout -b fix/your-fix-name
+   # or
+   git checkout -b feat/your-feature-name
    ```
 
-2. Create a new branch:
+2. Make your changes. Keep commits focused and atomic.
+
+3. Run tests before pushing:
    ```bash
-   git checkout -b feature/your-feature-name
+   cd backend && npm test
    ```
 
-3. Make your changes following the coding standards
-
-4. Test your changes:
+4. Run the linter:
    ```bash
-   # Frontend tests
-   cd frontend
-   npm test
-
-   # Backend tests
-   cd ../backend
-   npm test
+   cd frontend && npm run lint
+   cd ../backend && npm run lint
    ```
 
-5. Commit your changes:
-   ```bash
-   git commit -m "Description of changes"
-   ```
+5. Push and open a PR against `main`. Fill in the PR template.
 
-6. Push to your fork:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
+---
 
-7. Create a Pull Request
+## Commit Message Format
+
+Use the imperative mood and keep the first line under 72 characters:
+
+```
+fix: correct ownership check in LostFound details modal
+feat: add mark-as-resolved button to LostFound items
+docs: update local setup instructions in README
+chore: bump express to 5.1.0
+```
+
+Prefix types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+
+---
 
 ## Coding Standards
 
-### JavaScript/React
-- Use ES6+ features
-- Follow the Airbnb JavaScript Style Guide
-- Use meaningful variable and function names
-- Add comments for complex logic
-- Keep functions small and focused
+- **TypeScript/React** — follow the existing ESLint config (`eslint.config.js`)
+- **Backend** — follow `.eslintrc.json`; use `async/await`, not callbacks
+- **Tailwind** — use utility classes; avoid inline styles
+- **No hardcoded URLs** — always use `API_BASE` / env vars
 
-### CSS/Tailwind
-- Use Tailwind utility classes when possible
-- Follow BEM naming convention for custom CSS
-- Keep styles modular and reusable
-
-### Git Commit Messages
-- Use present tense ("Add feature" not "Added feature")
-- Use imperative mood ("Move cursor to..." not "Moves cursor to...")
-- Limit the first line to 72 characters or less
-- Reference issues and pull requests liberally
-
-## Testing
-
-- Write unit tests for new features
-- Ensure all tests pass before submitting a PR
-- Maintain or improve test coverage
-
-## Documentation
-
-- Update README.md if needed
-- Add JSDoc comments for new functions
-- Update API documentation if changing endpoints
-
-## Review Process
-
-1. All PRs will be reviewed by at least one maintainer
-2. Address any feedback or requested changes
-3. Once approved, your PR will be merged
+---
 
 ## Questions?
 
-Feel free to open an issue for any questions about contributing to KampusKart. 
+Open a [GitHub Discussion](https://github.com/Gaurav-205/KampusKart/discussions) rather than an issue.

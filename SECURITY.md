@@ -13,7 +13,7 @@ We take the security of KampusKart seriously. If you discover a security vulnera
 ### How to Report
 
 1. **DO NOT** create a public GitHub issue for security vulnerabilities
-2. Email security concerns to: gauravkhandelwal205@gmail.com
+2. Open a [GitHub Security Advisory](https://github.com/Gaurav-205/KampusKart/security/advisories/new) — this keeps the report private and notifies the maintainer directly
 3. Include the following information:
    - Description of the vulnerability
    - Steps to reproduce
@@ -122,8 +122,8 @@ We follow responsible disclosure practices:
 
 ## Contact
 
-For security concerns, contact:
-- **Email**: gauravkhandelwal205@gmail.com
+For security concerns:
+- Open a [GitHub Security Advisory](https://github.com/Gaurav-205/KampusKart/security/advisories/new) (preferred — keeps report private)
 - **GitHub**: [@Gaurav-205](https://github.com/Gaurav-205)
 
 ## Acknowledgments

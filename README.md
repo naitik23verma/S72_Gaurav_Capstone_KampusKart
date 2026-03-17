@@ -167,9 +167,17 @@ KampusKart/
 
 ---
 
+## Screenshots
+
+| Campus Map | Global Chat | Lost & Found |
+|:---:|:---:|:---:|
+| ![Map](frontend/public/images/1.jpg) | ![Chat](frontend/public/images/3.jpg) | ![LostFound](frontend/public/images/4.jpg) |
+
+---
+
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on submitting issues and pull requests.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. For questions, use [GitHub Discussions](https://github.com/Gaurav-205/KampusKart/discussions).
 
 ---
 

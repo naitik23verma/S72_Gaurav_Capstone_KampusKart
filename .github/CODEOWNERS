@@ -1,0 +1,11 @@
+# Global owner — reviews all PRs by default
+* @Gaurav-205
+
+# Frontend
+/frontend/ @Gaurav-205
+
+# Backend
+/backend/ @Gaurav-205
+
+# CI/CD workflows
+/.github/workflows/ @Gaurav-205

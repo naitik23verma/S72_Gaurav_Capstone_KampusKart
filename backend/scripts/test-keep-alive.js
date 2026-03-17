@@ -5,7 +5,7 @@
 
 const axios = require('axios');
 
-const SERVER_URL = process.env.SERVER_URL || 'https://s72-gaurav-capstone.onrender.com';
+const SERVER_URL = process.env.SERVER_URL || process.env.BACKEND_URL || 'http://localhost:5000';
 
 async function testKeepAlive() {
   console.log('🧪 Testing keep-alive functionality...\n');

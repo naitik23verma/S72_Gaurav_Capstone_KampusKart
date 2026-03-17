@@ -420,7 +420,7 @@ const seedData = async () => {
     console.log('Existing data cleared.');
 
     // Get a user to associate with LostFound and Complaints
-    let testUser = await User.findOne({ email: 'gauravkhandelwal205@gmail.com' });
+    let testUser = await User.findOne({ email: process.env.SEED_USER_EMAIL || null }).catch(() => null);
     if (!testUser) {
       // Try to find any existing user
       testUser = await User.findOne();

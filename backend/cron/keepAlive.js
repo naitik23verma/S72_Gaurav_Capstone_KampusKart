@@ -17,7 +17,8 @@ const _cron = require('node-cron');
 const KEEP_ALIVE_INTERVAL = 14 * 60 * 1000; // 14 minutes (before Render's 15 min timeout)
 const SERVER_URL = process.env.RENDER_EXTERNAL_URL || 
                    process.env.SERVER_URL || 
-                   'https://s72-gaurav-capstone.onrender.com';
+                   process.env.BACKEND_URL ||
+                   'http://localhost:5000';
 
 let keepAliveInterval = null;
 let cronJob = null;

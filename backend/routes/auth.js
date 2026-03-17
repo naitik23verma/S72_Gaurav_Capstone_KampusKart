@@ -80,11 +80,7 @@ router.get('/google/callback',
       );
 
       // Determine the frontend URL based on environment
-      const frontendUrl = process.env.FRONTEND_URL || (
-        process.env.NODE_ENV === 'production'
-          ? 'https://kampuskart.netlify.app'
-          : 'http://localhost:5173'
-      );
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
       console.log('Redirecting to frontend:', frontendUrl);
       // Redirect to frontend with token

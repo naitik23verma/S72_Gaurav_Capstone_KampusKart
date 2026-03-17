@@ -15,17 +15,9 @@ if (missingEnvVars.length > 0 && !isProduction) {
   console.warn('Please check your .env file and ensure all required variables are set.');
 }
 
-// Base API URL — override via VITE_API_URL env var, or fall back to defaults
-const API_BASE = import.meta.env.VITE_API_URL || (
-  isProduction
-    ? 'https://s72-gaurav-capstone.onrender.com'
-    : 'http://localhost:5000'
-);
+// Base API URL — override via VITE_API_URL env var, or fall back to localhost for dev
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || (
-  isProduction
-    ? 'https://s72-gaurav-capstone.onrender.com'
-    : 'http://localhost:5000'
-);
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
 
 export { API_BASE, SOCKET_URL, isProduction };

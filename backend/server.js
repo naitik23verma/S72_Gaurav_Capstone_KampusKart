@@ -77,14 +77,18 @@ app.use((req, res, next) => {
 });
 
 // Middleware
+// Build allowed origins from env var (comma-separated) plus localhost defaults
+const getAllowedOrigins = () => {
+  const base = ['http://localhost:3000', 'http://localhost:5000', 'http://localhost:5173'];
+  const extra = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()).filter(Boolean)
+    : [];
+  return [...base, ...extra];
+};
+
 const corsOptions = {
   origin: function(origin, callback) {
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://kampuskart.netlify.app',
-      'https://s72-gaurav-capstone.onrender.com'
-    ];
+    const allowedOrigins = getAllowedOrigins();
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) === -1) {
@@ -205,12 +209,7 @@ const io = new Server(server, {
   pingTimeout: 60000,
   cors: {
     origin: function(origin, callback) {
-      const allowedOrigins = [
-        'http://localhost:3000',
-        'http://localhost:5173',
-        'https://kampuskart.netlify.app',
-        'https://s72-gaurav-capstone.onrender.com'
-      ];
+      const allowedOrigins = getAllowedOrigins();
       if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
         const msg = 'The CORS policy for this site does not allow access from the specified Origin.';

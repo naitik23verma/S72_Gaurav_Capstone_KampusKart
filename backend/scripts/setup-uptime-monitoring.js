@@ -11,7 +11,7 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-const SERVER_URL = process.env.SERVER_URL || process.env.RENDER_EXTERNAL_URL || 'https://s72-gaurav-capstone.onrender.com';
+const SERVER_URL = process.env.SERVER_URL || process.env.RENDER_EXTERNAL_URL || process.env.BACKEND_URL || 'http://localhost:5000';
 
 console.log('\n🌐 KampusKart Uptime Monitoring Setup\n');
 console.log('=' .repeat(50));

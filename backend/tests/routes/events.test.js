@@ -32,10 +32,12 @@ describe('Events CRUD Operations', () => {
         next();
       });
 
+      const futureDate = new Date();
+      futureDate.setFullYear(futureDate.getFullYear() + 1);
       const eventData = {
-        title: 'Tech Fest 2024',
+        title: 'Tech Fest',
         description: 'Annual tech festival',
-        date: '2024-03-15',
+        date: futureDate.toISOString().split('T')[0],
         location: 'Main Auditorium'
       };
 

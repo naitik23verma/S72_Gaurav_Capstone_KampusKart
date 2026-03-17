@@ -77,8 +77,12 @@ router.put('/:id', auth, upload.array('images', 5), async (req, res) => {
     // Handle images
     let images = [];
     if (keepImages) {
-      const keepPublicIds = JSON.parse(keepImages);
-      images = facility.images.filter(img => keepPublicIds.includes(img.public_id));
+      try {
+        const keepPublicIds = JSON.parse(keepImages);
+        images = facility.images.filter(img => keepPublicIds.includes(img.public_id));
+      } catch (e) {
+        images = [];
+      }
     }
 
     // Upload new images

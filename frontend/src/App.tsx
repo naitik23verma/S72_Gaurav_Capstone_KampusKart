@@ -32,15 +32,21 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 const GoogleCallback: React.FC = () => {
   const { handleGoogleCallback } = useAuth();
   const location = useLocation();
+  const [done, setDone] = React.useState(false);
 
   React.useEffect(() => {
     const params = new URLSearchParams(location.search);
     const token = params.get('token');
     if (token) {
-      handleGoogleCallback(token);
+      handleGoogleCallback(token)
+        .catch(() => {})
+        .finally(() => setDone(true));
+    } else {
+      setDone(true);
     }
-  }, [location, handleGoogleCallback]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  if (!done) return null;
   return <Navigate to="/home" />;
 };
 

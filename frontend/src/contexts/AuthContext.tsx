@@ -24,7 +24,7 @@ export interface AuthContextType {
   login: (email: string, password: string, remember?: boolean) => Promise<void>;
   signup: (email: string, password: string, name: string, remember?: boolean) => Promise<void>;
   loginWithGoogle: () => void;
-  handleGoogleCallback: (token: string) => void;
+  handleGoogleCallback: (token: string) => Promise<void>;
   logout: () => void;
   updateProfile: (data: Partial<User>) => Promise<void>;
   loading: boolean;
@@ -427,7 +427,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('token', receivedToken);
       localStorage.setItem('token_expiry', expiry.toString());
       sessionStorage.removeItem('token');
-      return response.data;
     } catch (error) {
       console.error('Failed to fetch profile after Google login:', error);
       setUser(null);

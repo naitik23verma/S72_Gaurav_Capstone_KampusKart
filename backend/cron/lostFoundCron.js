@@ -38,11 +38,11 @@ cron.schedule('0 0 * * *', async () => {
     const now = new Date();
     
     // Find items that need to be hard deleted
-    // For resolved items: 3 days after resolution
+    // For resolved items: 3 days after resolution (not yet deleted)
     const resolvedItemsToDelete = await LostFoundItem.find({
       resolved: true,
       resolvedAt: { $exists: true, $lte: new Date(now - 3 * 24 * 60 * 60 * 1000) },
-      isDeleted: true
+      isDeleted: { $ne: true }
     });
 
     // For normal items: 14 days after soft delete

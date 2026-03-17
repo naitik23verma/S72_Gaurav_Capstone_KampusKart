@@ -34,13 +34,13 @@ try {
 // Rate limiting configuration
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 150, // limit each IP to 50 requests per windowMs (very generous)
+  max: 10, // limit each IP to 10 login attempts per 15 minutes
   message: { message: 'Too many login attempts, please try again after 15 minutes' }
 });
 
 const signupLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 125, // limit each IP to 25 requests per windowMs (very generous)
+  max: 5, // limit each IP to 5 signup attempts per hour
   message: { message: 'Too many signup attempts, please try again after an hour' }
 });
 
@@ -80,9 +80,11 @@ router.get('/google/callback',
       );
 
       // Determine the frontend URL based on environment
-      const frontendUrl = process.env.NODE_ENV === 'production'
-        ? 'https://kampuskart.netlify.app'
-        : 'http://localhost:5173';
+      const frontendUrl = process.env.FRONTEND_URL || (
+        process.env.NODE_ENV === 'production'
+          ? 'https://kampuskart.netlify.app'
+          : 'http://localhost:5173'
+      );
 
       console.log('Redirecting to frontend:', frontendUrl);
       // Redirect to frontend with token
@@ -212,7 +214,8 @@ router.post('/forgot-password', async (req, res) => {
 
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      // Return same response to prevent user enumeration
+      return res.status(200).json({ message: 'If that email is registered, an OTP has been sent' });
     }
 
     // Generate a 6-digit OTP
@@ -236,7 +239,7 @@ router.post('/forgot-password', async (req, res) => {
     if (transporter) {
       try {
         await transporter.sendMail(mailOptions);
-        res.status(200).json({ message: 'OTP sent to your email' });
+        res.status(200).json({ message: 'If that email is registered, an OTP has been sent' });
       } catch (emailError) {
         console.error('Email sending error:', emailError);
         res.status(500).json({ message: 'Error sending email. Please try again later.' });
@@ -245,9 +248,8 @@ router.post('/forgot-password', async (req, res) => {
       // For development/testing, return the OTP in the response
       console.log(`[DEV] OTP for ${email}: ${otp}`);
       res.status(200).json({ 
-        message: 'OTP generated successfully (email service not configured)',
-        otp: process.env.NODE_ENV === 'development' ? otp : undefined,
-        note: 'In production, this OTP would be sent via email'
+        message: 'If that email is registered, an OTP has been sent',
+        otp: process.env.NODE_ENV === 'development' ? otp : undefined
       });
     }
 

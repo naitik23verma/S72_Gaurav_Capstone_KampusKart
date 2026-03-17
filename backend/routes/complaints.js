@@ -133,7 +133,10 @@ router.put('/:id', protect, upload.array('images', 5), async (req, res) => {
 
     complaint.title = title || complaint.title;
     complaint.description = description || complaint.description;
-    complaint.status = status || complaint.status; // Allow updating status if needed
+    // Only admins can update status
+    if (status && req.user.isAdmin) {
+      complaint.status = status;
+    }
 
     // Update new fields if provided
     if (category) complaint.category = category;

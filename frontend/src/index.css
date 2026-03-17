@@ -17,13 +17,7 @@ html, body, #root {
   font-family: 'Work Sans', ui-sans-serif, system-ui, sans-serif;
 }
 
-/* CRITICAL: Prevent root elements from becoming transparent */
-html:active,
-body:active,
-#root:active {
-  opacity: 1 !important;
-  background-color: #ffffff !important;
-}
+
 
 html {
   overflow-y: scroll;
@@ -44,13 +38,7 @@ body {
   user-select: none;
 }
 
-/* CRITICAL: Prevent body from becoming transparent on click */
-body:active,
-body:focus {
-  opacity: 1 !important;
-  background-color: #ffffff !important;
-  filter: none !important;
-}
+
 
 :root {
   line-height: 1.5;
@@ -120,7 +108,6 @@ select,
   a:active,
   [role="button"]:active {
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
-    background-color: inherit !important;
   }
 }
 
@@ -187,36 +174,8 @@ select:focus {
 /* ─── Buttons — prevent white-flash on click ────────────────────────────────── */
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-
-/* Prevent grey/dark flashes on button click - NO visual feedback */
-button:active,
-[role="button"]:active,
-[type="button"]:active,
-[type="submit"]:active,
-.btn:active {
-  /* No transform, no filter, no visual change */
-}
-
-button:focus,
-[role="button"]:focus,
-[type="button"]:focus,
-[type="submit"]:focus,
-.btn:focus {
-  outline: none !important;
-}
-
-button:focus-visible {
-  outline: 2px solid #00C6A7 !important;
-  outline-offset: 2px !important;
 }
 
 /* ─── Links — prevent flashes ───────────────────────────────────────────────── */
@@ -240,43 +199,6 @@ header button:active {
 
 /* ─── Specific bg classes — prevent flashes on active ───────────────────────── */
 
-/* Remove all active state background changes */
-*:active {
-  background-color: inherit !important;
-  opacity: 1 !important;
-}
-
-/* Prevent ANY element from becoming transparent on click */
-*:active,
-*:focus,
-div:active,
-section:active,
-main:active,
-article:active,
-aside:active,
-nav:active,
-header:active,
-footer:active,
-.bg-white:active,
-.bg-gray-50:active,
-.bg-gray-100:active,
-.bg-gray-200:active {
-  opacity: 1 !important;
-  background-color: inherit !important;
-  filter: none !important;
-  -webkit-tap-highlight-color: transparent !important;
-}
-
-.bg-\[\#181818\]:active,
-.bg-\[\#00C6A7\]:active,
-.bg-\[\#F05A25\]:active,
-.bg-blue-50:active,
-.bg-red-50:active,
-.bg-green-50:active {
-  background-color: inherit !important;
-  opacity: 1 !important;
-}
-
 /* ─── Form inputs — force light theme ───────────────────────────────────────── */
 
 input,
@@ -298,6 +220,7 @@ select {
   -webkit-touch-callout: default;
 }
 
+/* CRITICAL: Prevent page dimming when focusing inputs */
 input:focus,
 input:active,
 textarea:focus,
@@ -308,6 +231,8 @@ select:active {
   color: #374151 !important;
   -webkit-text-fill-color: #374151 !important;
 }
+
+
 
 /* Autofill light theme override */
 input:-webkit-autofill,
@@ -341,12 +266,6 @@ input[type="date"]:invalid::-webkit-datetime-edit { color: #9ca3af; }
 /* ─── Mobile touch devices ──────────────────────────────────────────────────── */
 
 @media (hover: none) and (pointer: coarse) {
-  /* Disable hover transforms */
-  *:hover {
-    transform: none !important;
-    scale: none !important;
-  }
-
   /* Touch targets */
   button,
   [role="button"],
@@ -356,50 +275,6 @@ input[type="date"]:invalid::-webkit-datetime-edit { color: #9ca3af; }
     min-height: 44px;
     min-width: 44px;
     touch-action: manipulation;
-  }
-
-  /* Remove hover bg overrides */
-  .hover\:bg-\[\#FFD166\]:hover,
-  .hover\:bg-\[\#00C6A7\]:hover,
-  .hover\:bg-gray-100:hover,
-  .hover\:bg-gray-50:hover,
-  .hover\:bg-blue-50:hover,
-  .hover\:bg-blue-100:hover,
-  .hover\:bg-red-50:hover,
-  .hover\:bg-red-100:hover,
-  .hover\:bg-green-50:hover,
-  .hover\:bg-green-100:hover,
-  .hover\:bg-\[\#009e87\]:hover,
-  .hover\:bg-\[\#00C7A7\]:hover,
-  .hover\:bg-red-600:hover,
-  .hover\:scale-105:hover,
-  .hover\:scale-110:hover,
-  .hover\:shadow-lg:hover,
-  .hover\:opacity-90:hover,
-  .hover\:opacity-100:hover,
-  .hover\:text-black:hover,
-  .hover\:text-white:hover,
-  .hover\:text-blue-500:hover,
-  .hover\:underline:hover,
-  .group:hover .group-hover\:scale-105,
-  .group:hover .group-hover\:opacity-100 {
-    background-color: inherit !important;
-    transform: none !important;
-    scale: none !important;
-    opacity: inherit !important;
-    color: inherit !important;
-    text-decoration: inherit !important;
-    box-shadow: inherit !important;
-  }
-
-  /* Active feedback - NO visual change to prevent dark flashes */
-  button:active,
-  [role="button"]:active,
-  .btn:active,
-  a[role="button"]:active,
-  .cursor-pointer:active {
-    background-color: inherit !important;
-    transform: none !important;
   }
 
   /* No transition delays */

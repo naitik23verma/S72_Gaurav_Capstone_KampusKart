@@ -87,12 +87,25 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4">
-      <div className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
+    <div 
+      className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4"
+      onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="event-details-title"
+      tabIndex={-1}
+    >
+      <div 
+        className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Close Button */}
                   <button
             onClick={onClose}
-            aria-label="Close"
+            aria-label="Close dialog"
             className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
           >
             <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,7 +114,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
           </button>
 
         {/* Title */}
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12 sm:pr-14">{event.title}</h2>
+        <h2 id="event-details-title" className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12 sm:pr-14">{event.title}</h2>
 
         {/* Content: Image and Details side-by-side */}
         <div className="flex flex-col md:flex-row gap-8">
@@ -115,18 +128,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
                 src={event.image.url} 
                 alt={event.title} 
                 className="block w-full h-full object-cover"
-                
               />
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <svg className="w-12 h-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="11" cy="11" r="8" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                    <line x1="11" y1="8" x2="11" y2="14" />
-                    <line x1="8" y1="11" x2="14" y2="11" />
-                  </svg>
-                </div>
-              </div>
             </div>
           ) : (
             <div className="w-full md:w-1/2 lg:w-1/2 h-48 sm:h-64 md:h-80 bg-gray-100 rounded-lg mb-6 md:mb-0 flex flex-col items-center justify-center text-gray-400 flex-shrink-0 mx-auto md:mx-0 max-w-xl">
@@ -237,8 +239,15 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
       {/* Zoomed Image Modal */}
       {zoomedImage && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[10000] p-4" 
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-[10000] p-4" 
           onClick={closeZoomedImageModal}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') closeZoomedImageModal();
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image viewer"
+          tabIndex={-1}
         >
           <img 
             src={zoomedImage} 
@@ -251,7 +260,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
           <button
             onClick={closeZoomedImageModal}
             aria-label="Close zoomed image"
-            className="absolute top-4 right-4 bg-white/30 rounded-lg p-2 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+            className="absolute top-4 right-4 bg-gray-800 rounded-lg p-2 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -378,6 +387,7 @@ const Events = () => {
         const selectedDate = new Date(value);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+        // Allow today's date and future dates only
         if (selectedDate < today) return 'Event date cannot be in the past';
         return null;
       
@@ -641,7 +651,11 @@ const Events = () => {
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         {/* Success Message Banner */}
         {successMessage && (
-          <div className="mb-6 bg-green-50 border-2 border-green-200 rounded-lg p-4 flex items-center gap-3 animate-fade-in">
+          <div 
+            className="mb-6 bg-green-50 border-2 border-green-200 rounded-lg p-4 flex items-center gap-3 animate-fade-in"
+            role="alert"
+            aria-live="polite"
+          >
             <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
             <p className="text-green-800 font-medium">{successMessage}</p>
           </div>
@@ -666,6 +680,7 @@ const Events = () => {
                 value={filterStatus} 
                 onChange={e => setFilterStatus(e.target.value)}
                 className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
+                aria-label="Filter by event status"
               >
               <option value="All">All Statuses</option>
               <option value="Upcoming">Upcoming</option>
@@ -803,6 +818,8 @@ const Events = () => {
                       e.stopPropagation();
                       if (event.registerUrl) window.open(event.registerUrl, '_blank'); 
                     }}
+                    aria-label={event.registerUrl ? 'Register now' : 'Registration closed'}
+                    title={!event.registerUrl ? 'No registration link available' : undefined}
                   >
                     {event.registerUrl ? 'Register Now' : 'Registration Closed'}
                   </button>
@@ -857,7 +874,7 @@ const Events = () => {
                           type="date"
                           value={newEvent.date}
                           onChange={e => { setNewEvent({...newEvent, date: e.target.value}); if (fieldErrors.date) setFieldErrors(prev => ({...prev, date: ''})); }}
-                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.date ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm cursor-pointer [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
+                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.date ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm cursor-pointer`}
                           required
                           aria-label="Event Date"
                         />

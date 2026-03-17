@@ -134,7 +134,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
               <button
                 type="button"
                 onClick={() => handleRemoveImage(index)}
-                className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-lg p-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-lg p-1 transition-colors"
                 aria-label="Remove image"
               >
                 <FiX className="w-3 h-3 sm:w-4 sm:h-4" />

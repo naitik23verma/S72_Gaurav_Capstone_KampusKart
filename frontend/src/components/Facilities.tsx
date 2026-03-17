@@ -808,8 +808,14 @@ const Facilities = () => {
 
         {/* Facility Details Modal */}
         {selectedFacility && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4">
-            <div className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative">
+          <div
+            className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Facility details"
+            onClick={() => setSelectedFacility(null)}
+          >
+            <div className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative" onClick={(e) => e.stopPropagation()}>
               {/* Close Button */}
               <button
                 onClick={() => setSelectedFacility(null)}
@@ -833,7 +839,7 @@ const Facilities = () => {
                       key={idx}
                       src={img.url}
                       alt={`Facility image ${idx + 1}`}
-                      className="w-full h-64 object-cover rounded-lg cursor-zoom-in hover:opacity-90 transition-opacity duration-200"
+                      className="w-full h-64 object-cover rounded-lg cursor-zoom-in transition-colors duration-200"
                       onClick={() => setZoomedImage(img.url)}
                     />
                   ))}
@@ -912,7 +918,7 @@ const Facilities = () => {
         )}
         {/* Zoomed Image Modal */}
         {zoomedImage && selectedFacility && selectedFacility.images && selectedFacility.images.length > 0 && (
-          <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[10000] p-4" onClick={() => setZoomedImage(null)}>
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[10000] p-4" onClick={() => setZoomedImage(null)}>
             {/* Image */}
             <img 
               src={zoomedImage} 
@@ -926,7 +932,7 @@ const Facilities = () => {
               <>
                 {/* Previous Button */}
                 <button
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/30 rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
                   onClick={(e) => {
                     e.stopPropagation();
                     const currentIndex = selectedFacility.images.findIndex(img => img.url === zoomedImage);
@@ -941,7 +947,7 @@ const Facilities = () => {
                 </button>
                 {/* Next Button */}
                 <button
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/30 rounded-lg p-3 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
                   onClick={(e) => {
                     e.stopPropagation();
                     const currentIndex = selectedFacility.images.findIndex(img => img.url === zoomedImage);
@@ -961,7 +967,7 @@ const Facilities = () => {
              <button
               onClick={() => setZoomedImage(null)}
               aria-label="Close zoomed image"
-              className="absolute top-4 right-4 bg-white/30 rounded-lg p-2 text-white hover:bg-white/50 transition-colors duration-200 z-50"
+              className="absolute top-4 right-4 bg-gray-800 rounded-lg p-2 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
             >
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" />

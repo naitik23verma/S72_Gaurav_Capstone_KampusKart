@@ -63,14 +63,14 @@ export const FeatureModal: React.FC<FeatureModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4"
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
     >
       <div
-        className={`bg-white sm:rounded-xl rounded-t-xl shadow-2xl border border-gray-200 p-4 sm:p-6 md:p-8 ${sizeClasses[size]} w-full mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto relative animate-in zoom-in-95 duration-200`}
+        className={`bg-white sm:rounded-xl rounded-t-xl shadow-2xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 ${sizeClasses[size]} w-full mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto relative`}
         style={{ colorScheme: 'light', backgroundColor: '#ffffff', color: '#213547' }}
         onClick={(e) => e.stopPropagation()}
       >

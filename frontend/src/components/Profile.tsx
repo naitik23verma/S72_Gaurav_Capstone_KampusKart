@@ -333,7 +333,7 @@ const Profile = () => {
               {isEditing && (
                 <label
                   htmlFor="profilePicture-upload"
-                  className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-white cursor-pointer rounded-lg gap-1"
+                  className="absolute inset-0 flex flex-col items-center justify-center bg-black text-white cursor-pointer rounded-lg gap-1"
                   title="Upload photo"
                 >
                   <FiCamera className="w-5 h-5" />

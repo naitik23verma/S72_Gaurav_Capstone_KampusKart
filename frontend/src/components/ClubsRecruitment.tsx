@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiCalendar, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiUser, FiPhone, FiCheckCircle } from 'react-icons/fi';
+import { FiCalendar, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiUser, FiPhone, FiCheckCircle, FiUsers } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
@@ -80,7 +80,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
             </div>
           ) : (
             <div className="w-full md:w-1/2 lg:w-1/2 h-48 sm:h-64 md:h-80 bg-gray-100 rounded-lg mb-6 md:mb-0 flex flex-col items-center justify-center text-gray-400 flex-shrink-0 mx-auto md:mx-0 max-w-xl">
-              <FiCalendar className="w-16 h-16 mb-2" />
+              <FiUsers className="w-16 h-16 mb-2" />
               <span className="text-sm font-medium">No Image Available</span>
             </div>
           )}
@@ -614,7 +614,7 @@ const ClubsRecruitment = () => {
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-50">
                     <div className="flex flex-col items-center justify-center text-gray-300">
-                      <FiCalendar className="w-16 h-16" />
+                      <FiUsers className="w-16 h-16" />
                       <span className="text-xs mt-2">No Image Available</span>
                     </div>
                   </div>

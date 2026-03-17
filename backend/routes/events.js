@@ -12,7 +12,33 @@ const upload = multer({ storage });
 // GET all events
 router.get('/', async (req, res) => {
   try {
-    const events = await Event.find().sort({ date: -1 });
+    const { status, search, page, limit } = req.query;
+    const query = {};
+
+    if (status && status !== 'All') {
+      query.status = status;
+    }
+
+    if (search && typeof search === 'string') {
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.$or = [
+        { title: { $regex: escaped, $options: 'i' } },
+        { description: { $regex: escaped, $options: 'i' } },
+        { location: { $regex: escaped, $options: 'i' } },
+      ];
+    }
+
+    // If page/limit provided, paginate; otherwise return all (backwards compat)
+    if (page !== undefined && limit !== undefined) {
+      const parsedPage = Math.max(1, parseInt(page, 10) || 1);
+      const parsedLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 9));
+      const skip = (parsedPage - 1) * parsedLimit;
+      const total = await Event.countDocuments(query);
+      const events = await Event.find(query).sort({ date: -1 }).skip(skip).limit(parsedLimit);
+      return res.json({ events, totalItems: total, totalPages: Math.ceil(total / parsedLimit) });
+    }
+
+    const events = await Event.find(query).sort({ date: -1 });
     res.json(events);
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -140,6 +140,13 @@ router.put('/:id', protect, upload.array('images', 5), async (req, res) => {
     complaint.description = description || complaint.description;
     // Only admins can update status
     if (status && req.user.isAdmin) {
+      // Push to status history before updating
+      complaint.statusHistory.push({
+        status,
+        comment: req.body.statusComment || '',
+        updatedBy: req.user._id,
+        timestamp: new Date(),
+      });
       complaint.status = status;
     }
 

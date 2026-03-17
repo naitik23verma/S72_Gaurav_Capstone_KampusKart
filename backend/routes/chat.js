@@ -197,6 +197,13 @@ router.patch('/messages/:messageId', auth, async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to edit this message' });
     }
 
+    if (!message || !message.trim()) {
+      return res.status(400).json({ message: 'Message cannot be empty' });
+    }
+    if (message.length > 2000) {
+      return res.status(400).json({ message: 'Message cannot exceed 2000 characters' });
+    }
+
     chatMessage.message = message;
     chatMessage.edited = true;
     chatMessage.editedAt = new Date();

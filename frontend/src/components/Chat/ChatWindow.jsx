@@ -204,6 +204,9 @@ const ChatWindow = () => {
         socketRef.current.removeAllListeners();
         socketRef.current.disconnect();
       }
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
     };
   }, [user, markMessageAsRead]);
 

@@ -800,7 +800,7 @@ const LostFound = () => {
                           }}
                           onBlur={(e) => handleFieldBlur('date', e.target.value)}
                           max={new Date().toISOString().split('T')[0]}
-                          className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.date ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm cursor-pointer`}
+                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.date ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm cursor-pointer`}
                           required
                           aria-label="Item Date"
                         />
@@ -822,7 +822,7 @@ const LostFound = () => {
                           }
                         }}
                         onBlur={(e) => handleFieldBlur('title', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.title ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
+                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.title ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
                         placeholder="e.g. Black Wallet, Red Backpack"
                         required
                         aria-label="Item Title"
@@ -844,7 +844,7 @@ const LostFound = () => {
                           }
                         }}
                         onBlur={(e) => handleFieldBlur('description', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm resize-none`}
+                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm resize-none`}
                         rows={4}
                         placeholder="Describe the item, any unique features, etc."
                         required
@@ -868,7 +868,7 @@ const LostFound = () => {
                           }
                         }}
                         onBlur={(e) => handleFieldBlur('location', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.location ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
+                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.location ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
                         placeholder="Where was the item lost/found?"
                         aria-label="Item Location"
                       />
@@ -894,7 +894,7 @@ const LostFound = () => {
                         }
                       }}
                       onBlur={(e) => handleFieldBlur('contact', e.target.value)}
-                      className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.contact ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
+                      className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.contact ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
                       placeholder="Email or phone number"
                       required
                       aria-label="Contact Information"

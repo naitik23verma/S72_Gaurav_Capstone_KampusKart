@@ -409,7 +409,7 @@ router.post('/admin/cleanup-expired', authMiddleware, async (req, res) => {
 // Get a single lost or found item by ID
 router.get('/:id', async (req, res) => {
   try {
-    const item = await LostFoundItem.findById(req.params.id).populate('user', 'name email');
+    const item = await LostFoundItem.findOne({ _id: req.params.id, isDeleted: { $ne: true } }).populate('user', 'name email');
     if (!item) {
       return res.status(404).json({ message: 'Item not found' });
     }

@@ -18,6 +18,8 @@ import Facilities from './components/Facilities';
 import ChatWindow from './components/Chat/ChatWindow';
 import ClubsRecruitment from './components/ClubsRecruitment';
 import KampusKartNavbar from './components/KampusKartNavbar';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfService from './components/TermsOfService';
 
 // Protected Route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -126,7 +128,7 @@ const AppLayout: React.FC = () => {
             path="/profile/:userId"
             element={
               <ProtectedRoute>
-                <Profile />
+                <Navigate to="/profile" replace />
               </ProtectedRoute>
             }
           />
@@ -162,6 +164,8 @@ const AppLayout: React.FC = () => {
               </ProtectedRoute>
             }
           />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
         </Routes>
       </main>
     </div>

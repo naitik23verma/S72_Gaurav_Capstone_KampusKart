@@ -179,6 +179,13 @@ const Complaints = () => {
       if (node) observer.current.observe(node);
     }, [isFetchingMore, currentPage, totalPages]);
 
+  // Cleanup IntersectionObserver on unmount
+  useEffect(() => {
+    return () => {
+      if (observer.current) observer.current.disconnect();
+    };
+  }, []);
+
   const fetchComplaints = async () => {
     if (!token) return;
     try {
@@ -817,7 +824,7 @@ const Complaints = () => {
                             }
                           }}
                           onBlur={(e) => handleFieldBlur('title', e.target.value)}
-                          className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.title ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
+                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.title ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
                           placeholder="e.g. Mess Food Issue, Hostel Cleanliness"
                           required
                           aria-label="Complaint Title"
@@ -923,7 +930,7 @@ const Complaints = () => {
                           }
                         }}
                         onBlur={(e) => handleFieldBlur('description', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2.5 border ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm resize-none`}
+                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm resize-none`}
                         rows={4}
                         placeholder="Describe the issue, any relevant details, etc."
                         required
@@ -980,7 +987,7 @@ const Complaints = () => {
               className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4"
               role="dialog"
               aria-modal="true"
-              aria-label="Complaint details"
+              aria-labelledby="complaint-details-title"
               onClick={() => setSelectedComplaintForDetails(null)}
             >
                 <div className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative" onClick={(e) => e.stopPropagation()}>
@@ -995,7 +1002,7 @@ const Complaints = () => {
                     </svg>
                   </button>
 
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12 sm:pr-14">{selectedComplaintForDetails.title}</h2>
+                  <h2 id="complaint-details-title" className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12 sm:pr-14">{selectedComplaintForDetails.title}</h2>
 
                     {/* Images Section - Moved Up */}
                     {selectedComplaintForDetails.images && selectedComplaintForDetails.images.length > 0 && (

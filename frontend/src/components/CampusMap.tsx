@@ -359,9 +359,11 @@ const CampusMap: React.FC<CampusMapProps> = () => {
     }
     
     zoomChangeListenerRef.current = google.maps.event.addListener(map, 'zoom_changed', () => {
-      // Close InfoWindow when zoom changes
-      setInfoWindowPosition(null);
-      setSelectedLocation(null);
+      // Only close InfoWindow on user-initiated zoom, not during programmatic animation
+      if (!animationInProgress.current) {
+        setInfoWindowPosition(null);
+        setSelectedLocation(null);
+      }
     });
   }, []);
 

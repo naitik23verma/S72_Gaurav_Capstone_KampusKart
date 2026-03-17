@@ -9,7 +9,32 @@ const upload = multer({ storage: multer.memoryStorage() });
 // Get all facilities
 router.get('/', async (req, res) => {
   try {
-    const facilities = await Facility.find().sort({ createdAt: -1 });
+    const { type, search, page, limit } = req.query;
+    const query = {};
+
+    if (type && type !== 'All') {
+      query.type = type;
+    }
+
+    if (search && typeof search === 'string') {
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.$or = [
+        { name: { $regex: escaped, $options: 'i' } },
+        { description: { $regex: escaped, $options: 'i' } },
+        { location: { $regex: escaped, $options: 'i' } },
+      ];
+    }
+
+    if (page !== undefined && limit !== undefined) {
+      const parsedPage = Math.max(1, parseInt(page, 10) || 1);
+      const parsedLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 9));
+      const skip = (parsedPage - 1) * parsedLimit;
+      const total = await Facility.countDocuments(query);
+      const facilities = await Facility.find(query).sort({ createdAt: -1 }).skip(skip).limit(parsedLimit);
+      return res.json({ facilities, totalItems: total, totalPages: Math.ceil(total / parsedLimit) });
+    }
+
+    const facilities = await Facility.find(query).sort({ createdAt: -1 });
     res.json(facilities);
   } catch (err) {
     res.status(500).json({ message: err.message });

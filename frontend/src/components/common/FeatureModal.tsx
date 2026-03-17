@@ -82,9 +82,9 @@ export const FeatureModal: React.FC<FeatureModalProps> = ({
           <button
             onClick={onClose}
             aria-label="Close modal"
-            className="bg-gray-100 hover:bg-red-500 hover:text-white text-gray-700 rounded-lg p-2 transition-all duration-200 flex-shrink-0 flex items-center justify-center group"
+            className="bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] text-white rounded-lg p-2 transition-all duration-200 flex-shrink-0 flex items-center justify-center w-10 h-10"
           >
-            <FiX className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            <FiX className="w-5 h-5" />
           </button>
         </div>
 

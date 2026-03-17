@@ -12,7 +12,32 @@ const upload = multer({ storage });
 // GET all club recruitments
 router.get('/', async (req, res) => {
   try {
-    const clubs = await ClubRecruitment.find().sort({ startDate: -1 });
+    const { status, search, page, limit } = req.query;
+    const query = {};
+
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+
+    if (search && typeof search === 'string') {
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.$or = [
+        { title: { $regex: escaped, $options: 'i' } },
+        { description: { $regex: escaped, $options: 'i' } },
+        { clubName: { $regex: escaped, $options: 'i' } },
+      ];
+    }
+
+    if (page !== undefined && limit !== undefined) {
+      const parsedPage = Math.max(1, parseInt(page, 10) || 1);
+      const parsedLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 9));
+      const skip = (parsedPage - 1) * parsedLimit;
+      const total = await ClubRecruitment.countDocuments(query);
+      const clubs = await ClubRecruitment.find(query).sort({ startDate: -1 }).skip(skip).limit(parsedLimit);
+      return res.json({ clubs, totalItems: total, totalPages: Math.ceil(total / parsedLimit) });
+    }
+
+    const clubs = await ClubRecruitment.find(query).sort({ startDate: -1 });
     res.json(clubs);
   } catch (error) {
     res.status(500).json({ message: error.message });

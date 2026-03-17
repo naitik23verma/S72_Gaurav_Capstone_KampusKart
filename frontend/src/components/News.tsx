@@ -538,10 +538,10 @@ const News = () => {
               )}
               <div className="space-y-4 text-gray-700">
                 <div className="flex flex-wrap gap-2">
-                  <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white border border-gray-200 text-gray-800 flex items-center gap-1">
+                  <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white border-2 border-gray-200 text-gray-800 flex items-center gap-1">
                     <FiTag className="w-3 h-3" />{selectedNewsForDetails.category}
                   </span>
-                  <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white border border-gray-200 text-gray-800 flex items-center gap-1">
+                  <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white border-2 border-gray-200 text-gray-800 flex items-center gap-1">
                     <FiCalendar className="w-3 h-3" />{new Date(selectedNewsForDetails.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                   </span>
                 </div>

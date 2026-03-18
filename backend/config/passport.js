@@ -2,10 +2,15 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/User');
 
+const PROD_BACKEND_URL = 'https://s72-gaurav-capstone-kampuskart.onrender.com';
+
 // Determine the callback URL based on environment
 const getCallbackURL = () => {
   if (process.env.BACKEND_URL) {
     return `${process.env.BACKEND_URL}/api/auth/google/callback`;
+  }
+  if (process.env.NODE_ENV === 'production') {
+    return `${PROD_BACKEND_URL}/api/auth/google/callback`;
   }
   return 'http://localhost:5000/api/auth/google/callback';
 };

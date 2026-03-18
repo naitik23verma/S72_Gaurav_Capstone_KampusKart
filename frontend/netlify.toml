@@ -2,6 +2,11 @@
   command = "npm run build:verify"
   publish = "dist"
 
+[build.environment]
+  NODE_VERSION = "18"
+  VITE_API_URL = "https://s72-gaurav-capstone-kampuskart.onrender.com"
+  VITE_SOCKET_URL = "https://s72-gaurav-capstone-kampuskart.onrender.com"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

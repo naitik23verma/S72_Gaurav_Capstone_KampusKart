@@ -43,7 +43,24 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const hpp = require('hpp');
-const mongoSanitize = require('express-mongo-sanitize');
+// express-mongo-sanitize is incompatible with Express 5 (req.query is read-only).
+// Inline sanitizer that strips $ and . keys from req.body and req.params only.
+const sanitizeValue = (val) => {
+  if (val && typeof val === 'object' && !Array.isArray(val)) {
+    return Object.fromEntries(
+      Object.entries(val)
+        .filter(([k]) => !k.startsWith('$') && !k.includes('.'))
+        .map(([k, v]) => [k, sanitizeValue(v)])
+    );
+  }
+  if (Array.isArray(val)) return val.map(sanitizeValue);
+  return val;
+};
+const mongoSanitize = () => (req, _res, next) => {
+  if (req.body) req.body = sanitizeValue(req.body);
+  if (req.params) req.params = sanitizeValue(req.params);
+  next();
+};
 const passport = require('./config/passport');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');

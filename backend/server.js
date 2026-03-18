@@ -43,6 +43,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const hpp = require('hpp');
+const mongoSanitize = require('express-mongo-sanitize');
 const passport = require('./config/passport');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
@@ -68,34 +69,7 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
   contentSecurityPolicy: false // handled separately if needed
 }));
-// Custom NoSQL injection sanitizer — compatible with Express 5 (req.query is read-only)
-app.use((req, _res, next) => {
-  const sanitizeValue = (val) => {
-    if (val && typeof val === 'object') {
-      Object.keys(val).forEach(key => {
-        if (key.startsWith('$')) {
-          delete val[key];
-        } else {
-          sanitizeValue(val[key]);
-        }
-      });
-    }
-    return val;
-  };
-  if (req.body) sanitizeValue(req.body);
-  if (req.params) sanitizeValue(req.params);
-  // Sanitize query values in-place without reassigning req.query
-  if (req.query) {
-    Object.keys(req.query).forEach(key => {
-      if (key.startsWith('$')) {
-        delete req.query[key];
-      } else {
-        sanitizeValue(req.query[key]);
-      }
-    });
-  }
-  next();
-});
+app.use(mongoSanitize()); // prevent NoSQL injection
 app.use(hpp()); // prevent HTTP parameter pollution
 
 // Middleware
@@ -177,17 +151,17 @@ app.get('/api/server-status', (req, res) => {
 });
 
 // Global error handling middleware
-app.use((err, req, res, _next) => {
+app.use((err, _req, res, _next) => {
   console.error('Error:', err);
   
   // Log error details for debugging
   console.error('Error details:', {
     message: err.message,
     stack: err.stack,
-    url: req.url,
-    method: req.method,
-    userAgent: req.get('User-Agent'),
-    ip: req.ip
+    url: _req.url,
+    method: _req.method,
+    userAgent: _req.get('User-Agent'),
+    ip: _req.ip
   });
 
   // Don't expose internal errors in production
@@ -254,7 +228,7 @@ app.set('io', io);
 const onlineUsers = new Map();
 
 // Socket.IO authentication middleware
-io.use((socket, next) => {
+io.use(async (socket, next) => {
   const token = socket.handshake.auth?.token;
   if (!token) {
     return next(new Error('Authentication error: token required'));
@@ -269,6 +243,11 @@ io.use((socket, next) => {
   try {
     const jwt = require('jsonwebtoken');
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Verify user still exists in DB
+    const user = await User.findById(decoded.userId).select('_id');
+    if (!user) {
+      return next(new Error('Authentication error: user not found'));
+    }
     socket.userId = decoded.userId;
     next();
   } catch (err) {

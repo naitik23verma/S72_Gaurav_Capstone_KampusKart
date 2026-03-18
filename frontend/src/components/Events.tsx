@@ -384,11 +384,6 @@ const Events = () => {
       
       case 'date':
         if (!value) return 'Date is required';
-        const selectedDate = new Date(value);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        // Allow today's date and future dates only
-        if (selectedDate < today) return 'Event date cannot be in the past';
         return null;
       
       case 'contactEmail':

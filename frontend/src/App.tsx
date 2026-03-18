@@ -11,7 +11,6 @@ import LostFound from './components/LostFound';
 import Profile from './components/Profile';
 import Complaints from './components/Complaints';
 import CampusMap from './components/CampusMap';
-import Features from './components/Features';
 import Events from './components/Events';
 import News from './components/News';
 import Facilities from './components/Facilities';
@@ -101,14 +100,6 @@ const AppLayout: React.FC = () => {
             }
           />
           <Route
-            path="/features"
-            element={
-              <ProtectedRoute>
-                <Features />
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/campus-map"
             element={
               <ProtectedRoute>
@@ -128,7 +119,7 @@ const AppLayout: React.FC = () => {
             path="/profile/:userId"
             element={
               <ProtectedRoute>
-                <Navigate to="/profile" replace />
+                <Profile />
               </ProtectedRoute>
             }
           />

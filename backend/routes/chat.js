@@ -5,6 +5,13 @@ const auth = require('../middleware/authMiddleware');
 const multer = require('multer');
 const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
+const rateLimit = require('express-rate-limit');
+
+const messageLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 30, // 30 messages per minute per IP
+  message: { message: 'Too many messages, please slow down' }
+});
 
 // Configure multer for file uploads
 const storage = multer.memoryStorage();
@@ -118,7 +125,7 @@ router.get('/search', auth, async (req, res) => {
 });
 
 // Send new message
-router.post('/messages', auth, upload.array('attachments', 5), async (req, res) => {
+router.post('/messages', auth, messageLimiter, upload.array('attachments', 5), async (req, res) => {
   try {
     const { message, replyTo } = req.body;
     const attachments = [];

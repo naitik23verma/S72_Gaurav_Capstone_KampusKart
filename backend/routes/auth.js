@@ -8,6 +8,7 @@ const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 
 const { validateSignup, validateLogin, sanitizeInput } = require('../middleware/validation');
+const { isAdminEmail } = require('../utils/adminUtils');
 
 // Create Nodemailer transporter with better error handling
 let transporter;
@@ -48,6 +49,12 @@ const forgotPasswordLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 5, // limit each IP to 5 forgot-password requests per hour
   message: { message: 'Too many password reset requests, please try again after an hour' }
+});
+
+const resetPasswordLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // limit each IP to 10 reset attempts per hour
+  message: { message: 'Too many password reset attempts, please try again after an hour' }
 });
 
 // Google OAuth routes
@@ -132,10 +139,7 @@ router.post('/signup', signupLimiter, sanitizeInput, validateSignup, async (req,
     );
 
     // Check if user is admin based on environment configuration
-    const adminEmails = process.env.ADMIN_EMAILS ? 
-      process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : 
-      [];
-    const isAdmin = adminEmails.includes(user.email);
+    const isAdmin = isAdminEmail(user.email);
 
     res.status(201).json({
       token,
@@ -186,10 +190,7 @@ router.post('/login', loginLimiter, sanitizeInput, validateLogin, async (req, re
     );
 
     // Check if user is admin based on environment configuration
-    const adminEmails = process.env.ADMIN_EMAILS ? 
-      process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : 
-      [];
-    const isAdmin = adminEmails.includes(user.email);
+    const isAdmin = isAdminEmail(user.email);
 
     res.json({
       token,
@@ -250,8 +251,7 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
       // For development/testing, return the OTP in the response
       console.log(`[DEV] OTP for ${email}: ${otp}`);
       res.status(200).json({ 
-        message: 'If that email is registered, an OTP has been sent',
-        otp: process.env.NODE_ENV === 'development' ? otp : undefined
+        message: 'If that email is registered, an OTP has been sent'
       });
     }
 
@@ -262,7 +262,7 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
 });
 
 // Reset Password with OTP
-router.post('/reset-password', async (req, res) => {
+router.post('/reset-password', resetPasswordLimiter, async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
 

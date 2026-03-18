@@ -5,6 +5,13 @@ const authMiddleware = require('../middleware/authMiddleware');
 const multer = require('multer');
 const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
+const rateLimit = require('express-rate-limit');
+
+const writeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+  message: { message: 'Too many requests, please try again later' }
+});
 
 // Multer configuration for file uploads
 const storage = multer.memoryStorage();
@@ -74,7 +81,7 @@ router.get('/', async (req, res) => {
 });
 
 // POST new news (admin only)
-router.post('/', authMiddleware, upload.array('images', 5), async (req, res) => {
+router.post('/', authMiddleware, writeLimiter, upload.array('images', 5), async (req, res) => {
   if (!req.user.isAdmin) {
     return res.status(403).json({ message: 'Not authorized to add news.' });
   }
@@ -103,7 +110,7 @@ router.post('/', authMiddleware, upload.array('images', 5), async (req, res) => 
 });
 
 // Update a news item (admin only)
-router.put('/:id', authMiddleware, upload.array('images', 5), async (req, res) => {
+router.put('/:id', authMiddleware, writeLimiter, upload.array('images', 5), async (req, res) => {
   if (!req.user.isAdmin) {
     return res.status(403).json({ message: 'Only admin can edit news.' });
   }

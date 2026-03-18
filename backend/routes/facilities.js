@@ -4,7 +4,14 @@ const Facility = require('../models/Facility');
 const auth = require('../middleware/authMiddleware');
 const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
+const rateLimit = require('express-rate-limit');
 const upload = multer({ storage: multer.memoryStorage() });
+
+const writeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+  message: { message: 'Too many requests, please try again later' }
+});
 
 // Get all facilities
 router.get('/', async (req, res) => {
@@ -42,7 +49,7 @@ router.get('/', async (req, res) => {
 });
 
 // Add a facility (admin only)
-router.post('/', auth, upload.array('images', 5), async (req, res) => {
+router.post('/', auth, writeLimiter, upload.array('images', 5), async (req, res) => {
   try {
     // Check if user is admin
     if (!req.user.isAdmin) {
@@ -85,7 +92,7 @@ router.post('/', auth, upload.array('images', 5), async (req, res) => {
 });
 
 // Update a facility (admin only)
-router.put('/:id', auth, upload.array('images', 5), async (req, res) => {
+router.put('/:id', auth, writeLimiter, upload.array('images', 5), async (req, res) => {
   try {
     // Check if user is admin
     if (!req.user.isAdmin) {

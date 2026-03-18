@@ -5,6 +5,13 @@ const authMiddleware = require('../middleware/authMiddleware');
 const multer = require('multer');
 const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
+const rateLimit = require('express-rate-limit');
+
+const writeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+  message: { message: 'Too many requests, please try again later' }
+});
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -45,7 +52,7 @@ router.get('/', async (req, res) => {
 });
 
 // POST new club recruitment (admin only)
-router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
+router.post('/', authMiddleware, writeLimiter, upload.single('image'), async (req, res) => {
   if (!req.user.isAdmin) {
     return res.status(403).json({ message: 'Not authorized to add club recruitments.' });
   }
@@ -123,7 +130,7 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
 });
 
 // Update a club recruitment (admin only)
-router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
+router.put('/:id', authMiddleware, writeLimiter, upload.single('image'), async (req, res) => {
   if (!req.user.isAdmin) {
     return res.status(403).json({ message: 'Only admin can edit club recruitments.' });
   }

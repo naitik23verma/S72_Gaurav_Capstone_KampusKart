@@ -5,6 +5,7 @@ const User = require('../models/User');
 const multer = require('multer');
 const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
+const { isAdminEmail } = require('../utils/adminUtils');
 
 // Multer setup for memory storage
 const storage = multer.memoryStorage();
@@ -26,10 +27,7 @@ router.get('/', authMiddleware, async (req, res) => {
     const userObject = user.toObject();
     
     // Check if user is admin based on environment configuration
-    const adminEmails = process.env.ADMIN_EMAILS ? 
-      process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : 
-      [];
-    userObject.isAdmin = adminEmails.includes(user.email);
+    userObject.isAdmin = isAdminEmail(user.email);
 
     res.json(userObject);
   } catch (err) {
@@ -54,7 +52,17 @@ router.put('/', authMiddleware, upload.single('profilePicture'), async (req, res
   if (major !== undefined) profileFields.major = major; // Allow saving empty string
   if (yearOfStudy !== undefined) profileFields.yearOfStudy = yearOfStudy; // Allow saving empty string (now for year interval)
   if (gender !== undefined) profileFields.gender = gender;
-  if (dateOfBirth !== undefined) profileFields.dateOfBirth = dateOfBirth === '' ? null : dateOfBirth; // Allow clearing, save as null if empty string
+  if (dateOfBirth !== undefined) {
+    if (dateOfBirth === '' || dateOfBirth === null) {
+      profileFields.dateOfBirth = null;
+    } else {
+      const parsedDate = new Date(dateOfBirth);
+      if (isNaN(parsedDate.getTime())) {
+        return res.status(400).json({ message: 'Invalid date of birth format.' });
+      }
+      profileFields.dateOfBirth = parsedDate;
+    }
+  }
   if (program !== undefined) profileFields.program = program; // Allow saving empty string
   // Add other fields to update here
 
@@ -104,10 +112,7 @@ router.put('/', authMiddleware, upload.single('profilePicture'), async (req, res
             
             // Convert to plain object and add isAdmin field
             const userObject = updatedUser.toObject();
-            const adminEmails = process.env.ADMIN_EMAILS ? 
-              process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : 
-              [];
-            userObject.isAdmin = adminEmails.includes(updatedUser.email);
+            userObject.isAdmin = isAdminEmail(updatedUser.email);
             
             res.json(userObject);
           } catch (callbackErr) {
@@ -133,10 +138,7 @@ router.put('/', authMiddleware, upload.single('profilePicture'), async (req, res
 
       // Convert to plain object and add isAdmin field
       const userObject = user.toObject();
-      const adminEmails = process.env.ADMIN_EMAILS ? 
-        process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : 
-        [];
-      userObject.isAdmin = adminEmails.includes(user.email);
+      userObject.isAdmin = isAdminEmail(user.email);
 
       res.json(userObject);
     }

@@ -100,8 +100,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // Token expires in 24 hours, refresh 1 hour before expiry (23 hours)
-    // This gives plenty of time for the refresh to complete
-    const refreshTime = 23 * 60 * 60 * 1000; // 23 hours in milliseconds
+    // If a stored expiry exists, calculate remaining time from now
+    const storedExpiry = localStorage.getItem('token_expiry');
+    let refreshTime: number;
+
+    if (storedExpiry) {
+      const expiresAt = Number(storedExpiry);
+      const now = Date.now();
+      const remaining = expiresAt - now;
+      // Refresh 1 hour before expiry, but at least 30 seconds from now
+      refreshTime = Math.max(remaining - 60 * 60 * 1000, 30 * 1000);
+    } else {
+      // Session token — refresh after 23 hours
+      refreshTime = 23 * 60 * 60 * 1000;
+    }
     
     const timeout = setTimeout(() => {
       refreshToken();
@@ -272,8 +284,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Password must contain at least one number');
       }
 
-      if (!/[!@#$%^&*]/.test(password)) {
-        throw new Error('Password must contain at least one special character (!@#$%^&*)');
+      if (!/[^A-Za-z\d\s]/.test(password)) {
+        throw new Error('Password must contain at least one special character');
       }
 
       // Name validation

@@ -223,7 +223,6 @@ const News = () => {
             </button>
           )}
         </div>
-                    className={UI_PATTERNS.buttonNeutral}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 gap-4">
           <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
             <div className="relative">

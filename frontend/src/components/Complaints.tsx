@@ -13,11 +13,11 @@ import { UI_PATTERNS } from '../theme/uiPatterns';
 
 interface Complaint {
   _id: string;
-  user: {
+  user?: {
     _id: string;
     name: string;
     email: string;
-  };
+  } | null;
   title: string;
   description: string;
   category: 'Academic' | 'Administrative' | 'Facilities' | 'IT' | 'Security' | 'Other';
@@ -667,7 +667,7 @@ const Complaints = () => {
                   </div>
                   <div className="flex items-center text-sm text-gray-500">
                     <FiUser className="mr-2 flex-shrink-0" />
-                    <span className="truncate">Posted by {complaint.user.name}</span>
+                    <span className="truncate">Posted by {complaint.user?.name || 'Unknown user'}</span>
                   </div>
                   <div className="flex items-center text-sm text-gray-500">
                     <FiCalendar className="mr-2 flex-shrink-0" />
@@ -681,8 +681,8 @@ const Complaints = () => {
 
                 {/* Action Buttons */}
                 {user && complaint.user && (
-                  complaint.user._id === user._id || 
-                  complaint.user._id === user.id || 
+                  complaint.user?._id === user._id || 
+                  complaint.user?._id === user.id || 
                   user.isAdmin
                 ) && (
                   <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t-2 border-gray-200">
@@ -999,7 +999,7 @@ const Complaints = () => {
                             <div className="flex items-center text-sm text-gray-500">
                                       <FiUser className="w-5 h-5 mr-2 text-gray-500"/>
                                      <span className="truncate">
-                                       Posted by {selectedComplaintForDetails.user.name} on {selectedComplaintForDetails.createdAt ? new Date(selectedComplaintForDetails.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' }) : ''}
+                                       Posted by {selectedComplaintForDetails.user?.name || 'Unknown user'} on {selectedComplaintForDetails.createdAt ? new Date(selectedComplaintForDetails.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' }) : ''}
                                      </span>
                             </div>
                         </div>
@@ -1037,8 +1037,8 @@ const Complaints = () => {
 
                      {user && selectedComplaintForDetails.user && (
                         // Check if user can edit/delete this complaint
-                        (selectedComplaintForDetails.user._id === user._id || 
-                         selectedComplaintForDetails.user._id === user.id || 
+                      (selectedComplaintForDetails.user?._id === user._id || 
+                       selectedComplaintForDetails.user?._id === user.id || 
                          user.isAdmin)
                      ) && (
                         <div className="flex gap-3 mt-6">

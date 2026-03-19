@@ -100,7 +100,7 @@ const KampusKartNavbar: React.FC = () => {
     <Navbar1
       logo={{
         url: isLoggedIn ? "/home" : "/",
-        src: "/Logo.png",
+        src: "/Logo.webp",
         alt: "KampusKart Logo",
         title: "KampusKart",
       }}

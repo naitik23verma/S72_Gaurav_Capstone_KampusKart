@@ -428,7 +428,7 @@ const ChatWindow = () => {
   }, [messages]);
 
   // Fix logo import for Avatar
-  const logoUrl = '/Logo.png';
+  const logoUrl = '/Logo.webp';
 
   // Clean, minimal chat header
   const ChatHeader = () => (

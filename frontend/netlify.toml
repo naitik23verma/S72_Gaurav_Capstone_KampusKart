@@ -54,6 +54,12 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
+  for = "/Logo.webp"
+  [headers.values]
+    Content-Type = "image/webp"
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
   for = "/google-icon.svg"
   [headers.values]
     Content-Type = "image/svg+xml"

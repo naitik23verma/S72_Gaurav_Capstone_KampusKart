@@ -113,7 +113,7 @@ const Landing: React.FC = () => {
 
         {/* Footer */}
         <Footer
-          logo={<img src="/Logo.png" alt="KampusKart Logo" className="h-7 w-7" />}
+          logo={<img src="/Logo.webp" alt="KampusKart Logo" className="h-7 w-7" />}
           brandName="KampusKart"
           socialLinks={socialLinks}
           mainLinks={[

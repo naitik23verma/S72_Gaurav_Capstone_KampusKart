@@ -487,7 +487,7 @@ const Complaints = () => {
           </span>
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-gray-500">Category</p>
             <p className="font-medium">{complaint.category}</p>
@@ -790,8 +790,32 @@ const Complaints = () => {
             </div>
           ))}
           {!isFiltering && complaints.filter(c => c).length === 0 && (
-            <div className="col-span-full text-center py-12">
-              <p className="text-gray-500 text-lg">No complaints found.</p>
+            <div className="col-span-full flex flex-col items-center justify-center py-20 px-4">
+              <svg className="w-40 h-40 mb-6 text-gray-200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                {/* Document */}
+                <rect x="55" y="40" width="90" height="115" rx="10" fill="#f3f4f6" stroke="#d1d5db" strokeWidth="3"/>
+                {/* Lines on document */}
+                <line x1="72" y1="72" x2="128" y2="72" stroke="#d1d5db" strokeWidth="3" strokeLinecap="round"/>
+                <line x1="72" y1="88" x2="128" y2="88" stroke="#d1d5db" strokeWidth="3" strokeLinecap="round"/>
+                <line x1="72" y1="104" x2="108" y2="104" stroke="#d1d5db" strokeWidth="3" strokeLinecap="round"/>
+                {/* Checkmark circle */}
+                <circle cx="138" cy="148" r="22" fill="#f0fdf4" stroke="#86efac" strokeWidth="3"/>
+                <path d="M128 148 L135 155 L150 140" stroke="#22c55e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <p className="text-xl font-bold text-gray-700 mb-2">No complaints found</p>
+              <p className="text-gray-400 text-sm text-center max-w-xs">
+                {searchQuery || filterStatus !== 'All' || filterCategory !== 'all'
+                  ? 'No complaints match your current filters. Try adjusting your search.'
+                  : "All clear! No complaints have been submitted yet. Use the button above to raise one."}
+              </p>
+              {(searchQuery || filterStatus !== 'All' || filterCategory !== 'all') && (
+                <button
+                  onClick={() => { setSearchQuery(''); setSearchInput(''); setFilterStatus('All'); setFilterCategory('all'); }}
+                  className="mt-5 px-5 py-2.5 rounded-lg bg-[#181818] text-white text-sm font-semibold hover:bg-[#00C6A7] transition-colors duration-200"
+                >
+                  Clear filters
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -824,7 +848,7 @@ const Complaints = () => {
                             }
                           }}
                           onBlur={(e) => handleFieldBlur('title', e.target.value)}
-                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.title ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
+                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.title ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base`}
                           placeholder="e.g. Mess Food Issue, Hostel Cleanliness"
                           required
                           aria-label="Complaint Title"
@@ -842,7 +866,7 @@ const Complaints = () => {
                         name="category"
                         value={newComplaint.category}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                         required
                         aria-label="Complaint Category"
                       >
@@ -863,7 +887,7 @@ const Complaints = () => {
                         name="priority"
                         value={newComplaint.priority}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                         required
                         aria-label="Complaint Priority"
                       >
@@ -883,7 +907,7 @@ const Complaints = () => {
                         name="department"
                         value={newComplaint.department}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                         required
                         aria-label="Assigned Department"
                       >
@@ -904,7 +928,7 @@ const Complaints = () => {
                           name="status"
                           value={newComplaint.status || editingComplaint.status}
                           onChange={(e) => setNewComplaint({ ...newComplaint, status: e.target.value as Complaint['status'] })}
-                          className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                          className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                         >
                           <option value="Open">Open</option>
                           <option value="In Progress">In Progress</option>
@@ -930,7 +954,7 @@ const Complaints = () => {
                           }
                         }}
                         onBlur={(e) => handleFieldBlur('description', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm resize-none`}
+                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base resize-none`}
                         rows={4}
                         placeholder="Describe the issue, any relevant details, etc."
                         required
@@ -1165,5 +1189,6 @@ const Complaints = () => {
 };
 
 export default Complaints; 
+
 
 

@@ -57,6 +57,22 @@ const ChatWindow = () => {
   // Helper to get auth token from either storage (sessionStorage used when remember=false)
   const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
 
+  // iOS keyboard overlap fix: track visual viewport height
+  const [viewportHeight, setViewportHeight] = useState(
+    typeof window !== 'undefined' ? (window.visualViewport?.height ?? window.innerHeight) : 600
+  );
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => setViewportHeight(vv.height);
+    vv.addEventListener('resize', onResize);
+    vv.addEventListener('scroll', onResize);
+    return () => {
+      vv.removeEventListener('resize', onResize);
+      vv.removeEventListener('scroll', onResize);
+    };
+  }, []);
+
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [onlineUsers, setOnlineUsers] = useState([]);
@@ -753,15 +769,14 @@ const ChatWindow = () => {
           top: 0,
           left: 0,
           right: 0,
-          bottom: 0,
+          height: viewportHeight,
           zIndex: 10,
           display: 'flex',
           flexDirection: 'column',
           bgcolor: '#f7f7fa',
           overflow: 'hidden',
-          height: '100vh',
           minHeight: 0,
-          pt: 'var(--navbar-height, 72px)', // Padding to match navbar height
+          pt: '72px',
         }}
       >
         {/* Chat Header during error */}
@@ -867,15 +882,14 @@ const ChatWindow = () => {
           top: 0,
           left: 0,
           right: 0,
-          bottom: 0,
+          height: viewportHeight,
           zIndex: 10,
           display: 'flex',
           flexDirection: 'column',
           bgcolor: '#ffffff',
           overflow: 'hidden',
-          height: '100vh',
           minHeight: 0,
-          pt: 'var(--navbar-height, 72px)', // Padding to match navbar height
+          pt: '72px',
         }}
       >
         <ChatSkeleton messageCount={8} />
@@ -883,21 +897,24 @@ const ChatWindow = () => {
     );
   }
 
+  // Navbar height constant
+  const NAVBAR_H = 72;
+
   return (
     <Box sx={{
       position: 'fixed',
       top: 0,
       left: 0,
       right: 0,
-      bottom: 0,
+      // Use visual viewport height so the chat shrinks when iOS keyboard opens
+      height: viewportHeight,
       zIndex: 10,
       display: 'flex',
       flexDirection: 'column',
       bgcolor: '#fafafa',
       overflow: 'hidden',
-      height: '100vh',
       minHeight: 0,
-      pt: 'var(--navbar-height, 72px)', // Padding to match navbar height
+      pt: `${NAVBAR_H}px`,
       '&::before': {
         content: '""',
         position: 'absolute',
@@ -987,7 +1004,7 @@ const ChatWindow = () => {
         background: '#fafafa',
         zIndex: 20, 
         pt: 2, 
-        pb: 'env(safe-area-inset-bottom)',
+        pb: { xs: 'max(env(safe-area-inset-bottom), 12px)', sm: 2 },
         px: { xs: 2, sm: 3 },
       }}>
         {/* Reply Preview */}
@@ -1218,7 +1235,7 @@ const ChatWindow = () => {
               '& .MuiOutlinedInput-root': {
                 borderRadius: '8px',
                 bgcolor: CHAT_THEME.cardBg,
-                fontSize: '0.9375rem',
+                fontSize: '1rem',
                 '& fieldset': {
                   borderColor: 'transparent',
                 },
@@ -1240,7 +1257,7 @@ const ChatWindow = () => {
                 },
               },
             }}
-            inputProps={{ style: { fontSize: '0.9375rem' } }}
+            inputProps={{ style: { fontSize: '1rem' } }}
           />
           <IconButton 
             type="submit" 

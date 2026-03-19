@@ -829,7 +829,33 @@ const Events = () => {
             </div>
           ))}
           {filteredEvents.length === 0 && (
-            <div className="col-span-full text-center text-gray-400 py-12">No events found.</div>
+            <div className="col-span-full flex flex-col items-center justify-center py-16 px-4">
+              <svg className="w-24 h-24 mb-4 text-gray-200" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="12" y="20" width="72" height="64" rx="8" fill="currentColor" />
+                <rect x="12" y="20" width="72" height="64" rx="8" fill="white" stroke="#E5E7EB" strokeWidth="3" />
+                <rect x="24" y="8" width="8" height="20" rx="4" fill="#D1D5DB" />
+                <rect x="64" y="8" width="8" height="20" rx="4" fill="#D1D5DB" />
+                <rect x="20" y="44" width="56" height="4" rx="2" fill="#E5E7EB" />
+                <rect x="20" y="56" width="40" height="4" rx="2" fill="#E5E7EB" />
+                <rect x="20" y="68" width="24" height="4" rx="2" fill="#E5E7EB" />
+                <circle cx="72" cy="72" r="16" fill="#F3F4F6" stroke="#E5E7EB" strokeWidth="2" />
+                <path d="M66 72h12M72 66v12" stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
+              <p className="text-gray-500 font-semibold text-lg mb-1">
+                {searchQuery || filterStatus !== 'All' ? 'No events match your filters' : 'No events yet'}
+              </p>
+              <p className="text-gray-400 text-sm mb-4">
+                {searchQuery || filterStatus !== 'All' ? 'Try adjusting your search or filter.' : 'Check back soon for upcoming campus events.'}
+              </p>
+              {(searchQuery || filterStatus !== 'All') && (
+                <button
+                  onClick={() => { setSearchInput(''); setSearchQuery(''); setFilterStatus('All'); }}
+                  className="px-5 py-2 rounded-lg bg-[#181818] text-white text-sm font-semibold hover:bg-[#00C6A7] transition-colors duration-200"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
           )}
         </div>
 
@@ -852,7 +878,7 @@ const Events = () => {
                           type="text"
                           value={newEvent.title}
                           onChange={e => { setNewEvent({...newEvent, title: e.target.value}); if (fieldErrors.title) setFieldErrors(prev => ({...prev, title: ''})); }}
-                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.title ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm`}
+                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.title ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base`}
                           placeholder="Enter event title (e.g., Annual Tech Symposium 2024)"
                           required
                           aria-label="Event Title"
@@ -875,7 +901,7 @@ const Events = () => {
                           type="date"
                           value={newEvent.date}
                           onChange={e => { setNewEvent({...newEvent, date: e.target.value}); if (fieldErrors.date) setFieldErrors(prev => ({...prev, date: ''})); }}
-                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.date ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm cursor-pointer`}
+                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.date ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base cursor-pointer`}
                           required
                           aria-label="Event Date"
                         />
@@ -890,7 +916,7 @@ const Events = () => {
                       <textarea
                         value={newEvent.description}
                         onChange={e => { setNewEvent({...newEvent, description: e.target.value}); if (fieldErrors.description) setFieldErrors(prev => ({...prev, description: ''})); }}
-                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.description ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm resize-none`}
+                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.description ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base resize-none`}
                         rows={4}
                         placeholder="Provide a detailed description of the event. Include key highlights, agenda, target audience, and any special requirements."
                         required
@@ -909,7 +935,7 @@ const Events = () => {
                           type="text"
                           value={newEvent.location}
                           onChange={e => { setNewEvent({...newEvent, location: e.target.value}); if (fieldErrors.location) setFieldErrors(prev => ({...prev, location: ''})); }}
-                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.location ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm`}
+                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.location ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base`}
                           placeholder="Enter venue details (e.g., Main Auditorium, Block A, Floor 3)"
                           required
                           aria-label="Event Location"
@@ -924,7 +950,7 @@ const Events = () => {
                       <select
                         value={newEvent.status}
                         onChange={e => setNewEvent({...newEvent, status: e.target.value as Event['status']})}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                         required
                         aria-label="Event Status"
                       >
@@ -943,7 +969,7 @@ const Events = () => {
                         type="url"
                         value={newEvent.registerUrl}
                         onChange={e => setNewEvent({...newEvent, registerUrl: e.target.value})}
-                        className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                        className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                         placeholder="https://forms.google.com/..."
                         aria-label="Register URL"
                       />
@@ -958,7 +984,7 @@ const Events = () => {
                         type="text"
                         value={newEvent.operatingHours}
                         onChange={e => setNewEvent({...newEvent, operatingHours: e.target.value})}
-                        className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                        className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                         placeholder="e.g., 9:00 AM - 5:00 PM"
                         aria-label="Operating Hours"
                       />
@@ -974,7 +1000,7 @@ const Events = () => {
                           type="text"
                           value={newEvent.contactInfo.name ?? ''}
                           onChange={e => setNewEvent({...newEvent, contactInfo: {...newEvent.contactInfo, name: e.target.value}})}
-                          className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                          className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                           placeholder="Contact Person Name"
                           aria-label="Contact Name"
                         />
@@ -984,7 +1010,7 @@ const Events = () => {
                           type="email"
                           value={newEvent.contactInfo.email ?? ''}
                           onChange={e => setNewEvent({...newEvent, contactInfo: {...newEvent.contactInfo, email: e.target.value}})}
-                          className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                          className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                           placeholder="contact@example.com"
                           aria-label="Contact Email"
                         />
@@ -994,7 +1020,7 @@ const Events = () => {
                           type="tel"
                           value={newEvent.contactInfo.phone ?? ''}
                           onChange={e => setNewEvent({...newEvent, contactInfo: {...newEvent.contactInfo, phone: e.target.value}})}
-                          className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                          className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                           placeholder="+1 (555) 123-4567"
                           aria-label="Contact Phone"
                         />
@@ -1009,7 +1035,7 @@ const Events = () => {
                           type="text"
                           value={newEvent.mapLocation.building ?? ''}
                           onChange={e => setNewEvent({...newEvent, mapLocation: {...newEvent.mapLocation, building: e.target.value}})}
-                          className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                          className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                           placeholder="Building Name"
                           aria-label="Building"
                         />
@@ -1019,7 +1045,7 @@ const Events = () => {
                           type="text"
                           value={newEvent.mapLocation.floor ?? ''}
                           onChange={e => setNewEvent({...newEvent, mapLocation: {...newEvent.mapLocation, floor: e.target.value}})}
-                          className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                          className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                           placeholder="Floor"
                           aria-label="Floor"
                         />
@@ -1029,7 +1055,7 @@ const Events = () => {
                           type="text"
                           value={newEvent.mapLocation.room ?? ''}
                           onChange={e => setNewEvent({...newEvent, mapLocation: {...newEvent.mapLocation, room: e.target.value}})}
-                          className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                          className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                           placeholder="Room Number"
                           aria-label="Room"
                         />
@@ -1115,5 +1141,7 @@ const Events = () => {
 };
 
 export default Events; 
+
+
 
 

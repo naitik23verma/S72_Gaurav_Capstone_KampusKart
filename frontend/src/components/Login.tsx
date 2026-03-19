@@ -59,10 +59,10 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col font-sans bg-white overflow-hidden">
+    <div className="min-h-screen w-screen flex flex-col font-sans bg-white">
       <div className="flex flex-1 min-h-0">
         {/* Left: form */}
-        <div className="flex flex-col justify-center items-center w-full md:w-1/2 px-4 sm:px-6 md:px-8 py-4 bg-white overflow-y-auto">
+        <div className="flex flex-col justify-center items-center w-full md:w-1/2 px-4 sm:px-6 md:px-8 py-8 bg-white overflow-y-auto">
         <div className="w-full max-w-sm">
 
           {/* Logo */}
@@ -91,7 +91,7 @@ const Login: React.FC = () => {
                 type="email"
                 autoComplete="email"
                 required
-                className={`w-full px-3 py-2.5 border-2 ${emailError ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200 min-h-touch`}
+                className={`w-full px-3 py-2.5 border-2 ${emailError ? 'border-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-base placeholder:text-gray-400 transition-colors duration-200 min-h-touch`}
                 placeholder="you@example.com"
                 value={email}
                 onChange={handleEmailChange}
@@ -108,7 +108,7 @@ const Login: React.FC = () => {
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
                   required
-                  className="w-full px-3 py-2.5 pr-12 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-sm placeholder:text-gray-400 transition-colors duration-200 min-h-touch"
+                  className="w-full px-3 py-2.5 pr-12 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-900 text-base placeholder:text-gray-400 transition-colors duration-200 min-h-touch"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

@@ -94,7 +94,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
       <label className="block text-sm font-medium text-gray-700 mb-1">
         {single ? 'Image' : 'Images'}
       </label>
-      <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-200 rounded-md">
+      <div className="mt-1 flex justify-center px-4 pt-4 pb-5 sm:px-6 sm:pt-5 sm:pb-6 border-2 border-gray-200 rounded-md">
         <div className="space-y-1 text-center">
           <div className="flex text-sm text-gray-600">
             <label
@@ -123,13 +123,13 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 
       {/* Image Previews */}
       {images.length > 0 && (
-        <div className={`mt-4 grid gap-2 ${single ? 'grid-cols-1' : 'grid-cols-3 xs:grid-cols-4 sm:grid-cols-5'}`}>
+        <div className={`mt-4 grid gap-2 ${single ? 'grid-cols-1' : 'grid-cols-2 xs:grid-cols-3 sm:grid-cols-4'}`}>
           {images.map((image, index) => (
             <div key={index} className="relative group">
               <img
                 src={image.previewUrl || image.url}
                 alt={`Preview ${index + 1}`}
-                className={`${single ? 'h-48 w-full' : 'h-20 w-full xs:h-24 sm:h-28'} object-cover rounded-lg border-2 border-gray-200`}
+                className={`${single ? 'h-48 w-full' : 'h-24 w-full sm:h-28'} object-cover rounded-lg border-2 border-gray-200`}
               />
               <button
                 type="button"

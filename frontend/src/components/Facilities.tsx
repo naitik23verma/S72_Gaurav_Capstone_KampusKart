@@ -468,7 +468,31 @@ const Facilities = () => {
             </div>
           ))}
           {filteredFacilities.length === 0 && (
-            <div className="col-span-full text-center text-gray-400 py-12">No facilities found.</div>
+            <div className="col-span-full flex flex-col items-center justify-center py-16 px-4">
+              <svg className="w-24 h-24 mb-4 text-gray-200" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="16" y="32" width="64" height="52" rx="4" fill="white" stroke="#E5E7EB" strokeWidth="3" />
+                <path d="M8 36L48 12l40 24" stroke="#E5E7EB" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <rect x="36" y="60" width="24" height="24" rx="2" fill="#F3F4F6" stroke="#E5E7EB" strokeWidth="2" />
+                <rect x="24" y="44" width="12" height="12" rx="2" fill="#E5E7EB" />
+                <rect x="60" y="44" width="12" height="12" rx="2" fill="#E5E7EB" />
+                <circle cx="72" cy="72" r="16" fill="#F3F4F6" stroke="#E5E7EB" strokeWidth="2" />
+                <path d="M66 72h12M72 66v12" stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
+              <p className="text-gray-500 font-semibold text-lg mb-1">
+                {searchQuery || filterType !== 'All' ? 'No facilities match your filters' : 'No facilities yet'}
+              </p>
+              <p className="text-gray-400 text-sm mb-4">
+                {searchQuery || filterType !== 'All' ? 'Try adjusting your search or type filter.' : 'Campus facilities will appear here once added.'}
+              </p>
+              {(searchQuery || filterType !== 'All') && (
+                <button
+                  onClick={() => { setSearchInput(''); setSearchQuery(''); setFilterType('All'); }}
+                  className="px-5 py-2 rounded-lg bg-[#181818] text-white text-sm font-semibold hover:bg-[#00C6A7] transition-colors duration-200"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
           )}
         </div>
 
@@ -531,7 +555,7 @@ const Facilities = () => {
                         type="text"
                         value={newFacility.name}
                         onChange={e => setNewFacility({ ...newFacility, name: e.target.value })}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                         required
                         placeholder="e.g. Main Library"
                       />
@@ -543,7 +567,7 @@ const Facilities = () => {
                         type="text"
                         value={newFacility.location}
                         onChange={e => setNewFacility({ ...newFacility, location: e.target.value })}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                         required
                         placeholder="e.g. Central Block"
                       />
@@ -555,7 +579,7 @@ const Facilities = () => {
                     <textarea
                       value={newFacility.description}
                       onChange={e => setNewFacility({ ...newFacility, description: e.target.value })}
-                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm resize-none"
+                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base resize-none"
                       rows={3}
                       required
                       placeholder="Describe the facility, features, etc."
@@ -568,7 +592,7 @@ const Facilities = () => {
                       <select
                         value={newFacility.type}
                         onChange={e => setNewFacility({ ...newFacility, type: e.target.value })}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                         required
                       >
                         <option value="Academic">Academic</option>
@@ -583,7 +607,7 @@ const Facilities = () => {
                       <select
                         value={newFacility.icon}
                         onChange={e => setNewFacility({ ...newFacility, icon: e.target.value })}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                         required
                       >
                         {iconOptions.map(opt => (
@@ -706,7 +730,7 @@ const Facilities = () => {
                         type="text"
                         value={editFacility?.name || ''}
                         onChange={e => setEditFacility(editFacility ? { ...editFacility, name: e.target.value } : null)}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                         required
                         placeholder="e.g. Main Library"
                       />
@@ -718,7 +742,7 @@ const Facilities = () => {
                         type="text"
                         value={editFacility?.location || ''}
                         onChange={e => setEditFacility(editFacility ? { ...editFacility, location: e.target.value } : null)}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                         required
                         placeholder="e.g. Central Block"
                       />
@@ -730,7 +754,7 @@ const Facilities = () => {
                     <textarea
                       value={editFacility?.description || ''}
                       onChange={e => setEditFacility(editFacility ? { ...editFacility, description: e.target.value } : null)}
-                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm resize-none"
+                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base resize-none"
                       rows={3}
                       required
                       placeholder="Describe the facility, features, etc."
@@ -743,7 +767,7 @@ const Facilities = () => {
                       <select
                         value={editFacility?.type || 'Academic'}
                         onChange={e => setEditFacility(editFacility ? { ...editFacility, type: e.target.value as Facility['type'] } : null)}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                         required
                       >
                         <option value="Academic">Academic</option>
@@ -758,7 +782,7 @@ const Facilities = () => {
                       <select
                         value={editFacility?.icon || 'MdSchool'}
                         onChange={e => setEditFacility(editFacility ? { ...editFacility, icon: e.target.value } : null)}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                         required
                       >
                         {iconOptions.map(opt => (
@@ -1021,5 +1045,6 @@ const Facilities = () => {
 };
 
 export default Facilities; 
+
 
 

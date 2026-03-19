@@ -653,7 +653,29 @@ const ClubsRecruitment = () => {
             </div>
           ))}
           {filteredClubs.length === 0 && (
-            <div className="col-span-full text-center text-gray-400 py-12">No club recruitments found.</div>
+            <div className="col-span-full flex flex-col items-center justify-center py-16 px-4">
+              <svg className="w-24 h-24 mb-4 text-gray-200" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="36" cy="32" r="14" fill="white" stroke="#E5E7EB" strokeWidth="3" />
+                <circle cx="60" cy="32" r="14" fill="white" stroke="#E5E7EB" strokeWidth="3" />
+                <path d="M8 80c0-15.464 12.536-28 28-28h24c15.464 0 28 12.536 28 28" stroke="#E5E7EB" strokeWidth="3" strokeLinecap="round" />
+                <circle cx="72" cy="72" r="16" fill="#F3F4F6" stroke="#E5E7EB" strokeWidth="2" />
+                <path d="M66 72h12M72 66v12" stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
+              <p className="text-gray-500 font-semibold text-lg mb-1">
+                {searchQuery || filterStatus !== 'all' ? 'No clubs match your filters' : 'No club recruitments yet'}
+              </p>
+              <p className="text-gray-400 text-sm mb-4">
+                {searchQuery || filterStatus !== 'all' ? 'Try adjusting your search or status filter.' : 'Club recruitment drives will appear here when open.'}
+              </p>
+              {(searchQuery || filterStatus !== 'all') && (
+                <button
+                  onClick={() => { setSearchInput(''); setSearchQuery(''); setFilterStatus('all'); }}
+                  className="px-5 py-2 rounded-lg bg-[#181818] text-white text-sm font-semibold hover:bg-[#00C6A7] transition-colors duration-200"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
           )}
         </div>
         {/* Add/Edit Club Modal */}
@@ -674,7 +696,7 @@ const ClubsRecruitment = () => {
                           type="text"
                           value={newClub.title}
                           onChange={e => setNewClub({...newClub, title: e.target.value})}
-                          className="w-full px-10 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
+                          className="w-full px-10 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base"
                           placeholder="Enter recruitment title (e.g., Drama Club 2024 Intake)"
                           required
                           aria-label="Recruitment Title"
@@ -689,7 +711,7 @@ const ClubsRecruitment = () => {
                         type="text"
                         value={newClub.clubName}
                         onChange={e => setNewClub({...newClub, clubName: e.target.value})}
-                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base"
                         required
                         aria-label="Club Name"
                       />
@@ -703,7 +725,7 @@ const ClubsRecruitment = () => {
                         type="date"
                         value={newClub.startDate}
                         onChange={e => setNewClub({...newClub, startDate: e.target.value})}
-                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base"
                         required
                         aria-label="Start Date"
                       />
@@ -714,7 +736,7 @@ const ClubsRecruitment = () => {
                         type="date"
                         value={newClub.endDate}
                         onChange={e => setNewClub({...newClub, endDate: e.target.value})}
-                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base"
                         required
                         aria-label="End Date"
                       />
@@ -726,7 +748,7 @@ const ClubsRecruitment = () => {
                       <textarea
                         value={newClub.description}
                         onChange={e => setNewClub({...newClub, description: e.target.value})}
-                        className="w-full px-10 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm resize-none"
+                        className="w-full px-10 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base resize-none"
                         rows={4}
                         placeholder="Provide a detailed description of the recruitment. Include requirements, process, and highlights."
                         required
@@ -743,7 +765,7 @@ const ClubsRecruitment = () => {
                         type="url"
                         value={newClub.formUrl}
                         onChange={e => setNewClub({...newClub, formUrl: e.target.value})}
-                        className="w-full px-10 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
+                        className="w-full px-10 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base"
                         placeholder="https://forms.google.com/..."
                         required
                         aria-label="Form URL"
@@ -757,7 +779,7 @@ const ClubsRecruitment = () => {
                     <select
                       value={newClub.status}
                       onChange={e => setNewClub({...newClub, status: e.target.value as 'Open' | 'Closed'})}
-                      className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
+                      className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base"
                       required
                       aria-label="Recruitment Status"
                     >
@@ -773,7 +795,7 @@ const ClubsRecruitment = () => {
                         type="text"
                         value={newClub.contactInfo.name}
                         onChange={e => setNewClub({...newClub, contactInfo: {...newClub.contactInfo, name: e.target.value}})}
-                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base"
                         placeholder="Contact Name"
                         aria-label="Contact Name"
                       />
@@ -781,7 +803,7 @@ const ClubsRecruitment = () => {
                         type="email"
                         value={newClub.contactInfo.email}
                         onChange={e => setNewClub({...newClub, contactInfo: {...newClub.contactInfo, email: e.target.value}})}
-                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base"
                         placeholder="Contact Email"
                         aria-label="Contact Email"
                       />
@@ -789,7 +811,7 @@ const ClubsRecruitment = () => {
                         type="tel"
                         value={newClub.contactInfo.phone}
                         onChange={e => setNewClub({...newClub, contactInfo: {...newClub.contactInfo, phone: e.target.value}})}
-                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base"
                         placeholder="Contact Phone"
                         aria-label="Contact Phone"
                       />
@@ -872,4 +894,5 @@ const ClubsRecruitment = () => {
 };
 
 export default ClubsRecruitment;
+
 

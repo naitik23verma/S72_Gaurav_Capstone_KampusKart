@@ -539,8 +539,33 @@ const LostFound = () => {
               </div>
             ))
           ) : items.length === 0 ? (
-            <div className="col-span-full text-center py-12">
-              <p className="text-gray-500 text-lg">No items found</p>
+            <div className="col-span-full flex flex-col items-center justify-center py-20 px-4">
+              <svg className="w-40 h-40 mb-6 text-gray-200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                {/* Bag body */}
+                <rect x="55" y="80" width="90" height="80" rx="12" fill="#f3f4f6" stroke="#d1d5db" strokeWidth="3"/>
+                {/* Bag handle */}
+                <path d="M75 80 Q75 55 100 55 Q125 55 125 80" stroke="#d1d5db" strokeWidth="3" fill="none" strokeLinecap="round"/>
+                {/* Question mark */}
+                <text x="100" y="132" textAnchor="middle" fontSize="36" fontWeight="700" fill="#9ca3af">?</text>
+                {/* Magnifying glass */}
+                <circle cx="148" cy="148" r="18" fill="#e5e7eb" stroke="#d1d5db" strokeWidth="3"/>
+                <line x1="161" y1="161" x2="172" y2="172" stroke="#d1d5db" strokeWidth="4" strokeLinecap="round"/>
+                <circle cx="148" cy="148" r="10" fill="none" stroke="#9ca3af" strokeWidth="2.5"/>
+              </svg>
+              <p className="text-xl font-bold text-gray-700 mb-2">Nothing here yet</p>
+              <p className="text-gray-400 text-sm text-center max-w-xs">
+                {searchQuery || filterType !== 'all' || filterResolved !== 'all'
+                  ? 'No items match your current filters. Try adjusting your search.'
+                  : 'Be the first to post a lost or found item. Someone out there might be looking!'}
+              </p>
+              {(searchQuery || filterType !== 'all' || filterResolved !== 'all') && (
+                <button
+                  onClick={() => { setSearchQuery(''); setSearchInput(''); setFilterType('all'); setFilterResolved('all'); }}
+                  className="mt-5 px-5 py-2.5 rounded-lg bg-[#181818] text-white text-sm font-semibold hover:bg-[#00C6A7] transition-colors duration-200"
+                >
+                  Clear filters
+                </button>
+              )}
             </div>
           ) : (
             items.filter(item => item).map((item, idx) => (
@@ -771,7 +796,7 @@ const LostFound = () => {
                       <select
                         value={newItem.type}
                         onChange={(e) => setNewItem({...newItem, type: e.target.value as 'lost' | 'found'})}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
                         required
                         aria-label="Item Type"
                       >
@@ -800,7 +825,7 @@ const LostFound = () => {
                           }}
                           onBlur={(e) => handleFieldBlur('date', e.target.value)}
                           max={new Date().toISOString().split('T')[0]}
-                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.date ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm cursor-pointer`}
+                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.date ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base cursor-pointer`}
                           required
                           aria-label="Item Date"
                         />
@@ -822,7 +847,7 @@ const LostFound = () => {
                           }
                         }}
                         onBlur={(e) => handleFieldBlur('title', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.title ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
+                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.title ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base`}
                         placeholder="e.g. Black Wallet, Red Backpack"
                         required
                         aria-label="Item Title"
@@ -844,7 +869,7 @@ const LostFound = () => {
                           }
                         }}
                         onBlur={(e) => handleFieldBlur('description', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm resize-none`}
+                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base resize-none`}
                         rows={4}
                         placeholder="Describe the item, any unique features, etc."
                         required
@@ -868,7 +893,7 @@ const LostFound = () => {
                           }
                         }}
                         onBlur={(e) => handleFieldBlur('location', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.location ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
+                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.location ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base`}
                         placeholder="Where was the item lost/found?"
                         aria-label="Item Location"
                       />
@@ -894,7 +919,7 @@ const LostFound = () => {
                         }
                       }}
                       onBlur={(e) => handleFieldBlur('contact', e.target.value)}
-                      className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.contact ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 sm:text-sm`}
+                      className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.contact ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base`}
                       placeholder="Email or phone number"
                       required
                       aria-label="Contact Information"
@@ -1173,3 +1198,5 @@ const LostFound = () => {
 };
 
 export default LostFound;
+
+

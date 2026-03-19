@@ -70,8 +70,8 @@ export const FeatureModal: React.FC<FeatureModalProps> = ({
       aria-labelledby="modal-title"
     >
       <div
-        className={`bg-white sm:rounded-xl rounded-t-xl shadow-2xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 ${sizeClasses[size]} w-full mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto relative`}
-        style={{ colorScheme: 'light', backgroundColor: '#ffffff', color: '#213547' }}
+        className={`bg-white sm:rounded-xl rounded-t-xl shadow-2xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 ${sizeClasses[size]} w-full mx-auto overflow-y-auto relative`}
+        style={{ colorScheme: 'light', backgroundColor: '#ffffff', color: '#213547', maxHeight: 'min(95vh, 95dvh)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

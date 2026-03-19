@@ -5,8 +5,11 @@ import { MapSkeleton } from './common/SkeletonLoader';
 import { FeatureModal } from './common/FeatureModal';
 import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
 
-// Define libraries as a proper static constant with correct type
-const GOOGLE_MAPS_LIBRARIES: Libraries = ["places", "marker"] as Libraries;
+const rawMapId = (import.meta.env.VITE_GOOGLE_MAPS_MAP_ID as string | undefined)?.trim() || '';
+const hasValidMapId = rawMapId.length > 0;
+
+// Only request marker library when a mapId is configured for Advanced Markers.
+const GOOGLE_MAPS_LIBRARIES: Libraries = (hasValidMapId ? ["places", "marker"] : ["places"]) as Libraries;
 
 // Memoize map options to prevent unnecessary re-renders
 const MAP_OPTIONS = {
@@ -16,7 +19,6 @@ const MAP_OPTIONS = {
   scaleControl: true,
   mapTypeControl: true,
   fullscreenControl: true,
-  mapId: import.meta.env.VITE_GOOGLE_MAPS_MAP_ID
 } as const;
 
 // Memoize map container style
@@ -69,6 +71,9 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   useEffect(() => {
     if (isLoaded) {
       console.log('Google Maps script loaded successfully');
+      if (!hasValidMapId) {
+        console.warn('VITE_GOOGLE_MAPS_MAP_ID is not set. Falling back to classic markers.');
+      }
       setMapsReady(true);
     }
   }, [isLoaded]);
@@ -373,11 +378,16 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   const onMapLoad = useCallback((map: google.maps.Map) => {
     setMapRef(map);
     setIsLoading(false);
+
+    if (!hasValidMapId) {
+      setAdvancedMarkersAvailable(false);
+    } else {
     const capabilities = map.getMapCapabilities?.();
     const supportsAdvancedMarkers =
       !!window.google?.maps?.marker?.AdvancedMarkerElement &&
       capabilities?.isAdvancedMarkersAvailable === true;
     setAdvancedMarkersAvailable(supportsAdvancedMarkers);
+    }
     
     // Add zoom change listener to close InfoWindow on zoom
     if (zoomChangeListenerRef.current) {
@@ -690,6 +700,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
               zoom={animationInProgress.current ? undefined : mapZoom}
               options={{
                 ...MAP_OPTIONS,
+                ...(hasValidMapId ? { mapId: rawMapId } : {}),
                 // Adjust controls for mobile and desktop
                 zoomControl: true,
                 mapTypeControl: isPanelOpen,

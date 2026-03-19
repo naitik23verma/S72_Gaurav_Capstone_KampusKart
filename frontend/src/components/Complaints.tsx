@@ -32,8 +32,8 @@ interface Complaint {
     comment?: string;
     updatedBy: {
       _id: string;
-      name: string;
-    };
+      name?: string;
+    } | string;
     timestamp: string;
   }>;
   createdAt: string;
@@ -77,6 +77,7 @@ const Complaints = () => {
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [pendingDeleteComplaintId, setPendingDeleteComplaintId] = useState<string | null>(null);
+  const [statusComment, setStatusComment] = useState('');
   const buildComplaintSuggestions = useCallback((complaint: Complaint, normalizedQuery: string): string[] => {
     const suggestions: string[] = [];
     if (complaint?.title?.toLowerCase().includes(normalizedQuery)) {
@@ -254,6 +255,7 @@ const Complaints = () => {
       department: complaint?.department || '',
       status: complaint?.status || 'Open',
     });
+    setStatusComment('');
     setImages(
       (complaint.images || []).map(img => ({
         previewUrl: img.url,
@@ -279,6 +281,7 @@ const Complaints = () => {
     setImages([]);
     setFormError(null);
     setFieldErrors({});
+    setStatusComment('');
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -309,6 +312,17 @@ const Complaints = () => {
       return;
     }
 
+    if (
+      editingComplaint &&
+      user?.isAdmin &&
+      newComplaint.status !== editingComplaint.status &&
+      !statusComment.trim()
+    ) {
+      setFormError('Please add a status update note when changing complaint status.');
+      setIsSubmitting(false);
+      return;
+    }
+
     const method = editingComplaint ? 'PUT' : 'POST';
     const url = editingComplaint ? `${API_BASE}/api/complaints/${editingComplaint._id}` : `${API_BASE}/api/complaints`;
 
@@ -320,6 +334,9 @@ const Complaints = () => {
       formData.append('priority', newComplaint.priority);
       formData.append('department', newComplaint.department);
       formData.append('status', newComplaint.status);
+      if (editingComplaint && user?.isAdmin && newComplaint.status !== editingComplaint.status) {
+        formData.append('statusComment', statusComment.trim());
+      }
       
       // Append new images
       images.forEach((image) => {
@@ -857,6 +874,20 @@ const Complaints = () => {
                           <option value="Closed">Closed</option>
                         </select>
                         <p className="text-xs text-gray-500 mt-1">Update the status of the complaint.</p>
+                        {newComplaint.status !== editingComplaint.status && (
+                          <div className="mt-3">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Status Update Note</label>
+                            <textarea
+                              value={statusComment}
+                              onChange={(e) => setStatusComment(e.target.value)}
+                              rows={3}
+                              maxLength={500}
+                              placeholder="Add a short update for the complainant (required when status changes)."
+                              className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm resize-none"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">{statusComment.length}/500 characters</p>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -982,6 +1013,36 @@ const Complaints = () => {
                                        Posted by {selectedComplaintForDetails.user.name} on {selectedComplaintForDetails.createdAt ? new Date(selectedComplaintForDetails.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' }) : ''}
                                      </span>
                             </div>
+                        </div>
+
+                        <div className="space-y-3 pt-4 border-t-2 border-gray-200">
+                          <h4 className="text-lg font-semibold text-gray-900">Follow-up Updates</h4>
+                          {selectedComplaintForDetails.statusHistory && selectedComplaintForDetails.statusHistory.length > 0 ? (
+                            <ol className="space-y-3">
+                              {[...selectedComplaintForDetails.statusHistory]
+                                .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                                .map((entry, index) => {
+                                  const updaterName = typeof entry.updatedBy === 'string'
+                                    ? 'Admin'
+                                    : (entry.updatedBy?.name || 'Admin');
+                                  return (
+                                    <li key={`${entry.timestamp}-${index}`} className="rounded-lg border-2 border-gray-200 bg-white p-3">
+                                      <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                                        {renderStatus(entry.status)}
+                                        <span className="text-xs text-gray-500">by {updaterName}</span>
+                                        <span className="text-xs text-gray-400">•</span>
+                                        <span className="text-xs text-gray-500">{new Date(entry.timestamp).toLocaleString()}</span>
+                                      </div>
+                                      <p className="text-sm text-gray-700">
+                                        {entry.comment?.trim() ? entry.comment : 'No additional comment provided.'}
+                                      </p>
+                                    </li>
+                                  );
+                                })}
+                            </ol>
+                          ) : (
+                            <p className="text-sm text-gray-500">No follow-up updates yet. Admin status changes will appear here.</p>
+                          )}
                         </div>
                     </div>
 

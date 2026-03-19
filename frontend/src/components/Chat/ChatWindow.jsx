@@ -862,7 +862,7 @@ const ChatWindow = () => {
           top: 0,
           left: 0,
           right: 0,
-          height: viewportHeight,
+          height: '100svh',
           zIndex: 10,
           display: 'flex',
           flexDirection: 'column',
@@ -887,7 +887,7 @@ const ChatWindow = () => {
       left: 0,
       right: 0,
       // Use visual viewport height so the chat shrinks when iOS keyboard opens
-      height: viewportHeight,
+      height: '100svh',
       zIndex: 10,
       display: 'flex',
       flexDirection: 'column',

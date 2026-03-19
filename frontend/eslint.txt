@@ -1,0 +1,7 @@
+
+E:\Kampuskart\S72_Gaurav_Capstone_KampusKart\frontend\src\components\Chat\ChatWindow.jsx
+  865:19  error  'viewportHeight' is not defined  no-undef
+  890:15  error  'viewportHeight' is not defined  no-undef
+
+✖ 2 problems (2 errors, 0 warnings)
+

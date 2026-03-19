@@ -2,23 +2,30 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
-import Login from './components/Login';
-import Signup from './components/Signup';
-import Landing from './components/Landing';
-import ForgotPassword from './components/ForgotPassword';
-import Home from './components/Home';
-import LostFound from './components/LostFound';
-import Profile from './components/Profile';
-import Complaints from './components/Complaints';
-import CampusMap from './components/CampusMap';
-import Events from './components/Events';
-import News from './components/News';
-import Facilities from './components/Facilities';
-import ChatWindow from './components/Chat/ChatWindow';
-import ClubsRecruitment from './components/ClubsRecruitment';
+const Login = React.lazy(() => import('./components/Login'));
+const Signup = React.lazy(() => import('./components/Signup'));
+const Landing = React.lazy(() => import('./components/Landing'));
+const ForgotPassword = React.lazy(() => import('./components/ForgotPassword'));
+const Home = React.lazy(() => import('./components/Home'));
+const LostFound = React.lazy(() => import('./components/LostFound'));
+const Profile = React.lazy(() => import('./components/Profile'));
+const Complaints = React.lazy(() => import('./components/Complaints'));
+const CampusMap = React.lazy(() => import('./components/CampusMap'));
+const Events = React.lazy(() => import('./components/Events'));
+const News = React.lazy(() => import('./components/News'));
+const Facilities = React.lazy(() => import('./components/Facilities'));
+const ChatWindow = React.lazy(() => import('./components/Chat/ChatWindow'));
+const ClubsRecruitment = React.lazy(() => import('./components/ClubsRecruitment'));
 import KampusKartNavbar from './components/KampusKartNavbar';
-import PrivacyPolicy from './components/PrivacyPolicy';
-import TermsOfService from './components/TermsOfService';
+const PrivacyPolicy = React.lazy(() => import('./components/PrivacyPolicy'));
+const TermsOfService = React.lazy(() => import('./components/TermsOfService'));
+
+// Centralized lazy loading fallback spinner
+const PageLoader = () => (
+  <div className="flex justify-center items-center w-full min-h-[60vh]">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+);
 
 // Protected Route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -61,103 +68,105 @@ const AppLayout: React.FC = () => {
     <div className="flex flex-col min-h-screen">
       {showNavbar && <KampusKartNavbar />}
       <div className="flex-grow">
-        <Routes>
-          <Route path="/" element={<RootRedirect />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/auth/google/callback" element={<GoogleCallback />} />
-          <Route
-            path="/home"
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/chat"
-            element={
-              <ProtectedRoute>
-                <ChatWindow />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/lostfound"
-            element={
-              <ProtectedRoute>
-                <LostFound />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/complaints"
-            element={
-              <ProtectedRoute>
-                <Complaints />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/campus-map"
-            element={
-              <ProtectedRoute>
-                <CampusMap />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile/:userId"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/events"
-            element={
-              <ProtectedRoute>
-                <Events />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/news"
-            element={
-              <ProtectedRoute>
-                <News />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/facilities"
-            element={
-              <ProtectedRoute>
-                <Facilities />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/clubs-recruitment"
-            element={
-              <ProtectedRoute>
-                <ClubsRecruitment />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/terms" element={<TermsOfService />} />
-        </Routes>
+        <React.Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<RootRedirect />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/auth/google/callback" element={<GoogleCallback />} />
+            <Route
+              path="/home"
+              element={
+                <ProtectedRoute>
+                  <Home />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/chat"
+              element={
+                <ProtectedRoute>
+                  <ChatWindow />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/lostfound"
+              element={
+                <ProtectedRoute>
+                  <LostFound />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/complaints"
+              element={
+                <ProtectedRoute>
+                  <Complaints />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/campus-map"
+              element={
+                <ProtectedRoute>
+                  <CampusMap />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile/:userId"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/events"
+              element={
+                <ProtectedRoute>
+                  <Events />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/news"
+              element={
+                <ProtectedRoute>
+                  <News />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/facilities"
+              element={
+                <ProtectedRoute>
+                  <Facilities />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/clubs-recruitment"
+              element={
+                <ProtectedRoute>
+                  <ClubsRecruitment />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
+          </Routes>
+        </React.Suspense>
       </div>
     </div>
   );

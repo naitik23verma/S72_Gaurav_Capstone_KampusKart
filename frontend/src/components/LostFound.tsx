@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { FiSearch, FiMapPin, FiUser, FiCalendar, FiEdit2, FiTrash2, FiCheckCircle, FiInfo, FiTag, FiFileText, FiMail } from 'react-icons/fi';
+import { FiSearch, FiMapPin, FiUser, FiCalendar, FiEdit2, FiTrash2, FiCheckCircle, FiInfo, FiTag, FiFileText, FiMail, FiX } from 'react-icons/fi';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
@@ -85,6 +85,7 @@ const LostFound = () => {
   }, []);
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [pendingDeleteItemId, setPendingDeleteItemId] = useState<string | null>(null);
 
   const buildLostFoundSuggestions = useCallback((item: LostFoundItem, normalizedQuery: string): string[] => {
     const suggestions: string[] = [];
@@ -112,7 +113,7 @@ const LostFound = () => {
   // Auto-hide success message after 3 seconds
   useEffect(() => {
     if (successMessage) {
-      const timer = setTimeout(() => setSuccessMessage(null), 3000);
+      const timer = setTimeout(() => setSuccessMessage(null), 5000);
       return () => clearTimeout(timer);
     }
   }, [successMessage]);
@@ -296,7 +297,6 @@ const LostFound = () => {
 
   const handleDeleteItem = async (id: string) => {
     if (!token) return;
-    if (!window.confirm('Are you sure you want to delete this item?')) return;
     try {
       const response = await fetch(`${API_BASE}/api/lostfound/${id}`, {
         method: 'DELETE',
@@ -304,15 +304,20 @@ const LostFound = () => {
       });
       if (!response.ok) {
         const error = await response.json();
-        alert(error.message || 'Failed to delete item');
+        setError(error.message || 'Failed to delete item');
         return;
       }
-      setItems(items.filter(i => i._id !== id));
+      setItems(prevItems => prevItems.filter(i => i._id !== id));
       setSelectedItemForDetails(null);
+      setPendingDeleteItemId(null);
       setSuccessMessage('Item deleted successfully!');
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to delete item');
+      setError(error instanceof Error ? error.message : 'Failed to delete item');
     }
+  };
+
+  const requestDeleteItem = (id: string) => {
+    setPendingDeleteItemId(id);
   };
 
   const handleMarkResolved = async (id: string) => {
@@ -337,7 +342,7 @@ const LostFound = () => {
       }
       setSuccessMessage('Item marked as resolved!');
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to mark as resolved');
+      setError(error instanceof Error ? error.message : 'Failed to mark as resolved');
     }
   };
 
@@ -384,7 +389,15 @@ const LostFound = () => {
             aria-live="polite"
           >
             <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <p className="text-green-800 font-medium">{successMessage}</p>
+            <p className="text-green-800 font-medium flex-1">{successMessage}</p>
+            <button
+              type="button"
+              onClick={() => setSuccessMessage(null)}
+              className="p-1 rounded-md text-green-700 hover:bg-green-100"
+              aria-label="Dismiss success message"
+            >
+              <FiX className="w-4 h-4" />
+            </button>
           </div>
         )}
         
@@ -497,6 +510,35 @@ const LostFound = () => {
             )}
           </div>
         </div>
+
+        {(searchQuery || filterType !== 'all' || filterResolved !== 'all') && (
+          <div className="mb-6 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-gray-500">Active filters:</span>
+            {filterType !== 'all' && (
+              <span className="text-xs px-3 py-1.5 rounded-lg border-2 border-gray-200 bg-white text-gray-700 font-semibold capitalize">
+                Type: {filterType}
+              </span>
+            )}
+            {filterResolved !== 'all' && (
+              <span className="text-xs px-3 py-1.5 rounded-lg border-2 border-gray-200 bg-white text-gray-700 font-semibold capitalize">
+                Status: {filterResolved}
+              </span>
+            )}
+            {searchQuery && (
+              <span className="text-xs px-3 py-1.5 rounded-lg border-2 border-gray-200 bg-white text-gray-700 font-semibold">
+                Search: {searchQuery}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => { setSearchQuery(''); setSearchInput(''); setFilterType('all'); setFilterResolved('all'); }}
+              className="ml-auto px-4 py-2 rounded-lg bg-[#181818] text-white text-xs font-bold hover:bg-[#00C6A7] transition-colors duration-200"
+            >
+              Clear all
+            </button>
+          </div>
+        )}
+
         {/* Card Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
           {isFiltering ? (
@@ -645,9 +687,9 @@ const LostFound = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDeleteItem(item._id);
+                          requestDeleteItem(item._id);
                         }}
-                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200 text-xs font-medium min-w-0 min-h-touch"
+                        className="flex-1 sm:flex-none sm:px-4 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-white text-red-700 border-2 border-red-200 rounded-lg hover:bg-red-50 transition-colors duration-200 text-xs font-semibold min-w-0 min-h-touch"
                       >
                         <FiTrash2 className="w-3.5 h-3.5 flex-shrink-0" />
                         <span className="truncate">Delete</span>
@@ -667,6 +709,14 @@ const LostFound = () => {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
+          </div>
+        )}
+        {!isFiltering && !isFetchingMore && items.length > 0 && currentPage >= totalPages && (
+          <div className="mt-8 text-center">
+            <p className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm font-semibold text-gray-600">
+              <span className="w-2 h-2 rounded-full bg-[#00C6A7]" />
+              You have reached the end of results.
+            </p>
           </div>
         )}
         <FeatureModal
@@ -1048,7 +1098,7 @@ const LostFound = () => {
                   </button>
                 )}
                 <button
-                  onClick={() => handleDeleteItem(selectedItemForDetails._id)}
+                  onClick={() => requestDeleteItem(selectedItemForDetails._id)}
                   className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 active:bg-[#F05A25] transition-colors duration-200"
                 >
                   <FiTrash2 className="w-4 h-4" /> Delete
@@ -1066,6 +1116,31 @@ const LostFound = () => {
           </div>
         </div>
       )}
+
+      <FeatureModal
+        isOpen={!!pendingDeleteItemId}
+        onClose={() => setPendingDeleteItemId(null)}
+        title="Delete Item"
+        error={null}
+      >
+        <p className="text-sm text-gray-600 mb-6">Are you sure you want to delete this item? This action cannot be undone.</p>
+        <div className="flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={() => setPendingDeleteItemId(null)}
+            className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => pendingDeleteItemId && handleDeleteItem(pendingDeleteItemId)}
+            className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600"
+          >
+            Delete
+          </button>
+        </div>
+      </FeatureModal>
 
       {/* Zoomed Image Modal */}
       {zoomedImage && (
@@ -1102,7 +1177,7 @@ const LostFound = () => {
           {selectedItemForDetails && selectedItemForDetails.images && selectedItemForDetails.images.length > 1 && (
             <>
               <button
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
+                className="absolute left-2 sm:left-4 top-[72%] sm:top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-2 sm:p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
                 onClick={(e) => {
                   e.stopPropagation();
                   const currentIndex = selectedItemForDetails.images.findIndex(img => img.url === zoomedImage);
@@ -1116,7 +1191,7 @@ const LostFound = () => {
                 </svg>
               </button>
               <button
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
+                className="absolute right-2 sm:right-4 top-[72%] sm:top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-2 sm:p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
                 onClick={(e) => {
                   e.stopPropagation();
                   const currentIndex = selectedItemForDetails.images.findIndex(img => img.url === zoomedImage);

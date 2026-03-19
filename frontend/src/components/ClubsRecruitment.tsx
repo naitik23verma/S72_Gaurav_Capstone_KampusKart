@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { FiCalendar, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiUser, FiPhone, FiCheckCircle, FiUsers } from 'react-icons/fi';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FiCalendar, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiUser, FiPhone, FiCheckCircle, FiUsers, FiX } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
@@ -8,6 +8,7 @@ import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
+import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
 
 interface ClubRecruitment {
   _id: string;
@@ -37,6 +38,27 @@ interface ClubDetailsProps {
 const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDelete, isAdmin }) => {
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
 
+  const buildWhatsAppShareUrl = () => {
+    const contactSegments = [club.contactInfo?.name, club.contactInfo?.email, club.contactInfo?.phone].filter(Boolean);
+    const lines = [
+      '🎓 *Join the Club Recruitment!* 🎓',
+      '',
+      `*Club:* ${club.clubName}`,
+      `*Title:* ${club.title}`,
+      `*Description:* ${club.description}`,
+      `*Recruitment Period:* ${new Date(club.startDate).toLocaleDateString()} - ${new Date(club.endDate).toLocaleDateString()}`,
+      ...(contactSegments.length > 0 ? [`*Contact:* ${contactSegments.join(' | ')}`] : []),
+      '',
+      'Apply now and be part of something amazing!',
+      `🔗 ${club.formUrl}`,
+      '',
+      `See more details here: ${typeof window !== 'undefined' ? window.location.href : ''}`,
+    ];
+
+    const encodedMessage = lines.map((line) => encodeURIComponent(line)).join('%0A');
+    return `https://wa.me/?text=${encodedMessage}`;
+  };
+
   const handleImageClick = (imageUrl: string) => {
     setZoomedImage(imageUrl);
   };
@@ -50,7 +72,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
       className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4"
       role="dialog"
       aria-modal="true"
-      aria-label="Club details"
+      aria-labelledby="club-details-title"
       onClick={onClose}
     >
       <div className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto relative" onClick={(e) => e.stopPropagation()}>
@@ -65,7 +87,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
           </svg>
         </button>
 
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12 sm:pr-14">{club.title}</h2>
+        <h2 id="club-details-title" className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12 sm:pr-14">{club.title}</h2>
         <div className="flex flex-col md:flex-row gap-8">
           {club.image?.url ? (
             <div 
@@ -77,6 +99,9 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
                 alt={club.title} 
                 className="block w-full h-full object-cover"
               />
+              <div className="absolute bottom-2 right-2 px-2 py-1 rounded-md bg-black/60 text-white text-xs font-semibold">
+                Tap to zoom
+              </div>
             </div>
           ) : (
             <div className="w-full md:w-1/2 lg:w-1/2 h-48 sm:h-64 md:h-80 bg-gray-50 rounded-lg mb-6 md:mb-0 flex flex-col items-center justify-center text-gray-400 flex-shrink-0 mx-auto md:mx-0 max-w-xl">
@@ -132,15 +157,13 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
                     Apply Now
                   </a>
                   <a
-                    href={`https://wa.me/?text=${encodeURIComponent(
-                      `🎓 *Join the Club Recruitment!* 🎓\n\n*Club:* ${club.clubName}\n*Title:* ${club.title}\n*Description:* ${club.description}\n*Recruitment Period:* ${new Date(club.startDate).toLocaleDateString()} - ${new Date(club.endDate).toLocaleDateString()}\n${club.contactInfo?.name ? `*Contact:* ${club.contactInfo.name}` : ''}${club.contactInfo?.email ? ` | ${club.contactInfo.email}` : ''}${club.contactInfo?.phone ? ` | ${club.contactInfo.phone}` : ''}\n\nApply now and be part of something amazing!\n🔗 ${club.formUrl}\n\nSee more details here: ${typeof window !== 'undefined' ? window.location.href : ''}`
-                    )}`}
+                    href={buildWhatsAppShareUrl()}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center w-full text-center px-6 py-3 rounded-lg font-bold text-white bg-[#25D366] hover:bg-[#128C7E] transition mb-4 gap-2"
+                    className="inline-flex items-center justify-center w-full text-center px-6 py-2.5 rounded-lg font-semibold text-[#128C7E] border-2 border-[#25D366] bg-white hover:bg-green-50 transition mb-4 gap-2"
                     style={{ textDecoration: 'none' }}
                   >
-                    <FaWhatsapp className="w-6 h-6" /> Share on WhatsApp
+                    <FaWhatsapp className="w-5 h-5" /> Share on WhatsApp
                   </a>
                 </>
               )}
@@ -222,67 +245,46 @@ const ClubsRecruitment = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedClubForDetails, setSelectedClubForDetails] = useState<ClubRecruitment | null>(null);
   const [filterStatus, setFilterStatus] = useState<'all' | 'Open' | 'Closed'>('all');
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const isSelectingSuggestion = useRef(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingDeleteClubId, setPendingDeleteClubId] = useState<string | null>(null);
+
+  const buildClubSuggestions = useCallback((club: ClubRecruitment, normalizedQuery: string): string[] => {
+    const suggestions: string[] = [];
+    if (club?.title?.toLowerCase().includes(normalizedQuery)) {
+      suggestions.push(club.title);
+    }
+    if (club?.clubName?.toLowerCase().includes(normalizedQuery)) {
+      suggestions.push(club.clubName);
+    }
+    return suggestions;
+  }, []);
+
+  const {
+    showSuggestions,
+    setShowSuggestions,
+    filteredSuggestions,
+    searchRef,
+    markSuggestionSelection,
+  } = useSearchSuggestions<ClubRecruitment>({
+    searchInput,
+    items: clubs,
+    buildSuggestions: buildClubSuggestions,
+  });
 
   useEffect(() => {
     fetchClubs();
   }, []);
 
-  // Auto-hide success message after 3 seconds
+  // Auto-hide success message after 5 seconds
   useEffect(() => {
     if (successMessage) {
       const timer = setTimeout(() => {
         setSuccessMessage(null);
-      }, 3000);
+      }, 5000);
       return () => clearTimeout(timer);
     }
   }, [successMessage]);
-
-  // Generate autocomplete suggestions
-  useEffect(() => {
-    if (isSelectingSuggestion.current) {
-      isSelectingSuggestion.current = false;
-      return;
-    }
-    if (searchInput.trim().length > 0) {
-      const suggestions = new Set<string>();
-      clubs.forEach(club => {
-        if (club.title.toLowerCase().includes(searchInput.toLowerCase())) {
-          suggestions.add(club.title);
-        }
-        if (club.clubName.toLowerCase().includes(searchInput.toLowerCase())) {
-          suggestions.add(club.clubName);
-        }
-        if (club.description.toLowerCase().includes(searchInput.toLowerCase())) {
-          const words = club.description.split(' ').filter(word => 
-            word.toLowerCase().includes(searchInput.toLowerCase()) && word.length > 3
-          );
-          words.forEach(word => suggestions.add(word));
-        }
-      });
-      setFilteredSuggestions(Array.from(suggestions).slice(0, 5));
-      setShowSuggestions(true);
-    } else {
-      setFilteredSuggestions([]);
-      setShowSuggestions(false);
-    }
-  }, [searchInput, clubs]);
-
-  // Close suggestions when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const fetchClubs = async () => {
     try {
@@ -386,7 +388,6 @@ const ClubsRecruitment = () => {
 
   const handleDeleteClub = async (id: string) => {
     if (!token) return;
-    if (!window.confirm('Are you sure you want to delete this club recruitment?')) return;
     try {
       const response = await fetch(`${API_BASE}/api/clubs/${id}`, {
         method: 'DELETE',
@@ -396,12 +397,17 @@ const ClubsRecruitment = () => {
         const error = await response.json();
         throw new Error(error.message || 'Failed to delete club recruitment');
       }
-      setClubs(clubs.filter(c => c._id !== id));
+      setClubs(prevClubs => prevClubs.filter(c => c._id !== id));
       setSelectedClubForDetails(null);
+      setPendingDeleteClubId(null);
       setSuccessMessage('Club recruitment deleted successfully!');
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to delete club recruitment');
     }
+  };
+
+  const requestDeleteClub = (id: string) => {
+    setPendingDeleteClubId(id);
   };
 
   const handleSaveClub = async (e: React.FormEvent) => {
@@ -502,7 +508,15 @@ const ClubsRecruitment = () => {
             aria-live="polite"
           >
             <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <p className="text-sm font-medium text-green-800">{successMessage}</p>
+            <p className="text-sm font-medium text-green-800 flex-1">{successMessage}</p>
+            <button
+              type="button"
+              onClick={() => setSuccessMessage(null)}
+              className="p-1 rounded-md text-green-700 hover:bg-green-100"
+              aria-label="Dismiss success message"
+            >
+              <FiX className="w-4 h-4" />
+            </button>
           </div>
         )}
         
@@ -580,7 +594,7 @@ const ClubsRecruitment = () => {
                     onMouseDown={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      isSelectingSuggestion.current = true;
+                      markSuggestionSelection();
                       setSearchInput(suggestion);
                       setSearchQuery(suggestion);
                       setShowSuggestions(false);
@@ -863,10 +877,35 @@ const ClubsRecruitment = () => {
             club={selectedClubForDetails}
             onClose={closeClubDetailsModal}
             onEdit={handleEditClub}
-            onDelete={handleDeleteClub}
+            onDelete={requestDeleteClub}
             isAdmin={user?.isAdmin}
           />
         )}
+
+        <FeatureModal
+          isOpen={!!pendingDeleteClubId}
+          onClose={() => setPendingDeleteClubId(null)}
+          title="Delete Club Recruitment"
+          error={null}
+        >
+          <p className="text-sm text-gray-600 mb-6">Are you sure you want to delete this club recruitment? This action cannot be undone.</p>
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setPendingDeleteClubId(null)}
+              className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => pendingDeleteClubId && handleDeleteClub(pendingDeleteClubId)}
+              className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600"
+            >
+              Delete
+            </button>
+          </div>
+        </FeatureModal>
       </main>
 
       {/* Footer */}

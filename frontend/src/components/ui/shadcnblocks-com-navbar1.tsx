@@ -1,5 +1,5 @@
 import { Menu, Lock } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import {
   Accordion,
@@ -68,6 +68,8 @@ const Navbar1 = ({
     signup: { text: "Sign up", url: "#" },
   },
 }: Navbar1Props) => {
+  const { pathname } = useLocation();
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white w-full border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-6 py-4 bg-white">
@@ -164,7 +166,7 @@ const Navbar1 = ({
                   collapsible
                   className="flex w-full flex-col gap-3 bg-transparent"
                 >
-                  {menu.map((item) => renderMobileMenuItem(item))}
+                  {menu.map((item) => renderMobileMenuItem(item, pathname))}
                 </Accordion>
                 {mobileExtraLinks.length > 0 && (
                   <div className="border-t border-gray-200 pt-4 mt-2">
@@ -176,7 +178,11 @@ const Navbar1 = ({
                         <SheetClose key={idx} asChild>
                           <Link
                             to={link.url}
-                            className="inline-flex h-11 items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold text-gray-700 bg-white border border-gray-200 transition-colors duration-200 hover:bg-gray-50 active:bg-gray-100 hover:text-gray-900 hover:border-gray-300 focus:outline-none focus:ring-0"
+                            className={`inline-flex h-11 items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold border transition-colors duration-200 focus:outline-none focus:ring-0 ${
+                              isActivePath(pathname, link.url)
+                                ? "text-[#00C6A7] bg-[#E6FFFA] border-[#00C6A7]"
+                                : "text-gray-700 bg-white border-gray-200 hover:bg-gray-50 active:bg-gray-100 hover:text-gray-900 hover:border-gray-300"
+                            }`}
                             aria-label={`Go to ${link.name}`}
                           >
                             {link.name}
@@ -224,6 +230,12 @@ const Navbar1 = ({
       </div>
     </header>
   );
+};
+
+const isActivePath = (pathname: string, targetUrl: string) => {
+  if (!targetUrl || targetUrl === "#") return false;
+  if (targetUrl === "/") return pathname === "/";
+  return pathname === targetUrl || pathname.startsWith(`${targetUrl}/`);
 };
 
 const renderMenuItem = (item: MenuItem) => {
@@ -303,7 +315,7 @@ const renderMenuItem = (item: MenuItem) => {
   );
 };
 
-const renderMobileMenuItem = (item: MenuItem) => {
+const renderMobileMenuItem = (item: MenuItem, pathname: string) => {
   if (item.items) {
     return (
       <AccordionItem key={item.title} value={item.title} className="border-none">
@@ -345,11 +357,15 @@ const renderMobileMenuItem = (item: MenuItem) => {
                 <SheetClose key={subItem.title} asChild>
                   <Link
                     to={subItem.url}
-                    className="flex select-none gap-3 rounded-lg p-3 leading-none outline-none transition-colors duration-200 border focus:ring-0 bg-white hover:bg-gray-50 active:bg-gray-100 text-gray-700 hover:text-gray-900 border-gray-200 hover:border-gray-300"
+                    className={`flex select-none gap-3 rounded-lg p-3 leading-none outline-none transition-colors duration-200 border focus:ring-0 ${
+                      isActivePath(pathname, subItem.url)
+                        ? "bg-[#E6FFFA] text-[#00C6A7] border-[#00C6A7]"
+                        : "bg-white hover:bg-gray-50 active:bg-gray-100 text-gray-700 hover:text-gray-900 border-gray-200 hover:border-gray-300"
+                    }`}
                     aria-label={`Go to ${subItem.title}`}
                   >
                     <div className="flex-1">
-                      <div className="text-sm font-semibold flex items-center gap-2 mb-1 text-gray-900">
+                      <div className={`text-sm font-semibold flex items-center gap-2 mb-1 ${isActivePath(pathname, subItem.url) ? 'text-[#00A489]' : 'text-gray-900'}`}>
                         {subItem.title}
                       </div>
                       {subItem.description && (
@@ -372,7 +388,11 @@ const renderMobileMenuItem = (item: MenuItem) => {
     <SheetClose key={item.title} asChild>
       <Link
         to={item.url}
-        className="flex h-11 items-center rounded-lg px-4 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100 hover:text-gray-900 transition-colors duration-200 border border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-0"
+        className={`flex h-11 items-center rounded-lg px-4 text-sm font-semibold transition-colors duration-200 border focus:outline-none focus:ring-0 ${
+          isActivePath(pathname, item.url)
+            ? "text-[#00C6A7] bg-[#E6FFFA] border-[#00C6A7]"
+            : "text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100 hover:text-gray-900 border-gray-200 hover:border-gray-300"
+        }`}
         aria-label={`Go to ${item.title}`}
       >
         {item.title}

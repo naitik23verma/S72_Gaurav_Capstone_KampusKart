@@ -41,6 +41,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const tokenRef = useRef<string | null>(null);
   const isRefreshingRef = useRef<boolean>(false); // Prevent concurrent refreshes
 
+  const shouldRetryAuthRequest = (error: unknown): boolean => {
+    if (!axios.isAxiosError(error)) return false;
+
+    const status = error.response?.status;
+    if (!status) {
+      // Network/transport errors are transient and worth retrying.
+      return true;
+    }
+
+    // Do not retry client/auth errors.
+    if (status >= 400 && status < 500) {
+      return false;
+    }
+
+    // Retry 5xx server errors.
+    return status >= 500;
+  };
+
   // On mount, check both storages for a valid token
   useEffect(() => {
     const now = Date.now();
@@ -230,8 +248,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return; // Success, exit the retry loop
         } catch (error) {
           lastError = error;
-          if (attempt < 3) {
+          if (attempt < 3 && shouldRetryAuthRequest(error)) {
             await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+          } else {
+            break;
           }
         }
       }
@@ -326,8 +346,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return; // Success, exit the retry loop
         } catch (error) {
           lastError = error;
-          if (attempt < 3) {
+          if (attempt < 3 && shouldRetryAuthRequest(error)) {
             await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+          } else {
+            break;
           }
         }
       }

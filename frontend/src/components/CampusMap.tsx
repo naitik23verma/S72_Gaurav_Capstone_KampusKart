@@ -2,6 +2,7 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { GoogleMap, useLoadScript, InfoWindow, Libraries } from '@react-google-maps/api';
 import { MapSkeleton } from './common/SkeletonLoader';
+import { FeatureModal } from './common/FeatureModal';
 import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
 
 // Define libraries as a proper static constant with correct type
@@ -15,7 +16,7 @@ const MAP_OPTIONS = {
   scaleControl: true,
   mapTypeControl: true,
   fullscreenControl: true,
-  mapId: '7b1615000ef5c43e3005d9c9'
+  mapId: import.meta.env.VITE_GOOGLE_MAPS_MAP_ID
 } as const;
 
 // Memoize map container style
@@ -51,6 +52,10 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   const locationMarkerCleanupRef = useRef<Array<() => void>>([]);
   const userMarkerCleanupRef = useRef<(() => void) | null>(null);
   const [advancedMarkersAvailable, setAdvancedMarkersAvailable] = useState<boolean | null>(null);
+  const [animationNotice, setAnimationNotice] = useState<string | null>(null);
+  const [pendingDirectionsLocation, setPendingDirectionsLocation] = useState<Location | null>(null);
+  const pendingLocationRef = useRef<Location | null>(null);
+  const locationItemRefs = useRef<Record<number, HTMLLIElement | null>>({});
 
   // Use the useLoadScript hook instead of LoadScript component
   const { isLoaded, loadError: scriptLoadError } = useLoadScript({
@@ -290,6 +295,15 @@ const CampusMap: React.FC<CampusMapProps> = () => {
     );
   }, [locations, searchQuery]);
 
+  // Panel is always open on desktop, hidden on mobile — reactive to window resize
+  const [isPanelOpen, setIsPanelOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
+  useEffect(() => {
+    const handleResize = () => setIsPanelOpen(window.innerWidth >= 768);
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Optimize marker click handler
   const handleMarkerClick = useCallback((location: Location) => {
     // InfoWindow open handler
@@ -300,8 +314,13 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   // Optimize location click handler
   const handleLocationClick = useCallback((location: Location) => {
     if (!mapRef) return;
-    if (animationInProgress.current) return; // Prevent overlapping animations
+    if (animationInProgress.current) {
+      pendingLocationRef.current = location;
+      setAnimationNotice('Finishing current zoom, then moving to your latest selection...');
+      return;
+    }
     animationInProgress.current = true;
+    setAnimationNotice(`Navigating to ${location.name}...`);
 
     const currentZoom = mapRef.getZoom() || 15;
     const targetZoom = 18;
@@ -317,6 +336,15 @@ const CampusMap: React.FC<CampusMapProps> = () => {
           setMapCenter({ lat: location.lat, lng: location.lng });
           setMapZoom(targetZoom);
           animationInProgress.current = false;
+          setAnimationNotice(null);
+
+          if (pendingLocationRef.current && pendingLocationRef.current.id !== location.id) {
+            const queuedLocation = pendingLocationRef.current;
+            pendingLocationRef.current = null;
+            setTimeout(() => handleLocationClick(queuedLocation), 0);
+          } else {
+            pendingLocationRef.current = null;
+          }
         }, 100);
         return;
       }
@@ -327,6 +355,14 @@ const CampusMap: React.FC<CampusMapProps> = () => {
       currentStep++;
     }, zoomInterval);
   }, [mapRef, handleMarkerClick]);
+
+  useEffect(() => {
+    if (!selectedLocation || !isPanelOpen || window.innerWidth < 768) return;
+    const activeItem = locationItemRefs.current[selectedLocation.id];
+    if (activeItem) {
+      activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [selectedLocation, isPanelOpen]);
 
   // Optimize map click handler
   const handleMapClick = useCallback(() => {
@@ -508,16 +544,6 @@ const CampusMap: React.FC<CampusMapProps> = () => {
     }
   }, [hasRequestedLocation, mapRef, userLocation]);
 
-  // Panel is always open on desktop, hidden on mobile — reactive to window resize
-  const [isPanelOpen, setIsPanelOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
-  useEffect(() => {
-    const handleResize = () => setIsPanelOpen(window.innerWidth >= 768);
-    window.addEventListener('resize', handleResize);
-    handleResize();
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-
   // Cleanup zoom listener on unmount — only safe to call after Maps library is loaded
   useEffect(() => {
     return () => {
@@ -573,7 +599,14 @@ const CampusMap: React.FC<CampusMapProps> = () => {
           <div className="bg-white overflow-hidden h-full relative">
             {/* Mobile Search Bar - Visible on mobile only, positioned over map */}
             <div className="md:hidden absolute top-3 left-3 right-3 z-10" ref={searchRef}>
-              <div className="relative w-full rounded-lg border-2 border-gray-300 bg-white shadow-lg hover:border-[#00C6A7] focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
+              <form
+                className="relative w-full rounded-lg border-2 border-gray-300 bg-white shadow-lg hover:border-[#00C6A7] focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setSearchQuery(searchInput);
+                  setShowSuggestions(false);
+                }}
+              >
                 <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -590,10 +623,11 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                     }
                   }}
                   placeholder="Search locations..."
+                  enterKeyHint="search"
                   className="flex-1 pl-12 pr-3 py-3 bg-transparent text-gray-900 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
                 />
                 <button
-                  type="button"
+                  type="submit"
                   onClick={() => {
                     setSearchQuery(searchInput);
                     setShowSuggestions(false);
@@ -606,7 +640,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                   </svg>
                   <span>Search</span>
                 </button>
-              </div>
+              </form>
               
               {/* Autocomplete Dropdown */}
               {showSuggestions && filteredSuggestions.length > 0 && (
@@ -644,6 +678,12 @@ const CampusMap: React.FC<CampusMapProps> = () => {
               )}
             </div>
 
+            {animationNotice && (
+              <div className="absolute top-20 left-3 right-3 z-10 md:left-auto md:right-4 md:top-4 md:max-w-sm rounded-lg border-2 border-gray-300 bg-white/95 px-3 py-2 shadow-lg">
+                <p className="text-xs font-semibold text-gray-700">{animationNotice}</p>
+              </div>
+            )}
+
             <GoogleMap
               mapContainerStyle={MAP_CONTAINER_STYLE}
               center={animationInProgress.current ? undefined : mapCenter}
@@ -670,7 +710,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                   }}
                   options={{
                     pixelOffset: new window.google.maps.Size(0, -50),
-                    maxWidth: isPanelOpen ? 400 : 300,
+                    maxWidth: window.innerWidth < 640 ? 260 : isPanelOpen ? 400 : 300,
                     disableAutoPan: false
                   }}
                 >
@@ -690,7 +730,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                           setInfoWindowPosition(null);
                           setSelectedLocation(null);
                         }}
-                        className="absolute top-3 right-3 p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
+                        className="absolute top-2 right-2 p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
                         aria-label="Close"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -698,8 +738,8 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                         </svg>
                       </button>
                       
-                      <div className="pr-10">
-                        <h3 className="font-black text-lg text-gray-900 mb-2 line-clamp-2 leading-tight">{selectedLocation.name}</h3>
+                      <div className="pr-14">
+                        <h3 className="font-black text-lg text-gray-900 mb-2 leading-tight break-words">{selectedLocation.name}</h3>
                         <span className="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-lg border-2 border-gray-200">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
@@ -739,8 +779,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                       <button
                         className="w-full px-4 py-3 bg-[#181818] text-white rounded-lg hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 flex items-center justify-center gap-2 font-bold text-sm"
                         onClick={() => {
-                          const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedLocation.lat},${selectedLocation.lng}`;
-                          window.open(url, '_blank');
+                          setPendingDirectionsLocation(selectedLocation);
                         }}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -786,6 +825,13 @@ const CampusMap: React.FC<CampusMapProps> = () => {
 
         {/* Locations List Panel Container - Full width on mobile (overlay), 1/3 on desktop (side) */}
         {/* On mobile: fixed overlay that sits below the navbar (top-[72px]), above everything else (z-40) */}
+        {isPanelOpen && window.innerWidth < 768 && (
+          <div
+            className="fixed inset-0 top-[72px] bg-black/40 z-30 md:hidden"
+            onClick={() => setIsPanelOpen(false)}
+            aria-hidden="true"
+          />
+        )}
         <div className={`${isPanelOpen ? 'flex' : 'hidden'} md:flex fixed md:relative top-[72px] md:top-auto left-0 md:left-auto right-0 md:right-auto bottom-0 md:bottom-auto w-full md:w-1/3 flex-col md:h-full z-40 md:z-auto transition-all duration-300 ease-in-out`}>
           {/* Inner container with padding, shadow, and overflow for list */}
           <div className="bg-white p-3 md:p-4 flex-grow transition-all duration-300 ease-in-out opacity-100 h-full overflow-y-auto relative">
@@ -803,7 +849,14 @@ const CampusMap: React.FC<CampusMapProps> = () => {
             <h2 className="text-xl md:text-2xl font-extrabold text-gray-900 mb-4 md:mb-5 pr-12 md:pr-0">Campus Locations</h2>
             {/* Desktop Search Bar - Visible on desktop only */}
             <div className="hidden md:block mb-6 w-full relative">
-              <div className="relative w-full rounded-lg border-2 border-gray-300 bg-white shadow-sm hover:border-[#00C6A7] focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
+              <form
+                className="relative w-full rounded-lg border-2 border-gray-300 bg-white shadow-sm hover:border-[#00C6A7] focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setSearchQuery(searchInput);
+                  setShowSuggestions(false);
+                }}
+              >
                 <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -823,7 +876,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                   className="flex-1 pl-12 pr-3 py-3.5 bg-transparent text-gray-900 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
                 />
                 <button
-                  type="button"
+                  type="submit"
                   onClick={() => {
                     setSearchQuery(searchInput);
                     setShowSuggestions(false);
@@ -836,7 +889,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                   </svg>
                   <span>Search</span>
                 </button>
-              </div>
+              </form>
               
               {/* Autocomplete Dropdown */}
               {showSuggestions && filteredSuggestions.length > 0 && (
@@ -879,6 +932,9 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                 {filteredLocations.map((location) => (
                   <li
                     key={location.id}
+                    ref={(element) => {
+                      locationItemRefs.current[location.id] = element;
+                    }}
                     role="button"
                     tabIndex={0}
                     className={`pb-3 border-b-2 border-gray-200 last:border-b-0 text-gray-800 cursor-pointer hover:bg-gray-50 active:bg-gray-100 p-3 rounded-lg transition-colors duration-150 ${
@@ -917,6 +973,39 @@ const CampusMap: React.FC<CampusMapProps> = () => {
           </div>
         </div>
       </div>
+
+      <FeatureModal
+        isOpen={!!pendingDirectionsLocation}
+        onClose={() => setPendingDirectionsLocation(null)}
+        title="Open External Maps"
+        error={null}
+        size="sm"
+      >
+        <p className="text-sm text-gray-700 mb-6">
+          You are about to leave KampusKart and open Google Maps for directions to this location.
+        </p>
+        <div className="flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={() => setPendingDirectionsLocation(null)}
+            className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
+          >
+            Stay Here
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (!pendingDirectionsLocation) return;
+              const url = `https://www.google.com/maps/dir/?api=1&destination=${pendingDirectionsLocation.lat},${pendingDirectionsLocation.lng}`;
+              window.open(url, '_blank', 'noopener,noreferrer');
+              setPendingDirectionsLocation(null);
+            }}
+            className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7]"
+          >
+            Open Google Maps
+          </button>
+        </div>
+      </FeatureModal>
     </div>
   );
 };

@@ -6,16 +6,29 @@ import axios from 'axios';
 
 const imageUrl = '/login-side.jpg';
 
-const RightPanel: React.FC = () => (
-  <div className="hidden md:flex flex-1 items-center justify-center bg-gray-100">
-    <img
-      src={imageUrl}
-      alt="Campus"
-      className="object-cover w-full h-full"
-      onError={(e) => { e.currentTarget.style.display = 'none'; }}
-    />
-  </div>
-);
+const RightPanel: React.FC = () => {
+  const [imageError, setImageError] = useState(false);
+
+  return (
+    <div className="hidden md:flex flex-1 items-center justify-center bg-gray-100 relative overflow-hidden">
+      {!imageError ? (
+        <img
+          src={imageUrl}
+          alt="Campus"
+          className="object-cover w-full h-full"
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        <div className="h-full w-full flex flex-col items-center justify-center px-10 text-center bg-gradient-to-br from-[#181818] via-[#2B2B2B] to-[#00C6A7]">
+          <h3 className="text-2xl font-extrabold text-white mb-3">Build Your Campus Network</h3>
+          <p className="text-sm text-white/90 max-w-sm">
+            Create your KampusKart account to access events, clubs, facilities, and real-time campus updates.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -38,6 +51,7 @@ const Signup: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [showPasswordTips, setShowPasswordTips] = useState(false);
   const [emailError, setEmailError] = useState('');
   const navigate = useNavigate();
   const { signup, loginWithGoogle } = useAuth();
@@ -159,6 +173,7 @@ const Signup: React.FC = () => {
                   placeholder="••••••••"
                   value={password}
                   onChange={handlePasswordChange}
+                  onFocus={() => setShowPasswordTips(true)}
                   onBlur={handlePasswordBlur}
                 />
                 <button
@@ -171,11 +186,15 @@ const Signup: React.FC = () => {
                   {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
                 </button>
               </div>
-              {passwordErrors.length > 0 && (
+              {(showPasswordTips || passwordErrors.length > 0) && (
                 <ul className="mt-1.5 space-y-0.5">
-                  {passwordErrors.map((e, i) => (
-                    <li key={i} className="text-xs text-red-500">• {e}</li>
-                  ))}
+                  {passwordErrors.length > 0 ? (
+                    passwordErrors.map((e, i) => (
+                      <li key={i} className="text-xs text-red-500">• {e}</li>
+                    ))
+                  ) : (
+                    <li className="text-xs text-gray-500">Use at least 8 characters with uppercase, lowercase, number, and special character.</li>
+                  )}
                 </ul>
               )}
             </div>

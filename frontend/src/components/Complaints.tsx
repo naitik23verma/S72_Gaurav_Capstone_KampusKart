@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { FiEdit2, FiTrash2, FiCheckCircle, FiUser, FiCalendar, FiTag, FiFileText, FiSearch, FiInfo } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiCheckCircle, FiUser, FiCalendar, FiTag, FiFileText, FiSearch, FiInfo, FiX } from 'react-icons/fi';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
@@ -76,6 +76,7 @@ const Complaints = () => {
   const observer = useRef<IntersectionObserver | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [pendingDeleteComplaintId, setPendingDeleteComplaintId] = useState<string | null>(null);
   const buildComplaintSuggestions = useCallback((complaint: Complaint, normalizedQuery: string): string[] => {
     const suggestions: string[] = [];
     if (complaint?.title?.toLowerCase().includes(normalizedQuery)) {
@@ -105,7 +106,7 @@ const Complaints = () => {
   // Auto-hide success message after 3 seconds
   useEffect(() => {
     if (successMessage) {
-      const timer = setTimeout(() => setSuccessMessage(null), 3000);
+      const timer = setTimeout(() => setSuccessMessage(null), 5000);
       return () => clearTimeout(timer);
     }
   }, [successMessage]);
@@ -374,31 +375,34 @@ const Complaints = () => {
   };
 
   const handleDeleteComplaint = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this complaint?')) {
-      try {
-        setIsSubmitting(true);
-        setError(null);
-        const response = await fetch(`${API_BASE}/api/complaints/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+    try {
+      setIsSubmitting(true);
+      setError(null);
+      const response = await fetch(`${API_BASE}/api/complaints/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
 
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.message || 'Failed to delete complaint.');
-        }
-        setComplaints(complaints.filter(comp => comp._id !== id));
-        setSelectedComplaintForDetails(null); // Close details modal if open
-        setSuccessMessage('Complaint deleted successfully!');
-      } catch (err: any) {
-        console.error('Error deleting complaint:', err);
-        setError(err.message || 'Failed to delete complaint.');
-      } finally {
-        setIsSubmitting(false);
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to delete complaint.');
       }
+      setComplaints(prevComplaints => prevComplaints.filter(comp => comp._id !== id));
+      setSelectedComplaintForDetails(null); // Close details modal if open
+      setPendingDeleteComplaintId(null);
+      setSuccessMessage('Complaint deleted successfully!');
+    } catch (err: any) {
+      console.error('Error deleting complaint:', err);
+      setError(err.message || 'Failed to delete complaint.');
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const requestDeleteComplaint = (id: string) => {
+    setPendingDeleteComplaintId(id);
   };
 
   const renderStatus = (status: Complaint['status']) => {
@@ -431,7 +435,15 @@ const Complaints = () => {
         {successMessage && (
           <div className="mb-6 bg-green-50 border-2 border-green-200 rounded-lg p-4 flex items-center gap-3 animate-fade-in">
             <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <p className="text-green-800 font-medium">{successMessage}</p>
+            <p className="text-green-800 font-medium flex-1">{successMessage}</p>
+            <button
+              type="button"
+              onClick={() => setSuccessMessage(null)}
+              className="p-1 rounded-md text-green-700 hover:bg-green-100"
+              aria-label="Dismiss success message"
+            >
+              <FiX className="w-4 h-4" />
+            </button>
           </div>
         )}
         
@@ -547,6 +559,35 @@ const Complaints = () => {
             )}
           </div>
         </div>
+
+        {(searchQuery || filterStatus !== 'All' || filterCategory !== 'all') && (
+          <div className="mb-6 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-gray-500">Active filters:</span>
+            {filterCategory !== 'all' && (
+              <span className="text-xs px-3 py-1.5 rounded-lg border-2 border-gray-200 bg-white text-gray-700 font-semibold">
+                Category: {filterCategory}
+              </span>
+            )}
+            {filterStatus !== 'All' && (
+              <span className="text-xs px-3 py-1.5 rounded-lg border-2 border-gray-200 bg-white text-gray-700 font-semibold">
+                Status: {filterStatus}
+              </span>
+            )}
+            {searchQuery && (
+              <span className="text-xs px-3 py-1.5 rounded-lg border-2 border-gray-200 bg-white text-gray-700 font-semibold">
+                Search: {searchQuery}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => { setSearchQuery(''); setSearchInput(''); setFilterStatus('All'); setFilterCategory('all'); }}
+              className="ml-auto px-4 py-2 rounded-lg bg-[#181818] text-white text-xs font-bold hover:bg-[#00C6A7] transition-colors duration-200"
+            >
+              Clear all
+            </button>
+          </div>
+        )}
+
         {/* Card Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
           {isFiltering ? (
@@ -649,7 +690,7 @@ const Complaints = () => {
                       </button>
                     )}
                     <button
-                      onClick={(e) => { e.stopPropagation(); handleDeleteComplaint(complaint._id); }}
+                      onClick={(e) => { e.stopPropagation(); requestDeleteComplaint(complaint._id); }}
                       className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-4 sm:py-2.5 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200 text-xs sm:text-sm min-w-0 min-h-touch"
                     >
                       <FiTrash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
@@ -690,6 +731,15 @@ const Complaints = () => {
             </div>
           )}
         </div>
+
+        {!isFiltering && !isFetchingMore && complaints.length > 0 && currentPage >= totalPages && (
+          <div className="mt-8 text-center">
+            <p className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm font-semibold text-gray-600">
+              <span className="w-2 h-2 rounded-full bg-[#00C6A7]" />
+              You have reached the end of complaints.
+            </p>
+          </div>
+        )}
 
         {/* Add/Edit Complaint Modal */}
         <FeatureModal
@@ -951,7 +1001,7 @@ const Complaints = () => {
                               </button>
                             )}
                             <button
-                                onClick={() => handleDeleteComplaint(selectedComplaintForDetails._id)}
+                                onClick={() => requestDeleteComplaint(selectedComplaintForDetails._id)}
                                 className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 active:bg-[#F05A25] flex items-center"
                             >
                                 <FiTrash2 className="mr-1" /> Delete
@@ -961,6 +1011,32 @@ const Complaints = () => {
                 </div>
             </div>
          )}
+
+        <FeatureModal
+          isOpen={!!pendingDeleteComplaintId}
+          onClose={() => setPendingDeleteComplaintId(null)}
+          title="Delete Complaint"
+          error={null}
+        >
+          <p className="text-sm text-gray-600 mb-6">Are you sure you want to delete this complaint? This action cannot be undone.</p>
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setPendingDeleteComplaintId(null)}
+              className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={isSubmitting}
+              onClick={() => pendingDeleteComplaintId && handleDeleteComplaint(pendingDeleteComplaintId)}
+              className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Delete
+            </button>
+          </div>
+        </FeatureModal>
 
          {/* Zoomed Image Modal */}
          {zoomedImage && selectedComplaintForDetails && selectedComplaintForDetails.images && selectedComplaintForDetails.images.length > 0 && (
@@ -978,7 +1054,7 @@ const Complaints = () => {
                <>
                  {/* Previous Button */}
                  <button
-                   className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
+                   className="absolute left-2 sm:left-4 top-[72%] sm:top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-2 sm:p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
                    onClick={(e) => {
                      e.stopPropagation();
                      const currentIndex = selectedComplaintForDetails.images!.findIndex(img => img.url === zoomedImage);
@@ -993,7 +1069,7 @@ const Complaints = () => {
                  </button>
                  {/* Next Button */}
                  <button
-                   className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
+                   className="absolute right-2 sm:right-4 top-[72%] sm:top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-2 sm:p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
                    onClick={(e) => {
                      e.stopPropagation();
                      const currentIndex = selectedComplaintForDetails.images!.findIndex(img => img.url === zoomedImage);

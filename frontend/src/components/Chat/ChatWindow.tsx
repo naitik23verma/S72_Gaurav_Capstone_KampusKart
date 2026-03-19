@@ -12,16 +12,11 @@ import {
   List,
   ListItem,
   ListItemAvatar,
-  Divider,
   CircularProgress,
   Menu,
   MenuItem,
   Tooltip,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
@@ -29,6 +24,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ReplyIcon from '@mui/icons-material/Reply';
 import { API_BASE, SOCKET_URL } from '../../config';
 import { ChatSkeleton } from '../common/SkeletonLoader';
 
@@ -122,6 +118,7 @@ const ChatWindow = () => {
   const [onlineUsers, setOnlineUsers] = useState<ChatUser[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [emojiPickerDirection, setEmojiPickerDirection] = useState<'up' | 'down'>('up');
   const [emojiPickerComponent, setEmojiPickerComponent] = useState<ComponentType<Record<string, unknown>> | null>(null);
   const [emojiData, setEmojiData] = useState<Record<string, unknown> | null>(null);
   const [isEmojiLoading, setIsEmojiLoading] = useState(false);
@@ -129,7 +126,6 @@ const ChatWindow = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [searchResults, setSearchResults] = useState<ChatMessage[]>([]);
   const [selectedMessage, setSelectedMessage] = useState<ChatMessage | null>(null);
   const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(null);
   const [editText, setEditText] = useState('');
@@ -146,6 +142,8 @@ const ChatWindow = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const emojiPickerRef = useRef<HTMLDivElement | null>(null);
   const emojiToggleButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  const canSendMessage = newMessage.trim().length > 0 || attachments.length > 0;
 
   const markMessageAsRead = useCallback(async (messageId: string) => {
     try {
@@ -308,6 +306,15 @@ const ChatWindow = () => {
 
   useEffect(() => {
     if (!showEmojiPicker) return;
+
+    // Boundary-aware placement so picker stays visible on short viewports.
+    const toggleRect = emojiToggleButtonRef.current?.getBoundingClientRect();
+    if (toggleRect) {
+      const estimatedPickerHeight = 360;
+      const spaceAbove = toggleRect.top;
+      const spaceBelow = window.innerHeight - toggleRect.bottom;
+      setEmojiPickerDirection(spaceAbove >= estimatedPickerHeight || spaceAbove > spaceBelow ? 'up' : 'down');
+    }
 
     const handleOutsideClick = (event: MouseEvent) => {
       const target = event.target;
@@ -614,7 +621,15 @@ const ChatWindow = () => {
                 fontSize: '0.75rem',
               }}
             >
-              {onlineUsers.length} {onlineUsers.length === 1 ? 'person' : 'people'} online
+              {(() => {
+                const currentUserId = user?._id || user?.id;
+                const othersOnlineCount = onlineUsers.filter((onlineUser) => {
+                  const onlineUserId = onlineUser._id || onlineUser.id;
+                  return !!onlineUserId && onlineUserId !== currentUserId;
+                }).length;
+                if (othersOnlineCount === 0) return 'Just you online';
+                return `${othersOnlineCount} ${othersOnlineCount === 1 ? 'person' : 'people'} online`;
+              })()}
             </Typography>
           </Box>
         </Box>
@@ -666,6 +681,7 @@ const ChatWindow = () => {
             border: `2px solid ${CHAT_THEME.border}`,
             borderRadius: '12px',
             p: { xs: 1.5, sm: 1.75 },
+            pr: isOwnMessage ? '44px' : undefined,
             minWidth: 120,
             maxWidth: { xs: '80%', sm: 420 },
             ml: isOwnMessage ? 0 : { xs: 0.5, sm: 1 },
@@ -822,33 +838,32 @@ const ChatWindow = () => {
               </Typography>
             )}
           </Box>
-        </Box>
 
-        {/* Action Button for Own Messages */}
-        {isOwnMessage && user && (
-          <IconButton
-            size="small"
-            onClick={(e) => handleMessageActions(message, e)}
-            sx={{ 
-              position: 'absolute', 
-              top: 4, 
-              left: 4,
-              backgroundColor: CHAT_THEME.cardBg,
-              border: `2px solid ${CHAT_THEME.border}`,
-              borderRadius: '8px',
-              width: 28,
-              height: 28,
-              opacity: 0.8,
-              transition: 'opacity 0.2s ease',
-              '&:hover': { 
+          {isOwnMessage && user && (
+            <IconButton
+              size="small"
+              onClick={(e) => handleMessageActions(message, e)}
+              sx={{
+                position: 'absolute',
+                top: 6,
+                right: 6,
                 backgroundColor: CHAT_THEME.cardBg,
-                opacity: 1,
-              }
-            }}
-          >
-            <MoreVertIcon fontSize="small" sx={{ color: CHAT_THEME.textSecondary }} />
-          </IconButton>
-        )}
+                border: `2px solid ${CHAT_THEME.border}`,
+                borderRadius: '8px',
+                width: 28,
+                height: 28,
+                opacity: 0.9,
+                transition: 'opacity 0.2s ease',
+                '&:hover': {
+                  backgroundColor: CHAT_THEME.cardBg,
+                  opacity: 1,
+                }
+              }}
+            >
+              <MoreVertIcon fontSize="small" sx={{ color: CHAT_THEME.textSecondary }} />
+            </IconButton>
+          )}
+        </Box>
 
       </ListItem>
     );
@@ -1157,10 +1172,17 @@ const ChatWindow = () => {
           </Paper>
         )}
         {/* Typing Indicator */}
-        {isTyping && (
+        <Box sx={{
+          maxHeight: isTyping ? 64 : 0,
+          opacity: isTyping ? 1 : 0,
+          transform: isTyping ? 'translateY(0)' : 'translateY(6px)',
+          transition: 'max-height 220ms ease, opacity 180ms ease, transform 220ms ease',
+          overflow: 'hidden',
+          pointerEvents: 'none',
+          mb: isTyping ? 1.5 : 0,
+        }}>
           <Box sx={{ 
             px: 2, 
-            mb: 1.5, 
             display: 'flex', 
             alignItems: 'center', 
             gap: 1.5,
@@ -1208,7 +1230,7 @@ const ChatWindow = () => {
               Someone is typing...
             </Typography>
           </Box>
-        )}
+        </Box>
         {/* Message Input */}
         <Paper
           component="form"
@@ -1255,7 +1277,16 @@ const ChatWindow = () => {
           </IconButton>
           <IconButton 
             ref={emojiToggleButtonRef}
-            onClick={() => setShowEmojiPicker((prev) => !prev)} 
+            onClick={() => {
+              const toggleRect = emojiToggleButtonRef.current?.getBoundingClientRect();
+              if (toggleRect) {
+                const estimatedPickerHeight = 360;
+                const spaceAbove = toggleRect.top;
+                const spaceBelow = window.innerHeight - toggleRect.bottom;
+                setEmojiPickerDirection(spaceAbove >= estimatedPickerHeight || spaceAbove > spaceBelow ? 'up' : 'down');
+              }
+              setShowEmojiPicker((prev) => !prev);
+            }} 
             size="small"
             sx={{ 
               color: CHAT_THEME.textSecondary,
@@ -1273,7 +1304,21 @@ const ChatWindow = () => {
             <EmojiEmotionsIcon />
           </IconButton>
           {showEmojiPicker && (
-            <Box ref={emojiPickerRef} sx={{ position: 'absolute', bottom: '100%', left: 0, zIndex: 30 }}>
+            <Box
+              ref={emojiPickerRef}
+              sx={{
+                position: 'absolute',
+                ...(emojiPickerDirection === 'up' ? { bottom: '100%' } : { top: '100%' }),
+                left: 0,
+                zIndex: 30,
+                mt: emojiPickerDirection === 'down' ? 1 : 0,
+                mb: emojiPickerDirection === 'up' ? 1 : 0,
+                maxHeight: '65vh',
+                overflow: 'auto',
+                borderRadius: '12px',
+                boxShadow: '0 10px 24px rgba(0,0,0,0.16)',
+              }}
+            >
               {emojiPickerComponent && emojiData ? (
                 React.createElement(emojiPickerComponent, {
                   data: emojiData,
@@ -1368,6 +1413,7 @@ const ChatWindow = () => {
               '& .MuiInputBase-input': {
                 py: 1.25,
                 px: 1.5,
+                fontSize: '16px',
                 color: CHAT_THEME.textPrimary,
                 '&::placeholder': {
                   color: CHAT_THEME.textMuted,
@@ -1375,23 +1421,23 @@ const ChatWindow = () => {
                 },
               },
             }}
-            inputProps={{ style: { fontSize: '1rem' } }}
+            inputProps={{ style: { fontSize: '16px' } }}
           />
           <IconButton 
             type="submit" 
-            disabled={(newMessage.trim() === '' && attachments.length === 0) || sendingMessage}
+            disabled={!canSendMessage || sendingMessage}
             sx={{
               width: { xs: 40, sm: 44 },
               height: { xs: 40, sm: 44 },
               borderRadius: '8px',
-              background: (newMessage.trim() !== '' || attachments.length > 0) && !sendingMessage
+              background: canSendMessage && !sendingMessage
                 ? CHAT_THEME.primary
                 : '#e5e7eb',
-              color: (newMessage.trim() !== '' || attachments.length > 0) && !sendingMessage
+              color: canSendMessage && !sendingMessage
                 ? '#ffffff'
                 : '#9ca3af',
               '&:hover': {
-                background: (newMessage.trim() !== '' || attachments.length > 0) && !sendingMessage
+                background: canSendMessage && !sendingMessage
                   ? CHAT_THEME.primaryHover
                   : '#d1d5db',
               },
@@ -1427,6 +1473,21 @@ const ChatWindow = () => {
       >
         {selectedMessage && user && (selectedMessage.sender?._id === user._id || selectedMessage.sender?.id === user.id) && (
           <>
+            <MenuItem
+              onClick={() => {
+                setReplyTo(selectedMessage);
+                setAnchorEl(null);
+              }}
+              sx={{
+                borderRadius: '6px',
+                mx: 0.5,
+                my: 0.25,
+                '&:hover': { backgroundColor: CHAT_THEME.cardBg }
+              }}
+            >
+              <ReplyIcon fontSize="small" sx={{ mr: 1.5, color: CHAT_THEME.textSecondary }} />
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>Reply</Typography>
+            </MenuItem>
             <MenuItem 
               onClick={() => {
                 startEditing(selectedMessage);
@@ -1463,28 +1524,6 @@ const ChatWindow = () => {
         )}
       </Menu>
 
-      {/* Search Results Dialog */}
-      <Dialog
-        open={searchResults.length > 0}
-        onClose={() => setSearchResults([])}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>Search Results</DialogTitle>
-        <DialogContent>
-          <List>
-            {searchResults.map((message: ChatMessage) => (
-              <React.Fragment key={message._id}>
-                {renderMessage(message)}
-                <Divider />
-              </React.Fragment>
-            ))}
-          </List>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setSearchResults([])}>Close</Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };

@@ -5,16 +5,29 @@ import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 const imageUrl = '/login-side.jpg';
 
-const RightPanel: React.FC = () => (
-  <div className="hidden md:flex flex-1 items-center justify-center bg-gray-100">
-    <img
-      src={imageUrl}
-      alt="Campus"
-      className="object-cover w-full h-full"
-      onError={(e) => { e.currentTarget.style.display = 'none'; }}
-    />
-  </div>
-);
+const RightPanel: React.FC = () => {
+  const [imageError, setImageError] = useState(false);
+
+  return (
+    <div className="hidden md:flex flex-1 items-center justify-center bg-gray-100 relative overflow-hidden">
+      {!imageError ? (
+        <img
+          src={imageUrl}
+          alt="Campus"
+          className="object-cover w-full h-full"
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        <div className="h-full w-full flex flex-col items-center justify-center px-10 text-center bg-gradient-to-br from-[#181818] via-[#2B2B2B] to-[#00C6A7]">
+          <h3 className="text-2xl font-extrabold text-white mb-3">Welcome Back to KampusKart</h3>
+          <p className="text-sm text-white/90 max-w-sm">
+            Sign in to continue where you left off with your campus map, events, clubs, and community updates.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { FiX } from 'react-icons/fi';
 import { ErrorMessage } from './ErrorMessage';
 
@@ -30,6 +30,12 @@ export const FeatureModal: React.FC<FeatureModalProps> = ({
   error,
   size = 'md',
 }) => {
+  const titleId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  const [sheetOffsetY, setSheetOffsetY] = useState(0);
+
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -53,6 +59,58 @@ export const FeatureModal: React.FC<FeatureModalProps> = ({
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
 
+  // Move focus into modal on open and trap tab navigation inside.
+  useEffect(() => {
+    if (!isOpen || !dialogRef.current) return;
+
+    const root = dialogRef.current;
+    const selector = [
+      'button:not([disabled])',
+      'a[href]',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      'textarea:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])'
+    ].join(',');
+
+    const getFocusable = () => Array.from(root.querySelectorAll<HTMLElement>(selector));
+    const focusable = getFocusable();
+    (focusable[0] || root).focus();
+
+    const handleTabKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+      const currentFocusable = getFocusable();
+      if (currentFocusable.length === 0) {
+        e.preventDefault();
+        root.focus();
+        return;
+      }
+
+      const first = currentFocusable[0];
+      const last = currentFocusable[currentFocusable.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+
+      if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    root.addEventListener('keydown', handleTabKey);
+    return () => root.removeEventListener('keydown', handleTabKey);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !error || !dialogRef.current) return;
+    const contentContainer = dialogRef.current.querySelector('div[style]') as HTMLDivElement | null;
+    if (contentContainer) {
+      contentContainer.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [isOpen, error]);
+
   if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -67,17 +125,47 @@ export const FeatureModal: React.FC<FeatureModalProps> = ({
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
-      aria-labelledby="modal-title"
+      aria-labelledby={titleId}
       tabIndex={-1}
+      ref={dialogRef}
     >
       <div
+        ref={sheetRef}
         className={`bg-white sm:rounded-xl rounded-t-xl shadow-2xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 ${sizeClasses[size]} w-full mx-auto overflow-y-auto relative`}
-        style={{ colorScheme: 'light', backgroundColor: '#ffffff', color: '#213547', maxHeight: 'min(95vh, 95dvh)' }}
+        style={{
+          colorScheme: 'light',
+          backgroundColor: '#ffffff',
+          color: '#213547',
+          maxHeight: 'min(95vh, 95dvh)',
+          transform: `translateY(${sheetOffsetY}px)`,
+          transition: sheetOffsetY === 0 ? 'transform 220ms ease' : 'none',
+        }}
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => {
+          if (window.innerWidth >= 640) return;
+          touchStartYRef.current = e.touches[0].clientY;
+        }}
+        onTouchMove={(e) => {
+          if (window.innerWidth >= 640 || touchStartYRef.current === null) return;
+          const deltaY = e.touches[0].clientY - touchStartYRef.current;
+          setSheetOffsetY(deltaY > 0 ? deltaY : 0);
+        }}
+        onTouchEnd={() => {
+          if (window.innerWidth >= 640) return;
+          if (sheetOffsetY > 90) {
+            setSheetOffsetY(0);
+            onClose();
+            touchStartYRef.current = null;
+            return;
+          }
+          setSheetOffsetY(0);
+          touchStartYRef.current = null;
+        }}
       >
+        <div className="sm:hidden w-10 h-1 rounded-full bg-gray-300 mx-auto mb-4" aria-hidden="true" />
         {/* Header */}
         <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
-          <h2 id="modal-title" className="text-xl sm:text-2xl font-bold text-gray-900">
+          <h2 id={titleId} className="text-xl sm:text-2xl font-bold text-gray-900">
             {title}
           </h2>
           <button

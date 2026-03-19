@@ -316,7 +316,7 @@ const Profile = () => {
           {/* Avatar + completion card */}
           <div className="flex flex-col sm:flex-row items-center gap-5 mb-6 p-5 sm:p-6 bg-white border-2 border-gray-200 rounded-lg">
             {/* Avatar */}
-            <div className="relative flex-shrink-0">
+            <div className="relative flex-shrink-0 group">
               <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-gray-100 border-2 border-gray-200 overflow-hidden flex items-center justify-center">
                 {avatarSrc ? (
                   <img src={avatarSrc} alt="Profile" className="w-full h-full object-cover" />
@@ -327,7 +327,7 @@ const Profile = () => {
               {isEditing && (
                 <label
                   htmlFor="profilePicture-upload"
-                  className="absolute inset-0 flex flex-col items-center justify-center bg-black text-white cursor-pointer rounded-lg gap-1"
+                  className="absolute inset-0 flex flex-col items-center justify-center bg-black/65 text-white cursor-pointer rounded-lg gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity duration-200"
                   title="Upload photo"
                 >
                   <FiCamera className="w-5 h-5" />
@@ -365,6 +365,9 @@ const Profile = () => {
                   <p className="text-xs text-gray-400 mt-1">
                     {isEditing ? 'Fill in all fields to reach 100%' : 'Click Edit Profile to complete your profile'}
                   </p>
+                )}
+                {completion === 100 && (
+                  <p className="text-xs text-green-600 mt-1 font-semibold">Profile complete. You are all set.</p>
                 )}
               </div>
             </div>

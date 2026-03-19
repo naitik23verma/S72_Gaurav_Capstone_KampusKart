@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { FiMapPin, FiSearch, FiEdit2, FiTag, FiCalendar, FiUser, FiTrash2, FiCheckCircle } from 'react-icons/fi';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { FiMapPin, FiSearch, FiEdit2, FiTag, FiCalendar, FiUser, FiTrash2, FiCheckCircle, FiX } from 'react-icons/fi';
 import { MdSchool, MdRestaurant, MdLocalLaundryService, MdHotel, MdLibraryBooks, MdFastfood, MdLocalCafe, MdRoomService, MdBed, MdApartment } from 'react-icons/md';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
@@ -127,13 +127,14 @@ const Facilities = () => {
   const [addLoading, setAddLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [pendingDeleteFacilityId, setPendingDeleteFacilityId] = useState<string | null>(null);
 
   // Auto-hide success message after 3 seconds
   useEffect(() => {
     if (successMessage) {
       const timer = setTimeout(() => {
         setSuccessMessage(null);
-      }, 3000);
+      }, 5000);
       return () => clearTimeout(timer);
     }
   }, [successMessage]);
@@ -211,6 +212,29 @@ const Facilities = () => {
     setFormError(null);
   };
 
+  const handleDeleteFacility = async (facilityId: string, closeDetails = false) => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/facilities/${facilityId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Failed to delete facility');
+      setFacilities(prevFacilities => prevFacilities.filter(f => f._id !== facilityId));
+      if (closeDetails) {
+        setSelectedFacility(null);
+      }
+      setPendingDeleteFacilityId(null);
+      setSuccessMessage('Facility deleted successfully!');
+    } catch (err) {
+      setError('Failed to delete facility');
+    }
+  };
+
+  const requestDeleteFacility = (facilityId: string) => {
+    setPendingDeleteFacilityId(facilityId);
+  };
+
   if (isLoading) {
     return <PageSkeleton contentType="cards" itemCount={6} filterCount={1} showAddButton={user?.isAdmin} />;
   }
@@ -223,7 +247,15 @@ const Facilities = () => {
         {successMessage && (
           <div className="mb-6 rounded-lg bg-green-50 border-2 border-green-200 p-4 flex items-center gap-3">
             <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <p className="text-sm font-medium text-green-800">{successMessage}</p>
+            <p className="text-sm font-medium text-green-800 flex-1">{successMessage}</p>
+            <button
+              type="button"
+              onClick={() => setSuccessMessage(null)}
+              className="p-1 rounded-md text-green-700 hover:bg-green-100"
+              aria-label="Dismiss success message"
+            >
+              <FiX className="w-4 h-4" />
+            </button>
           </div>
         )}
         
@@ -418,18 +450,7 @@ const Facilities = () => {
                       onClick={async (e) => {
                         e.stopPropagation();
                         if (!facility) return;
-                        if (!window.confirm('Are you sure you want to delete this facility?')) return;
-                        try {
-                          const res = await fetch(`${API_BASE}/api/facilities/${facility._id}`, {
-                            method: 'DELETE',
-                            headers: { 'Authorization': `Bearer ${token}` },
-                          });
-                          if (!res.ok) throw new Error('Failed to delete facility');
-                          setFacilities(facilities.filter(f => f._id !== facility._id));
-                          setSuccessMessage('Facility deleted successfully!');
-                        } catch (err) {
-                          setError('Failed to delete facility');
-                        }
+                        requestDeleteFacility(facility._id);
                       }}
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-3 sm:py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200 text-sm sm:text-base min-w-0"
                     >
@@ -910,19 +931,7 @@ const Facilities = () => {
                   <button
                     onClick={async () => {
                       if (!selectedFacility) return;
-                      if (!window.confirm('Are you sure you want to delete this facility?')) return;
-                      try {
-                        const res = await fetch(`${API_BASE}/api/facilities/${selectedFacility._id}`, {
-                          method: 'DELETE',
-                          headers: { 'Authorization': `Bearer ${token}` },
-                        });
-                        if (!res.ok) throw new Error('Failed to delete facility');
-                        setFacilities(facilities.filter(f => f._id !== selectedFacility._id));
-                        setSelectedFacility(null);
-                        setSuccessMessage('Facility deleted successfully!');
-                      } catch (err) {
-                        setError('Failed to delete facility');
-                      }
+                      requestDeleteFacility(selectedFacility._id);
                     }}
                     className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 active:bg-[#F05A25] flex items-center"
                   ><span className="truncate">Delete</span></button>
@@ -931,6 +940,35 @@ const Facilities = () => {
             </div>
           </div>
         )}
+
+        <FeatureModal
+          isOpen={!!pendingDeleteFacilityId}
+          onClose={() => setPendingDeleteFacilityId(null)}
+          title="Delete Facility"
+          error={null}
+        >
+          <p className="text-sm text-gray-600 mb-6">Are you sure you want to delete this facility? This action cannot be undone.</p>
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setPendingDeleteFacilityId(null)}
+              className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!pendingDeleteFacilityId) return;
+                const isDeletingFromDetails = selectedFacility?._id === pendingDeleteFacilityId;
+                handleDeleteFacility(pendingDeleteFacilityId, isDeletingFromDetails);
+              }}
+              className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600"
+            >
+              Delete
+            </button>
+          </div>
+        </FeatureModal>
         {/* Zoomed Image Modal */}
         {zoomedImage && selectedFacility && selectedFacility.images && selectedFacility.images.length > 0 && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000] p-4" onClick={() => setZoomedImage(null)}>
@@ -947,7 +985,7 @@ const Facilities = () => {
               <>
                 {/* Previous Button */}
                 <button
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
+                  className="absolute left-2 sm:left-4 top-[72%] sm:top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-2 sm:p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
                   onClick={(e) => {
                     e.stopPropagation();
                     const currentIndex = selectedFacility.images!.findIndex(img => img.url === zoomedImage);
@@ -962,7 +1000,7 @@ const Facilities = () => {
                 </button>
                 {/* Next Button */}
                 <button
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
+                  className="absolute right-2 sm:right-4 top-[72%] sm:top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-2 sm:p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
                   onClick={(e) => {
                     e.stopPropagation();
                     const currentIndex = selectedFacility.images!.findIndex(img => img.url === zoomedImage);

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FiCalendar, FiMapPin, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiClock, FiUser, FiPhone, FiCheckCircle, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FiCalendar, FiMapPin, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiClock, FiUser, FiPhone, FiCheckCircle, FiEdit2, FiTrash2, FiX } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
@@ -306,6 +306,7 @@ const Events = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedEventForDetails, setSelectedEventForDetails] = useState<Event | null>(null);
+  const [pendingDeleteEventId, setPendingDeleteEventId] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -335,7 +336,7 @@ const Events = () => {
   // Auto-hide success message after 3 seconds
   useEffect(() => {
     if (successMessage) {
-      const timer = setTimeout(() => setSuccessMessage(null), 3000);
+      const timer = setTimeout(() => setSuccessMessage(null), 5000);
       return () => clearTimeout(timer);
     }
   }, [successMessage]);
@@ -475,7 +476,6 @@ const Events = () => {
 
   const handleDeleteEvent = async (id: string) => {
     if (!token) return;
-    if (!window.confirm('Are you sure you want to delete this event?')) return;
     try {
       const response = await fetch(`${API_BASE}/api/events/${id}`, {
         method: 'DELETE',
@@ -485,12 +485,17 @@ const Events = () => {
         const error = await response.json();
         throw new Error(error.message || 'Failed to delete event');
       }
-      setEvents(events.filter(e => e._id !== id));
+      setEvents(prevEvents => prevEvents.filter(e => e._id !== id));
       setSelectedEventForDetails(null);
       setSuccessMessage('Event deleted successfully!');
+      setPendingDeleteEventId(null);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to delete event');
     }
+  };
+
+  const requestDeleteEvent = (id: string) => {
+    setPendingDeleteEventId(id);
   };
 
   const handleSaveEvent = async (e: React.FormEvent) => {
@@ -752,6 +757,9 @@ const Events = () => {
                   </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                    <div className="absolute bottom-2 right-2 px-2 py-1 rounded-md bg-black/60 text-white text-xs font-semibold">
+                      Tap to zoom
+                    </div>
                     <div className="flex flex-col items-center justify-center text-gray-300">
                       <FiCalendar className="w-16 h-16" />
                       <span className="text-xs mt-2">No Image Available</span>
@@ -759,7 +767,7 @@ const Events = () => {
                   </div>
                 )}
                 {/* Status Badge */}
-                <div className="absolute top-4 right-4">
+                <div className="absolute top-3 right-3 sm:top-4 sm:right-4 max-w-[calc(100%-1rem)]">
                   {renderStatus(event.status)}
                 </div>
               </div>
@@ -828,7 +836,15 @@ const Events = () => {
               </p>
               {(searchQuery || filterStatus !== 'All') && (
                 <button
-                  onClick={() => { setSearchInput(''); setSearchQuery(''); setFilterStatus('All'); }}
+                <p className="text-green-800 font-medium flex-1">{successMessage}</p>
+                <button
+                  type="button"
+                  onClick={() => setSuccessMessage(null)}
+                  className="p-1 rounded-md text-green-700 hover:bg-green-100"
+                  aria-label="Dismiss success message"
+                >
+                  <FiX className="w-4 h-4" />
+                </button>
                   className="px-5 py-2 rounded-lg bg-[#181818] text-white text-sm font-semibold hover:bg-[#00C6A7] transition-colors duration-200"
                 >
                   Clear filters
@@ -1089,10 +1105,35 @@ const Events = () => {
             event={selectedEventForDetails}
             onClose={closeEventDetailsModal}
             onEdit={handleEditEvent}
-            onDelete={handleDeleteEvent}
+            onDelete={requestDeleteEvent}
             isAdmin={user?.isAdmin}
           />
         )}
+
+        <FeatureModal
+          isOpen={!!pendingDeleteEventId}
+          onClose={() => setPendingDeleteEventId(null)}
+          title="Delete Event"
+          error={null}
+        >
+          <p className="text-sm text-gray-600 mb-6">Are you sure you want to delete this event? This action cannot be undone.</p>
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setPendingDeleteEventId(null)}
+              className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => pendingDeleteEventId && handleDeleteEvent(pendingDeleteEventId)}
+              className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600"
+            >
+              Delete
+            </button>
+          </div>
+        </FeatureModal>
       </main>
 
       {/* Footer */}

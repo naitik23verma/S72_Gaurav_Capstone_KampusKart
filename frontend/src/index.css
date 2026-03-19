@@ -39,6 +39,7 @@ body {
 
 
 :root {
+  font-size: 16px;
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light only;
@@ -194,10 +195,15 @@ textarea:not(.MuiInputBase-input),
 select {
   background-color: #ffffff !important;
   color: #374151 !important;
+  font-size: max(16px, 1rem) !important;
   color-scheme: light only !important;
   -webkit-text-fill-color: #374151 !important;
   touch-action: manipulation;
   -webkit-touch-callout: default;
+}
+
+.MuiInputBase-input {
+  font-size: 16px !important;
 }
 
 /* CRITICAL: Prevent page dimming when focusing inputs */

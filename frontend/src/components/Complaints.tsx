@@ -65,8 +65,7 @@ const Complaints = () => {
   const [filterCategory, setFilterCategory] = useState<'all' | 'Academic' | 'Administrative' | 'Facilities' | 'IT' | 'Security' | 'Other'>('all');
   const [images, setImages] = useState<ImageFile[]>([]);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
-  const dragItem = useRef<number | null>(null);
-  const dragOverItem = useRef<number | null>(null);
+
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -303,17 +302,7 @@ const Complaints = () => {
     setNewComplaint({ ...newComplaint, [name]: value });
   };
 
-  const handleDragStart = (index: number) => { dragItem.current = index; };
-  const handleDragEnter = (index: number) => { dragOverItem.current = index; };
-  const handleDragEnd = () => {
-    if (dragItem.current === null || dragOverItem.current === null) return;
-    const newImages = [...images];
-    const dragged = newImages.splice(dragItem.current, 1)[0];
-    newImages.splice(dragOverItem.current, 0, dragged);
-    setImages(newImages);
-    dragItem.current = null;
-    dragOverItem.current = null;
-  };
+
 
   const handleSaveComplaint = async (e: React.FormEvent) => {
     e.preventDefault();

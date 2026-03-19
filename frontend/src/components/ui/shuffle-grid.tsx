@@ -83,15 +83,9 @@ const ImageSquare = ({ src, id }: ImageSquareProps) => {
   );
 };
 
-const generateSquares = () => {
-  return shuffle([...squareData]).map((sq) => (
-    <ImageSquare key={sq.id} src={sq.src} id={sq.id} />
-  ));
-};
-
 export const ShuffleGrid = () => {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [squares, setSquares] = useState(generateSquares());
+  const [squares, setSquares] = useState(squareData);
 
   useEffect(() => {
     shuffleSquares();
@@ -101,13 +95,15 @@ export const ShuffleGrid = () => {
   }, []);
 
   const shuffleSquares = () => {
-    setSquares(generateSquares());
+    setSquares(shuffle([...squareData]));
     timeoutRef.current = setTimeout(shuffleSquares, 3000);
   };
 
   return (
     <div className="grid grid-cols-4 grid-rows-4 h-full gap-2 sm:gap-3">
-      {squares.map((sq) => sq)}
+      {squares.map((sq) => (
+        <ImageSquare key={sq.id} src={sq.src} id={sq.id} />
+      ))}
     </div>
   );
 };

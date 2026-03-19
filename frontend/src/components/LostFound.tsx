@@ -500,17 +500,13 @@ const LostFound = () => {
                 {filteredSuggestions.map((suggestion, index) => (
                   <div
                     key={index}
-                    onClick={(e) => {
+                    onMouseDown={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       isSelectingSuggestion.current = true;
                       setSearchInput(suggestion);
                       setSearchQuery(suggestion);
                       setShowSuggestions(false);
-                    }}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
                     }}
                     className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0"
                     role="option"

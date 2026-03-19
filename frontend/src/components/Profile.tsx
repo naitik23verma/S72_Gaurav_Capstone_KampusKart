@@ -202,12 +202,7 @@ const Profile = () => {
     return () => clearTimeout(t);
   }, [successMessage]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProfileData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-    setSuccessMessage(null);
-  };
-
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setProfileData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     setSuccessMessage(null);
   };
@@ -396,7 +391,7 @@ const Profile = () => {
                     <div className="flex flex-col">
                       <label htmlFor="gender" className="block text-xs font-semibold text-gray-700 mb-1.5">Gender</label>
                       <div className="relative">
-                        <select id="gender" name="gender" value={profileData.gender} onChange={handleSelectChange}
+                        <select id="gender" name="gender" value={profileData.gender} onChange={handleInputChange}
                           className="appearance-none w-full px-4 py-2.5 bg-white text-gray-900 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base cursor-pointer">
                           <option value="">Select Gender</option>
                           <option value="Male">Male</option>

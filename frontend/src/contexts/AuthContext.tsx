@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { API_BASE, isProduction } from '../config';
+import { API_BASE } from '../config';
 import { AppSkeleton } from '../components/common/AppSkeleton';
 
 interface User {
@@ -161,6 +161,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Only logout if the error is authentication-related
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         logout();
+      } else {
+        // Reschedule token refresh if it was a network error or 5xx, to gracefully recover later
+        refreshTimeoutRef.current = setTimeout(() => {
+          refreshToken();
+        }, 5 * 60 * 1000); // 5 minutes
       }
     } finally {
       isRefreshingRef.current = false;

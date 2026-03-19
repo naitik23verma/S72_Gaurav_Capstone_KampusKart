@@ -2,7 +2,6 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { GoogleMap, useLoadScript, InfoWindow, Marker, Libraries } from '@react-google-maps/api';
 import { MapSkeleton } from './common/SkeletonLoader';
-import { sanitizeText } from '../utils/sanitize';
 
 // Define libraries as a proper static constant with correct type
 const GOOGLE_MAPS_LIBRARIES: Libraries = ["places"];
@@ -45,7 +44,7 @@ interface Location {
 }
 
 const CampusMap: React.FC<CampusMapProps> = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
@@ -349,9 +348,9 @@ const CampusMap: React.FC<CampusMapProps> = () => {
     setSelectedLocation(null);
   }, []);
 
-  // Optimize map load handler
   const onMapLoad = useCallback((map: google.maps.Map) => {
     setMapRef(map);
+    setIsLoading(false);
     
     // Add zoom change listener to close InfoWindow on zoom
     if (zoomChangeListenerRef.current) {
@@ -617,7 +616,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                           </div>
                           <h4 className="text-sm font-bold text-gray-900">About</h4>
                         </div>
-                        <p className="text-sm text-gray-700 leading-relaxed">{sanitizeText(selectedLocation.description || '')}</p>
+                        <p className="text-sm text-gray-700 leading-relaxed">{selectedLocation.description || ''}</p>
                       </div>
 
                       {/* Location ID Badge */}
@@ -789,7 +788,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                     <div className="flex flex-wrap items-start gap-2">
                       <div className="flex-1 min-w-0">
                         <span className="font-semibold text-sm md:text-base block truncate">{location.id}. {location.name}</span>
-                        <p className="text-xs md:text-sm text-gray-600 mt-1 line-clamp-2">{sanitizeText(location.description)}</p>
+                        <p className="text-xs md:text-sm text-gray-600 mt-1 line-clamp-2">{location.description}</p>
                       </div>
                       <span className="text-xs bg-gray-200 px-2 py-1 rounded-full flex-shrink-0 whitespace-nowrap">
                         {location.category}

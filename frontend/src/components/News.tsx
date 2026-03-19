@@ -35,8 +35,7 @@ const News = () => {
   const [error, setError] = useState<string | null>(null);
   const [newsImages, setNewsImages] = useState<ImageFile[]>([]);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
-  const dragImage = useRef<number | null>(null);
-  const dragOverImage = useRef<number | null>(null);
+
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -344,7 +343,7 @@ const News = () => {
                       src={item.images[0].url}
                       alt={item.title}
                       className="object-cover w-full h-full"
-                      onClick={(e) => { e.stopPropagation(); setZoomedImage(item.images[0].url); }}
+                      onClick={(e) => { e.stopPropagation(); if (item.images) setZoomedImage(item.images[0].url); }}
                     />
                   </>
                 ) : (

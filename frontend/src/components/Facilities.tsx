@@ -43,13 +43,11 @@ const Facilities = () => {
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [facilityImages, setFacilityImages] = useState<ImageFile[]>([]);
-  const dragImage = useRef<number | null>(null);
-  const dragOverImage = useRef<number | null>(null);
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editFacility, setEditFacility] = useState<Facility | null>(null);
   const [editFacilityImages, setEditFacilityImages] = useState<ImageFile[]>([]);
-  const editDragImage = useRef<number | null>(null);
-  const editDragOverImage = useRef<number | null>(null);
+
   const iconOptions = [
     { 
       value: 'MdSchool', 
@@ -516,7 +514,7 @@ const Facilities = () => {
                 ]);
                 
                 if (!validation.isValid) {
-                  setFormError(validation.error);
+                  setFormError(validation.error || null);
                   setAddLoading(false);
                   return;
                 }

@@ -12,26 +12,20 @@ import {
   List,
   ListItem,
   ListItemAvatar,
-  ListItemText,
-  Divider,
   CircularProgress,
   Menu,
   MenuItem,
   Tooltip,
-  Badge,
   Button,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  InputAdornment,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import SearchIcon from '@mui/icons-material/Search';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import ReplyIcon from '@mui/icons-material/Reply';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import data from '@emoji-mart/data';
@@ -57,21 +51,7 @@ const ChatWindow = () => {
   // Helper to get auth token from either storage (sessionStorage used when remember=false)
   const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
 
-  // iOS keyboard overlap fix: track visual viewport height
-  const [viewportHeight, setViewportHeight] = useState(
-    typeof window !== 'undefined' ? (window.visualViewport?.height ?? window.innerHeight) : 600
-  );
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const onResize = () => setViewportHeight(vv.height);
-    vv.addEventListener('resize', onResize);
-    vv.addEventListener('scroll', onResize);
-    return () => {
-      vv.removeEventListener('resize', onResize);
-      vv.removeEventListener('scroll', onResize);
-    };
-  }, []);
+  // iOS keyboard overlap fix: replaced visualViewport listener with 100svh on parent container
 
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
@@ -769,7 +749,7 @@ const ChatWindow = () => {
           top: 0,
           left: 0,
           right: 0,
-          height: viewportHeight,
+          height: '100svh',
           zIndex: 10,
           display: 'flex',
           flexDirection: 'column',

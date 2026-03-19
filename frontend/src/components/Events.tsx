@@ -866,7 +866,7 @@ const Events = () => {
           title={editingEvent ? 'Edit Event' : 'Add New Event'}
           error={error}
         >
-              <form onSubmit={handleSaveEvent} className="space-y-8">
+              <form onSubmit={(e) => { handleSaveEvent(e).catch(console.error); }} className="space-y-8">
                 {/* Event Details Section */}
                 <div className="border-2 border-gray-200 rounded-lg p-6 mb-6">
                   <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Event Details <FiInfo className="text-gray-400" title="Fill in the details of your event." /></h3>

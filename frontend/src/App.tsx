@@ -55,7 +55,7 @@ const GoogleCallback: React.FC = () => {
 const AppLayout: React.FC = () => {
   const location = useLocation();
   const hideNavbarRoutes = ['/login', '/signup', '/forgot-password'];
-  const showNavbar = !hideNavbarRoutes.includes(location.pathname);
+  const showNavbar = !hideNavbarRoutes.some(route => location.pathname === route || location.pathname.startsWith(`${route}/`));
 
   return (
     <div className="flex flex-col min-h-screen">

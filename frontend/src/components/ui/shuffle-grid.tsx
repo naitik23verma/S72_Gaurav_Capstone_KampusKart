@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Skeleton } from "./skeleton";
 
 const shuffle = (array: (typeof squareData)[0][]) => {
   let currentIndex = array.length,
@@ -62,7 +61,7 @@ const ImageSquare = ({ src, id }: ImageSquareProps) => {
       aria-label="Campus life image"
     >
       {!isLoaded && !hasError && (
-        <Skeleton className="w-full h-full absolute inset-0" />
+        <div className="w-full h-full absolute inset-0 bg-gray-200 animate-pulse rounded-md" />
       )}
       {hasError && (
         <div className="w-full h-full bg-gray-100 flex items-center justify-center">

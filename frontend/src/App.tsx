@@ -2,6 +2,9 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import KampusKartNavbar from './components/KampusKartNavbar';
+
+// Lazy load all route components
 const Login = React.lazy(() => import('./components/Login'));
 const Signup = React.lazy(() => import('./components/Signup'));
 const Landing = React.lazy(() => import('./components/Landing'));
@@ -16,14 +19,13 @@ const News = React.lazy(() => import('./components/News'));
 const Facilities = React.lazy(() => import('./components/Facilities'));
 const ChatWindow = React.lazy(() => import('./components/Chat/ChatWindow'));
 const ClubsRecruitment = React.lazy(() => import('./components/ClubsRecruitment'));
-import KampusKartNavbar from './components/KampusKartNavbar';
 const PrivacyPolicy = React.lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService = React.lazy(() => import('./components/TermsOfService'));
 
-// Centralized lazy loading fallback spinner
+// Centralized lazy loading fallback - simple spinner
 const PageLoader = () => (
   <div className="flex justify-center items-center w-full min-h-[60vh]">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00C6A7]"></div>
   </div>
 );
 

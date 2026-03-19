@@ -18,6 +18,15 @@ dist-ssr
 .env.development
 .env.production
 
+# Test and debug files
+*.txt
+test-*.html
+test-*.js
+test-*.bat
+debug-*.js
+*-output.txt
+error-test.*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

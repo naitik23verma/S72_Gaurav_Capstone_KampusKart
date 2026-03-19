@@ -617,7 +617,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                           </div>
                           <h4 className="text-sm font-bold text-gray-900">About</h4>
                         </div>
-                        <p className="text-sm text-gray-700 leading-relaxed">{sanitizeText(selectedLocation.description)}</p>
+                        <p className="text-sm text-gray-700 leading-relaxed">{sanitizeText(selectedLocation.description || '')}</p>
                       </div>
 
                       {/* Location ID Badge */}

@@ -271,7 +271,7 @@ const Facilities = () => {
             <div className="relative">
               <select
                 value={filterType}
-                onChange={e => setFilterType(e.target.value)}
+                onChange={e => setFilterType((e.target.value as string) || 'All')}
                 className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
               >
                 <option value="All">All Types</option>
@@ -976,9 +976,9 @@ const Facilities = () => {
                   className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
                   onClick={(e) => {
                     e.stopPropagation();
-                    const currentIndex = selectedFacility.images.findIndex(img => img.url === zoomedImage);
-                    const prevIndex = (currentIndex - 1 + selectedFacility.images.length) % selectedFacility.images.length;
-                    setZoomedImage(selectedFacility.images[prevIndex].url);
+                    const currentIndex = selectedFacility.images!.findIndex(img => img.url === zoomedImage);
+                    const prevIndex = (currentIndex - 1 + selectedFacility.images!.length) % selectedFacility.images!.length;
+                    setZoomedImage(selectedFacility.images![prevIndex].url);
                   }}
                   aria-label="Previous image"
                 >
@@ -991,9 +991,9 @@ const Facilities = () => {
                   className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
                   onClick={(e) => {
                     e.stopPropagation();
-                    const currentIndex = selectedFacility.images.findIndex(img => img.url === zoomedImage);
-                    const nextIndex = (currentIndex + 1) % selectedFacility.images.length;
-                    setZoomedImage(selectedFacility.images[nextIndex].url);
+                    const currentIndex = selectedFacility.images!.findIndex(img => img.url === zoomedImage);
+                    const nextIndex = (currentIndex + 1) % selectedFacility.images!.length;
+                    setZoomedImage(selectedFacility.images![nextIndex].url);
                   }}
                   aria-label="Next image"
                 >

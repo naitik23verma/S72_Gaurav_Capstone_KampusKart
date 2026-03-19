@@ -298,7 +298,7 @@ const Complaints = () => {
     setFieldErrors({});
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setNewComplaint({ ...newComplaint, [name]: value });
   };
@@ -1110,9 +1110,9 @@ const Complaints = () => {
                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
                    onClick={(e) => {
                      e.stopPropagation();
-                     const currentIndex = selectedComplaintForDetails.images.findIndex(img => img.url === zoomedImage);
-                     const prevIndex = (currentIndex - 1 + selectedComplaintForDetails.images.length) % selectedComplaintForDetails.images.length;
-                     setZoomedImage(selectedComplaintForDetails.images[prevIndex].url);
+                     const currentIndex = selectedComplaintForDetails.images!.findIndex(img => img.url === zoomedImage);
+                     const prevIndex = (currentIndex - 1 + selectedComplaintForDetails.images!.length) % selectedComplaintForDetails.images!.length;
+                     setZoomedImage(selectedComplaintForDetails.images![prevIndex].url);
                    }}
                    aria-label="Previous image"
                  >
@@ -1125,9 +1125,9 @@ const Complaints = () => {
                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
                    onClick={(e) => {
                      e.stopPropagation();
-                     const currentIndex = selectedComplaintForDetails.images.findIndex(img => img.url === zoomedImage);
-                     const nextIndex = (currentIndex + 1) % selectedComplaintForDetails.images.length;
-                     setZoomedImage(selectedComplaintForDetails.images[nextIndex].url);
+                     const currentIndex = selectedComplaintForDetails.images!.findIndex(img => img.url === zoomedImage);
+                     const nextIndex = (currentIndex + 1) % selectedComplaintForDetails.images!.length;
+                     setZoomedImage(selectedComplaintForDetails.images![nextIndex].url);
                    }}
                    aria-label="Next image"
                  >

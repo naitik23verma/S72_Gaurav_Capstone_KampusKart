@@ -13,11 +13,19 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: false,
     assetsInlineLimit: 0,
     copyPublicDir: true,
     rollupOptions: {
       output: {
+        manualChunks: (id) => {
+          if (id.includes('node_modules/@mui/')) return 'vendor-mui';
+          if (id.includes('node_modules/@react-google-maps/') || id.includes('node_modules/@googlemaps/')) return 'vendor-maps';
+          if (id.includes('node_modules/three/') || id.includes('node_modules/@react-three/')) return 'vendor-three';
+          if (id.includes('node_modules/@emoji-mart/data/')) return 'vendor-emoji-data';
+          if (id.includes('node_modules/@emoji-mart/react/') || id.includes('node_modules/emoji-mart/')) return 'vendor-emoji-ui';
+          if (id.includes('node_modules/socket.io-client/')) return 'vendor-socket';
+        },
         assetFileNames: (assetInfo) => {
           // Keep images at root level, not in assets folder
           if (assetInfo.name && /\.(png|jpe?g|svg|gif|ico)$/i.test(assetInfo.name)) {
@@ -30,7 +38,15 @@ export default defineConfig({
   },
   publicDir: 'public',
   server: {
+    host: 'localhost',
     port: 3000,
+    strictPort: true,
+    hmr: {
+      protocol: 'ws',
+      host: 'localhost',
+      port: 3000,
+      clientPort: 3000,
+    },
   },
   test: {
     globals: true,

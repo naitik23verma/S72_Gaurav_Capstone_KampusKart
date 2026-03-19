@@ -1,10 +1,10 @@
 /// <reference types="vite/client" />
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { GoogleMap, useLoadScript, InfoWindow, Marker, Libraries } from '@react-google-maps/api';
+import { GoogleMap, useLoadScript, InfoWindow, Libraries } from '@react-google-maps/api';
 import { MapSkeleton } from './common/SkeletonLoader';
 
 // Define libraries as a proper static constant with correct type
-const GOOGLE_MAPS_LIBRARIES: Libraries = ["places"];
+const GOOGLE_MAPS_LIBRARIES: Libraries = ["places", "marker"] as Libraries;
 
 // Memoize map options to prevent unnecessary re-renders
 const MAP_OPTIONS = {
@@ -23,13 +23,6 @@ const MAP_CONTAINER_STYLE = {
   height: '100%',
 } as const;
 
-// Move useLoadScript outside component and memoize it
-const useGoogleMaps = () => {
-  return useLoadScript({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    libraries: GOOGLE_MAPS_LIBRARIES
-  });
-};
 
 interface CampusMapProps {}
 
@@ -54,8 +47,25 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   const [hasRequestedLocation, setHasRequestedLocation] = useState(false);
   const animationInProgress = useRef(false);
   const zoomChangeListenerRef = useRef<google.maps.MapsEventListener | null>(null);
+  const locationMarkerCleanupRef = useRef<Array<() => void>>([]);
+  const userMarkerCleanupRef = useRef<(() => void) | null>(null);
+  const [advancedMarkersAvailable, setAdvancedMarkersAvailable] = useState<boolean | null>(null);
 
-  const { isLoaded, loadError } = useGoogleMaps();
+  // Use the useLoadScript hook instead of LoadScript component
+  const { isLoaded, loadError: scriptLoadError } = useLoadScript({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string,
+    libraries: GOOGLE_MAPS_LIBRARIES,
+  });
+
+  const [mapsReady, setMapsReady] = useState(false);
+
+  // Update mapsReady when script loads
+  useEffect(() => {
+    if (isLoaded) {
+      console.log('Google Maps script loaded successfully');
+      setMapsReady(true);
+    }
+  }, [isLoaded]);
 
   // Lock page scrolling while the map page is mounted to ensure a single-frame view
   useEffect(() => {
@@ -351,6 +361,11 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   const onMapLoad = useCallback((map: google.maps.Map) => {
     setMapRef(map);
     setIsLoading(false);
+    const capabilities = map.getMapCapabilities?.();
+    const supportsAdvancedMarkers =
+      !!window.google?.maps?.marker?.AdvancedMarkerElement &&
+      capabilities?.isAdvancedMarkersAvailable === true;
+    setAdvancedMarkersAvailable(supportsAdvancedMarkers);
     
     // Add zoom change listener to close InfoWindow on zoom
     if (zoomChangeListenerRef.current) {
@@ -365,6 +380,121 @@ const CampusMap: React.FC<CampusMapProps> = () => {
       }
     });
   }, []);
+
+  // Render campus location markers using AdvancedMarkerElement where available.
+  useEffect(() => {
+    if (!mapsReady || !mapRef || advancedMarkersAvailable !== true) return;
+
+    // Clear previous markers/listeners.
+    locationMarkerCleanupRef.current.forEach((cleanup) => cleanup());
+    locationMarkerCleanupRef.current = [];
+
+    filteredLocations.forEach((location) => {
+      const marker = new window.google.maps.marker.AdvancedMarkerElement({
+        map: mapRef,
+        position: { lat: location.lat, lng: location.lng },
+        title: location.name,
+      });
+
+      const clickHandler = () => handleMarkerClick(location);
+      marker.addEventListener('gmp-click', clickHandler);
+      locationMarkerCleanupRef.current.push(() => {
+        marker.removeEventListener('gmp-click', clickHandler);
+        marker.map = null;
+      });
+    });
+
+    return () => {
+      locationMarkerCleanupRef.current.forEach((cleanup) => cleanup());
+      locationMarkerCleanupRef.current = [];
+    };
+  }, [mapsReady, mapRef, advancedMarkersAvailable, filteredLocations, handleMarkerClick]);
+
+  // Render user location marker using AdvancedMarkerElement where available.
+  useEffect(() => {
+    if (!mapsReady || !mapRef || advancedMarkersAvailable !== true) return;
+
+    if (userMarkerCleanupRef.current) {
+      userMarkerCleanupRef.current();
+      userMarkerCleanupRef.current = null;
+    }
+
+    if (!userLocation) return;
+
+    const pin = new window.google.maps.marker.PinElement({
+      background: '#2563eb',
+      borderColor: '#1d4ed8',
+      glyphColor: '#ffffff',
+      scale: 1,
+    });
+
+    const marker = new window.google.maps.marker.AdvancedMarkerElement({
+      map: mapRef,
+      position: userLocation,
+      title: 'Your Location',
+      content: pin.element,
+    });
+
+    userMarkerCleanupRef.current = () => {
+      marker.map = null;
+    };
+
+    return () => {
+      if (userMarkerCleanupRef.current) {
+        userMarkerCleanupRef.current();
+        userMarkerCleanupRef.current = null;
+      }
+    };
+  }, [mapsReady, mapRef, advancedMarkersAvailable, userLocation]);
+
+  // Fallback marker rendering for environments where Advanced Markers are unavailable.
+  useEffect(() => {
+    if (!mapsReady || !mapRef || advancedMarkersAvailable !== false) return;
+
+    locationMarkerCleanupRef.current.forEach((cleanup) => cleanup());
+    locationMarkerCleanupRef.current = [];
+
+    filteredLocations.forEach((location) => {
+      const marker = new window.google.maps.Marker({
+        map: mapRef,
+        position: { lat: location.lat, lng: location.lng },
+        title: location.name,
+      });
+
+      const clickListener = marker.addListener('click', () => handleMarkerClick(location));
+      locationMarkerCleanupRef.current.push(() => {
+        clickListener.remove();
+        marker.setMap(null);
+      });
+    });
+
+    if (userMarkerCleanupRef.current) {
+      userMarkerCleanupRef.current();
+      userMarkerCleanupRef.current = null;
+    }
+
+    if (userLocation) {
+      const userMarker = new window.google.maps.Marker({
+        map: mapRef,
+        position: userLocation,
+        title: 'Your Location',
+        icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+      });
+
+      userMarkerCleanupRef.current = () => {
+        userMarker.setMap(null);
+      };
+    }
+
+    return () => {
+      locationMarkerCleanupRef.current.forEach((cleanup) => cleanup());
+      locationMarkerCleanupRef.current = [];
+      if (userMarkerCleanupRef.current) {
+        userMarkerCleanupRef.current();
+        userMarkerCleanupRef.current = null;
+      }
+    };
+  }, [mapsReady, mapRef, advancedMarkersAvailable, filteredLocations, handleMarkerClick, userLocation]);
 
   // Optimize recenter handler
   const handleRecenter = useCallback(() => {
@@ -404,28 +534,37 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   }, []);
 
 
-  // Cleanup zoom listener on unmount
+  // Cleanup zoom listener on unmount — only safe to call after Maps library is loaded
   useEffect(() => {
     return () => {
-      // Cleanup zoom change listener
-      if (zoomChangeListenerRef.current) {
-        google.maps.event.removeListener(zoomChangeListenerRef.current);
+      locationMarkerCleanupRef.current.forEach((cleanup) => cleanup());
+      locationMarkerCleanupRef.current = [];
+      if (userMarkerCleanupRef.current) {
+        userMarkerCleanupRef.current();
+        userMarkerCleanupRef.current = null;
+      }
+      if (zoomChangeListenerRef.current && window.google?.maps?.event) {
+        window.google.maps.event.removeListener(zoomChangeListenerRef.current);
         zoomChangeListenerRef.current = null;
       }
     };
   }, []);
 
-  if (loadError) {
+  if (scriptLoadError) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center p-8">
           <div className="text-red-500 mb-4">
             <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">Map Loading Error</h3>
-          <p className="text-gray-600 mb-4">Unable to load the campus map. Please check your internet connection and try again.</p>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">
+            Map Loading Error
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Unable to load the campus map. Please check your internet connection and try again.
+          </p>
           <button 
             onClick={() => window.location.reload()} 
             className="px-6 py-2 bg-[#00C6A7] text-white rounded-lg font-semibold hover:bg-[#009e87] active:bg-[#00C6A7] transition-colors"
@@ -437,7 +576,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
     );
   }
 
-  if (!isLoaded || isLoading) {
+  if (!isLoaded) {
     return <MapSkeleton />;
   }
 
@@ -449,9 +588,9 @@ const CampusMap: React.FC<CampusMapProps> = () => {
         <div className="w-full md:w-2/3 h-full relative">
           <div className="bg-white overflow-hidden h-full relative">
             {/* Mobile Search Bar - Visible on mobile only, positioned over map */}
-            <div className="md:hidden absolute top-2 left-3 right-3 z-10" ref={searchRef}>
-              <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="md:hidden absolute top-3 left-3 right-3 z-10" ref={searchRef}>
+              <div className="relative w-full rounded-lg border-2 border-gray-300 bg-white shadow-lg hover:border-[#00C6A7] focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
+                <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <input
@@ -466,8 +605,8 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                       setShowSuggestions(false);
                     }
                   }}
-                  placeholder="Search campus locations..."
-                  className="flex-1 pl-10 pr-2 py-2.5 bg-transparent text-gray-700 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
+                  placeholder="Search locations..."
+                  className="flex-1 pl-12 pr-3 py-3 bg-transparent text-gray-900 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
                 />
                 <button
                   type="button"
@@ -475,10 +614,10 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                     setSearchQuery(searchInput);
                     setShowSuggestions(false);
                   }}
-                  className="px-4 py-2.5 bg-[#181818] text-white font-bold text-xs hover:bg-[#00C6A7] active:bg-[#181818] flex items-center justify-center gap-1.5 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
+                  className="px-5 py-3 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] active:bg-[#181818] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-300 rounded-r-lg rounded-l-none"
                   aria-label="Search"
                 >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                   <span>Search</span>
@@ -487,7 +626,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
               
               {/* Autocomplete Dropdown */}
               {showSuggestions && filteredSuggestions.length > 0 && (
-                <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg max-h-60 overflow-auto">
+                <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-300 rounded-lg shadow-xl max-h-60 overflow-auto">
                   {filteredSuggestions.map((suggestion, index) => (
                     <div
                       key={index}
@@ -509,12 +648,12 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                           mapRef.setZoom(18);
                         }
                       }}
-                      className="flex items-center px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0"
+                      className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-colors border-b-2 border-gray-200 last:border-b-0"
                     >
-                      <svg className="w-3.5 h-3.5 text-gray-400 mr-2.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
-                      <span className="text-xs font-medium text-gray-700">{suggestion}</span>
+                      <span className="text-sm font-medium text-gray-900">{suggestion}</span>
                     </div>
                   ))}
                 </div>
@@ -536,25 +675,6 @@ const CampusMap: React.FC<CampusMapProps> = () => {
               onClick={handleMapClick}
               onLoad={onMapLoad}
             >
-              {/* Markers for all filtered locations */}
-              {isLoaded && filteredLocations.map(location => (
-                <Marker
-                  key={location.id}
-                  position={{ lat: location.lat, lng: location.lng }}
-                  title={location.name}
-                  onClick={() => handleMarkerClick(location)}
-                  animation={google.maps.Animation.DROP}
-                />
-              ))}
-              {/* Marker for user location */}
-              {isLoaded && userLocation && (
-                <Marker
-                  position={userLocation}
-                  icon={'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'}
-                  title="Your Location"
-                  animation={google.maps.Animation.BOUNCE}
-                />
-              )}
               {/* InfoWindow for location details */}
               {selectedLocation && infoWindowPosition && (
                 <InfoWindow
@@ -651,10 +771,10 @@ const CampusMap: React.FC<CampusMapProps> = () => {
             {/* Recenter Button - Optimized for mobile */}
             <button
               onClick={handleRecenter}
-              className="absolute bottom-3 left-3 z-10 bg-white border-2 border-gray-200 rounded-lg p-2.5 flex items-center justify-center hover:bg-gray-50 active:bg-gray-100 transition-colors duration-200"
+              className="absolute bottom-4 left-4 z-10 bg-white border-2 border-gray-300 shadow-lg rounded-lg p-3 flex items-center justify-center hover:bg-gray-50 active:bg-gray-100 hover:border-[#00C6A7] transition-colors duration-200"
               title="Re-center map on your location"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#00C6A7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#00C6A7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={2} fill="none" />
                 <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth={2} fill="none" />
                 <line x1="12" y1="2" x2="12" y2="6" stroke="currentColor" strokeWidth={2} />
@@ -667,11 +787,11 @@ const CampusMap: React.FC<CampusMapProps> = () => {
             {!isPanelOpen && (
               <button
                 onClick={() => setIsPanelOpen(true)}
-                className="md:hidden absolute bottom-3 right-3 z-10 bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] text-white border-2 border-gray-200 rounded-lg px-3 py-2.5 flex items-center gap-2 text-sm font-semibold transition-colors duration-200"
+                className="md:hidden absolute bottom-4 right-4 z-10 bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] text-white border-2 border-gray-300 shadow-lg rounded-lg px-4 py-3 flex items-center gap-2.5 text-base font-bold transition-colors duration-200"
                 aria-label="Show locations list"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
                 Locations
               </button>
@@ -686,19 +806,19 @@ const CampusMap: React.FC<CampusMapProps> = () => {
           <div className="bg-white p-3 md:p-4 flex-grow transition-all duration-300 ease-in-out opacity-100 h-full overflow-y-auto relative">
             {/* Mobile close button — inside the scrollable container, top-right corner */}
             <button
-              className="md:hidden absolute top-3 right-3 z-10 bg-white border-2 border-gray-200 rounded-lg p-1.5 text-gray-600 hover:bg-gray-50 active:bg-gray-100 flex items-center justify-center"
+              className="md:hidden absolute top-4 right-4 z-10 bg-white border-2 border-gray-300 shadow-md rounded-lg p-2 text-gray-700 hover:bg-gray-50 active:bg-gray-100 hover:border-[#00C6A7] flex items-center justify-center transition-colors duration-200"
               onClick={() => setIsPanelOpen(false)}
               aria-label="Close locations panel"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
 
-            <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-3 md:mb-4 pr-10 md:pr-0">Campus Locations</h2>
+            <h2 className="text-xl md:text-2xl font-extrabold text-gray-900 mb-4 md:mb-5 pr-12 md:pr-0">Campus Locations</h2>
             {/* Desktop Search Bar - Visible on desktop only */}
             <div className="hidden md:block mb-6 w-full relative">
-              <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
+              <div className="relative w-full rounded-lg border-2 border-gray-300 bg-white shadow-sm hover:border-[#00C6A7] focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
                 <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -715,7 +835,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                     }
                   }}
                   placeholder="Search locations..."
-                  className="flex-1 pl-12 pr-3 py-3.5 bg-transparent text-gray-700 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
+                  className="flex-1 pl-12 pr-3 py-3.5 bg-transparent text-gray-900 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
                 />
                 <button
                   type="button"
@@ -723,19 +843,19 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                     setSearchQuery(searchInput);
                     setShowSuggestions(false);
                   }}
-                  className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] active:bg-[#181818] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
+                  className="px-6 py-3.5 bg-[#181818] text-white font-bold text-base hover:bg-[#00C6A7] active:bg-[#181818] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-300 rounded-r-lg rounded-l-none"
                   aria-label="Search"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
-                  <span className="hidden sm:inline">Search</span>
+                  <span>Search</span>
                 </button>
               </div>
               
               {/* Autocomplete Dropdown */}
               {showSuggestions && filteredSuggestions.length > 0 && (
-                <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg max-h-60 overflow-auto">
+                <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-300 rounded-lg shadow-xl max-h-60 overflow-auto">
                   {filteredSuggestions.map((suggestion, index) => (
                     <div
                       key={index}
@@ -757,12 +877,12 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                           mapRef.setZoom(18);
                         }
                       }}
-                      className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0"
+                      className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-colors border-b-2 border-gray-200 last:border-b-0"
                     >
-                      <svg className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
-                      <span className="text-sm font-medium text-gray-700">{suggestion}</span>
+                      <span className="text-base font-medium text-gray-900">{suggestion}</span>
                     </div>
                   ))}
                 </div>
@@ -770,12 +890,12 @@ const CampusMap: React.FC<CampusMapProps> = () => {
             </div>
             {/* Locations List - Always in panel on desktop, hidden on mobile */}
             <div className="block transition-all duration-300 ease-in-out opacity-100">
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {filteredLocations.map((location) => (
                   <li
                     key={location.id}
-                    className={`mb-2 pb-2 border-b-2 border-gray-200 text-gray-800 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors duration-150 ${
-                      selectedLocation?.id === location.id ? 'bg-[#00C6A7]/10' : ''
+                    className={`pb-3 border-b-2 border-gray-200 last:border-b-0 text-gray-800 cursor-pointer hover:bg-gray-50 active:bg-gray-100 p-3 rounded-lg transition-colors duration-150 ${
+                      selectedLocation?.id === location.id ? 'bg-[#00C6A7]/10 border-[#00C6A7]' : ''
                     }`}
                     onClick={() => {
                       handleLocationClick(location);
@@ -787,10 +907,10 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                   >
                     <div className="flex flex-wrap items-start gap-2">
                       <div className="flex-1 min-w-0">
-                        <span className="font-semibold text-sm md:text-base block truncate">{location.id}. {location.name}</span>
-                        <p className="text-xs md:text-sm text-gray-600 mt-1 line-clamp-2">{location.description}</p>
+                        <span className="font-bold text-base md:text-lg text-gray-900 block mb-1">{location.id}. {location.name}</span>
+                        <p className="text-sm md:text-base text-gray-600 mt-1.5 line-clamp-2 leading-relaxed">{location.description}</p>
                       </div>
-                      <span className="text-xs bg-gray-200 px-2 py-1 rounded-full flex-shrink-0 whitespace-nowrap">
+                      <span className="text-xs font-semibold bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full flex-shrink-0 whitespace-nowrap border-2 border-gray-300">
                         {location.category}
                       </span>
                     </div>

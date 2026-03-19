@@ -310,3 +310,71 @@ input[type="date"]:invalid::-webkit-datetime-edit { color: #9ca3af; }
   display: none !important; content: none !important; background: none !important; box-shadow: none !important;
 }
 .gm-style .gm-style-iw-tc::after { background: white !important; box-shadow: none !important; }
+
+/* ─── Auth layout (no-scroll pages) ────────────────────────────────────────── */
+
+.auth-page {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.auth-form-panel {
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+}
+
+.auth-form-card {
+  width: 100%;
+  transform-origin: center center;
+  margin: auto;
+}
+
+/* Responsive scaling for smaller viewports */
+@media (max-height: 900px) {
+  .auth-form-card {
+    transform: scale(0.98);
+  }
+}
+
+@media (max-height: 820px) {
+  .auth-form-card {
+    transform: scale(0.94);
+  }
+}
+
+@media (max-height: 730px) {
+  .auth-form-panel {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .auth-form-card {
+    transform: scale(0.88);
+  }
+}
+
+@media (max-height: 650px) {
+  .auth-form-panel {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  
+  .auth-form-card {
+    transform: scale(0.82);
+  }
+}
+
+@media (max-height: 580px) {
+  .auth-form-panel {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .auth-form-card {
+    transform: scale(0.76);
+  }
+}

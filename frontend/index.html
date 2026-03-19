@@ -73,10 +73,26 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-    <script>
+    <script type="module">
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        window.addEventListener('load', async () => {
+          if (import.meta.env.PROD) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+            return;
+          }
+
+          // In development, remove stale service workers and caches to avoid serving outdated modules.
+          try {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(registrations.map((registration) => registration.unregister()));
+
+            if ('caches' in window) {
+              const cacheNames = await caches.keys();
+              await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+            }
+          } catch {
+            // Ignore cleanup failures in dev.
+          }
         });
       }
     </script>

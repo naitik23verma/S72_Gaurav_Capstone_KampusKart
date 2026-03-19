@@ -28,9 +28,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import data from '@emoji-mart/data';
-import Picker from '@emoji-mart/react';
-import { API_BASE } from '../../config';
+import { API_BASE, SOCKET_URL } from '../../config';
 import { ChatSkeleton } from '../common/SkeletonLoader';
 
 // Chat Color Theme Configuration
@@ -58,6 +56,9 @@ const ChatWindow = () => {
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [emojiPickerComponent, setEmojiPickerComponent] = useState(null);
+  const [emojiData, setEmojiData] = useState(null);
+  const [isEmojiLoading, setIsEmojiLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
@@ -94,7 +95,7 @@ const ChatWindow = () => {
   useEffect(() => {
     const token = getToken();
     // Initialize socket connection
-    socketRef.current = io(API_BASE, {
+    socketRef.current = io(SOCKET_URL, {
       withCredentials: true,
       auth: {
         token,
@@ -205,6 +206,37 @@ const ChatWindow = () => {
       }
     };
   }, [user, markMessageAsRead]);
+
+  // Load emoji picker dependencies only when needed.
+  useEffect(() => {
+    let mounted = true;
+
+    const loadEmojiAssets = async () => {
+      if (!showEmojiPicker || (emojiPickerComponent && emojiData) || isEmojiLoading) return;
+
+      try {
+        setIsEmojiLoading(true);
+        const [pickerModule, dataModule] = await Promise.all([
+          import('@emoji-mart/react'),
+          import('@emoji-mart/data'),
+        ]);
+
+        if (!mounted) return;
+        setEmojiPickerComponent(() => pickerModule.default);
+        setEmojiData(dataModule.default);
+      } catch {
+        // Ignore lazy-load errors; chat remains usable without emoji picker.
+      } finally {
+        if (mounted) setIsEmojiLoading(false);
+      }
+    };
+
+    loadEmojiAssets();
+
+    return () => {
+      mounted = false;
+    };
+  }, [showEmojiPicker, emojiPickerComponent, emojiData, isEmojiLoading]);
 
   // Load more messages when scrolling up
   const loadMoreMessages = useCallback(async () => {
@@ -1133,7 +1165,7 @@ const ChatWindow = () => {
             <AttachFileIcon />
           </IconButton>
           <IconButton 
-            onClick={() => setShowEmojiPicker(!showEmojiPicker)} 
+            onClick={() => setShowEmojiPicker((prev) => !prev)} 
             size="small"
             sx={{ 
               color: CHAT_THEME.textSecondary,
@@ -1152,14 +1184,30 @@ const ChatWindow = () => {
           </IconButton>
           {showEmojiPicker && (
             <Box sx={{ position: 'absolute', bottom: '100%', left: 0, zIndex: 30 }}>
-              <Picker 
-                data={data} 
-                theme="light"
-                onEmojiSelect={(emoji) => {
-                setNewMessage((prev) => prev + emoji.native);
-                setShowEmojiPicker(false);
-                }} 
-              />
+              {emojiPickerComponent && emojiData ? (
+                React.createElement(emojiPickerComponent, {
+                  data: emojiData,
+                  theme: 'light',
+                  onEmojiSelect: (emoji) => {
+                    setNewMessage((prev) => prev + emoji.native);
+                    setShowEmojiPicker(false);
+                  },
+                })
+              ) : (
+                <Paper
+                  sx={{
+                    p: 1.5,
+                    borderRadius: '10px',
+                    border: `2px solid ${CHAT_THEME.border}`,
+                    bgcolor: CHAT_THEME.background,
+                    minWidth: 200,
+                  }}
+                >
+                  <Typography variant="caption" sx={{ color: CHAT_THEME.textSecondary, fontWeight: 600 }}>
+                    {isEmojiLoading ? 'Loading emoji...' : 'Emoji unavailable'}
+                  </Typography>
+                </Paper>
+              )}
             </Box>
           )}
           {/* Show selected attachments as chips */}

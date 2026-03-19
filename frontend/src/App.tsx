@@ -64,6 +64,26 @@ const AppLayout: React.FC = () => {
   const hideNavbarRoutes = ['/login', '/signup', '/forgot-password'];
   const showNavbar = !hideNavbarRoutes.some(route => location.pathname === route || location.pathname.startsWith(`${route}/`));
 
+  React.useEffect(() => {
+    const lockScrollRoutes = ['/login', '/signup'];
+    const shouldLockScroll = lockScrollRoutes.some(
+      route => location.pathname === route || location.pathname.startsWith(`${route}/`)
+    );
+
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+
+    if (shouldLockScroll) {
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, [location.pathname]);
+
   return (
     <div className="flex flex-col min-h-screen">
       {showNavbar && <KampusKartNavbar />}

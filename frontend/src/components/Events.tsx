@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiCalendar, FiMapPin, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiClock, FiUser, FiPhone, FiCheckCircle, FiEdit2, FiTrash2, FiX } from 'react-icons/fi';
+import { FiCalendar, FiMapPin, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiClock, FiUser, FiPhone, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
+import { SuccessMessage } from './common/SuccessMessage';
 import { validateEmail, validatePhone, validateUrl } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
 import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
+import { UI_PATTERNS } from '../theme/uiPatterns';
 
 interface Event {
   _id: string;
@@ -88,7 +90,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
 
   return (
     <div 
-      className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4"
+      className={UI_PATTERNS.modalOverlay}
       onClick={onClose}
       onKeyDown={(e) => {
         if (e.key === 'Escape') onClose();
@@ -99,14 +101,14 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
       tabIndex={-1}
     >
       <div 
-        className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative"
+        className={UI_PATTERNS.modalPanel}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
                   <button
             onClick={onClose}
             aria-label="Close dialog"
-            className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
+            className={UI_PATTERNS.modalCloseButton}
           >
             <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
@@ -114,7 +116,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
           </button>
 
         {/* Title */}
-        <h2 id="event-details-title" className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12 sm:pr-14">{event.title}</h2>
+                    className={UI_PATTERNS.buttonNeutral}
 
         {/* Content: Image and Details side-by-side */}
         <div className="flex flex-col md:flex-row gap-8">
@@ -209,7 +211,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
               href={event.registerUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block w-full text-center px-6 py-3 rounded-lg font-bold text-white bg-[#00C6A7] hover:bg-[#009e87] active:bg-[#00C6A7] transition mb-4"
+              className={`inline-block w-full text-center ${UI_PATTERNS.buttonPrimary} mb-4`}
             >
               Register Now
             </a>
@@ -219,14 +221,14 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
             <div className="flex gap-3">
               <button
                 onClick={() => onEdit?.(event)}
-                className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100 flex items-center"
+                className={`${UI_PATTERNS.buttonNeutral} flex items-center`}
                 aria-label="Edit event"
               >
                 <FiEdit2 className="mr-1" /> Edit Event
               </button>
               <button
                 onClick={() => onDelete?.(event._id)}
-                className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-[#d44d1e] active:bg-[#F05A25] flex items-center"
+                className={`${UI_PATTERNS.buttonDanger} flex items-center`}
                 aria-label="Delete event"
               >
                 <FiTrash2 className="mr-1" /> Delete Event
@@ -260,7 +262,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
           <button
             onClick={closeZoomedImageModal}
             aria-label="Close zoomed image"
-            className="absolute top-4 right-4 bg-gray-800 rounded-lg p-2 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
+            className={UI_PATTERNS.zoomCloseButton}
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -635,24 +637,7 @@ const Events = () => {
     <div className="min-h-screen bg-white font-sans">
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         {/* Success Message Banner */}
-        {successMessage && (
-          <div 
-            className="mb-6 bg-green-50 border-2 border-green-200 rounded-lg p-4 flex items-center gap-3 animate-fade-in"
-            role="alert"
-            aria-live="polite"
-          >
-            <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <p className="text-green-800 font-medium flex-1">{successMessage}</p>
-            <button
-              type="button"
-              onClick={() => setSuccessMessage(null)}
-              className="p-1 rounded-md text-green-700 hover:bg-green-100"
-              aria-label="Dismiss success message"
-            >
-              <FiX className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+        <SuccessMessage message={successMessage} onDismiss={() => setSuccessMessage(null)} />
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <h1 className="text-h2 font-extrabold text-black">Campus Events</h1>
           {user?.isAdmin && (
@@ -804,10 +789,10 @@ const Events = () => {
                 {/* Action Button */}
                 <div className="mt-4 pt-4 border-t-2 border-gray-200">
                   <button
-                    className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                    className={`w-full flex items-center justify-center gap-2 ${UI_PATTERNS.buttonPrimary} font-medium ${
                       event.registerUrl 
-                        ? 'bg-[#00C6A7] text-white hover:bg-[#009e87] active:bg-[#00C6A7]' 
-                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        ? ''
+                        : 'bg-gray-100 text-gray-400 hover:bg-gray-100 active:bg-gray-100 cursor-not-allowed'
                     }`}
                     disabled={!event.registerUrl}
                     onClick={(e) => { 
@@ -825,7 +810,7 @@ const Events = () => {
           ))}
           {filteredEvents.length === 0 && (
             <div className="col-span-full flex flex-col items-center justify-center py-16 px-4">
-              <svg className="w-24 h-24 mb-4 text-gray-200" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <svg className={UI_PATTERNS.emptyStateIcon} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <rect x="12" y="20" width="72" height="64" rx="8" fill="currentColor" />
                 <rect x="12" y="20" width="72" height="64" rx="8" fill="white" stroke="#E5E7EB" strokeWidth="3" />
                 <rect x="24" y="8" width="8" height="20" rx="4" fill="#D1D5DB" />
@@ -868,7 +853,7 @@ const Events = () => {
         >
               <form onSubmit={(e) => { handleSaveEvent(e).catch(console.error); }} className="space-y-8">
                 {/* Event Details Section */}
-                <div className="border-2 border-gray-200 rounded-lg p-6 mb-6">
+                <div className={UI_PATTERNS.modalSection}>
                   <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Event Details <FiInfo className="text-gray-400" title="Fill in the details of your event." /></h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -1078,7 +1063,7 @@ const Events = () => {
                   <button
                     type="button"
                     onClick={closeEventModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100"
+                    className={UI_PATTERNS.buttonNeutral}
                     disabled={isSubmitting}
                   >
                     Cancel
@@ -1086,7 +1071,7 @@ const Events = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`${UI_PATTERNS.buttonPrimary} ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {isSubmitting ? (
                       <span className="flex items-center">
@@ -1126,14 +1111,14 @@ const Events = () => {
             <button
               type="button"
               onClick={() => setPendingDeleteEventId(null)}
-              className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
+              className={UI_PATTERNS.buttonNeutral}
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={() => pendingDeleteEventId && handleDeleteEvent(pendingDeleteEventId)}
-              className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600"
+              className={UI_PATTERNS.buttonDanger}
             >
               Delete
             </button>

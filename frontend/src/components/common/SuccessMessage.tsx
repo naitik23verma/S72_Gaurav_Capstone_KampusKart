@@ -1,16 +1,17 @@
 import React from 'react';
-import { FiCheckCircle } from 'react-icons/fi';
+import { FiCheckCircle, FiX } from 'react-icons/fi';
 
 interface SuccessMessageProps {
   message: string | null;
   className?: string;
+  onDismiss?: () => void;
 }
 
 /**
  * Reusable success message banner component
  * Displays a green banner with checkmark icon
  */
-export const SuccessMessage: React.FC<SuccessMessageProps> = ({ message, className = '' }) => {
+export const SuccessMessage: React.FC<SuccessMessageProps> = ({ message, className = '', onDismiss }) => {
   if (!message) return null;
 
   return (
@@ -20,7 +21,17 @@ export const SuccessMessage: React.FC<SuccessMessageProps> = ({ message, classNa
       aria-live="polite"
     >
       <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" aria-hidden="true" />
-      <p className="text-sm font-medium text-green-800">{message}</p>
+      <p className="text-sm font-medium text-green-800 flex-1">{message}</p>
+      {onDismiss && (
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="p-1 rounded-md text-green-700 hover:bg-green-100"
+          aria-label="Dismiss success message"
+        >
+          <FiX className="w-4 h-4" />
+        </button>
+      )}
     </div>
   );
 };

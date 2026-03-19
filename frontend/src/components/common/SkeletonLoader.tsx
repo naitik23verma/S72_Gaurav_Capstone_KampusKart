@@ -1,4 +1,5 @@
 import React from 'react';
+import { UI_PATTERNS } from '../../theme/uiPatterns';
 
 interface SkeletonProps {
   className?: string;
@@ -38,13 +39,12 @@ export const CardSkeleton: React.FC<{ count?: number }> = ({ count = 6 }) => {
           key={index}
           className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden"
         >
-          {/* Matches actual card image: h-48 sm:h-56 md:h-64 */}
-          <div className="h-48 sm:h-56 md:h-64 bg-gray-200 animate-pulse" />
-          <div className="p-6">
+          <div className={UI_PATTERNS.skeletonCardMedia} />
+          <div className={UI_PATTERNS.skeletonCardBody}>
             <Skeleton height="24px" width="70%" className="mb-3" />
             <Skeleton height="16px" width="90%" className="mb-2" />
             <Skeleton height="16px" width="60%" className="mb-4" />
-            <div className="border-t border-gray-100 pt-3 flex items-center justify-between">
+            <div className={UI_PATTERNS.skeletonCardActions}>
               <Skeleton height="14px" width="40%" />
               <Skeleton height="14px" width="30%" />
             </div>
@@ -64,13 +64,12 @@ export const CardSkeleton4Col: React.FC<{ count?: number }> = ({ count = 8 }) =>
           key={index}
           className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden"
         >
-          {/* Matches actual card image: h-48 sm:h-56 md:h-64 */}
-          <div className="h-48 sm:h-56 md:h-64 bg-gray-200 animate-pulse" />
-          <div className="p-4">
+          <div className={UI_PATTERNS.skeletonCardMedia} />
+          <div className={UI_PATTERNS.skeletonCardBody}>
             <Skeleton height="20px" width="70%" className="mb-2" />
             <Skeleton height="16px" width="85%" className="mb-1" />
             <Skeleton height="16px" width="50%" className="mb-3" />
-            <div className="border-t border-gray-100 pt-2 flex items-center justify-between">
+            <div className={UI_PATTERNS.skeletonCardActions}>
               <Skeleton height="14px" width="40%" />
               <Skeleton height="14px" width="25%" />
             </div>

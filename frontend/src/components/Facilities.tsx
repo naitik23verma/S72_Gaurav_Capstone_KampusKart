@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { FiMapPin, FiSearch, FiEdit2, FiTag, FiCalendar, FiUser, FiTrash2, FiCheckCircle, FiX } from 'react-icons/fi';
+import { FiMapPin, FiSearch, FiEdit2, FiTag, FiCalendar, FiUser, FiTrash2 } from 'react-icons/fi';
 import { MdSchool, MdRestaurant, MdLocalLaundryService, MdHotel, MdLibraryBooks, MdFastfood, MdLocalCafe, MdRoomService, MdBed, MdApartment } from 'react-icons/md';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
+import { SuccessMessage } from './common/SuccessMessage';
 import { validateMultipleRequired } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
 import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
+import { UI_PATTERNS } from '../theme/uiPatterns';
 
 interface Facility {
   _id: string;
@@ -244,20 +246,7 @@ const Facilities = () => {
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         
         {/* Success Message Banner */}
-        {successMessage && (
-          <div className="mb-6 rounded-lg bg-green-50 border-2 border-green-200 p-4 flex items-center gap-3">
-            <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <p className="text-sm font-medium text-green-800 flex-1">{successMessage}</p>
-            <button
-              type="button"
-              onClick={() => setSuccessMessage(null)}
-              className="p-1 rounded-md text-green-700 hover:bg-green-100"
-              aria-label="Dismiss success message"
-            >
-              <FiX className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+        <SuccessMessage message={successMessage} onDismiss={() => setSuccessMessage(null)} />
         
         {/* Top Bar: Heading + Add Button */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
@@ -387,8 +376,8 @@ const Facilities = () => {
                 )}
                 {/* Type Badge */}
                 {facility?.type && (
-                  <div className="absolute top-4 left-4">
-                    <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white/90 text-gray-800 flex items-center gap-1">
+                  <div className={UI_PATTERNS.badgeTopLeft}>
+                    <span className={UI_PATTERNS.badgeLabel}>
                       <FiTag className="w-3 h-3" />
                       {facility.type}
                     </span>
@@ -396,8 +385,8 @@ const Facilities = () => {
                 )}
                 {/* Location Badge */}
                 {facility?.location && (
-                  <div className="absolute top-4 right-4">
-                    <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white/90 text-gray-800 flex items-center gap-1">
+                  <div className={UI_PATTERNS.badgeTopRight}>
+                    <span className={UI_PATTERNS.badgeLabel}>
                       <FiMapPin className="w-3 h-3" />
                       {facility.location}
                     </span>
@@ -464,7 +453,7 @@ const Facilities = () => {
           ))}
           {filteredFacilities.length === 0 && (
             <div className="col-span-full flex flex-col items-center justify-center py-16 px-4">
-              <svg className="w-24 h-24 mb-4 text-gray-200" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <svg className={UI_PATTERNS.emptyStateIcon} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <rect x="16" y="32" width="64" height="52" rx="4" fill="white" stroke="#E5E7EB" strokeWidth="3" />
                 <path d="M8 36L48 12l40 24" stroke="#E5E7EB" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                 <rect x="36" y="60" width="24" height="24" rx="2" fill="#F3F4F6" stroke="#E5E7EB" strokeWidth="2" />
@@ -642,14 +631,14 @@ const Facilities = () => {
                   <button
                     type="button"
                     onClick={closeAddModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100"
+                    className={UI_PATTERNS.buttonNeutral}
                     disabled={addLoading}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 ${addLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`${UI_PATTERNS.buttonPrimary} ${addLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={addLoading}
                   >
                     {addLoading ? (
@@ -817,14 +806,14 @@ const Facilities = () => {
                   <button
                     type="button"
                     onClick={closeEditModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100"
+                    className={UI_PATTERNS.buttonNeutral}
                     disabled={editLoading}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 ${editLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`${UI_PATTERNS.buttonPrimary} ${editLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={editLoading}
                   >
                     {editLoading ? (
@@ -846,18 +835,18 @@ const Facilities = () => {
         {/* Facility Details Modal */}
         {selectedFacility && (
           <div
-            className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4"
+            className={UI_PATTERNS.modalOverlay}
             role="dialog"
             aria-modal="true"
             aria-labelledby="facility-details-title"
             onClick={() => setSelectedFacility(null)}
           >
-            <div className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative" onClick={(e) => e.stopPropagation()}>
+            <div className={UI_PATTERNS.modalPanel} onClick={(e) => e.stopPropagation()}>
               {/* Close Button */}
               <button
                 onClick={() => setSelectedFacility(null)}
                 aria-label="Close"
-                className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
+                className={UI_PATTERNS.modalCloseButton}
               >
                 <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -926,14 +915,14 @@ const Facilities = () => {
                       setIsEditModalOpen(true);
                       setSelectedFacility(null);
                     }}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100 flex items-center"
+                    className={`${UI_PATTERNS.buttonNeutral} flex items-center`}
                   ><span className="truncate">Edit</span></button>
                   <button
                     onClick={async () => {
                       if (!selectedFacility) return;
                       requestDeleteFacility(selectedFacility._id);
                     }}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 active:bg-[#F05A25] flex items-center"
+                    className={`${UI_PATTERNS.buttonDanger} flex items-center`}
                   ><span className="truncate">Delete</span></button>
                 </div>
               )}
@@ -952,7 +941,7 @@ const Facilities = () => {
             <button
               type="button"
               onClick={() => setPendingDeleteFacilityId(null)}
-              className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
+              className={UI_PATTERNS.buttonNeutral}
             >
               Cancel
             </button>
@@ -963,7 +952,7 @@ const Facilities = () => {
                 const isDeletingFromDetails = selectedFacility?._id === pendingDeleteFacilityId;
                 handleDeleteFacility(pendingDeleteFacilityId, isDeletingFromDetails);
               }}
-              className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600"
+              className={UI_PATTERNS.buttonDanger}
             >
               Delete
             </button>
@@ -1020,7 +1009,7 @@ const Facilities = () => {
              <button
               onClick={() => setZoomedImage(null)}
               aria-label="Close zoomed image"
-              className="absolute top-4 right-4 bg-gray-800 rounded-lg p-2 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
+              className={UI_PATTERNS.zoomCloseButton}
             >
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" />

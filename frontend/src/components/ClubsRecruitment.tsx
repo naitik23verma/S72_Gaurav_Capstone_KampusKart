@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiCalendar, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiUser, FiPhone, FiCheckCircle, FiUsers, FiX } from 'react-icons/fi';
+import { FiCalendar, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiUser, FiPhone, FiUsers } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
+import { SuccessMessage } from './common/SuccessMessage';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
 import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
+import { UI_PATTERNS } from '../theme/uiPatterns';
 
 interface ClubRecruitment {
   _id: string;
@@ -69,18 +71,18 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
 
   return (
     <div
-      className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4"
+      className={UI_PATTERNS.modalOverlay}
       role="dialog"
       aria-modal="true"
       aria-labelledby="club-details-title"
       onClick={onClose}
     >
-      <div className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto relative" onClick={(e) => e.stopPropagation()}>
+      <div className={UI_PATTERNS.modalPanel} onClick={(e) => e.stopPropagation()}>
         {/* Close Button */}
         <button
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
+          className={UI_PATTERNS.modalCloseButton}
         >
           <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
@@ -152,7 +154,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
                     href={club.formUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block w-full text-center px-6 py-3 rounded-lg font-bold text-white bg-[#00C6A7] hover:bg-[#009e87] active:bg-[#00C6A7] transition mb-2"
+                    className="inline-block w-full text-center px-6 py-3 rounded-lg font-bold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition mb-2"
                   >
                     Apply Now
                   </a>
@@ -171,13 +173,13 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
                 <div className="flex flex-col sm:flex-row gap-2">
                   <button
                     onClick={() => onEdit?.(club)}
-                    className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-colors duration-200"
+                    className={`${UI_PATTERNS.buttonNeutral} flex-1 transition-colors duration-200`}
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => onDelete?.(club._id)}
-                    className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-[#d44d1e] active:bg-[#F05A25] transition-colors duration-200"
+                    className={`${UI_PATTERNS.buttonDanger} flex-1 transition-colors duration-200`}
                   >
                     Delete
                   </button>
@@ -209,7 +211,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
             <button
               onClick={closeZoomedImageModal}
               aria-label="Close zoomed image"
-              className="absolute top-4 right-4 bg-gray-800 rounded-lg p-2 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
+              className={UI_PATTERNS.zoomCloseButton}
             >
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" />
@@ -501,24 +503,7 @@ const ClubsRecruitment = () => {
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         
         {/* Success Message Banner */}
-        {successMessage && (
-          <div 
-            className="mb-6 rounded-lg bg-green-50 border-2 border-green-200 p-4 flex items-center gap-3"
-            role="alert"
-            aria-live="polite"
-          >
-            <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <p className="text-sm font-medium text-green-800 flex-1">{successMessage}</p>
-            <button
-              type="button"
-              onClick={() => setSuccessMessage(null)}
-              className="p-1 rounded-md text-green-700 hover:bg-green-100"
-              aria-label="Dismiss success message"
-            >
-              <FiX className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+        <SuccessMessage message={successMessage} onDismiss={() => setSuccessMessage(null)} />
         
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <h1 className="text-h2 font-extrabold text-black">Clubs Recruitment</h1>
@@ -633,8 +618,8 @@ const ClubsRecruitment = () => {
                     </div>
                   </div>
                 )}
-                <div className="absolute top-4 right-4">
-                  <span className={`px-3 py-1.5 rounded-lg text-xs font-medium ${club.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>{club.status}</span>
+                <div className={UI_PATTERNS.badgeTopRight}>
+                  <span className={`${UI_PATTERNS.badgeLabel} ${club.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>{club.status}</span>
                 </div>
               </div>
               <div className="p-4 sm:p-5 md:p-6">
@@ -654,7 +639,7 @@ const ClubsRecruitment = () => {
                   <button
                     className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
                       club.formUrl 
-                        ? 'bg-[#00C6A7] text-white hover:bg-[#009e87] active:bg-[#00C6A7]' 
+                        ? 'bg-[#181818] text-white hover:bg-[#00C6A7] active:bg-[#181818]' 
                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     }`}
                     disabled={!club.formUrl}
@@ -668,7 +653,7 @@ const ClubsRecruitment = () => {
           ))}
           {filteredClubs.length === 0 && (
             <div className="col-span-full flex flex-col items-center justify-center py-16 px-4">
-              <svg className="w-24 h-24 mb-4 text-gray-200" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <svg className={UI_PATTERNS.emptyStateIcon} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <circle cx="36" cy="32" r="14" fill="white" stroke="#E5E7EB" strokeWidth="3" />
                 <circle cx="60" cy="32" r="14" fill="white" stroke="#E5E7EB" strokeWidth="3" />
                 <path d="M8 80c0-15.464 12.536-28 28-28h24c15.464 0 28 12.536 28 28" stroke="#E5E7EB" strokeWidth="3" strokeLinecap="round" />
@@ -893,14 +878,14 @@ const ClubsRecruitment = () => {
             <button
               type="button"
               onClick={() => setPendingDeleteClubId(null)}
-              className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
+              className={UI_PATTERNS.buttonNeutral}
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={() => pendingDeleteClubId && handleDeleteClub(pendingDeleteClubId)}
-              className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600"
+              className={UI_PATTERNS.buttonDanger}
             >
               Delete
             </button>

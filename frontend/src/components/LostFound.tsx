@@ -1,14 +1,16 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { FiSearch, FiMapPin, FiUser, FiCalendar, FiEdit2, FiTrash2, FiCheckCircle, FiInfo, FiTag, FiFileText, FiMail, FiX } from 'react-icons/fi';
+import { FiSearch, FiMapPin, FiUser, FiCalendar, FiEdit2, FiTrash2, FiCheckCircle, FiInfo, FiTag, FiFileText, FiMail } from 'react-icons/fi';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
+import { SuccessMessage } from './common/SuccessMessage';
 import { validateEmail, validatePhone } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
 import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
+import { UI_PATTERNS } from '../theme/uiPatterns';
 
 interface LostFoundItem {
   _id: string;
@@ -382,24 +384,7 @@ const LostFound = () => {
     <div className="min-h-screen bg-white font-sans">
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         {/* Success Message Banner */}
-        {successMessage && (
-          <div 
-            className="mb-6 bg-green-50 border-2 border-green-200 rounded-lg p-4 flex items-center gap-3 animate-fade-in"
-            role="alert"
-            aria-live="polite"
-          >
-            <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <p className="text-green-800 font-medium flex-1">{successMessage}</p>
-            <button
-              type="button"
-              onClick={() => setSuccessMessage(null)}
-              className="p-1 rounded-md text-green-700 hover:bg-green-100"
-              aria-label="Dismiss success message"
-            >
-              <FiX className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+        <SuccessMessage message={successMessage} onDismiss={() => setSuccessMessage(null)} />
         
         {/* Top Bar: Heading + Add Button */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
@@ -610,13 +595,13 @@ const LostFound = () => {
                   </div>
                 )}
                 {/* Status Badges - Now positioned over the image */}
-                <div className="absolute top-4 right-4 flex flex-col gap-2">
-                  <span className={`text-xs px-3 py-1.5 rounded-lg font-medium ${
+                <div className={`${UI_PATTERNS.badgeTopRight} flex flex-col gap-2`}>
+                  <span className={`${UI_PATTERNS.badgeLabel} ${
                     item.type === 'lost' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                   }`}>
                     {item.type === 'lost' ? 'Lost Item' : 'Found Item'}
                   </span>
-                  <span className={`text-xs px-3 py-1.5 rounded-lg font-medium ${
+                  <span className={`${UI_PATTERNS.badgeLabel} ${
                     item.resolved ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
                   }`}>
                     {item.resolved ? 'Resolved' : 'Unresolved'}
@@ -965,7 +950,7 @@ const LostFound = () => {
                   <button
                     type="button"
                     onClick={closeItemModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100"
+                    className={UI_PATTERNS.buttonNeutral}
                     disabled={isSubmitting}
                   >
                     Cancel
@@ -973,7 +958,7 @@ const LostFound = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`${UI_PATTERNS.buttonPrimary} ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {isSubmitting ? (
                       <span className="flex items-center">
@@ -995,7 +980,7 @@ const LostFound = () => {
       {/* Item Details Modal */}
       {selectedItemForDetails && (
         <div 
-          className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4"
+          className={UI_PATTERNS.modalOverlay}
           onClick={() => setSelectedItemForDetails(null)}
           onKeyDown={(e) => {
             if (e.key === 'Escape') setSelectedItemForDetails(null);
@@ -1006,7 +991,7 @@ const LostFound = () => {
           tabIndex={-1}
         >
           <div 
-            className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative" 
+            className={UI_PATTERNS.modalPanel}
             style={{ colorScheme: 'light', backgroundColor: '#ffffff', color: '#213547' }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -1014,7 +999,7 @@ const LostFound = () => {
             <button
               onClick={() => setSelectedItemForDetails(null)}
               aria-label="Close dialog"
-              className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
+              className={UI_PATTERNS.modalCloseButton}
             >
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
@@ -1106,7 +1091,7 @@ const LostFound = () => {
                 {!selectedItemForDetails.resolved && (
                   <button
                     onClick={() => handleMarkResolved(selectedItemForDetails._id)}
-                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#00C6A7] hover:bg-[#009e86] active:bg-[#00C6A7] transition-colors duration-200"
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200"
                   >
                     <FiCheckCircle className="w-4 h-4" /> Mark as Resolved
                   </button>
@@ -1128,14 +1113,14 @@ const LostFound = () => {
           <button
             type="button"
             onClick={() => setPendingDeleteItemId(null)}
-            className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
+            className={UI_PATTERNS.buttonNeutral}
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={() => pendingDeleteItemId && handleDeleteItem(pendingDeleteItemId)}
-            className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600"
+            className={UI_PATTERNS.buttonDanger}
           >
             Delete
           </button>
@@ -1211,7 +1196,7 @@ const LostFound = () => {
           <button
             onClick={() => setZoomedImage(null)}
             aria-label="Close zoomed image"
-            className="absolute top-4 right-4 bg-gray-800 rounded-lg p-2 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
+            className={UI_PATTERNS.zoomCloseButton}
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />

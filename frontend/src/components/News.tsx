@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiCalendar, FiFileText, FiSearch, FiInfo, FiTag, FiEdit2, FiTrash2, FiCheckCircle, FiX } from 'react-icons/fi';
+import { FiCalendar, FiFileText, FiSearch, FiInfo, FiTag, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
+import { SuccessMessage } from './common/SuccessMessage';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
 import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
+import { UI_PATTERNS } from '../theme/uiPatterns';
 
 interface NewsItem {
   _id: string;
@@ -208,24 +210,7 @@ const News = () => {
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         
         {/* Success Message Banner */}
-        {successMessage && (
-          <div
-            className="mb-6 rounded-lg bg-green-50 border-2 border-green-200 p-4 flex items-center gap-3"
-            role="alert"
-            aria-live="polite"
-          >
-            <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <p className="text-sm font-medium text-green-800 flex-1">{successMessage}</p>
-            <button
-              type="button"
-              onClick={() => setSuccessMessage(null)}
-              className="p-1 rounded-md text-green-700 hover:bg-green-100"
-              aria-label="Dismiss success message"
-            >
-              <FiX className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+        <SuccessMessage message={successMessage} onDismiss={() => setSuccessMessage(null)} />
         
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <h1 className="text-h2 font-extrabold text-black">Campus News</h1>
@@ -238,7 +223,7 @@ const News = () => {
             </button>
           )}
         </div>
-
+                    className={UI_PATTERNS.buttonNeutral}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 gap-4">
           <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
             <div className="relative">
@@ -342,15 +327,15 @@ const News = () => {
                   </div>
                 )}
                 {/* Category Badge */}
-                <div className="absolute top-4 left-4">
-                  <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white/90 text-gray-800 flex items-center gap-1">
+                <div className={UI_PATTERNS.badgeTopLeft}>
+                  <span className={UI_PATTERNS.badgeLabel}>
                     <FiTag className="w-3 h-3" />
                     {item.category}
                   </span>
                 </div>
                 {/* Date Badge */}
-                <div className="absolute top-4 right-4">
-                  <span className="text-[11px] sm:text-xs px-2.5 sm:px-3 py-1.5 rounded-lg font-medium bg-white/90 text-gray-800 flex items-center gap-1 max-w-[130px] sm:max-w-none truncate">
+                <div className={UI_PATTERNS.badgeTopRight}>
+                  <span className={UI_PATTERNS.badgeLabel}>
                     <FiCalendar className="w-3 h-3" />
                     {new Date(item.date).toLocaleDateString('en-US', {
                       year: '2-digit',
@@ -390,7 +375,7 @@ const News = () => {
           ))}
           {filteredNews.length === 0 && (
             <div className="col-span-full flex flex-col items-center justify-center py-16 px-4">
-              <svg className="w-24 h-24 mb-4 text-gray-200" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <svg className={UI_PATTERNS.emptyStateIcon} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <rect x="8" y="12" width="80" height="72" rx="8" fill="white" stroke="#E5E7EB" strokeWidth="3" />
                 <rect x="20" y="28" width="56" height="6" rx="3" fill="#E5E7EB" />
                 <rect x="20" y="42" width="40" height="4" rx="2" fill="#E5E7EB" />
@@ -503,13 +488,13 @@ const News = () => {
                   <button
                     type="button"
                     onClick={closeNewsModal}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100"
+                    className={UI_PATTERNS.buttonNeutral}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-3 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200"
+                    className={UI_PATTERNS.buttonPrimary}
                   >
                     {editingNews ? 'Save Changes' : 'Add News'}
                   </button>
@@ -520,17 +505,17 @@ const News = () => {
         {/* News Details Modal */}
         {selectedNewsForDetails && (
           <div
-            className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4"
+            className={UI_PATTERNS.modalOverlay}
             role="dialog"
             aria-modal="true"
             aria-labelledby="news-details-title"
             onClick={() => setSelectedNewsForDetails(null)}
           >
-            <div className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto relative" onClick={(e) => e.stopPropagation()}>
+            <div className={UI_PATTERNS.modalPanel} onClick={(e) => e.stopPropagation()}>
               <button
                 onClick={() => setSelectedNewsForDetails(null)}
                 aria-label="Close"
-                className="absolute top-6 right-6 z-10 bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] text-white rounded-lg p-2.5 transition-all duration-200 flex items-center justify-center w-10 h-10"
+                className={UI_PATTERNS.modalCloseButton}
               >
                 <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
@@ -571,7 +556,7 @@ const News = () => {
                 <div className="flex gap-3 mt-6 pt-6 border-t border-gray-200">
                   <button
                     onClick={() => { setSelectedNewsForDetails(null); handleEditNews(selectedNewsForDetails); }}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 flex items-center gap-1"
+                    className={`${UI_PATTERNS.buttonNeutral} flex items-center gap-1`}
                   >
                     <FiEdit2 className="w-4 h-4" /> Edit
                   </button>
@@ -580,7 +565,7 @@ const News = () => {
                       requestDeleteNews(selectedNewsForDetails._id);
                       setSelectedNewsForDetails(null);
                     }}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 flex items-center gap-1"
+                    className={`${UI_PATTERNS.buttonDanger} flex items-center gap-1`}
                   >
                     <FiTrash2 className="w-4 h-4" /> Delete
                   </button>
@@ -601,14 +586,14 @@ const News = () => {
             <button
               type="button"
               onClick={() => setPendingDeleteNewsId(null)}
-              className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50"
+              className={UI_PATTERNS.buttonNeutral}
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={() => pendingDeleteNewsId && handleDeleteNews(pendingDeleteNewsId)}
-              className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600"
+              className={UI_PATTERNS.buttonDanger}
             >
               Delete
             </button>
@@ -622,7 +607,7 @@ const News = () => {
             <button
               onClick={() => setZoomedImage(null)}
               aria-label="Close zoomed image"
-              className="absolute top-4 right-4 bg-gray-800 rounded-lg p-2 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
+              className={UI_PATTERNS.zoomCloseButton}
             >
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />

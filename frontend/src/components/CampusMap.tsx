@@ -726,7 +726,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                   }}
                 >
                   <div 
-                    className="p-0 max-w-sm bg-white rounded-lg overflow-hidden border-2 border-gray-200" 
+                    className="p-0 w-[min(92vw,360px)] max-w-sm bg-white rounded-lg overflow-hidden border-2 border-gray-200" 
                     style={{ 
                       margin: 0, 
                       padding: 0,
@@ -741,16 +741,21 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                           setInfoWindowPosition(null);
                           setSelectedLocation(null);
                         }}
-                        className="absolute top-2 right-2 p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
+                        className="absolute top-2 right-2 z-10 bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] text-white rounded-lg p-2 transition-all duration-200 flex items-center justify-center"
                         aria-label="Close"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                       
                       <div className="pr-14">
-                        <h3 className="font-black text-lg text-gray-900 mb-2 leading-tight break-words">{selectedLocation.name}</h3>
+                        <h3
+                          className="font-black text-lg text-gray-900 mb-2 leading-tight break-words line-clamp-2"
+                          title={selectedLocation.name}
+                        >
+                          {selectedLocation.name}
+                        </h3>
                         <span className="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-lg border-2 border-gray-200">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
@@ -761,7 +766,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                     </div>
 
                     {/* Content Section */}
-                    <div className="p-4 space-y-4">
+                    <div className="p-4 space-y-4 max-h-[48vh] overflow-y-auto">
                       {/* Description Section */}
                       <div className="bg-gray-50 p-3 rounded-lg border-2 border-gray-200">
                         <div className="flex items-start gap-2 mb-2">
@@ -772,7 +777,9 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                           </div>
                           <h4 className="text-sm font-bold text-gray-900">About</h4>
                         </div>
-                        <p className="text-sm text-gray-700 leading-relaxed">{selectedLocation.description || ''}</p>
+                        <p className="text-sm text-gray-700 leading-relaxed break-words line-clamp-5" title={selectedLocation.description || ''}>
+                          {selectedLocation.description || ''}
+                        </p>
                       </div>
 
                       {/* Location ID Badge */}
@@ -970,7 +977,12 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                   >
                     <div className="flex flex-wrap items-start gap-2">
                       <div className="flex-1 min-w-0">
-                        <span className="font-bold text-base md:text-lg text-gray-900 block mb-1">{location.id}. {location.name}</span>
+                        <span
+                          className="font-bold text-base md:text-lg text-gray-900 block mb-1 line-clamp-2 break-words"
+                          title={`${location.id}. ${location.name}`}
+                        >
+                          {location.id}. {location.name}
+                        </span>
                         <p className="text-sm md:text-base text-gray-600 mt-1.5 line-clamp-2 leading-relaxed">{location.description}</p>
                       </div>
                       <span className="text-xs font-semibold bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full flex-shrink-0 whitespace-nowrap border-2 border-gray-300">

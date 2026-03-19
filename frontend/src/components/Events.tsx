@@ -642,7 +642,15 @@ const Events = () => {
             aria-live="polite"
           >
             <FiCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <p className="text-green-800 font-medium">{successMessage}</p>
+            <p className="text-green-800 font-medium flex-1">{successMessage}</p>
+            <button
+              type="button"
+              onClick={() => setSuccessMessage(null)}
+              className="p-1 rounded-md text-green-700 hover:bg-green-100"
+              aria-label="Dismiss success message"
+            >
+              <FiX className="w-4 h-4" />
+            </button>
           </div>
         )}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
@@ -836,15 +844,12 @@ const Events = () => {
               </p>
               {(searchQuery || filterStatus !== 'All') && (
                 <button
-                <p className="text-green-800 font-medium flex-1">{successMessage}</p>
-                <button
                   type="button"
-                  onClick={() => setSuccessMessage(null)}
-                  className="p-1 rounded-md text-green-700 hover:bg-green-100"
-                  aria-label="Dismiss success message"
-                >
-                  <FiX className="w-4 h-4" />
-                </button>
+                  onClick={() => {
+                    setSearchInput('');
+                    setSearchQuery('');
+                    setFilterStatus('All');
+                  }}
                   className="px-5 py-2 rounded-lg bg-[#181818] text-white text-sm font-semibold hover:bg-[#00C6A7] transition-colors duration-200"
                 >
                   Clear filters

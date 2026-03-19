@@ -57,8 +57,6 @@ const ImageSquare = ({ src, id }: ImageSquareProps) => {
       layout
       transition={{ duration: 1.5, type: "spring" }}
       className="w-full h-full rounded-lg overflow-hidden border-2 border-gray-200 relative"
-      role="img"
-      aria-label="Campus life image"
     >
       {!isLoaded && !hasError && (
         <div className="w-full h-full absolute inset-0 bg-gray-200 animate-pulse rounded-md" />
@@ -68,15 +66,12 @@ const ImageSquare = ({ src, id }: ImageSquareProps) => {
           <span className="text-gray-400 text-xs">Image unavailable</span>
         </div>
       )}
-      <div
-        className={`w-full h-full transition-opacity duration-300 ${
+      <img
+        className={`w-full h-full object-cover transition-opacity duration-300 ${
           isLoaded ? 'opacity-100' : 'opacity-0'
         }`}
-        style={{
-          backgroundImage: `url(${src})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
+        src={src}
+        alt={`Campus life scene ${id}`}
       />
     </motion.div>
   );
@@ -84,18 +79,26 @@ const ImageSquare = ({ src, id }: ImageSquareProps) => {
 
 export const ShuffleGrid = () => {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef = useRef(false);
   const [squares, setSquares] = useState(squareData);
 
   useEffect(() => {
+    isMountedRef.current = true;
     shuffleSquares();
     return () => {
+      isMountedRef.current = false;
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
 
   const shuffleSquares = () => {
+    if (!isMountedRef.current) return;
     setSquares(shuffle([...squareData]));
-    timeoutRef.current = setTimeout(shuffleSquares, 3000);
+    timeoutRef.current = setTimeout(() => {
+      if (isMountedRef.current) {
+        shuffleSquares();
+      }
+    }, 3000);
   };
 
   return (

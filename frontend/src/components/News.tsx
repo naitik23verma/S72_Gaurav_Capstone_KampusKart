@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiCalendar, FiFileText, FiSearch, FiInfo, FiTag, FiEdit2, FiTrash2, FiCheckCircle } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
@@ -7,6 +7,7 @@ import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
+import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
 
 interface NewsItem {
   _id: string;
@@ -36,55 +37,31 @@ const News = () => {
   const [newsImages, setNewsImages] = useState<ImageFile[]>([]);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
 
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const isSelectingSuggestion = useRef(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedNewsForDetails, setSelectedNewsForDetails] = useState<NewsItem | null>(null);
 
-  // Generate autocomplete suggestions from existing news
-  useEffect(() => {
-    if (isSelectingSuggestion.current) {
-      isSelectingSuggestion.current = false;
-      return;
+  const buildNewsSuggestions = useCallback((item: NewsItem, normalizedQuery: string): string[] => {
+    const suggestions: string[] = [];
+    if (item?.title?.toLowerCase().includes(normalizedQuery)) {
+      suggestions.push(item.title);
     }
-    if (searchInput.trim().length > 0) {
-      const suggestions = new Set<string>();
-      if (Array.isArray(news)) {
-        news.forEach(item => {
-          if (item && item.title && item.title.toLowerCase().includes(searchInput.toLowerCase())) {
-            suggestions.add(item.title);
-          }
-          if (item && item.category && item.category.toLowerCase().includes(searchInput.toLowerCase())) {
-            suggestions.add(item.category);
-          }
-          if (item && item.description && item.description.toLowerCase().includes(searchInput.toLowerCase())) {
-            const words = item.description.split(' ').filter(word => 
-              word.toLowerCase().includes(searchInput.toLowerCase()) && word.length > 3
-            );
-            words.forEach(word => suggestions.add(word));
-          }
-        });
-      }
-      setFilteredSuggestions(Array.from(suggestions).slice(0, 5));
-      setShowSuggestions(true);
-    } else {
-      setFilteredSuggestions([]);
-      setShowSuggestions(false);
+    if (item?.category?.toLowerCase().includes(normalizedQuery)) {
+      suggestions.push(item.category);
     }
-  }, [searchInput, news]);
-
-  // Close suggestions when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return suggestions;
   }, []);
+
+  const {
+    showSuggestions,
+    setShowSuggestions,
+    filteredSuggestions,
+    searchRef,
+    markSuggestionSelection,
+  } = useSearchSuggestions<NewsItem>({
+    searchInput,
+    items: news,
+    buildSuggestions: buildNewsSuggestions,
+  });
 
   useEffect(() => {
     fetchNews();
@@ -309,17 +286,13 @@ const News = () => {
                 {filteredSuggestions.map((suggestion, index) => (
                   <div
                     key={index}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      isSelectingSuggestion.current = true;
-                      setSearchInput(suggestion);
-                      setSearchQuery(suggestion);
-                      setShowSuggestions(false);
-                    }}
                     onMouseDown={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
+                      markSuggestionSelection();
+                      setSearchInput(suggestion);
+                      setSearchQuery(suggestion);
+                      setShowSuggestions(false);
                     }}
                     className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0"
                   >
@@ -537,7 +510,7 @@ const News = () => {
             className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4"
             role="dialog"
             aria-modal="true"
-            aria-label="News details"
+            aria-labelledby="news-details-title"
             onClick={() => setSelectedNewsForDetails(null)}
           >
             <div className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto relative" onClick={(e) => e.stopPropagation()}>
@@ -550,7 +523,7 @@ const News = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12 sm:pr-14">{selectedNewsForDetails.title}</h2>
+              <h2 id="news-details-title" className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12 sm:pr-14">{selectedNewsForDetails.title}</h2>
               {selectedNewsForDetails.images && selectedNewsForDetails.images.length > 0 && (
                 <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {selectedNewsForDetails.images.map((img, idx) => (

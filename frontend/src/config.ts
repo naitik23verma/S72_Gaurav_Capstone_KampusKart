@@ -1,8 +1,8 @@
 // Use Vite's built-in mode detection — reliable across all deploy environments
-const isProduction = import.meta.env.MODE === 'production';
+const isProduction: boolean = import.meta.env.MODE === 'production';
 
 // Environment validation
-const requiredEnvVars = {
+const requiredEnvVars: Record<string, string | undefined> = {
   VITE_GOOGLE_MAPS_API_KEY: import.meta.env.VITE_GOOGLE_MAPS_API_KEY
 };
 
@@ -16,8 +16,8 @@ if (missingEnvVars.length > 0 && !isProduction) {
 }
 
 // Base API URL — override via VITE_API_URL env var, or fall back to localhost for dev
-const API_BASE = import.meta.env.VITE_API_URL || (isProduction ? 'https://s72-gaurav-capstone-kampuskart.onrender.com' : 'http://localhost:5000');
+const API_BASE: string = import.meta.env.VITE_API_URL || (isProduction ? 'https://s72-gaurav-capstone-kampuskart.onrender.com' : 'http://localhost:5000');
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || (isProduction ? 'https://s72-gaurav-capstone-kampuskart.onrender.com' : 'http://localhost:5000');
+const SOCKET_URL: string = import.meta.env.VITE_SOCKET_URL || (isProduction ? 'https://s72-gaurav-capstone-kampuskart.onrender.com' : 'http://localhost:5000');
 
 export { API_BASE, SOCKET_URL, isProduction };

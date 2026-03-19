@@ -2,6 +2,7 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { GoogleMap, useLoadScript, InfoWindow, Libraries } from '@react-google-maps/api';
 import { MapSkeleton } from './common/SkeletonLoader';
+import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
 
 // Define libraries as a proper static constant with correct type
 const GOOGLE_MAPS_LIBRARIES: Libraries = ["places", "marker"] as Libraries;
@@ -246,61 +247,36 @@ const CampusMap: React.FC<CampusMapProps> = () => {
   ], []);
 
   // Set Raj Bungalow as the default map center
-  const universityLocation = useMemo(() => ({
+  const universityLocation = {
     lat: 18.493343843257275,
     lng: 74.02357135415613
-  }), []);
+  };
 
   // Add state for map center and zoom
   const [mapCenter, setMapCenter] = useState(universityLocation);
   const [mapZoom, setMapZoom] = useState(16);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const isSelectingSuggestion = useRef(false);
-
-  // Generate autocomplete suggestions from existing locations
-  useEffect(() => {
-    if (isSelectingSuggestion.current) {
-      isSelectingSuggestion.current = false;
-      return;
+  const buildLocationSuggestions = useCallback((location: Location, normalizedQuery: string): string[] => {
+    const suggestions: string[] = [];
+    if (location?.name?.toLowerCase().includes(normalizedQuery)) {
+      suggestions.push(location.name);
     }
-    if (searchInput.trim().length > 0) {
-      const suggestions = new Set<string>();
-      if (Array.isArray(locations)) {
-        locations.forEach(location => {
-          if (location && location.name && location.name.toLowerCase().includes(searchInput.toLowerCase())) {
-            suggestions.add(location.name);
-          }
-          if (location && location.category && location.category.toLowerCase().includes(searchInput.toLowerCase())) {
-            suggestions.add(location.category);
-          }
-          if (location && location.description && location.description.toLowerCase().includes(searchInput.toLowerCase())) {
-            const words = location.description.split(' ').filter(word => 
-              word.toLowerCase().includes(searchInput.toLowerCase()) && word.length > 3
-            );
-            words.forEach(word => suggestions.add(word));
-          }
-        });
-      }
-      setFilteredSuggestions(Array.from(suggestions).slice(0, 5));
-      setShowSuggestions(true);
-    } else {
-      setFilteredSuggestions([]);
-      setShowSuggestions(false);
+    if (location?.category?.toLowerCase().includes(normalizedQuery)) {
+      suggestions.push(location.category);
     }
-  }, [searchInput, locations]);
-
-  // Close suggestions when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return suggestions;
   }, []);
+
+  const {
+    showSuggestions,
+    setShowSuggestions,
+    filteredSuggestions,
+    searchRef,
+    markSuggestionSelection,
+  } = useSearchSuggestions<Location>({
+    searchInput,
+    items: locations,
+    buildSuggestions: buildLocationSuggestions,
+  });
 
   // Memoize filtered locations
   const filteredLocations = useMemo(() => {
@@ -379,6 +355,14 @@ const CampusMap: React.FC<CampusMapProps> = () => {
         setSelectedLocation(null);
       }
     });
+  }, []);
+
+  const onMapUnmount = useCallback(() => {
+    if (zoomChangeListenerRef.current && window.google?.maps?.event) {
+      window.google.maps.event.removeListener(zoomChangeListenerRef.current);
+      zoomChangeListenerRef.current = null;
+    }
+    setMapRef(null);
   }, []);
 
   // Render campus location markers using AdvancedMarkerElement where available.
@@ -632,7 +616,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                       key={index}
                       onMouseDown={(e) => {
                         e.stopPropagation();
-                        isSelectingSuggestion.current = true;
+                        markSuggestionSelection();
                         // Find and navigate to matching location if found
                         const matchingLocation = locations.find(loc =>
                           loc.name.toLowerCase().includes(suggestion.toLowerCase()) ||
@@ -674,6 +658,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
               }}
               onClick={handleMapClick}
               onLoad={onMapLoad}
+              onUnmount={onMapUnmount}
             >
               {/* InfoWindow for location details */}
               {selectedLocation && infoWindowPosition && (
@@ -861,7 +846,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                       key={index}
                       onMouseDown={(e) => {
                         e.stopPropagation();
-                        isSelectingSuggestion.current = true;
+                        markSuggestionSelection();
                         // Find and navigate to matching location if found
                         const matchingLocation = locations.find(loc =>
                           loc.name.toLowerCase().includes(suggestion.toLowerCase()) ||
@@ -894,6 +879,8 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                 {filteredLocations.map((location) => (
                   <li
                     key={location.id}
+                    role="button"
+                    tabIndex={0}
                     className={`pb-3 border-b-2 border-gray-200 last:border-b-0 text-gray-800 cursor-pointer hover:bg-gray-50 active:bg-gray-100 p-3 rounded-lg transition-colors duration-150 ${
                       selectedLocation?.id === location.id ? 'bg-[#00C6A7]/10 border-[#00C6A7]' : ''
                     }`}
@@ -902,6 +889,15 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                       // On mobile, close the panel so the map is visible
                       if (window.innerWidth < 768) {
                         setIsPanelOpen(false);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleLocationClick(location);
+                        if (window.innerWidth < 768) {
+                          setIsPanelOpen(false);
+                        }
                       }
                     }}
                   >

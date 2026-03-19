@@ -1,14 +1,13 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { FiEdit2, FiTrash2, FiCheckCircle, FiUser, FiCalendar, FiTag, FiFileText, FiSearch, FiInfo } from 'react-icons/fi';
-import { format } from 'date-fns';
 import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
 import { ImageUpload, ImageFile } from './common/ImageUpload';
-import { validateMultipleRequired } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
+import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
 
 interface Complaint {
   _id: string;
@@ -77,57 +76,31 @@ const Complaints = () => {
   const observer = useRef<IntersectionObserver | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const isSelectingSuggestion = useRef(false);
-
-  // Generate autocomplete suggestions from existing complaints
-  useEffect(() => {
-    if (isSelectingSuggestion.current) {
-      isSelectingSuggestion.current = false;
-      return;
+  const buildComplaintSuggestions = useCallback((complaint: Complaint, normalizedQuery: string): string[] => {
+    const suggestions: string[] = [];
+    if (complaint?.title?.toLowerCase().includes(normalizedQuery)) {
+      suggestions.push(complaint.title);
     }
-    if (searchInput.trim().length > 0) {
-      const suggestions = new Set<string>();
-      if (Array.isArray(complaints)) {
-        complaints.forEach((complaint: Complaint | null) => {
-          if (!complaint) return;
-          if (complaint.title && complaint.title.toLowerCase().includes(searchInput.toLowerCase())) {
-            suggestions.add(complaint.title);
-          }
-          if (complaint.category && complaint.category.toLowerCase().includes(searchInput.toLowerCase())) {
-            suggestions.add(complaint.category);
-          }
-          if (complaint.department && complaint.department.toLowerCase().includes(searchInput.toLowerCase())) {
-            suggestions.add(complaint.department);
-          }
-          if (complaint.description && complaint.description.toLowerCase().includes(searchInput.toLowerCase())) {
-            const words = complaint.description.split(' ').filter(word => 
-              word.toLowerCase().includes(searchInput.toLowerCase()) && word.length > 3
-            );
-            words.forEach(word => suggestions.add(word));
-          }
-        });
-      }
-      setFilteredSuggestions(Array.from(suggestions).slice(0, 5));
-      setShowSuggestions(true);
-    } else {
-      setFilteredSuggestions([]);
-      setShowSuggestions(false);
+    if (complaint?.category?.toLowerCase().includes(normalizedQuery)) {
+      suggestions.push(complaint.category);
     }
-  }, [searchInput, complaints]);
-
-  // Close suggestions when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    if (complaint?.department?.toLowerCase().includes(normalizedQuery)) {
+      suggestions.push(complaint.department);
+    }
+    return suggestions;
   }, []);
+
+  const {
+    showSuggestions,
+    setShowSuggestions,
+    filteredSuggestions,
+    searchRef,
+    markSuggestionSelection,
+  } = useSearchSuggestions<Complaint>({
+    searchInput,
+    items: complaints,
+    buildSuggestions: buildComplaintSuggestions,
+  });
 
   // Auto-hide success message after 3 seconds
   useEffect(() => {
@@ -185,6 +158,14 @@ const Complaints = () => {
     };
   }, []);
 
+  // Disconnect the previous observer when filters/search change to avoid stale observers.
+  useEffect(() => {
+    if (observer.current) {
+      observer.current.disconnect();
+      observer.current = null;
+    }
+  }, [filterStatus, filterCategory, searchQuery]);
+
   const fetchComplaints = async () => {
     if (!token) return;
     try {
@@ -238,8 +219,10 @@ const Complaints = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-    setIsFiltering(true);
-  }, [filterStatus, filterCategory, searchQuery]);
+    if (!isLoading) {
+      setIsFiltering(true);
+    }
+  }, [filterStatus, filterCategory, searchQuery, isLoading]);
 
   useEffect(() => {
     fetchComplaints();
@@ -433,107 +416,6 @@ const Complaints = () => {
     }
   };
 
-  const renderStatusHistory = (history: Complaint['statusHistory']) => {
-    return (
-      <div className="space-y-2">
-        {history.map((update, index) => (
-          <div key={index} className="bg-gray-50 p-3 rounded-lg">
-            <div className="flex items-center justify-between">
-              <span className="font-medium">{update.status}</span>
-              <span className="text-sm text-gray-500">
-                {format(new Date(update.timestamp), 'MMM d, yyyy h:mm a')}
-              </span>
-            </div>
-            {update.comment && (
-              <p className="text-sm text-gray-600 mt-1">{update.comment}</p>
-            )}
-            <p className="text-xs text-gray-500 mt-1">
-              Updated by: {update.updatedBy.name}
-            </p>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const getStatusColor = (status: Complaint['status']) => {
-    switch (status) {
-      case 'Open': return 'bg-red-100 text-red-800';
-      case 'In Progress': return 'bg-yellow-100 text-yellow-800';
-      case 'Resolved': return 'bg-green-100 text-green-800';
-      case 'Closed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const renderComplaintDetails = (complaint: Complaint) => {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">{complaint.title}</h3>
-          <span className={`px-3 py-1 rounded-lg text-sm ${getStatusColor(complaint.status)}`}>
-            {complaint.status}
-          </span>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-gray-500">Category</p>
-            <p className="font-medium">{complaint.category}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Priority</p>
-            <p className="font-medium">{complaint.priority}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Department</p>
-            <p className="font-medium">{complaint.department}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Assigned To</p>
-            <p className="font-medium">{complaint.assignedTo?.name || 'Not Assigned'}</p>
-          </div>
-        </div>
-
-        {complaint.estimatedResolutionTime && (
-          <div>
-            <p className="text-sm text-gray-500">Estimated Resolution Time</p>
-            <p className="font-medium">
-              {format(new Date(complaint.estimatedResolutionTime), 'MMM d, yyyy h:mm a')}
-            </p>
-          </div>
-        )}
-
-        <div>
-          <p className="text-sm text-gray-500">Description</p>
-          <p className="mt-1">{complaint.description}</p>
-        </div>
-
-        {complaint.images && complaint.images.length > 0 && (
-          <div>
-            <p className="text-sm text-gray-500 mb-2">Images</p>
-            <div className="grid grid-cols-2 gap-2">
-              {complaint.images.map((image, index) => (
-                <img
-                  key={index}
-                  src={image.url}
-                  alt={`Complaint image ${index + 1}`}
-                  className="w-full h-32 object-cover rounded-lg cursor-pointer"
-                  onClick={() => setZoomedImage(image.url)}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div>
-          <p className="text-sm text-gray-500 mb-2">Status History</p>
-          {renderStatusHistory(complaint.statusHistory)}
-        </div>
-      </div>
-    );
-  };
-
   if (isLoading && complaints.length === 0) {
     return <PageSkeleton contentType="cards" itemCount={8} filterCount={2} showAddButton={true} />;
   }
@@ -650,7 +532,7 @@ const Complaints = () => {
                     onMouseDown={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      isSelectingSuggestion.current = true;
+                      markSuggestionSelection();
                       setSearchInput(suggestion);
                       setSearchQuery(suggestion);
                       setShowSuggestions(false);

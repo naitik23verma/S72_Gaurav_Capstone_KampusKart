@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { FiMapPin, FiSearch, FiEdit2, FiTag, FiCalendar, FiUser, FiTrash2, FiCheckCircle } from 'react-icons/fi';
 import { MdSchool, MdRestaurant, MdLocalLaundryService, MdHotel, MdLibraryBooks, MdFastfood, MdLocalCafe, MdRoomService, MdBed, MdApartment } from 'react-icons/md';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,6 +9,7 @@ import { validateMultipleRequired } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
+import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
 
 interface Facility {
   _id: string;
@@ -125,10 +126,6 @@ const Facilities = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [addLoading, setAddLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const isSelectingSuggestion = useRef(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Auto-hide success message after 3 seconds
@@ -141,52 +138,31 @@ const Facilities = () => {
     }
   }, [successMessage]);
 
-  // Generate autocomplete suggestions from existing facilities
-  useEffect(() => {
-    if (isSelectingSuggestion.current) {
-      isSelectingSuggestion.current = false;
-      return;
+  const buildFacilitySuggestions = useCallback((facility: Facility, normalizedQuery: string): string[] => {
+    const suggestions: string[] = [];
+    if (facility?.name?.toLowerCase().includes(normalizedQuery)) {
+      suggestions.push(facility.name);
     }
-    if (searchInput.trim().length > 0) {
-      const suggestions = new Set<string>();
-      if (Array.isArray(facilities)) {
-        facilities.forEach((facility: Facility | null) => {
-          if (!facility) return;
-          if (facility.name && facility.name.toLowerCase().includes(searchInput.toLowerCase())) {
-            suggestions.add(facility.name);
-          }
-          if (facility.type && facility.type.toLowerCase().includes(searchInput.toLowerCase())) {
-            suggestions.add(facility.type);
-          }
-          if (facility.location && facility.location.toLowerCase().includes(searchInput.toLowerCase())) {
-            suggestions.add(facility.location);
-          }
-          if (facility.description && facility.description.toLowerCase().includes(searchInput.toLowerCase())) {
-            const words = facility.description.split(' ').filter(word => 
-              word.toLowerCase().includes(searchInput.toLowerCase()) && word.length > 3
-            );
-            words.forEach(word => suggestions.add(word));
-          }
-        });
-      }
-      setFilteredSuggestions(Array.from(suggestions).slice(0, 5));
-      setShowSuggestions(true);
-    } else {
-      setFilteredSuggestions([]);
-      setShowSuggestions(false);
+    if (facility?.type?.toLowerCase().includes(normalizedQuery)) {
+      suggestions.push(facility.type);
     }
-  }, [searchInput, facilities]);
-
-  // Close suggestions when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    if (facility?.location?.toLowerCase().includes(normalizedQuery)) {
+      suggestions.push(facility.location);
+    }
+    return suggestions;
   }, []);
+
+  const {
+    showSuggestions,
+    setShowSuggestions,
+    filteredSuggestions,
+    searchRef,
+    markSuggestionSelection,
+  } = useSearchSuggestions<Facility>({
+    searchInput,
+    items: facilities,
+    buildSuggestions: buildFacilitySuggestions,
+  });
 
   const filteredFacilities = useMemo(() => {
     if (!Array.isArray(facilities)) return [];
@@ -327,7 +303,7 @@ const Facilities = () => {
                     onMouseDown={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      isSelectingSuggestion.current = true;
+                      markSuggestionSelection();
                       setSearchInput(suggestion);
                       setSearchQuery(suggestion);
                       setShowSuggestions(false);
@@ -852,7 +828,7 @@ const Facilities = () => {
             className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4"
             role="dialog"
             aria-modal="true"
-            aria-label="Facility details"
+            aria-labelledby="facility-details-title"
             onClick={() => setSelectedFacility(null)}
           >
             <div className="bg-white rounded-t-xl sm:rounded-xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] md:max-h-[85vh] overflow-y-auto relative" onClick={(e) => e.stopPropagation()}>
@@ -869,7 +845,7 @@ const Facilities = () => {
 
               <div className="flex items-center gap-3 mb-4">
                 {iconOptions.find(opt => opt.value === selectedFacility?.icon)?.icon}
-                <h2 className="text-2xl font-bold text-gray-900 pr-8">{selectedFacility?.name || 'Facility'}</h2>
+                <h2 id="facility-details-title" className="text-2xl font-bold text-gray-900 pr-8">{selectedFacility?.name || 'Facility'}</h2>
               </div>
               {/* Images Gallery */}
               {selectedFacility.images && selectedFacility.images.length > 0 && (

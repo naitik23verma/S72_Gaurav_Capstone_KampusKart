@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { ComponentType, useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 import { format } from 'date-fns';
 import {
   Box,
@@ -12,6 +12,7 @@ import {
   List,
   ListItem,
   ListItemAvatar,
+  Divider,
   CircularProgress,
   Menu,
   MenuItem,
@@ -45,41 +46,108 @@ const CHAT_THEME = {
   textMuted: '#9ca3af',     // Muted text
 };
 
+interface ChatUser {
+  _id?: string;
+  id?: string;
+  name?: string;
+  profilePicture?: string | { url?: string };
+}
+
+interface ChatAttachment {
+  type?: string;
+  url: string;
+  name: string;
+}
+
+interface ChatReaction {
+  emoji?: string;
+  user?: ChatUser;
+}
+
+interface ChatReadEntry {
+  user?: ChatUser;
+}
+
+interface ChatMessage {
+  _id: string;
+  message: string;
+  sender?: ChatUser;
+  timestamp?: string;
+  edited?: boolean;
+  attachments?: ChatAttachment[];
+  reactions?: ChatReaction[];
+  readBy?: ChatReadEntry[];
+  replyTo?: ChatMessage;
+}
+
+interface PaginatedChatResponse {
+  messages: ChatMessage[];
+  pagination?: {
+    page: number;
+    pages: number;
+  };
+}
+
+interface ServerToClientEvents {
+  'previous-messages': (data: ChatMessage[] | PaginatedChatResponse) => void;
+  connect_error: () => void;
+  disconnect: (reason: string) => void;
+  connect: () => void;
+  'new-message': (message: ChatMessage) => void;
+  'online-users': (users: ChatUser[]) => void;
+  'user-typing': (userData: ChatUser) => void;
+  'user-stop-typing': (userData: ChatUser) => void;
+  'message-updated': (updatedMessage: ChatMessage) => void;
+  'message-deleted': (data: { _id: string }) => void;
+}
+
+interface ClientToServerEvents {
+  join: (data: { _id?: string; name?: string; profilePicture?: string | { url?: string } }) => void;
+  typing: (data: { _id?: string; name?: string }) => void;
+  'stop-typing': (data: { _id?: string; name?: string }) => void;
+}
+
+interface EmojiSelectData {
+  native?: string;
+}
+
 const ChatWindow = () => {
   // Helper to get auth token from either storage (sessionStorage used when remember=false)
   const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
 
   // iOS keyboard overlap fix: replaced visualViewport listener with 100svh on parent container
 
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [onlineUsers, setOnlineUsers] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState<ChatUser[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [emojiPickerComponent, setEmojiPickerComponent] = useState(null);
-  const [emojiData, setEmojiData] = useState(null);
+  const [emojiPickerComponent, setEmojiPickerComponent] = useState<ComponentType<Record<string, unknown>> | null>(null);
+  const [emojiData, setEmojiData] = useState<Record<string, unknown> | null>(null);
   const [isEmojiLoading, setIsEmojiLoading] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [searchResults, setSearchResults] = useState([]);
-  const [selectedMessage, setSelectedMessage] = useState(null);
-  const [editingMessage, setEditingMessage] = useState(null);
+  const [searchResults, setSearchResults] = useState<ChatMessage[]>([]);
+  const [selectedMessage, setSelectedMessage] = useState<ChatMessage | null>(null);
+  const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(null);
   const [editText, setEditText] = useState('');
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [replyTo, setReplyTo] = useState(null);
-  const [attachments, setAttachments] = useState([]);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
+  const [attachments, setAttachments] = useState<File[]>([]);
   const [sendingMessage, setSendingMessage] = useState(false);
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { user } = useAuth();
-  const socketRef = useRef();
-  const messagesEndRef = useRef(null);
-  const loadMoreRef = useRef(null); // Separate ref for load-more trigger (top of list)
-  const typingTimeoutRef = useRef(null);
-  const observerRef = useRef(null);
+  const socketRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null); // Separate ref for load-more trigger (top of list)
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const emojiPickerRef = useRef<HTMLDivElement | null>(null);
+  const emojiToggleButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  const markMessageAsRead = useCallback(async (messageId) => {
+  const markMessageAsRead = useCallback(async (messageId: string) => {
     try {
       await fetch(`${API_BASE}/api/chat/messages/${messageId}/read`, {
         method: 'POST',
@@ -112,7 +180,7 @@ const ChatWindow = () => {
     }
 
     // Listen for previous messages
-    socketRef.current.on('previous-messages', (data) => {
+    socketRef.current.on('previous-messages', (data: ChatMessage[] | PaginatedChatResponse) => {
       // Support both array and object formats
       if (Array.isArray(data)) {
         setMessages(data);
@@ -133,7 +201,7 @@ const ChatWindow = () => {
       setLoading(false);
     });
 
-    socketRef.current.on('disconnect', (reason) => {
+    socketRef.current.on('disconnect', (reason: string) => {
       if (reason === 'io server disconnect') {
         setError('Connection lost. Please refresh the page.');
       }
@@ -144,9 +212,9 @@ const ChatWindow = () => {
     });
 
     // Listen for new messages
-    socketRef.current.on('new-message', (message) => {
+    socketRef.current.on('new-message', (message: ChatMessage) => {
       if (message) {
-        setMessages((prev) => {
+        setMessages((prev: ChatMessage[]) => {
           // Check if message already exists to prevent duplicates
           const messageExists = prev.some(msg => msg._id === message._id);
           if (messageExists) {
@@ -159,30 +227,30 @@ const ChatWindow = () => {
     });
 
     // Listen for online users
-    socketRef.current.on('online-users', (users) => {
+    socketRef.current.on('online-users', (users: ChatUser[]) => {
       if (Array.isArray(users)) {
         setOnlineUsers(users);
       }
     });
 
     // Listen for typing indicators
-    socketRef.current.on('user-typing', (userData) => {
+    socketRef.current.on('user-typing', (userData: ChatUser) => {
       if (userData && user && (userData._id !== user._id && userData.id !== user.id)) {
         setIsTyping(true);
       }
     });
 
-    socketRef.current.on('user-stop-typing', (userData) => {
+    socketRef.current.on('user-stop-typing', (userData: ChatUser) => {
       if (userData && user && (userData._id !== user._id && userData.id !== user.id)) {
         setIsTyping(false);
       }
     });
 
     // Listen for message updates (edits, reactions, etc.)
-    socketRef.current.on('message-updated', (updatedMessage) => {
+    socketRef.current.on('message-updated', (updatedMessage: ChatMessage) => {
       if (updatedMessage) {
-        setMessages((prev) =>
-          prev.map((msg) =>
+        setMessages((prev: ChatMessage[]) =>
+          prev.map((msg: ChatMessage) =>
             msg._id === updatedMessage._id ? updatedMessage : msg
           )
         );
@@ -190,9 +258,9 @@ const ChatWindow = () => {
     });
 
     // Listen for message-deleted
-    socketRef.current.on('message-deleted', (data) => {
+    socketRef.current.on('message-deleted', (data: { _id: string }) => {
       if (data && data._id) {
-        setMessages((prev) => prev.filter((msg) => msg._id !== data._id));
+        setMessages((prev: ChatMessage[]) => prev.filter((msg: ChatMessage) => msg._id !== data._id));
       }
     });
 
@@ -238,6 +306,27 @@ const ChatWindow = () => {
     };
   }, [showEmojiPicker, emojiPickerComponent, emojiData, isEmojiLoading]);
 
+  useEffect(() => {
+    if (!showEmojiPicker) return;
+
+    const handleOutsideClick = (event: MouseEvent) => {
+      const target = event.target;
+      if (
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(target) &&
+        emojiToggleButtonRef.current &&
+        !emojiToggleButtonRef.current.contains(target)
+      ) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [showEmojiPicker]);
+
   // Load more messages when scrolling up
   const loadMoreMessages = useCallback(async () => {
     try {
@@ -275,7 +364,7 @@ const ChatWindow = () => {
       threshold: 1.0,
     };
 
-    const handleObserver = (entries) => {
+    const handleObserver = (entries: IntersectionObserverEntry[]) => {
       const [target] = entries;
       if (target.isIntersecting && hasMore && !loading) {
         loadMoreMessages();
@@ -295,7 +384,7 @@ const ChatWindow = () => {
     };
   }, [hasMore, loading, loadMoreMessages]);
 
-  const handleSendMessage = async (e) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim() === '' && attachments.length === 0) return;
     if (sendingMessage) return; // Prevent multiple submissions
@@ -343,9 +432,9 @@ const ChatWindow = () => {
     }
   };
 
-  const handleFileSelect = (e) => {
-    const files = Array.from(e.target.files);
-    setAttachments((prev) => [...prev, ...files]);
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    setAttachments((prev: File[]) => [...prev, ...files]);
   };
 
   const handleTyping = () => {
@@ -372,7 +461,7 @@ const ChatWindow = () => {
     }, 1000);
   };
 
-  const handleMessageActions = (message, event) => {
+  const handleMessageActions = (message: ChatMessage, event: React.MouseEvent<HTMLElement>) => {
     setSelectedMessage(message);
     setAnchorEl(event.currentTarget); // Use the button as anchor
   };
@@ -387,8 +476,8 @@ const ChatWindow = () => {
         },
       });
       if (response.ok) {
-        setMessages((prev) =>
-          prev.filter((msg) => msg._id !== selectedMessage._id)
+        setMessages((prev: ChatMessage[]) =>
+          prev.filter((msg: ChatMessage) => msg._id !== selectedMessage._id)
         );
       } else {
         throw new Error('Failed to delete message');
@@ -417,8 +506,8 @@ const ChatWindow = () => {
       if (response.ok) {
         const updatedMessage = await response.json();
         if (updatedMessage) {
-          setMessages((prev) =>
-            prev.map((msg) =>
+          setMessages((prev: ChatMessage[]) =>
+            prev.map((msg: ChatMessage) =>
               msg._id === selectedMessage._id ? { ...msg, ...updatedMessage } : msg
             )
           );
@@ -435,7 +524,7 @@ const ChatWindow = () => {
     setSelectedMessage(null);
   };
 
-  const startEditing = (message) => {
+  const startEditing = (message: ChatMessage) => {
     setEditingMessage(message);
     setEditText(message.message);
     setAnchorEl(null);
@@ -534,7 +623,7 @@ const ChatWindow = () => {
   );
 
   // Enhanced message bubble
-  const renderMessage = (message) => {
+  const renderMessage = (message: ChatMessage) => {
     if (!message) return null;
     if (!message.sender) return null;
     if (!user) return null;
@@ -544,7 +633,7 @@ const ChatWindow = () => {
     if (!senderId || !userId) return null;
     const isOwnMessage = senderId === userId;
     const hasReactions = message.reactions && Array.isArray(message.reactions) && message.reactions.length > 0;
-    const isRead = message.readBy && Array.isArray(message.readBy) && message.readBy.some((r) => r?.user?._id === userId || r?.user?.id === userId);
+    const isRead = message.readBy && Array.isArray(message.readBy) && message.readBy.some((r: ChatReadEntry) => r?.user?._id === userId || r?.user?.id === userId);
     return (
       <ListItem
         key={message._id}
@@ -652,7 +741,7 @@ const ChatWindow = () => {
           )}
           {message.attachments && message.attachments.length > 0 && (
             <Box sx={{ mt: 1 }}>
-              {message.attachments.map((attachment, index) => (
+              {message.attachments.map((attachment: ChatAttachment, index: number) => (
                 <Box key={index} sx={{ mb: 1 }}>
                   {attachment.type === 'image' ? (
                     <img
@@ -677,7 +766,7 @@ const ChatWindow = () => {
           )}
           {hasReactions && (
             <Box sx={{ display: 'flex', gap: 0.5, mt: 0.75, flexWrap: 'wrap' }}>
-              {message.reactions.map((reaction, index) => (
+              {message.reactions.map((reaction: ChatReaction, index: number) => (
                 <Tooltip key={index} title={reaction?.user?.name || 'Unknown'} placement="top">
                   <Typography 
                     component="span" 
@@ -770,7 +859,7 @@ const ChatWindow = () => {
       setAnchorEl(null);
       setSelectedMessage(null);
     }
-  }, [anchorEl, messages]);
+  }, [anchorEl]);
 
   // Error state
   if (error && (!messages || messages.length === 0)) {
@@ -1165,6 +1254,7 @@ const ChatWindow = () => {
             <AttachFileIcon />
           </IconButton>
           <IconButton 
+            ref={emojiToggleButtonRef}
             onClick={() => setShowEmojiPicker((prev) => !prev)} 
             size="small"
             sx={{ 
@@ -1183,13 +1273,13 @@ const ChatWindow = () => {
             <EmojiEmotionsIcon />
           </IconButton>
           {showEmojiPicker && (
-            <Box sx={{ position: 'absolute', bottom: '100%', left: 0, zIndex: 30 }}>
+            <Box ref={emojiPickerRef} sx={{ position: 'absolute', bottom: '100%', left: 0, zIndex: 30 }}>
               {emojiPickerComponent && emojiData ? (
                 React.createElement(emojiPickerComponent, {
                   data: emojiData,
                   theme: 'light',
-                  onEmojiSelect: (emoji) => {
-                    setNewMessage((prev) => prev + emoji.native);
+                  onEmojiSelect: (emoji: EmojiSelectData) => {
+                    setNewMessage((prev) => prev + (emoji?.native || ''));
                     setShowEmojiPicker(false);
                   },
                 })
@@ -1213,7 +1303,7 @@ const ChatWindow = () => {
           {/* Show selected attachments as chips */}
           {attachments.length > 0 && (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1, px: 2 }}>
-              {attachments.map((file, idx) => (
+              {attachments.map((file: File, idx: number) => (
                 <Paper 
                   key={idx} 
                   sx={{ 
@@ -1383,7 +1473,7 @@ const ChatWindow = () => {
         <DialogTitle>Search Results</DialogTitle>
         <DialogContent>
           <List>
-            {searchResults.map((message) => (
+            {searchResults.map((message: ChatMessage) => (
               <React.Fragment key={message._id}>
                 {renderMessage(message)}
                 <Divider />

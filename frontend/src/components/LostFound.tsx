@@ -8,6 +8,7 @@ import { validateEmail, validatePhone } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
+import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
 
 interface LostFoundItem {
   _id: string;
@@ -82,55 +83,31 @@ const LostFound = () => {
       if (observer.current) observer.current.disconnect();
     };
   }, []);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const isSelectingSuggestion = useRef(false);
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Generate autocomplete suggestions from existing items
-  useEffect(() => {
-    // Skip if user just selected a suggestion
-    if (isSelectingSuggestion.current) {
-      isSelectingSuggestion.current = false;
-      return;
+  const buildLostFoundSuggestions = useCallback((item: LostFoundItem, normalizedQuery: string): string[] => {
+    const suggestions: string[] = [];
+    if (item?.title?.toLowerCase().includes(normalizedQuery)) {
+      suggestions.push(item.title);
     }
-    
-    if (searchInput.trim().length > 0) {
-      const suggestions = new Set<string>();
-      items.forEach(item => {
-        if (item.title.toLowerCase().includes(searchInput.toLowerCase())) {
-          suggestions.add(item.title);
-        }
-        if (item.location && item.location.toLowerCase().includes(searchInput.toLowerCase())) {
-          suggestions.add(item.location);
-        }
-        if (item.description.toLowerCase().includes(searchInput.toLowerCase())) {
-          const words = item.description.split(' ').filter(word => 
-            word.toLowerCase().includes(searchInput.toLowerCase()) && word.length > 3
-          );
-          words.forEach(word => suggestions.add(word));
-        }
-      });
-      setFilteredSuggestions(Array.from(suggestions).slice(0, 5));
-      setShowSuggestions(true);
-    } else {
-      setFilteredSuggestions([]);
-      setShowSuggestions(false);
+    if (item?.location?.toLowerCase().includes(normalizedQuery)) {
+      suggestions.push(item.location);
     }
-  }, [searchInput, items]);
-
-  // Close suggestions when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return suggestions;
   }, []);
+
+  const {
+    showSuggestions,
+    setShowSuggestions,
+    filteredSuggestions,
+    searchRef,
+    markSuggestionSelection,
+  } = useSearchSuggestions<LostFoundItem>({
+    searchInput,
+    items,
+    buildSuggestions: buildLostFoundSuggestions,
+  });
 
   // Auto-hide success message after 3 seconds
   useEffect(() => {
@@ -503,7 +480,7 @@ const LostFound = () => {
                     onMouseDown={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      isSelectingSuggestion.current = true;
+                      markSuggestionSelection();
                       setSearchInput(suggestion);
                       setSearchQuery(suggestion);
                       setShowSuggestions(false);

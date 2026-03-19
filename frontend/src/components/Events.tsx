@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiCalendar, FiMapPin, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiClock, FiUser, FiPhone, FiCheckCircle, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../config';
@@ -8,6 +8,7 @@ import { validateEmail, validatePhone, validateUrl } from '../utils/formValidati
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
+import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
 
 interface Event {
   _id: string;
@@ -307,51 +308,29 @@ const Events = () => {
   const [selectedEventForDetails, setSelectedEventForDetails] = useState<Event | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const isSelectingSuggestion = useRef(false);
 
-  // Generate autocomplete suggestions from existing events
-  useEffect(() => {
-    if (isSelectingSuggestion.current) {
-      isSelectingSuggestion.current = false;
-      return;
+  const buildEventSuggestions = useCallback((event: Event, normalizedQuery: string): string[] => {
+    const suggestions: string[] = [];
+    if (event?.title?.toLowerCase().includes(normalizedQuery)) {
+      suggestions.push(event.title);
     }
-    if (searchInput.trim().length > 0) {
-      const suggestions = new Set<string>();
-      events.forEach(event => {
-        if (event.title.toLowerCase().includes(searchInput.toLowerCase())) {
-          suggestions.add(event.title);
-        }
-        if (event.location && event.location.toLowerCase().includes(searchInput.toLowerCase())) {
-          suggestions.add(event.location);
-        }
-        if (event.description.toLowerCase().includes(searchInput.toLowerCase())) {
-          const words = event.description.split(' ').filter(word => 
-            word.toLowerCase().includes(searchInput.toLowerCase()) && word.length > 3
-          );
-          words.forEach(word => suggestions.add(word));
-        }
-      });
-      setFilteredSuggestions(Array.from(suggestions).slice(0, 5));
-      setShowSuggestions(true);
-    } else {
-      setFilteredSuggestions([]);
-      setShowSuggestions(false);
+    if (event?.location?.toLowerCase().includes(normalizedQuery)) {
+      suggestions.push(event.location);
     }
-  }, [searchInput, events]);
-
-  // Close suggestions when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return suggestions;
   }, []);
+
+  const {
+    showSuggestions,
+    setShowSuggestions,
+    filteredSuggestions,
+    searchRef,
+    markSuggestionSelection,
+  } = useSearchSuggestions<Event>({
+    searchInput,
+    items: events,
+    buildSuggestions: buildEventSuggestions,
+  });
 
   // Auto-hide success message after 3 seconds
   useEffect(() => {
@@ -738,7 +717,7 @@ const Events = () => {
                     onMouseDown={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      isSelectingSuggestion.current = true;
+                      markSuggestionSelection();
                       setSearchInput(suggestion);
                       setSearchQuery(suggestion);
                       setShowSuggestions(false);

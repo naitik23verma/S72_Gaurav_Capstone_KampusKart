@@ -68,6 +68,7 @@ export const FeatureModal: React.FC<FeatureModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
+      tabIndex={-1}
     >
       <div
         className={`bg-white sm:rounded-xl rounded-t-xl shadow-2xl border-2 border-gray-200 p-4 sm:p-6 md:p-8 ${sizeClasses[size]} w-full mx-auto overflow-y-auto relative`}

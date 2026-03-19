@@ -41,17 +41,22 @@ KampusKart is a full-stack campus management portal built for MIT ADT University
 
 | Layer | Technologies |
 |-------|-------------|
-| Frontend | React 18, TypeScript, Vite, Tailwind CSS, Material UI, Framer Motion, Socket.IO Client |
-| Backend | Node.js, Express 5, MongoDB, Mongoose, JWT, Passport.js, Socket.IO, Cloudinary, Nodemailer |
+| Frontend | React 18, TypeScript 5, Vite 6, Tailwind CSS 3, Material UI 7, Framer Motion, Socket.IO Client |
+| Backend | Node.js 18 (CommonJS), Express 5, MongoDB, Mongoose, JWT, Passport.js, Socket.IO, Cloudinary, Nodemailer |
 | Infrastructure | Netlify (frontend), Render (backend), MongoDB Atlas, GitHub Actions |
+| Testing | Vitest + React Testing Library (frontend), Jest + Supertest (backend) |
 
 ---
 
 ## Screenshots
 
+> Screenshots below are representative. The live app at [kampuskart.netlify.app](https://kampuskart.netlify.app) reflects the current state.
+
 | Campus Map | Global Chat | Lost & Found |
 |:---:|:---:|:---:|
-| ![Map](frontend/public/images/3.png) | ![Chat](frontend/public/images/1.png) | ![LostFound](frontend/public/images/2.png) |
+| ![Map](frontend/public/images/3.png) | ![Chat](frontend/public/images/1.png) | ![Lost & Found](frontend/public/images/2.png) |
+
+Additional pages — Events, News, Facilities, Clubs Recruitment, Complaints, and Profile — are accessible after login. All feature the same card-grid layout with search, filters, illustrated empty states, and full mobile responsiveness.
 
 ---
 
@@ -230,10 +235,16 @@ Admin privileges are granted by email. Add admin email addresses to `ADMIN_EMAIL
 ## Running Tests
 
 ```bash
+# Frontend (Vitest)
+cd frontend && npm test
+
+# Backend (Jest)
 cd backend && npm test
 ```
 
-Tests cover auth middleware, input validation, User and Complaint models, route handlers, and email utilities.
+Frontend tests cover utility functions (`formValidation`) and shared UI components. Backend tests cover auth middleware, input validation, Mongoose models, route handlers, and email utilities.
+
+> **Note on language breakdown:** GitHub reports ~60% TypeScript / ~37% JavaScript for this repo. This is expected — the frontend is 100% TypeScript, while the backend is intentionally plain CommonJS JavaScript (no transpilation step, direct Node.js execution). The JS percentage reflects the backend, not untyped frontend code.
 
 ---
 

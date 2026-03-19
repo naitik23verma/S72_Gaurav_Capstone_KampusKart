@@ -32,4 +32,16 @@ export default defineConfig({
   server: {
     port: 3000,
   },
-}); 
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/tests/setup.ts'],
+    include: ['src/tests/**/*.{test,spec}.{ts,tsx}'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
+      include: ['src/components/**', 'src/utils/**'],
+      exclude: ['src/components/ui/**'],
+    },
+  },
+});

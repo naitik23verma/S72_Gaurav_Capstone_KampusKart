@@ -60,7 +60,7 @@ const AppLayout: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
       {showNavbar && <KampusKartNavbar />}
-      <main className="flex-grow">
+      <div className="flex-grow">
         <Routes>
           <Route path="/" element={<RootRedirect />} />
           <Route path="/login" element={<Login />} />
@@ -158,7 +158,7 @@ const AppLayout: React.FC = () => {
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
         </Routes>
-      </main>
+      </div>
     </div>
   );
 };

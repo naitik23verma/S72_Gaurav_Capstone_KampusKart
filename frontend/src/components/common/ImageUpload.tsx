@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { FiX, FiUpload } from 'react-icons/fi';
+import { FiX } from 'react-icons/fi';
 import { validateFileSize, validateFileType } from '../../utils/formValidation';
 
 export interface ImageFile {

@@ -1,5 +1,4 @@
 const axios = require('axios');
-const _cron = require('node-cron');
 
 /**
  * Keep-alive service to prevent Render.com from spinning down the server

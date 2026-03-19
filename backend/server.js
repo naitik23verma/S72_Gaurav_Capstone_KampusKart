@@ -168,17 +168,17 @@ app.get('/api/server-status', (req, res) => {
 });
 
 // Global error handling middleware
-app.use((err, _req, res, _next) => {
+app.use((err, req, res, _next) => {
   console.error('Error:', err);
   
   // Log error details for debugging
   console.error('Error details:', {
     message: err.message,
     stack: err.stack,
-    url: _req.url,
-    method: _req.method,
-    userAgent: _req.get('User-Agent'),
-    ip: _req.ip
+    url: req.url,
+    method: req.method,
+    userAgent: req.get('User-Agent'),
+    ip: req.ip
   });
 
   // Don't expose internal errors in production

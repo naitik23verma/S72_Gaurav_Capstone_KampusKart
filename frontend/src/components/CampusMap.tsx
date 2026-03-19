@@ -468,7 +468,7 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                     }
                   }}
                   placeholder="Search campus locations..."
-                  className="flex-1 pl-10 pr-2 py-2.5 bg-transparent text-gray-700 font-medium outline-none text-sm border-none placeholder:text-gray-400 rounded-l-lg"
+                  className="flex-1 pl-10 pr-2 py-2.5 bg-transparent text-gray-700 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
                 />
                 <button
                   type="button"
@@ -681,24 +681,22 @@ const CampusMap: React.FC<CampusMapProps> = () => {
         </div>
 
         {/* Locations List Panel Container - Full width on mobile (overlay), 1/3 on desktop (side) */}
-        <div className={`${isPanelOpen ? 'flex' : 'hidden'} md:flex absolute md:relative inset-0 md:inset-auto w-full md:w-1/3 flex-col md:h-full z-20 md:z-auto transition-all duration-300 ease-in-out`}>
-          {/* Mobile close button */}
-          <button
-            className="md:hidden absolute top-2 right-2 z-20 bg-white border-2 border-gray-200 rounded-lg p-1.5 text-gray-600 hover:bg-gray-50 active:bg-gray-100"
-            onClick={() => setIsPanelOpen(false)}
-            aria-label="Close locations panel"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
+        {/* On mobile: fixed overlay that sits below the navbar (top-[72px]), above everything else (z-40) */}
+        <div className={`${isPanelOpen ? 'flex' : 'hidden'} md:flex fixed md:relative top-[72px] md:top-auto left-0 md:left-auto right-0 md:right-auto bottom-0 md:bottom-auto w-full md:w-1/3 flex-col md:h-full z-40 md:z-auto transition-all duration-300 ease-in-out`}>
           {/* Inner container with padding, shadow, and overflow for list */}
-          {/* Added pt-4 to prevent button overlap */}
-          {/* Adjusted opacity and height based on panel state */}
-          {/* Removed mobile specific height/opacity classes */}
-          <div className={`bg-white p-3 md:p-4 md:flex-grow transition-all duration-300 ease-in-out opacity-100 h-full overflow-y-auto`}>
-            <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-3 md:mb-4">Campus Locations</h2>
+          <div className="bg-white p-3 md:p-4 flex-grow transition-all duration-300 ease-in-out opacity-100 h-full overflow-y-auto relative">
+            {/* Mobile close button — inside the scrollable container, top-right corner */}
+            <button
+              className="md:hidden absolute top-3 right-3 z-10 bg-white border-2 border-gray-200 rounded-lg p-1.5 text-gray-600 hover:bg-gray-50 active:bg-gray-100 flex items-center justify-center"
+              onClick={() => setIsPanelOpen(false)}
+              aria-label="Close locations panel"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-3 md:mb-4 pr-10 md:pr-0">Campus Locations</h2>
             {/* Desktop Search Bar - Visible on desktop only */}
             <div className="hidden md:block mb-6 w-full relative">
               <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
@@ -782,7 +780,10 @@ const CampusMap: React.FC<CampusMapProps> = () => {
                     }`}
                     onClick={() => {
                       handleLocationClick(location);
-                      // On desktop, clicking a list item doesn't close the panel
+                      // On mobile, close the panel so the map is visible
+                      if (window.innerWidth < 768) {
+                        setIsPanelOpen(false);
+                      }
                     }}
                   >
                     <div className="flex flex-wrap items-start gap-2">

@@ -155,10 +155,7 @@ router.post('/signup', signupLimiter, sanitizeInput, validateSignup, async (req,
     });
   } catch (error) {
     console.error('Signup error:', error);
-    res.status(500).json({ 
-      message: 'Error creating user', 
-      error: error.message 
-    });
+    res.status(500).json({ message: 'Error creating user' });
   }
 });
 
@@ -206,10 +203,7 @@ router.post('/login', loginLimiter, sanitizeInput, validateLogin, async (req, re
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ 
-      message: 'Error logging in', 
-      error: error.message 
-    });
+    res.status(500).json({ message: 'Error logging in' });
   }
 });
 
@@ -260,7 +254,7 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
 
   } catch (error) {
     console.error('Forgot password error:', error);
-    res.status(500).json({ message: 'Error processing request', error: error.message });
+    res.status(500).json({ message: 'Error processing request' });
   }
 });
 
@@ -313,7 +307,7 @@ router.post('/reset-password', resetPasswordLimiter, async (req, res) => {
 
   } catch (error) {
     console.error('Reset password error:', error);
-    res.status(500).json({ message: 'Error resetting password', error: error.message });
+    res.status(500).json({ message: 'Error resetting password' });
   }
 });
 

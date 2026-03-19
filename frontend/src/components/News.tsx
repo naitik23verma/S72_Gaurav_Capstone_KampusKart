@@ -358,14 +358,14 @@ const News = () => {
                 )}
                 {/* Category Badge */}
                 <div className="absolute top-4 left-4">
-                  <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white text-gray-800 flex items-center gap-1">
+                  <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white/90 text-gray-800 flex items-center gap-1">
                     <FiTag className="w-3 h-3" />
                     {item.category}
                   </span>
                 </div>
                 {/* Date Badge */}
                 <div className="absolute top-4 right-4">
-                  <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white text-gray-800 flex items-center gap-1">
+                  <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white/90 text-gray-800 flex items-center gap-1">
                     <FiCalendar className="w-3 h-3" />
                     {new Date(item.date).toLocaleDateString('en-US', {
                       year: 'numeric',
@@ -576,7 +576,7 @@ const News = () => {
 
         {/* Zoomed Image Modal */}
         {zoomedImage && (
-          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[10000]" onClick={() => setZoomedImage(null)}>
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000]" onClick={() => setZoomedImage(null)}>
             <img src={zoomedImage} alt="Zoomed" className="max-h-[90vh] max-w-[90vw] rounded-lg" onClick={(e) => e.stopPropagation()} />
             <button
               onClick={() => setZoomedImage(null)}

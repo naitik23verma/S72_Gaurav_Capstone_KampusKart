@@ -79,7 +79,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
               />
             </div>
           ) : (
-            <div className="w-full md:w-1/2 lg:w-1/2 h-48 sm:h-64 md:h-80 bg-gray-100 rounded-lg mb-6 md:mb-0 flex flex-col items-center justify-center text-gray-400 flex-shrink-0 mx-auto md:mx-0 max-w-xl">
+            <div className="w-full md:w-1/2 lg:w-1/2 h-48 sm:h-64 md:h-80 bg-gray-50 rounded-lg mb-6 md:mb-0 flex flex-col items-center justify-center text-gray-400 flex-shrink-0 mx-auto md:mx-0 max-w-xl">
               <FiUsers className="w-16 h-16 mb-2" />
               <span className="text-sm font-medium">No Image Available</span>
             </div>
@@ -154,7 +154,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
                   </button>
                   <button
                     onClick={() => onDelete?.(club._id)}
-                    className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 active:bg-[#F05A25] transition-colors duration-200"
+                    className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-[#d44d1e] active:bg-[#F05A25] transition-colors duration-200"
                   >
                     Delete
                   </button>
@@ -166,7 +166,7 @@ const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDele
         {/* Zoomed Image Modal */}
         {zoomedImage && (
           <div 
-            className="fixed inset-0 bg-black/80 flex items-center justify-center z-[10000]" 
+            className="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000]" 
             onClick={closeZoomedImageModal}
             onKeyDown={(e) => {
               if (e.key === 'Escape') closeZoomedImageModal();

@@ -1072,7 +1072,7 @@ const LostFound = () => {
       {/* Zoomed Image Modal */}
       {zoomedImage && (
         <div 
-          className="fixed inset-0 bg-black/80 flex items-center justify-center z-[10000] p-4" 
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000] p-4" 
           onClick={() => setZoomedImage(null)}
           onKeyDown={(e) => {
             if (e.key === 'Escape') setZoomedImage(null);

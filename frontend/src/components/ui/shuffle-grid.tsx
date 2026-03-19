@@ -19,7 +19,7 @@ const shuffle = (array: (typeof squareData)[0][]) => {
 
 const squareData = [
   { id: 1,  src: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=400&q=80" },
-  { id: 2,  src: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&q=80" },
+  { id: 2,  src: "https://images.unsplash.com/photo-1607237138185-eedd9c632b0b?w=400&q=80" },
   { id: 3,  src: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?w=400&q=80" },
   { id: 4,  src: "https://images.unsplash.com/photo-1519452635265-7b1fbfd1e4e0?w=400&q=80" },
   { id: 5,  src: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&q=80" },
@@ -117,7 +117,7 @@ export const ShuffleHero = () => {
     <section className="w-full px-4 sm:px-6 md:px-8 grid grid-cols-1 md:grid-cols-2 items-center gap-6 sm:gap-8 md:gap-10 lg:gap-12 max-w-6xl mx-auto">
       {/* Left: text */}
       <div className="text-center md:text-left space-y-3 sm:space-y-4 md:space-y-5">
-        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border-2 border-gray-200 text-xs font-semibold text-[#00C6A7] uppercase tracking-widest">
+        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border-2 border-gray-200 text-xs font-semibold text-teal-700 uppercase tracking-widest">
           Your campus, simplified
         </span>
         <h1

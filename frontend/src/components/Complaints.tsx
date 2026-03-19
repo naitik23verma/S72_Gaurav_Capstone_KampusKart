@@ -1069,7 +1069,7 @@ const Complaints = () => {
 
          {/* Zoomed Image Modal */}
          {zoomedImage && selectedComplaintForDetails && selectedComplaintForDetails.images && selectedComplaintForDetails.images.length > 0 && (
-           <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[10000] p-4 safe-top safe-bottom" onClick={() => setZoomedImage(null)}>
+           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000] p-4 safe-top safe-bottom" onClick={() => setZoomedImage(null)}>
              {/* Image */}
              <img 
                src={zoomedImage} 

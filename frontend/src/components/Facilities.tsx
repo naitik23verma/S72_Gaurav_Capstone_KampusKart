@@ -382,7 +382,7 @@ const Facilities = () => {
                 {/* Type Badge */}
                 {facility?.type && (
                   <div className="absolute top-4 left-4">
-                    <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white text-gray-800 flex items-center gap-1">
+                    <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white/90 text-gray-800 flex items-center gap-1">
                       <FiTag className="w-3 h-3" />
                       {facility.type}
                     </span>
@@ -391,7 +391,7 @@ const Facilities = () => {
                 {/* Location Badge */}
                 {facility?.location && (
                   <div className="absolute top-4 right-4">
-                    <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white text-gray-800 flex items-center gap-1">
+                    <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white/90 text-gray-800 flex items-center gap-1">
                       <FiMapPin className="w-3 h-3" />
                       {facility.location}
                     </span>
@@ -935,7 +935,7 @@ const Facilities = () => {
         )}
         {/* Zoomed Image Modal */}
         {zoomedImage && selectedFacility && selectedFacility.images && selectedFacility.images.length > 0 && (
-          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[10000] p-4" onClick={() => setZoomedImage(null)}>
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000] p-4" onClick={() => setZoomedImage(null)}>
             {/* Image */}
             <img 
               src={zoomedImage} 

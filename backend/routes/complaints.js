@@ -204,32 +204,6 @@ router.put('/:id', protect, upload.array('images', 5), async (req, res) => {
   }
 });
 
-// @desc    Delete a complaint (only by the creator)
-// @route   DELETE /api/complaints/:id
-// @access  Private
-router.delete('/:id', protect, async (req, res) => {
-  try {
-    const complaint = await Complaint.findById(req.params.id);
-
-    if (!complaint) {
-      return res.status(404).json({ message: 'Complaint not found.' });
-    }
-
-    // Ensure the logged-in user is the creator of the complaint or an admin
-    if (complaint.user.toString() !== req.user._id.toString() && !req.user.isAdmin) {
-      return res.status(403).json({ message: 'Not authorized to delete this complaint.' });
-    }
-
-    // Soft delete - do NOT delete images from Cloudinary so they remain if restored
-    complaint.isDeleted = true;
-    complaint.deletedAt = new Date();
-    await complaint.save();
-    res.json({ message: 'Complaint removed.' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
 // Admin-only route to get all complaints (including deleted ones)
 // NOTE: Must be defined before /:id to prevent Express matching 'admin' as an id
 router.get('/admin/all', protect, async (req, res) => {
@@ -389,6 +363,32 @@ router.post('/admin/cleanup-expired', protect, async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: 'Error during manual cleanup', error: error.message });
+  }
+});
+
+// @desc    Delete a complaint (only by the creator)
+// @route   DELETE /api/complaints/:id
+// @access  Private
+router.delete('/:id', protect, async (req, res) => {
+  try {
+    const complaint = await Complaint.findById(req.params.id);
+
+    if (!complaint) {
+      return res.status(404).json({ message: 'Complaint not found.' });
+    }
+
+    // Ensure the logged-in user is the creator of the complaint or an admin
+    if (complaint.user.toString() !== req.user._id.toString() && !req.user.isAdmin) {
+      return res.status(403).json({ message: 'Not authorized to delete this complaint.' });
+    }
+
+    // Soft delete - do NOT delete images from Cloudinary so they remain if restored
+    complaint.isDeleted = true;
+    complaint.deletedAt = new Date();
+    await complaint.save();
+    res.json({ message: 'Complaint removed.' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

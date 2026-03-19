@@ -70,7 +70,7 @@ describe('User Model Test', () => {
       expect(err).toBeDefined();
     });
 
-    test('should fail with password less than 6 characters', async () => {
+    test('should fail with password less than 8 characters', async () => {
       const invalidUser = {
         email: 'test@example.com',
         password: '123',

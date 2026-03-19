@@ -134,7 +134,7 @@ router.get('/suggestions', authMiddleware, async (req, res) => {
             ],
             isDeleted: { $ne: true }
         })
-        .select('title description type resolved location date createdAt') // Include more fields
+        .select('title description type resolved location date createdAt user') // Include more fields
         .limit(5) // Limit to 5 suggestions
         .sort({ createdAt: -1 }) // Sort by newest first
         .populate('user', 'name'); // Include user name
@@ -149,7 +149,7 @@ router.get('/suggestions', authMiddleware, async (req, res) => {
             location: item.location,
             date: item.date,
             createdAt: item.createdAt,
-            userName: item.user.name,
+            userName: item.user?.name || '',
             displayText: `${item.title} (${item.type}${item.resolved ? ' - Resolved' : ''})`,
             // Add a formatted date string
             formattedDate: new Date(item.date).toLocaleDateString('en-US', {

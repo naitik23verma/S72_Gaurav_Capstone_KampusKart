@@ -32,7 +32,7 @@ const Home = () => {
         <section className="w-full px-4 sm:px-6 md:px-8 grid grid-cols-1 md:grid-cols-2 items-center gap-6 sm:gap-8 md:gap-10 lg:gap-12 max-w-6xl mx-auto">
           {/* Left: text */}
           <div className="text-center md:text-left space-y-3 sm:space-y-4 md:space-y-5">
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border-2 border-gray-200 text-xs font-semibold text-[#00C6A7] uppercase tracking-widest">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border-2 border-gray-200 text-xs font-semibold text-teal-700 uppercase tracking-widest">
               Your campus, simplified
             </span>
             <h1
@@ -77,7 +77,7 @@ const Home = () => {
       {/* Features */}
       <section id="features-section" className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-12 md:py-16">
         <div className="mb-8 md:mb-10 text-center md:text-left">
-          <span className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-lg bg-gray-50 border-2 border-gray-200 text-xs font-semibold text-[#00C6A7] uppercase tracking-widest">
+          <span className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-lg bg-gray-50 border-2 border-gray-200 text-xs font-semibold text-teal-700 uppercase tracking-widest">
             Everything you need
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-black mb-3" style={{ letterSpacing: '-0.01em' }}>

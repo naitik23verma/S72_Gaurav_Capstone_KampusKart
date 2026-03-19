@@ -225,7 +225,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
               </button>
               <button
                 onClick={() => onDelete?.(event._id)}
-                className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 active:bg-[#F05A25] flex items-center"
+                className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-[#d44d1e] active:bg-[#F05A25] flex items-center"
                 aria-label="Delete event"
               >
                 <FiTrash2 className="mr-1" /> Delete Event
@@ -238,7 +238,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onClose, onEdit, onD
       {/* Zoomed Image Modal */}
       {zoomedImage && (
         <div 
-          className="fixed inset-0 bg-black/80 flex items-center justify-center z-[10000] p-4" 
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000] p-4" 
           onClick={closeZoomedImageModal}
           onKeyDown={(e) => {
             if (e.key === 'Escape') closeZoomedImageModal();

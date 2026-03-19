@@ -39,7 +39,7 @@ const Landing: React.FC = () => {
         {/* Features Section */}
         <section className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-10 md:py-12 lg:py-16">
           <div className="mb-6 sm:mb-8 md:mb-10 text-center md:text-left">
-            <span className="inline-flex items-center gap-2 mb-3 sm:mb-4 px-3 py-1.5 rounded-lg bg-gray-50 border-2 border-gray-200 text-xs font-semibold text-[#00C6A7] uppercase tracking-widest">
+            <span className="inline-flex items-center gap-2 mb-3 sm:mb-4 px-3 py-1.5 rounded-lg bg-gray-50 border-2 border-gray-200 text-xs font-semibold text-teal-700 uppercase tracking-widest">
               Everything you need
             </span>
             <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-black mb-2 sm:mb-3" style={{ letterSpacing: '-0.01em' }}>
@@ -76,7 +76,7 @@ const Landing: React.FC = () => {
         {/* How it works */}
         <section className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-10 md:py-12 lg:py-16">
           <div className="mb-6 sm:mb-8 md:mb-10 text-center md:text-left">
-            <span className="inline-flex items-center gap-2 mb-3 sm:mb-4 px-3 py-1.5 rounded-lg bg-gray-50 border-2 border-gray-200 text-xs font-semibold text-[#00C6A7] uppercase tracking-widest">
+            <span className="inline-flex items-center gap-2 mb-3 sm:mb-4 px-3 py-1.5 rounded-lg bg-gray-50 border-2 border-gray-200 text-xs font-semibold text-teal-700 uppercase tracking-widest">
               Simple by design
             </span>
             <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-black mb-2 sm:mb-3" style={{ letterSpacing: '-0.01em' }}>

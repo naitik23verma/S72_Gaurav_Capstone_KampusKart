@@ -223,10 +223,8 @@ const Complaints = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-    if (!isLoading) {
-      setIsFiltering(true);
-    }
-  }, [filterStatus, filterCategory, searchQuery, isLoading]);
+    setIsFiltering(true);
+  }, [filterStatus, filterCategory, searchQuery]);
 
   useEffect(() => {
     fetchComplaints();

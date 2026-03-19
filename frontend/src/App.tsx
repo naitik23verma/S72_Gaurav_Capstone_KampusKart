@@ -72,17 +72,12 @@ const AppLayout: React.FC = () => {
       route => location.pathname === route || location.pathname.startsWith(`${route}/`)
     );
 
-    const previousHtmlOverflow = document.documentElement.style.overflow;
-    const previousBodyOverflow = document.body.style.overflow;
-
-    if (shouldLockScroll) {
-      document.documentElement.style.overflow = 'hidden';
-      document.body.style.overflow = 'hidden';
-    }
+    document.documentElement.style.overflow = shouldLockScroll ? 'hidden' : '';
+    document.body.style.overflow = shouldLockScroll ? 'hidden' : '';
 
     return () => {
-      document.documentElement.style.overflow = previousHtmlOverflow;
-      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
     };
   }, [location.pathname]);
 

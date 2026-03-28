@@ -275,7 +275,7 @@ className="... bg-gray-100 text-gray-400 cursor-not-allowed"
 ### Badge Structure
 ```tsx
 <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-{color}-100 text-{color}-800 border-2 border-{color}-200">
-  <Icon className="w-3 h-3 mr-1.5" />
+  <Icon className="w-3 h-3 mr-1.5" /> 
   Status Text
 </span>
 ```

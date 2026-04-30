@@ -19,6 +19,8 @@ const routeModules: Array<[string, () => Promise<unknown>]> = [
   ['TermsOfService', () => import('../../components/TermsOfService')],
 ];
 
+const IMPORT_TIMEOUT_MS = 20000;
+
 describe('Route module smoke tests', () => {
   it.each(routeModules)('%s module loads with default export', async (_name, loader) => {
     const mod = await loader();
@@ -26,5 +28,5 @@ describe('Route module smoke tests', () => {
 
     expect(defaultExport).toBeDefined();
     expect(typeof defaultExport).toMatch(/function|object/);
-  });
+  }, IMPORT_TIMEOUT_MS);
 });

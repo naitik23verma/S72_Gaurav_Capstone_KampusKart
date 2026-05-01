@@ -1,3 +1,3 @@
-import LostFound from '../components/LostFound';
+import { default as LostFound } from '../features/lostfound';
 
 export default LostFound;

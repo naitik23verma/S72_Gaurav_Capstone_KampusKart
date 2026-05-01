@@ -609,6 +609,43 @@ Users can view and update profile data including:
 
 Profile pictures are uploaded to Cloudinary, and old profile images are deleted when replaced.
 
+## 11.11 Frontend Feature Slices Architecture
+
+To enable scalability and maintainability, the frontend has been refactored into a **feature slices** architecture. Each major feature (Lost & Found, Complaints, Events, Chat, News, Facilities, Clubs) is organized as a self-contained module with:
+
+- **types.ts** - Domain-specific TypeScript interfaces (e.g., `LostFoundItem`, `Complaint`)
+- **api.ts** - Centralized API functions for the feature (all fetch calls)
+- **hooks/** - Custom hooks for feature-specific logic
+- **components/** - UI components for the feature
+- **index.ts** - Main export point for clean imports
+
+Directory structure:
+```
+frontend/src/
+  features/
+    lostfound/
+      types.ts, api.ts, hooks/, components/, index.ts
+    complaints/
+      types.ts, api.ts, hooks/, components/, index.ts
+    events/
+      types.ts, api.ts, hooks/, components/, index.ts
+    chat/
+      types.ts, api.ts, hooks/, components/, index.ts
+    news/, facilities/, clubs/
+      (same structure)
+```
+
+Benefits:
+- **Modularity**: Each feature is self-contained and independent
+- **Testability**: API calls are centralized and easier to mock
+- **Type Safety**: Domain types are co-located with feature logic
+- **Maintainability**: Clear folder structure reduces cognitive load
+- **Performance**: Route-level lazy loading + tree-shaking
+
+Page wrappers in `frontend/src/pages/` continue to serve as route-level lazy-load containers, importing components from the feature modules.
+
+See [frontend/src/features/README.md](frontend/src/features/README.md) for detailed documentation and migration status.
+
 ## 12. Admin Functionality
 
 Admin functionality is controlled by the `ADMIN_EMAILS` environment variable. This design avoids adding database role-management complexity while still supporting protected admin operations.

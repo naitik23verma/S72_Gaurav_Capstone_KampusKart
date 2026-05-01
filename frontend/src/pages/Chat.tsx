@@ -1,3 +1,3 @@
-import ChatWindow from '../components/Chat/ChatWindow';
+import { default as ChatWindow } from '../features/chat';
 
 export default ChatWindow;

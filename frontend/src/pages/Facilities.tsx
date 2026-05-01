@@ -1,3 +1,3 @@
-import Facilities from '../components/Facilities';
+import { default as Facilities } from '../features/facilities';
 
 export default Facilities;

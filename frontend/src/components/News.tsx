@@ -1,56 +1,51 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { FiCalendar, FiFileText, FiSearch, FiInfo, FiTag, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
-import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { SuccessMessage } from './common/SuccessMessage';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
 import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
-import { UI_PATTERNS } from '../theme/uiPatterns';
 
-interface NewsItem {
-  _id: string;
-  title: string;
-  description: string;
-  date: string;
-  category: string;
-  images?: { url: string; public_id?: string }[];
-}
+// Import from the feature directory
+import { 
+  useNews, 
+  NewsItem, 
+  NewsCard, 
+  NewsFilters, 
+  NewsForm, 
+  NewsDetail,
+  newsApi
+} from '../features/news';
 
 const News = () => {
-  const { user, token } = useAuth();
-  const [isLoading, setIsLoading] = useState(true);
-  const [filterCategory, setFilterCategory] = useState('All');
-  const [searchInput, setSearchInput] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [news, setNews] = useState<NewsItem[]>([]);
+  const { token, user } = useAuth();
+  
+  // Custom hook for state and data fetching
+  const {
+    news,
+    loading,
+    error: fetchError,
+    filters,
+    updateFilters,
+    refresh,
+    removeNews,
+  } = useNews(token);
+
+  // Local UI state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingNews, setEditingNews] = useState<NewsItem | null>(null);
-  const [newNews, setNewNews] = useState({
-    title: '',
-    description: '',
-    date: '',
-    category: 'Campus'
-  });
-  const [error, setError] = useState<string | null>(null);
-  const [newsImages, setNewsImages] = useState<ImageFile[]>([]);
-  const [zoomedImage, setZoomedImage] = useState<string | null>(null);
-
+  const [modalType, setModalType] = useState<'form' | 'detail' | 'delete'>('form');
+  const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [selectedNewsForDetails, setSelectedNewsForDetails] = useState<NewsItem | null>(null);
-  const [pendingDeleteNewsId, setPendingDeleteNewsId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
-  const buildNewsSuggestions = useCallback((item: NewsItem, normalizedQuery: string): string[] => {
+  // Search Suggestions Hook
+  const buildSuggestions = useCallback((item: NewsItem, query: string): string[] => {
     const suggestions: string[] = [];
-    if (item?.title?.toLowerCase().includes(normalizedQuery)) {
-      suggestions.push(item.title);
-    }
-    if (item?.category?.toLowerCase().includes(normalizedQuery)) {
-      suggestions.push(item.category);
-    }
+    const normalizedQuery = query.toLowerCase();
+    if (item.title?.toLowerCase().includes(normalizedQuery)) suggestions.push(item.title);
+    if (item.category?.toLowerCase().includes(normalizedQuery)) suggestions.push(item.category);
     return suggestions;
   }, []);
 
@@ -59,564 +54,194 @@ const News = () => {
     setShowSuggestions,
     filteredSuggestions,
     searchRef,
-    markSuggestionSelection,
   } = useSearchSuggestions<NewsItem>({
-    searchInput,
+    searchInput: filters.search,
     items: news,
-    buildSuggestions: buildNewsSuggestions,
+    buildSuggestions,
   });
 
-  useEffect(() => {
-    fetchNews();
-  }, []);
+  // Modal handlers
+  const openAddModal = () => {
+    setSelectedNews(null);
+    setModalType('form');
+    setFormError(null);
+    setIsModalOpen(true);
+  };
 
-  // Auto-hide success message after 3 seconds
+  const openEditModal = (item: NewsItem) => {
+    setSelectedNews(item);
+    setModalType('form');
+    setFormError(null);
+    setIsModalOpen(true);
+  };
+
+  const openDetailModal = (item: NewsItem) => {
+    setSelectedNews(item);
+    setModalType('detail');
+    setIsModalOpen(true);
+  };
+
+  const openDeleteModal = (id: string) => {
+    const item = news.find(n => n._id === id);
+    if (item) {
+      setSelectedNews(item);
+      setModalType('delete');
+      setIsModalOpen(true);
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedNews(null);
+    setFormError(null);
+  };
+
+  // Action handlers
+  const handleFormSubmit = async (formData: FormData) => {
+    if (!token) return;
+    setIsSubmitting(true);
+    setFormError(null);
+
+    try {
+      if (selectedNews) {
+        await newsApi.updateNews(token, selectedNews._id, formData);
+        setSuccessMessage('News updated successfully!');
+      } else {
+        await newsApi.createNews(token, formData);
+        setSuccessMessage('News added successfully!');
+      }
+      refresh();
+      closeModal();
+    } catch (err: any) {
+      setFormError(err.message || 'Failed to save news');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedNews) return;
+    const success = await removeNews(selectedNews._id);
+    if (success) {
+      setSuccessMessage('News deleted successfully!');
+      closeModal();
+    }
+  };
+
+  // Success message auto-hide
   useEffect(() => {
     if (successMessage) {
-      const timer = setTimeout(() => {
-        setSuccessMessage(null);
-      }, 5000);
+      const timer = setTimeout(() => setSuccessMessage(null), 5000);
       return () => clearTimeout(timer);
     }
   }, [successMessage]);
 
-  const fetchNews = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`${API_BASE}/api/news`);
-      if (!response.ok) throw new Error('Failed to fetch news');
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setNews(data);
-      } else {
-        setNews([]);
-      }
-    } catch (error) {
-      console.error('Error fetching news:', error);
-      setError('Failed to load news');
-      setNews([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleEditNews = (item: NewsItem) => {
-    setEditingNews(item);
-    setNewNews({
-      title: item.title,
-      description: item.description,
-      date: item.date.split('T')[0],
-      category: item.category
-    });
-    setNewsImages((item.images || []).map(img => ({ previewUrl: img.url, url: img.url, public_id: img.public_id })));
-    setIsModalOpen(true);
-  };
-
-  const handleDeleteNews = async (id: string) => {
-    if (!token) return;
-    try {
-      const response = await fetch(`${API_BASE}/api/news/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to delete news');
-      }
-      setNews(prevNews => prevNews.filter(n => n._id !== id));
-      setSuccessMessage('News deleted successfully!');
-      setPendingDeleteNewsId(null);
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to delete news');
-    }
-  };
-
-  const requestDeleteNews = (id: string) => {
-    setPendingDeleteNewsId(id);
-  };
-
-  const handleSaveNews = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!token) return;
-    if (!newNews.title.trim()) { setError('Title is required'); return; }
-    if (!newNews.description.trim()) { setError('Description is required'); return; }
-    if (!newNews.date) { setError('Date is required'); return; }
-    try {
-      const method = editingNews ? 'PUT' : 'POST';
-      const url = editingNews ? `${API_BASE}/api/news/${editingNews._id}` : `${API_BASE}/api/news`;
-      const formData = new FormData();
-      formData.append('title', newNews.title);
-      formData.append('description', newNews.description);
-      formData.append('date', newNews.date);
-      formData.append('category', newNews.category);
-      newsImages.forEach((img) => {
-        if (img.file) formData.append('images', img.file);
-      });
-      // When editing, tell the backend which existing images to keep
-      if (editingNews) {
-        const keepPublicIds = newsImages.filter(img => img.public_id).map(img => img.public_id);
-        formData.append('keepImages', JSON.stringify(keepPublicIds));
-      }
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to save news');
-      }
-      const savedNews = await response.json();
-      if (editingNews) {
-        setNews(news.map(n => n._id === savedNews._id ? savedNews : n));
-        setSuccessMessage('News updated successfully!');
-      } else {
-        setNews([savedNews, ...news]);
-        setSuccessMessage('News added successfully!');
-      }
-      closeNewsModal();
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to save news');
-    }
-  };
-
-  const closeNewsModal = () => {
-    setIsModalOpen(false);
-    setEditingNews(null);
-    setNewNews({
-      title: '',
-      description: '',
-      date: '',
-      category: 'Campus'
-    });
-    setNewsImages([]);
-    setError(null);
-  };
-
-  const filteredNews = news.filter(item =>
-    (filterCategory === 'All' || item.category === filterCategory) &&
-    (item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-     item.description.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-
-  if (isLoading) {
+  if (loading && news.length === 0) {
     return <PageSkeleton contentType="cards" itemCount={6} filterCount={1} showAddButton={user?.isAdmin} />;
   }
+
+  const filteredNews = news.filter(n => {
+    const matchesSearch = n.title.toLowerCase().includes(filters.search.toLowerCase()) || 
+                         n.description.toLowerCase().includes(filters.search.toLowerCase());
+    const matchesCategory = filters.category === 'All' || n.category === filters.category;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="min-h-screen bg-white font-sans">
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
-        
-        {/* Success Message Banner */}
         <SuccessMessage message={successMessage} onDismiss={() => setSuccessMessage(null)} />
-        
+
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <h1 className="text-h2 font-extrabold text-black">Campus News</h1>
           {user?.isAdmin && (
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200"
+            <button
+              onClick={openAddModal}
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] transition-colors"
             >
               + Add News
             </button>
           )}
         </div>
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 gap-4">
-          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-            <div className="relative">
-              <select
-                value={filterCategory}
-                onChange={e => setFilterCategory(e.target.value)}
-                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
-              >
-                <option value="All">All Categories</option>
-                <option value="Campus">Campus</option>
-                <option value="Academic">Academic</option>
-                <option value="Infrastructure">Infrastructure</option>
-                <option value="Achievements">Achievements</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
+
+        <NewsFilters
+          filters={filters}
+          onFilterChange={updateFilters}
+          suggestions={filteredSuggestions}
+          showSuggestions={showSuggestions}
+          setShowSuggestions={setShowSuggestions}
+          searchRef={searchRef as any}
+          onSuggestionSelect={(val) => updateFilters({ search: val })}
+        />
+
+        {fetchError && (
+          <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg font-medium border-2 border-red-100">
+            {fetchError}
           </div>
-          {/* Search Bar */}
-          <div className="relative w-full sm:w-[380px] md:w-[440px] lg:w-[520px]" ref={searchRef}>
-            <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
-              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
-              <input
-                type="text"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setSearchQuery(searchInput);
-                    setShowSuggestions(false);
-                  } else if (e.key === 'Escape') {
-                    setShowSuggestions(false);
-                  }
-                }}
-                placeholder="Search news..."
-                className="flex-1 pl-12 pr-3 py-3.5 bg-transparent text-gray-700 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
+        )}
+
+        {/* News Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredNews.length === 0 ? (
+            <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
+              <p className="text-xl font-bold text-gray-700">No news found</p>
+              <p className="text-gray-400 text-sm mt-2">Try adjusting your filters or search terms.</p>
+            </div>
+          ) : (
+            filteredNews.map((item) => (
+              <NewsCard
+                key={item._id}
+                news={item}
+                isAdmin={user?.isAdmin}
+                onSelect={openDetailModal}
+                onEdit={openEditModal}
+                onDelete={openDeleteModal}
               />
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery(searchInput);
-                  setShowSuggestions(false);
-                }}
-                className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] active:bg-[#181818] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
-                aria-label="Search"
-              >
-                <FiSearch className="w-4 h-4" />
-                <span className="hidden sm:inline">Search</span>
-              </button>
-            </div>
-            
-            {/* Autocomplete Dropdown */}
-            {showSuggestions && filteredSuggestions.length > 0 && (
-              <div className="absolute z-[60] w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-                {filteredSuggestions.map((suggestion, index) => (
-                  <div
-                    key={index}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      markSuggestionSelection();
-                      setSearchInput(suggestion);
-                      setSearchQuery(suggestion);
-                      setShowSuggestions(false);
-                    }}
-                    className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0"
-                  >
-                    <FiSearch className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" />
-                    <span className="text-sm font-medium text-gray-700">{suggestion}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
-          {filteredNews.map(item => (
-            <div key={item._id} className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden cursor-pointer hover:border-gray-300 transition-colors duration-200" onClick={() => setSelectedNewsForDetails(item)}>
-              {/* Image Section with Overlay */}
-              <div className="relative h-48 sm:h-56 md:h-64 overflow-hidden">
-                {item.images && item.images.length > 0 ? (
-                  <>
-                    <img
-                      src={item.images[0].url}
-                      alt={item.title}
-                      className="object-cover w-full h-full"
-                      onClick={(e) => { e.stopPropagation(); if (item.images) setZoomedImage(item.images[0].url); }}
-                    />
-                  </>
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                    <span className="text-5xl text-gray-300">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-16 h-16">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-3A2.25 2.25 0 008.25 5.25V9m7.5 0v10.5A2.25 2.25 0 0113.5 21h-3a2.25 2.25 0 01-2.25-2.25V9m7.5 0H6.75m8.25 0H18m-12 0h2.25" />
-                      </svg>
-                    </span>
-                  </div>
-                )}
-                {/* Category Badge */}
-                <div className={UI_PATTERNS.badgeTopLeft}>
-                  <span className={UI_PATTERNS.badgeLabel}>
-                    <FiTag className="w-3 h-3" />
-                    {item.category}
-                  </span>
-                </div>
-                {/* Date Badge */}
-                <div className={UI_PATTERNS.badgeTopRight}>
-                  <span className={UI_PATTERNS.badgeLabel}>
-                    <FiCalendar className="w-3 h-3" />
-                    {new Date(item.date).toLocaleDateString('en-US', {
-                      year: '2-digit',
-                      month: 'short',
-                      day: 'numeric'
-                    })}
-                  </span>
-                </div>
-              </div>
-
-              {/* Content Section */}
-              <div className="p-4 sm:p-5 md:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{item.title}</h2>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">{item.description}</p>
-
-                {/* Action Buttons */}
-                {user && user.isAdmin && (
-                  <div className="flex flex-row gap-2 pt-4 border-t-2 border-gray-200">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleEditNews(item); }}
-                      className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200 text-xs sm:text-sm min-w-0"
-                    >
-                      <FiEdit2 className="w-4 h-4 flex-shrink-0" />
-                      <span className="truncate">Edit</span>
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); requestDeleteNews(item._id); }}
-                      className="flex items-center justify-center gap-2 px-3 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200 text-xs sm:text-sm min-w-0"
-                    >
-                      <FiTrash2 className="w-4 h-4 flex-shrink-0" />
-                      <span className="truncate">Delete</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-          {filteredNews.length === 0 && (
-            <div className="col-span-full flex flex-col items-center justify-center py-16 px-4">
-              <svg className={UI_PATTERNS.emptyStateIcon} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <rect x="8" y="12" width="80" height="72" rx="8" fill="white" stroke="#E5E7EB" strokeWidth="3" />
-                <rect x="20" y="28" width="56" height="6" rx="3" fill="#E5E7EB" />
-                <rect x="20" y="42" width="40" height="4" rx="2" fill="#E5E7EB" />
-                <rect x="20" y="52" width="48" height="4" rx="2" fill="#E5E7EB" />
-                <rect x="20" y="62" width="32" height="4" rx="2" fill="#E5E7EB" />
-                <rect x="20" y="16" width="16" height="6" rx="3" fill="#D1D5DB" />
-                <circle cx="72" cy="72" r="16" fill="#F3F4F6" stroke="#E5E7EB" strokeWidth="2" />
-                <path d="M66 72h12M72 66v12" stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round" />
-              </svg>
-              <p className="text-gray-500 font-semibold text-lg mb-1">
-                {searchQuery || filterCategory !== 'All' ? 'No news matches your filters' : 'No news yet'}
-              </p>
-              <p className="text-gray-400 text-sm mb-4">
-                {searchQuery || filterCategory !== 'All' ? 'Try adjusting your search or category.' : 'Check back soon for the latest campus news.'}
-              </p>
-              {(searchQuery || filterCategory !== 'All') && (
-                <button
-                  onClick={() => { setSearchInput(''); setSearchQuery(''); setFilterCategory('All'); }}
-                  className="px-5 py-2 rounded-lg bg-[#181818] text-white text-sm font-semibold hover:bg-[#00C6A7] transition-colors duration-200"
-                >
-                  Clear filters
-                </button>
-              )}
-            </div>
+            ))
           )}
         </div>
 
-        {/* Add/Edit News Modal */}
+        {/* Modals */}
         <FeatureModal
           isOpen={isModalOpen}
-          onClose={closeNewsModal}
-          title={editingNews ? 'Edit News' : 'Add News'}
-          error={error}
+          onClose={closeModal}
+          title={
+            modalType === 'form' ? (selectedNews ? 'Edit News' : 'Add News') :
+            modalType === 'detail' ? 'News Details' : 'Confirm Delete'
+          }
+          error={formError}
+          maxWidth={modalType === 'detail' ? '4xl' : '2xl'}
         >
-              <form onSubmit={handleSaveNews} className="space-y-8">
-                {/* News Details Section */}
-                <div className="border-2 border-gray-200 rounded-lg p-6 mb-6">
-                  <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">News Details <FiInfo className="text-gray-400" title="Fill in the details of your news item." /></h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Title <FiTag className="inline text-gray-400" /></label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={newNews.title}
-                          onChange={e => setNewNews({...newNews, title: e.target.value})}
-                          className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
-                          placeholder="e.g. New Library Opening"
-                          required
-                          aria-label="News Title"
-                        />
-                        <FiTag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">Give a short, descriptive title for the news item.</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Date <FiCalendar className="inline text-gray-400" /></label>
-                      <input
-                        type="date"
-                        value={newNews.date}
-                        onChange={e => setNewNews({...newNews, date: e.target.value})}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
-                        required
-                        aria-label="News Date"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">When is this news relevant?</p>
-                    </div>
-                  </div>
-                  <div className="mt-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Description <FiFileText className="inline text-gray-400" /></label>
-                    <div className="relative">
-                      <textarea
-                        value={newNews.description}
-                        onChange={e => setNewNews({...newNews, description: e.target.value})}
-                        className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base resize-none"
-                        rows={4}
-                        placeholder="Describe the news, any important details, etc."
-                        required
-                        aria-label="News Description"
-                      ></textarea>
-                      <FiFileText className="absolute left-3 top-3 text-gray-400" />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">Provide details to help users understand the news.</p>
-                  </div>
-                  <div className="mt-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Category <FiTag className="inline text-gray-400" /></label>
-                    <select
-                      value={newNews.category}
-                      onChange={e => setNewNews({...newNews, category: e.target.value})}
-                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
-                      required
-                      aria-label="News Category"
-                    >
-                      <option value="Campus">Campus</option>
-                      <option value="Academic">Academic</option>
-                      <option value="Infrastructure">Infrastructure</option>
-                      <option value="Achievements">Achievements</option>
-                    </select>
-                    <p className="text-xs text-gray-500 mt-1">Select the category for this news item.</p>
-                  </div>
-                </div>
-                {/* Images Section */}
-                <ImageUpload
-                  images={newsImages}
-                  onImagesChange={setNewsImages}
-                  maxImages={5}
-                  id="news-image-upload"
-                />
-                <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
-                  <button
-                    type="button"
-                    onClick={closeNewsModal}
-                    className={UI_PATTERNS.buttonNeutral}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className={UI_PATTERNS.buttonPrimary}
-                  >
-                    {editingNews ? 'Save Changes' : 'Add News'}
-                  </button>
-                </div>
-              </form>
-        </FeatureModal>
+          {modalType === 'form' && (
+            <NewsForm
+              news={selectedNews}
+              onSubmit={handleFormSubmit}
+              isSubmitting={isSubmitting}
+              error={formError}
+            />
+          )}
+          
+          {modalType === 'detail' && selectedNews && (
+            <NewsDetail
+              news={selectedNews}
+              isAdmin={user?.isAdmin}
+              onEdit={openEditModal}
+              onDelete={openDeleteModal}
+            />
+          )}
 
-        {/* News Details Modal */}
-        {selectedNewsForDetails && (
-          <div
-            className={UI_PATTERNS.modalOverlay}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="news-details-title"
-            onClick={() => setSelectedNewsForDetails(null)}
-          >
-            <div className={UI_PATTERNS.modalPanel} onClick={(e) => e.stopPropagation()}>
-              <button
-                onClick={() => setSelectedNewsForDetails(null)}
-                aria-label="Close"
-                className={UI_PATTERNS.modalCloseButton}
-              >
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-              <h2 id="news-details-title" className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12 sm:pr-14">{selectedNewsForDetails.title}</h2>
-              {selectedNewsForDetails.images && selectedNewsForDetails.images.length > 0 && (
-                <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {selectedNewsForDetails.images.map((img, idx) => (
-                    <img
-                      key={idx}
-                      src={img.url}
-                      alt={`News image ${idx + 1}`}
-                      className="w-full h-56 object-cover rounded-lg cursor-zoom-in"
-                      onClick={() => setZoomedImage(img.url)}
-                    />
-                  ))}
-                </div>
-              )}
-              {selectedNewsForDetails.images && selectedNewsForDetails.images.length > 0 && (
-                <p className="text-xs text-gray-500 -mt-2">Tap image to zoom</p>
-              )}
-              <div className="space-y-4 text-gray-700">
-                <div className="flex flex-wrap gap-2">
-                  <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white border-2 border-gray-200 text-gray-800 flex items-center gap-1">
-                    <FiTag className="w-3 h-3" />{selectedNewsForDetails.category}
-                  </span>
-                  <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-white border-2 border-gray-200 text-gray-800 flex items-center gap-1">
-                    <FiCalendar className="w-3 h-3" />{new Date(selectedNewsForDetails.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                  </span>
-                </div>
-                <div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
-                  <p className="text-gray-700 whitespace-pre-wrap text-sm">{selectedNewsForDetails.description}</p>
-                </div>
+          {modalType === 'delete' && (
+            <div className="p-6 text-center">
+              <h3 className="text-xl font-bold mb-4">Delete News Item?</h3>
+              <p className="text-gray-600 mb-8">Are you sure you want to delete "{selectedNews?.title}"? This action cannot be undone.</p>
+              <div className="flex justify-center gap-4">
+                <button onClick={closeModal} className="px-6 py-2 border-2 border-gray-200 rounded-lg font-bold">Cancel</button>
+                <button onClick={handleDelete} className="px-6 py-2 bg-red-600 text-white rounded-lg font-bold">Delete News</button>
               </div>
-              {user?.isAdmin && (
-                <div className="flex gap-3 mt-6 pt-6 border-t border-gray-200">
-                  <button
-                    onClick={() => { setSelectedNewsForDetails(null); handleEditNews(selectedNewsForDetails); }}
-                    className={`${UI_PATTERNS.buttonNeutral} flex items-center gap-1`}
-                  >
-                    <FiEdit2 className="w-4 h-4" /> Edit
-                  </button>
-                  <button
-                    onClick={() => {
-                      requestDeleteNews(selectedNewsForDetails._id);
-                      setSelectedNewsForDetails(null);
-                    }}
-                    className={`${UI_PATTERNS.buttonDanger} flex items-center gap-1`}
-                  >
-                    <FiTrash2 className="w-4 h-4" /> Delete
-                  </button>
-                </div>
-              )}
             </div>
-          </div>
-        )}
-
-        <FeatureModal
-          isOpen={!!pendingDeleteNewsId}
-          onClose={() => setPendingDeleteNewsId(null)}
-          title="Delete News Item"
-          error={null}
-        >
-          <p className="text-sm text-gray-600 mb-6">Are you sure you want to delete this news item? This action cannot be undone.</p>
-          <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => setPendingDeleteNewsId(null)}
-              className={UI_PATTERNS.buttonNeutral}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={() => pendingDeleteNewsId && handleDeleteNews(pendingDeleteNewsId)}
-              className={UI_PATTERNS.buttonDanger}
-            >
-              Delete
-            </button>
-          </div>
+          )}
         </FeatureModal>
-
-        {/* Zoomed Image Modal */}
-        {zoomedImage && (
-          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000]" onClick={() => setZoomedImage(null)}>
-            <img src={zoomedImage} alt="Zoomed" className="max-h-[90vh] max-w-[90vw] rounded-lg" onClick={(e) => e.stopPropagation()} />
-            <button
-              onClick={() => setZoomedImage(null)}
-              aria-label="Close zoomed image"
-              className={UI_PATTERNS.zoomCloseButton}
-            >
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          </div>
-        )}
       </main>
-
-      {/* Footer */}
       <Footer
         logo={<img src="/Logo.webp" alt="KampusKart Logo" className="h-7 w-7" />}
         brandName="KampusKart"
@@ -640,7 +265,4 @@ const News = () => {
   );
 };
 
-export default News; 
-
-
-
+export default News;

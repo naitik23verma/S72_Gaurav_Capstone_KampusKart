@@ -1,102 +1,56 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { FiSearch, FiMapPin, FiUser, FiCalendar, FiEdit2, FiTrash2, FiCheckCircle, FiInfo, FiTag, FiFileText, FiMail } from 'react-icons/fi';
-import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
-import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { SuccessMessage } from './common/SuccessMessage';
-import { validateEmail, validatePhone } from '../utils/formValidation';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
 import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
-import { UI_PATTERNS } from '../theme/uiPatterns';
 
-interface LostFoundItem {
-  _id: string;
-  user: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  type: 'lost' | 'found';
-  title: string;
-  description: string;
-  location?: string;
-  date: string;
-  images: { public_id: string; url: string }[];
-  resolved: boolean;
-  contact?: string;
-  createdAt: string;
-  displayText?: string;
-  formattedDate?: string;
-  timeAgo?: string;
-  userName?: string;
-}
-
-// Use ImageFile type from ImageUpload component
+// Import from the feature directory
+import { 
+  useLostFound, 
+  LostFoundItem, 
+  LostFoundCard, 
+  LostFoundFilters, 
+  LostFoundForm, 
+  LostFoundDetail,
+  lostFoundApi
+} from '../features/lostfound';
 
 const LostFound = () => {
-  const [items, setItems] = useState<LostFoundItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isFiltering, setIsFiltering] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const { token, user } = useAuth();
+  
+  // Custom hook for state and data fetching
+  const {
+    items,
+    loading,
+    error,
+    totalPages,
+    isFetchingMore,
+    isFiltering,
+    filters,
+    updateFilters,
+    setPage,
+    refresh,
+    markAsResolved,
+    removeItem,
+  } = useLostFound(token);
+
+  // Local UI state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newItem, setNewItem] = useState({
-    type: 'lost',
-    title: '',
-    description: '',
-    location: '',
-    date: '',
-    contact: '',
-    images: [] as ImageFile[], // Use ImageFile type from ImageUpload component
-  });
-  const [formError, setFormError] = useState<string | null>(null);
-  const [editingItem, setEditingItem] = useState<LostFoundItem | null>(null);
-  const [searchInput, setSearchInput] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const itemsPerPage = 9; // Define how many items per page
-  const [filterType, setFilterType] = useState<'all' | 'lost' | 'found'>('all');
-  const [filterResolved, setFilterResolved] = useState<'all' | 'resolved' | 'unresolved'>('all');
-  const [selectedItemForDetails, setSelectedItemForDetails] = useState<LostFoundItem | null>(null);
-  const [zoomedImage, setZoomedImage] = useState<string | null>(null);
-  const observer = useRef<IntersectionObserver | null>(null);
-  const lastItemRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      if (isFetchingMore) return;
-      if (observer.current) observer.current.disconnect();
-      observer.current = new window.IntersectionObserver(entries => {
-        if (entries[0].isIntersecting && currentPage < totalPages) {
-          setIsFetchingMore(true);
-          setCurrentPage(prev => prev + 1);
-        }
-      });
-      if (node) observer.current.observe(node);
-    }, [isFetchingMore, currentPage, totalPages]);
-
-  // Cleanup observer on unmount
-  useEffect(() => {
-    return () => {
-      if (observer.current) observer.current.disconnect();
-    };
-  }, []);
-  const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
+  const [modalType, setModalType] = useState<'form' | 'detail' | 'delete'>('form');
+  const [selectedItem, setSelectedItem] = useState<LostFoundItem | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [pendingDeleteItemId, setPendingDeleteItemId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
-  const buildLostFoundSuggestions = useCallback((item: LostFoundItem, normalizedQuery: string): string[] => {
+  // Search Suggestions Hook
+  const buildSuggestions = useCallback((item: LostFoundItem, query: string): string[] => {
     const suggestions: string[] = [];
-    if (item?.title?.toLowerCase().includes(normalizedQuery)) {
-      suggestions.push(item.title);
-    }
-    if (item?.location?.toLowerCase().includes(normalizedQuery)) {
-      suggestions.push(item.location);
-    }
+    const normalizedQuery = query.toLowerCase();
+    if (item.title?.toLowerCase().includes(normalizedQuery)) suggestions.push(item.title);
+    if (item.location?.toLowerCase().includes(normalizedQuery)) suggestions.push(item.location);
     return suggestions;
   }, []);
 
@@ -105,14 +59,104 @@ const LostFound = () => {
     setShowSuggestions,
     filteredSuggestions,
     searchRef,
-    markSuggestionSelection,
   } = useSearchSuggestions<LostFoundItem>({
-    searchInput,
+    searchInput: filters.search,
     items,
-    buildSuggestions: buildLostFoundSuggestions,
+    buildSuggestions,
   });
 
-  // Auto-hide success message after 3 seconds
+  // Modal handlers
+  const openAddModal = () => {
+    setSelectedItem(null);
+    setModalType('form');
+    setFormError(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (item: LostFoundItem) => {
+    setSelectedItem(item);
+    setModalType('form');
+    setFormError(null);
+    setIsModalOpen(true);
+  };
+
+  const openDetailModal = (item: LostFoundItem) => {
+    setSelectedItem(item);
+    setModalType('detail');
+    setIsModalOpen(true);
+  };
+
+  const openDeleteModal = (id: string) => {
+    const item = items.find(i => i._id === id);
+    if (item) {
+      setSelectedItem(item);
+      setModalType('delete');
+      setIsModalOpen(true);
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedItem(null);
+    setFormError(null);
+  };
+
+  // Action handlers
+  const handleFormSubmit = async (formData: FormData) => {
+    if (!token) return;
+    setIsSubmitting(true);
+    setFormError(null);
+
+    try {
+      if (selectedItem) {
+        await lostFoundApi.updateItem(token, selectedItem._id, formData);
+        setSuccessMessage('Item updated successfully!');
+      } else {
+        await lostFoundApi.createItem(token, formData);
+        setSuccessMessage('Item posted successfully!');
+      }
+      refresh();
+      closeModal();
+    } catch (err: any) {
+      setFormError(err.message || 'Failed to save item');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleResolve = async (id: string) => {
+    const success = await markAsResolved(id);
+    if (success) {
+      setSuccessMessage('Item marked as resolved!');
+      if (modalType === 'detail') {
+        setSelectedItem(prev => prev ? { ...prev, resolved: true } : null);
+      }
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedItem) return;
+    const success = await removeItem(selectedItem._id);
+    if (success) {
+      setSuccessMessage('Item deleted successfully!');
+      closeModal();
+    }
+  };
+
+  // Infinite scroll observer
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastItemRef = useCallback((node: HTMLDivElement | null) => {
+    if (isFetchingMore) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new window.IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && filters.page < totalPages) {
+        setPage(filters.page + 1);
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [isFetchingMore, filters.page, totalPages, setPage]);
+
+  // Success message auto-hide
   useEffect(() => {
     if (successMessage) {
       const timer = setTimeout(() => setSuccessMessage(null), 5000);
@@ -120,1101 +164,162 @@ const LostFound = () => {
     }
   }, [successMessage]);
 
-  // Field validation functions
-  const validateField = (fieldName: string, value: string): string | null => {
-    switch (fieldName) {
-      case 'title':
-        if (!value.trim()) return 'Title is required';
-        if (value.trim().length < 3) return 'Title must be at least 3 characters';
-        if (value.trim().length > 100) return 'Title must be less than 100 characters';
-        return null;
-      
-      case 'description':
-        if (!value.trim()) return 'Description is required';
-        if (value.trim().length < 10) return 'Description must be at least 10 characters';
-        if (value.trim().length > 1000) return 'Description must be less than 1000 characters';
-        return null;
-      
-      case 'location':
-        // Location is optional, but if provided must be at least 3 characters
-        if (value.trim() && value.trim().length < 3) return 'Location must be at least 3 characters';
-        if (value.trim().length > 100) return 'Location must be less than 100 characters';
-        return null;
-      
-      case 'date':
-        if (!value) return 'Date is required';
-        const selectedDate = new Date(value);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        // Allow today's date but not future dates
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        if (selectedDate >= tomorrow) return 'Date cannot be in the future';
-        return null;
-      
-      case 'contact':
-        if (!value.trim()) return 'Contact information is required';
-        // Check if it's email or phone
-        if (value.includes('@')) {
-          const emailValidation = validateEmail(value);
-          if (!emailValidation.isValid) return emailValidation.error || 'Invalid email format';
-        } else {
-          const phoneValidation = validatePhone(value);
-          if (!phoneValidation.isValid) return phoneValidation.error || 'Invalid phone format';
-        }
-        return null;
-      
-      default:
-        return null;
-    }
-  };
-
-  const handleFieldBlur = (fieldName: string, value: string) => {
-    const error = validateField(fieldName, value);
-    setFieldErrors(prev => ({
-      ...prev,
-      [fieldName]: error || ''
-    }));
-  };
-
-  const openAddItemModal = () => {
-    setEditingItem(null);
-    setNewItem({
-      type: 'lost',
-      title: '',
-      description: '',
-      location: '',
-      date: '',
-      contact: '',
-      images: [], // No images when adding
-    });
-    setFormError(null);
-    setFieldErrors({});
-    setIsModalOpen(true);
-  };
-
-  const openEditItemModal = (item: LostFoundItem) => {
-    setEditingItem(item);
-    const formattedDate = item.date ? new Date(item.date).toISOString().split('T')[0] : '';
-    setNewItem({
-      type: item?.type || 'lost',
-      title: item?.title || '',
-      description: item?.description || '',
-      location: item?.location || '',
-      date: formattedDate,
-      contact: item?.contact || '',
-      images: (item.images || []).map(img => ({
-        previewUrl: img.url,
-        public_id: img.public_id,
-        url: img.url,
-      })),
-    });
-    setFormError(null);
-    setFieldErrors({});
-    setIsModalOpen(true);
-  };
-
-  const closeItemModal = () => {
-    setIsModalOpen(false);
-    setEditingItem(null);
-    setNewItem({
-      type: 'lost',
-      title: '',
-      description: '',
-      location: '',
-      date: '',
-      contact: '',
-      images: [],
-    });
-    setFormError(null);
-    setFieldErrors({});
-  };
-
-  const fetchItems = async () => {
-    try {
-      // Only show full page loading on initial load, not when filtering
-      if (currentPage === 1 && items.length === 0) {
-        setLoading(true);
-      } else if (currentPage === 1) {
-        setIsFiltering(true);
-      }
-      setError(null);
-      const url = new URL(`${API_BASE}/api/lostfound`);
-      url.searchParams.append('page', currentPage.toString());
-      url.searchParams.append('limit', itemsPerPage.toString());
-      if (searchQuery) {
-        url.searchParams.append('search', searchQuery);
-      }
-      if (filterType !== 'all') {
-        url.searchParams.append('type', filterType);
-      }
-      if (filterResolved !== 'all') {
-        url.searchParams.append('resolved', filterResolved === 'resolved' ? 'true' : 'false');
-      }
-      const response = await fetch(url.toString(), {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Error fetching items: ${response.statusText}`);
-      }
-      const data = await response.json();
-      if (data && Array.isArray(data.items)) {
-        if (currentPage === 1) {
-          setItems(data.items);
-        } else {
-          setItems(prev => [...prev, ...data.items]);
-        }
-        if (data.totalPages !== undefined) {
-          setTotalPages(data.totalPages);
-        }
-      } else {
-        setItems([]);
-        setTotalPages(1);
-      }
-    } catch (err: any) {
-      console.error('Error fetching lost and found items:', err);
-      setError(err.message || 'Failed to fetch lost and found items.');
-    } finally {
-      setLoading(false);
-      setIsFiltering(false);
-      setIsFetchingMore(false);
-    }
-  };
-
-  // Reset currentPage when filters or search changes
-  useEffect(() => {
-    setCurrentPage(1);
-    setIsFiltering(true);
-  }, [filterType, filterResolved, searchQuery]);
-
-  useEffect(() => {
-    if (token) {
-      fetchItems();
-    }
-    // eslint-disable-next-line
-  }, [token, searchQuery, currentPage, filterType, filterResolved]);
-
-  const handleDeleteItem = async (id: string) => {
-    if (!token) return;
-    try {
-      const response = await fetch(`${API_BASE}/api/lostfound/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        setError(error.message || 'Failed to delete item');
-        return;
-      }
-      setItems(prevItems => prevItems.filter(i => i._id !== id));
-      setSelectedItemForDetails(null);
-      setPendingDeleteItemId(null);
-      setSuccessMessage('Item deleted successfully!');
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to delete item');
-    }
-  };
-
-  const requestDeleteItem = (id: string) => {
-    setPendingDeleteItemId(id);
-  };
-
-  const handleMarkResolved = async (id: string) => {
-    if (!token) return;
-    try {
-      const response = await fetch(`${API_BASE}/api/lostfound/${id}/resolve`, {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to mark as resolved');
-      }
-      await response.json();
-      // If filtering by unresolved, remove the item from the list since it no longer matches
-      if (filterResolved === 'unresolved') {
-        setItems(prev => prev.filter(i => i._id !== id));
-        setSelectedItemForDetails(null);
-      } else {
-        setItems(prev => prev.map(i => i._id === id ? { ...i, resolved: true } : i));
-        setSelectedItemForDetails(prev => prev ? { ...prev, resolved: true } : prev);
-      }
-      setSuccessMessage('Item marked as resolved!');
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to mark as resolved');
-    }
-  };
-
-  const renderStatus = (type: 'lost' | 'found', resolved: boolean) => {
-    return (
-      <div className="flex gap-2">
-        <span className={`text-xs px-3 py-1.5 rounded-lg font-medium ${
-          type === 'lost' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-        }`}>
-          {type === 'lost' ? 'Lost Item' : 'Found Item'}
-        </span>
-        <span className={`text-xs px-3 py-1.5 rounded-lg font-medium ${
-          resolved ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
-        }`}>
-          {resolved ? 'Resolved' : 'Unresolved'}
-        </span>
-      </div>
-    );
-  };
-
-
-  if (loading) {
+  if (loading && filters.page === 1) {
     return <PageSkeleton contentType="cards" itemCount={8} filterCount={2} showAddButton={true} />;
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white font-sans">
-        <div className="text-center">
-          <p className="text-red-500">Error: {error}</p>
-        </div>
-      </div>
-    );
   }
 
   return (
     <div className="min-h-screen bg-white font-sans">
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
-        {/* Success Message Banner */}
         <SuccessMessage message={successMessage} onDismiss={() => setSuccessMessage(null)} />
-        
-        {/* Top Bar: Heading + Add Button */}
+
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <h1 className="text-h2 font-extrabold text-black">Lost and Found</h1>
           <button
-            onClick={openAddItemModal}
-            aria-label="Add New Item"
-            className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200"
+            onClick={openAddModal}
+            className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] transition-colors"
           >
             + Add New Item
           </button>
         </div>
-        {/* Filter/Search Row */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 gap-4">
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-            <div className="relative">
-              <select
-                value={filterType}
-                onChange={e => setFilterType(e.target.value as 'all' | 'lost' | 'found')}
-                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
-                aria-label="Filter by type"
-              >
-                <option value="all">All Types</option>
-                <option value="lost">Lost Items</option>
-                <option value="found">Found Items</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-            <div className="relative">
-              <select
-                value={filterResolved}
-                onChange={e => setFilterResolved(e.target.value as 'all' | 'resolved' | 'unresolved')}
-                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
-                aria-label="Filter by resolution status"
-              >
-                <option value="all">All Statuses</option>
-                <option value="unresolved">Unresolved</option>
-                <option value="resolved">Resolved</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-          </div>
-          {/* Search Bar */}
-          <div className="relative w-full sm:w-[380px] md:w-[440px] lg:w-[520px]" ref={searchRef}>
-            <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
-              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
-              <input
-                type="text"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setSearchQuery(searchInput);
-                    setShowSuggestions(false);
-                  } else if (e.key === 'Escape') {
-                    setShowSuggestions(false);
-                  }
-                }}
-                placeholder="Search items..."
-                className="flex-1 pl-12 pr-3 py-3.5 bg-transparent text-gray-700 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery(searchInput);
-                  setShowSuggestions(false);
-                }}
-                className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] active:bg-[#181818] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
-                aria-label="Search"
-              >
-                <FiSearch className="w-4 h-4" />
-                <span className="hidden sm:inline">Search</span>
-              </button>
-            </div>
-            
-            {/* Autocomplete Dropdown */}
-            {showSuggestions && filteredSuggestions.length > 0 && (
-              <div className="absolute z-[60] w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-                {filteredSuggestions.map((suggestion, index) => (
-                  <div
-                    key={index}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      markSuggestionSelection();
-                      setSearchInput(suggestion);
-                      setSearchQuery(suggestion);
-                      setShowSuggestions(false);
-                    }}
-                    className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0"
-                    role="option"
-                    aria-selected="false"
-                  >
-                    <FiSearch className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" />
-                    <span className="text-sm font-medium text-gray-700">{suggestion}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
 
-        {(searchQuery || filterType !== 'all' || filterResolved !== 'all') && (
+        <LostFoundFilters
+          filters={filters}
+          onFilterChange={updateFilters}
+          suggestions={filteredSuggestions}
+          showSuggestions={showSuggestions}
+          setShowSuggestions={setShowSuggestions}
+          searchRef={searchRef as any}
+          onSuggestionSelect={(val) => updateFilters({ search: val })}
+        />
+
+        {/* Active Filters Display */}
+        {(filters.search || filters.type !== 'all' || filters.resolved !== 'all') && (
           <div className="mb-6 flex flex-wrap items-center gap-2">
             <span className="text-xs font-semibold text-gray-500">Active filters:</span>
-            {filterType !== 'all' && (
+            {filters.type !== 'all' && (
               <span className="text-xs px-3 py-1.5 rounded-lg border-2 border-gray-200 bg-white text-gray-700 font-semibold capitalize">
-                Type: {filterType}
+                Type: {filters.type}
               </span>
             )}
-            {filterResolved !== 'all' && (
+            {filters.resolved !== 'all' && (
               <span className="text-xs px-3 py-1.5 rounded-lg border-2 border-gray-200 bg-white text-gray-700 font-semibold capitalize">
-                Status: {filterResolved}
+                Status: {filters.resolved}
               </span>
             )}
-            {searchQuery && (
+            {filters.search && (
               <span className="text-xs px-3 py-1.5 rounded-lg border-2 border-gray-200 bg-white text-gray-700 font-semibold">
-                Search: {searchQuery}
+                Search: {filters.search}
               </span>
             )}
             <button
-              type="button"
-              onClick={() => { setSearchQuery(''); setSearchInput(''); setFilterType('all'); setFilterResolved('all'); }}
-              className="ml-auto px-4 py-2 rounded-lg bg-[#181818] text-white text-xs font-bold hover:bg-[#00C6A7] transition-colors duration-200"
+              onClick={() => updateFilters({ search: '', type: 'all', resolved: 'all' })}
+              className="ml-auto px-4 py-2 rounded-lg bg-[#181818] text-white text-xs font-bold hover:bg-[#00C6A7] transition-colors"
             >
               Clear all
             </button>
           </div>
         )}
 
-        {/* Card Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+        {/* Items Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {isFiltering ? (
-            // Show skeleton cards while filtering
             Array.from({ length: 6 }).map((_, idx) => (
-              <div key={idx} className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden animate-pulse">
-                <div className="h-48 sm:h-56 md:h-64 bg-gray-200"></div>
+              <div key={idx} className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden animate-pulse h-[400px]">
+                <div className="h-64 bg-gray-200"></div>
                 <div className="p-6 space-y-3">
                   <div className="h-6 bg-gray-200 rounded w-3/4"></div>
                   <div className="h-4 bg-gray-200 rounded w-full"></div>
-                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
                 </div>
               </div>
             ))
           ) : items.length === 0 ? (
-            <div className="col-span-full flex flex-col items-center justify-center py-20 px-4">
-              <svg className="w-40 h-40 mb-6 text-gray-200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                {/* Bag body */}
-                <rect x="55" y="80" width="90" height="80" rx="12" fill="#f3f4f6" stroke="#d1d5db" strokeWidth="3"/>
-                {/* Bag handle */}
-                <path d="M75 80 Q75 55 100 55 Q125 55 125 80" stroke="#d1d5db" strokeWidth="3" fill="none" strokeLinecap="round"/>
-                {/* Question mark */}
-                <text x="100" y="132" textAnchor="middle" fontSize="36" fontWeight="700" fill="#9ca3af">?</text>
-                {/* Magnifying glass */}
-                <circle cx="148" cy="148" r="18" fill="#e5e7eb" stroke="#d1d5db" strokeWidth="3"/>
-                <line x1="161" y1="161" x2="172" y2="172" stroke="#d1d5db" strokeWidth="4" strokeLinecap="round"/>
-                <circle cx="148" cy="148" r="10" fill="none" stroke="#9ca3af" strokeWidth="2.5"/>
-              </svg>
-              <p className="text-xl font-bold text-gray-700 mb-2">Nothing here yet</p>
-              <p className="text-gray-400 text-sm text-center max-w-xs">
-                {searchQuery || filterType !== 'all' || filterResolved !== 'all'
-                  ? 'No items match your current filters. Try adjusting your search.'
-                  : 'Be the first to post a lost or found item. Someone out there might be looking!'}
-              </p>
-              {(searchQuery || filterType !== 'all' || filterResolved !== 'all') && (
-                <button
-                  onClick={() => { setSearchQuery(''); setSearchInput(''); setFilterType('all'); setFilterResolved('all'); }}
-                  className="mt-5 px-5 py-2.5 rounded-lg bg-[#181818] text-white text-sm font-semibold hover:bg-[#00C6A7] transition-colors duration-200"
-                >
-                  Clear filters
-                </button>
-              )}
+            <div className="col-span-full flex flex-col items-center justify-center py-20">
+              <p className="text-xl font-bold text-gray-700">Nothing here yet</p>
+              <p className="text-gray-400 text-sm mt-2">No items match your criteria.</p>
             </div>
           ) : (
-            items.filter(item => item).map((item, idx) => (
-            <div
-              key={item._id}
-              ref={idx === items.length - 1 ? lastItemRef : undefined}
-              className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden cursor-pointer hover:border-gray-300 transition-colors duration-200"
-              onClick={() => setSelectedItemForDetails(item)}
-            >
-              {/* Image Section with Overlay */}
-              <div className="relative h-48 sm:h-56 md:h-64 overflow-hidden">
-                {item.images && item.images.length > 0 ? (
-                  <>
-                    <img
-                      src={item.images[0].url}
-                      alt={item?.title || 'Item'}
-                      className="object-cover w-full h-full"
-                    />
-                  </>
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                    <span className="text-5xl text-gray-300">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-16 h-16">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-3A2.25 2.25 0 008.25 5.25V9m7.5 0v10.5A2.25 2.25 0 0113.5 21h-3a2.25 2.25 0 01-2.25-2.25V9m7.5 0H6.75m8.25 0H18m-12 0h2.25" />
-                      </svg>
-                    </span>
-                  </div>
-                )}
-                {/* Status Badges - Now positioned over the image */}
-                <div className={`${UI_PATTERNS.badgeTopRight} flex flex-col gap-2`}>
-                  <span className={`${UI_PATTERNS.badgeLabel} ${
-                    item.type === 'lost' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                  }`}>
-                    {item.type === 'lost' ? 'Lost Item' : 'Found Item'}
-                  </span>
-                  <span className={`${UI_PATTERNS.badgeLabel} ${
-                    item.resolved ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {item.resolved ? 'Resolved' : 'Unresolved'}
-                  </span>
-                </div>
+            items.map((item, idx) => (
+              <div key={item._id} ref={idx === items.length - 1 ? lastItemRef : undefined}>
+                <LostFoundCard
+                  item={item}
+                  currentUser={user}
+                  token={token}
+                  onSelect={openDetailModal}
+                  onResolve={handleResolve}
+                  onEdit={openEditModal}
+                  onDelete={openDeleteModal}
+                />
               </div>
-
-              {/* Content Section */}
-              <div className="p-4 sm:p-5 md:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{item?.title || 'Item'}</h2>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{item.description}</p>
-
-                {/* Meta Info Row - Location, Date, User */}
-                <div className="space-y-3 pt-4 border-t-2 border-gray-200">
-                  {item.location && (
-                    <div className="flex items-center text-sm text-gray-500">
-                      <FiMapPin className="mr-2 flex-shrink-0" />
-                      <span className="truncate">{item.location}</span>
-                    </div>
-                  )}
-                  {item.date && (
-                    <div className="flex items-center text-sm text-gray-500">
-                      <FiCalendar className="mr-2 flex-shrink-0" />
-                      <span>{new Date(item.date).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      })}</span>
-                    </div>
-                  )}
-                  {item.user?.name && (
-                    <div className="flex items-center text-sm text-gray-500">
-                      <FiUser className="mr-2 flex-shrink-0" />
-                      <span className="truncate">Posted by {item.user.name}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Action Buttons */}
-                {token && user && item.user && (
-                  // Check if user can edit/delete this item
-                  (user._id === item.user._id || user.isAdmin) && (
-                    <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t-2 border-gray-200">
-                      {!item.resolved && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleMarkResolved(item._id);
-                          }}
-                          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors duration-200 text-xs font-medium min-w-0 min-h-touch"
-                        >
-                          <FiCheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                          <span className="truncate">Resolve</span>
-                        </button>
-                      )}
-                      {!item.resolved && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openEditItemModal(item);
-                          }}
-                          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200 text-xs font-medium min-w-0 min-h-touch"
-                        >
-                          <FiEdit2 className="w-3.5 h-3.5 flex-shrink-0" />
-                          <span className="truncate">Edit</span>
-                        </button>
-                      )}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          requestDeleteItem(item._id);
-                        }}
-                        className="flex-1 sm:flex-none sm:px-4 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-white text-red-700 border-2 border-red-200 rounded-lg hover:bg-red-50 transition-colors duration-200 text-xs font-semibold min-w-0 min-h-touch"
-                      >
-                        <FiTrash2 className="w-3.5 h-3.5 flex-shrink-0" />
-                        <span className="truncate">Delete</span>
-                      </button>
-                    </div>
-                  )
-                )}
-                
-              </div>
-            </div>
-          ))
+            ))
           )}
         </div>
+
         {isFetchingMore && (
           <div className="flex justify-center items-center mt-8">
-            <svg className="animate-spin h-8 w-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
+            <div className="animate-spin h-8 w-8 border-4 border-[#00C6A7] border-t-transparent rounded-full"></div>
           </div>
         )}
-        {!isFiltering && !isFetchingMore && items.length > 0 && currentPage >= totalPages && (
+
+        {!isFiltering && !isFetchingMore && items.length > 0 && filters.page >= totalPages && (
           <div className="mt-8 text-center">
-            <p className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm font-semibold text-gray-600">
-              <span className="w-2 h-2 rounded-full bg-[#00C6A7]" />
+            <p className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-gray-200 text-sm font-semibold text-gray-600">
               You have reached the end of results.
             </p>
           </div>
         )}
+
+        {/* Modals */}
         <FeatureModal
           isOpen={isModalOpen}
-          onClose={closeItemModal}
-          title={editingItem ? 'Edit Item' : 'Add New Item'}
+          onClose={closeModal}
+          title={
+            modalType === 'form' ? (selectedItem ? 'Edit Item' : 'Add New Item') :
+            modalType === 'detail' ? 'Item Details' : 'Confirm Delete'
+          }
           error={formError}
+          maxWidth={modalType === 'detail' ? '3xl' : '2xl'}
         >
-
-              <form onSubmit={async (e) => {
-                e.preventDefault();
-                setIsSubmitting(true);
-                setFormError(null);
-                setFieldErrors({});
-
-                // Validate all fields
-                const errors: {[key: string]: string} = {};
-                const titleError = validateField('title', newItem.title);
-                const descError = validateField('description', newItem.description);
-                const locationError = validateField('location', newItem.location);
-                const dateError = validateField('date', newItem.date);
-                const contactError = validateField('contact', newItem.contact);
-
-                if (titleError) errors.title = titleError;
-                if (descError) errors.description = descError;
-                if (locationError) errors.location = locationError;
-                if (dateError) errors.date = dateError;
-                if (contactError) errors.contact = contactError;
-
-                if (Object.keys(errors).length > 0) {
-                  setFieldErrors(errors);
-                  setFormError('Please fix the errors below');
-                  setIsSubmitting(false);
-                  return;
-                }
-
-                const formData = new FormData();
-                formData.append('type', newItem.type);
-                formData.append('title', newItem.title.trim());
-                formData.append('description', newItem.description.trim());
-                formData.append('location', newItem.location.trim());
-                formData.append('date', newItem.date);
-                formData.append('contact', newItem.contact.trim());
-                newItem.images.forEach((image) => {
-                  if (image.file) {
-                    formData.append('images', image.file);
-                  }
-                });
-                if (editingItem) {
-                  const keepPublicIds = newItem.images.filter(img => img.public_id).map(img => img.public_id);
-                  formData.append('keepImages', JSON.stringify(keepPublicIds));
-                }
-
-                try {
-                  const response = await fetch(`${API_BASE}/api/lostfound${editingItem ? '/' + editingItem._id : ''}`, {
-                    method: editingItem ? 'PUT' : 'POST',
-                    headers: {
-                      'Authorization': `Bearer ${token}`,
-                    },
-                    body: formData,
-                  });
-
-                  const data = await response.json();
-
-                  if (response.ok) {
-                    if (editingItem) {
-                      setItems(items.map(i => i._id === editingItem._id ? data : i));
-                      setSuccessMessage('Item updated successfully!');
-                    } else {
-                      setItems([data, ...items]);
-                      setSuccessMessage('Item added successfully!');
-                    }
-                    closeItemModal();
-                  } else {
-                    // Handle validation errors from backend
-                    if (data.details && Array.isArray(data.details)) {
-                      const backendErrors: {[key: string]: string} = {};
-                      data.details.forEach((err: any) => {
-                        backendErrors[err.field] = err.message;
-                      });
-                      setFieldErrors(backendErrors);
-                      setFormError(data.message || 'Validation failed');
-                    } else {
-                      setFormError(data.message || 'Failed to save item.');
-                    }
-                  }
-                } catch (err: any) {
-                  console.error('Error saving item:', err);
-                  setFormError('An error occurred while saving the item. Please try again.');
-                } finally {
-                  setIsSubmitting(false);
-                }
-              }} className="space-y-8">
-                {/* Item Details Section */}
-                <div className="border-2 border-gray-200 rounded-lg p-6 mb-6">
-                  <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Item Details <FiInfo className="text-gray-400" title="Fill in the details of your lost or found item." /></h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Type <FiTag className="inline text-gray-400" /></label>
-                      <select
-                        value={newItem.type}
-                        onChange={(e) => setNewItem({...newItem, type: e.target.value as 'lost' | 'found'})}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
-                        required
-                        aria-label="Item Type"
-                      >
-                        <option value="lost">Lost Item</option>
-                        <option value="found">Found Item</option>
-                      </select>
-                      <p className="text-xs text-gray-500 mt-1">Select whether you lost or found the item.</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                        Date <FiCalendar className="inline text-gray-400" />
-                      </label>
-                      <div className="relative cursor-pointer" onClick={(e) => {
-                        const input = e.currentTarget.querySelector('input[type="date"]') as HTMLInputElement;
-                        if (input) input.showPicker?.();
-                      }}>
-                        <FiCalendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
-                        <input
-                          type="date"
-                          value={newItem.date}
-                          onChange={(e) => {
-                            setNewItem({...newItem, date: e.target.value});
-                            if (fieldErrors.date) {
-                              setFieldErrors(prev => ({...prev, date: ''}));
-                            }
-                          }}
-                          onBlur={(e) => handleFieldBlur('date', e.target.value)}
-                          max={new Date().toISOString().split('T')[0]}
-                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.date ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base cursor-pointer`}
-                          required
-                          aria-label="Item Date"
-                        />
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">When was the item lost or found?</p>
-                      {fieldErrors.date && <p className="text-xs text-red-500 mt-1">{fieldErrors.date}</p>}
-                    </div>
-                  </div>
-                  <div className="mt-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Title <FiTag className="inline text-gray-400" /></label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={newItem.title}
-                        onChange={(e) => {
-                          setNewItem({...newItem, title: e.target.value});
-                          if (fieldErrors.title) {
-                            setFieldErrors(prev => ({...prev, title: ''}));
-                          }
-                        }}
-                        onBlur={(e) => handleFieldBlur('title', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.title ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base`}
-                        placeholder="e.g. Black Wallet, Red Backpack"
-                        required
-                        aria-label="Item Title"
-                      />
-                      <FiTag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">Give a short, descriptive title for the item.</p>
-                    {fieldErrors.title && <p className="text-xs text-red-500 mt-1">{fieldErrors.title}</p>}
-                  </div>
-                  <div className="mt-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Description <FiFileText className="inline text-gray-400" /></label>
-                    <div className="relative">
-                      <textarea
-                        value={newItem.description}
-                        onChange={(e) => {
-                          setNewItem({...newItem, description: e.target.value});
-                          if (fieldErrors.description) {
-                            setFieldErrors(prev => ({...prev, description: ''}));
-                          }
-                        }}
-                        onBlur={(e) => handleFieldBlur('description', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base resize-none`}
-                        rows={4}
-                        placeholder="Describe the item, any unique features, etc."
-                        required
-                        aria-label="Item Description"
-                      ></textarea>
-                      <FiFileText className="absolute left-3 top-3 text-gray-400" />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">Provide details to help identify the item.</p>
-                    {fieldErrors.description && <p className="text-xs text-red-500 mt-1">{fieldErrors.description}</p>}
-                  </div>
-                  <div className="mt-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Location (Optional) <FiMapPin className="inline text-gray-400" /></label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={newItem.location}
-                        onChange={(e) => {
-                          setNewItem({...newItem, location: e.target.value});
-                          if (fieldErrors.location) {
-                            setFieldErrors(prev => ({...prev, location: ''}));
-                          }
-                        }}
-                        onBlur={(e) => handleFieldBlur('location', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.location ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base`}
-                        placeholder="Where was the item lost/found?"
-                        aria-label="Item Location"
-                      />
-                      <FiMapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">Be as specific as possible (e.g. Library, Canteen, Room 101).</p>
-                    {fieldErrors.location && <p className="text-xs text-red-500 mt-1">{fieldErrors.location}</p>}
-                  </div>
-                </div>
-
-                {/* Contact Section */}
-                <div className="border-2 border-gray-200 rounded-lg p-6">
-                  <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Contact <FiInfo className="text-gray-400" title="Contact is linked to your account." /></h3>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Contact Information <FiMail className="inline text-gray-400" /></label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={newItem.contact}
-                      onChange={(e) => {
-                        setNewItem({...newItem, contact: e.target.value});
-                        if (fieldErrors.contact) {
-                          setFieldErrors(prev => ({...prev, contact: ''}));
-                        }
-                      }}
-                      onBlur={(e) => handleFieldBlur('contact', e.target.value)}
-                      className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.contact ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base`}
-                      placeholder="Email or phone number"
-                      required
-                      aria-label="Contact Information"
-                    />
-                    <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">How can someone reach you if they have information?</p>
-                  {fieldErrors.contact && <p className="text-xs text-red-500 mt-1">{fieldErrors.contact}</p>}
-                </div>
-
-                {/* Images Section */}
-                <ImageUpload
-                  images={newItem.images}
-                  onImagesChange={(images) => setNewItem({ ...newItem, images })}
-                  maxImages={5}
-                  id="lostfound-image-upload"
-                />
-
-                <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
-                  <button
-                    type="button"
-                    onClick={closeItemModal}
-                    className={UI_PATTERNS.buttonNeutral}
-                    disabled={isSubmitting}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`${UI_PATTERNS.buttonPrimary} ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    {isSubmitting ? (
-                      <span className="flex items-center">
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        {editingItem ? 'Saving...' : 'Adding...'}
-                      </span>
-                    ) : (
-                      editingItem ? 'Save Changes' : 'Add Item'
-                    )}
-                  </button>
-                </div>
-              </form>
-        </FeatureModal>
-      </main>
-
-      {/* Item Details Modal */}
-      {selectedItemForDetails && (
-        <div 
-          className={UI_PATTERNS.modalOverlay}
-          onClick={() => setSelectedItemForDetails(null)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') setSelectedItemForDetails(null);
-          }}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="item-details-title"
-          tabIndex={-1}
-        >
-          <div 
-            className={UI_PATTERNS.modalPanel}
-            style={{ colorScheme: 'light', backgroundColor: '#ffffff', color: '#213547' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close Button */}
-            <button
-              onClick={() => setSelectedItemForDetails(null)}
-              aria-label="Close dialog"
-              className={UI_PATTERNS.modalCloseButton}
-            >
-              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            <h2 id="item-details-title" className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12 sm:pr-14">{selectedItemForDetails.title}</h2>
-
-            {/* Image Gallery with zoom */}
-            {selectedItemForDetails.images && selectedItemForDetails.images.length > 0 && (
-              <div className="mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                {selectedItemForDetails.images.map((image) => (
-                  <img
-                    key={image.public_id || image.url}
-                    src={image.url}
-                    alt={`${selectedItemForDetails.title} image`}
-                    className="w-full h-48 sm:h-56 md:h-64 object-cover rounded-lg cursor-zoom-in transition-transform duration-200 hover:scale-[1.02]"
-                    onClick={() => setZoomedImage(image.url)}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Details Section */}
-            <div className="space-y-6 text-gray-700">
-              {/* Status Badges */}
-              <div className="flex flex-wrap items-center gap-3 mb-2">
-                {renderStatus(selectedItemForDetails.type, selectedItemForDetails.resolved)}
-              </div>
-              <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
-                <p className="text-gray-700 whitespace-pre-wrap">{selectedItemForDetails.description}</p>
-              </div>
-
-              {/* Meta Info - Location, Date, Posted By */}
-              <div className="space-y-3 pt-4 border-t-2 border-gray-200">
-                {selectedItemForDetails.location && (
-                  <div>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <FiMapPin className="w-5 h-5 mr-2 text-gray-500"/>
-                      <span>{selectedItemForDetails.location}</span>
-                    </div>
-                  </div>
-                )}
-                <div>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <FiCalendar className="w-5 h-5 mr-2 text-gray-500"/>
-                    <span>{new Date(selectedItemForDetails.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                  </div>
-                </div>
-                {selectedItemForDetails.user?.name && selectedItemForDetails.createdAt && (
-                  <div className="flex items-center text-sm text-gray-500">
-                    <FiUser className="w-5 h-5 mr-2 text-gray-500" />
-                    <span className="truncate">Posted by {selectedItemForDetails.user.name} on {new Date(selectedItemForDetails.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</span>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">Contact Information</p>
-                <div className="flex items-center">
-                  <FiMail className="w-5 h-5 mr-2 text-gray-500"/>
-                  {selectedItemForDetails.contact && (selectedItemForDetails.contact.includes('@') ? (
-                    <a href={`mailto:${selectedItemForDetails.contact}`} className="text-[#00C6A7] hover:underline">{selectedItemForDetails.contact}</a>
-                  ) : (
-                    <a href={`tel:${selectedItemForDetails.contact}`} className="text-[#00C6A7] hover:underline">{selectedItemForDetails.contact}</a>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Owner/Admin Actions */}
-            {(user && (user._id === selectedItemForDetails.user._id || user.id === selectedItemForDetails.user._id || user.isAdmin)) && (
-              <div className="flex flex-wrap gap-2 mt-6 pt-6 border-t-2 border-gray-200">
-                {!selectedItemForDetails.resolved && (
-                  <button
-                    onClick={() => { setSelectedItemForDetails(null); openEditItemModal(selectedItemForDetails); }}
-                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-colors duration-200"
-                  >
-                    <FiEdit2 className="w-4 h-4" /> Edit
-                  </button>
-                )}
-                <button
-                  onClick={() => requestDeleteItem(selectedItemForDetails._id)}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#F05A25] hover:bg-red-600 active:bg-[#F05A25] transition-colors duration-200"
-                >
-                  <FiTrash2 className="w-4 h-4" /> Delete
-                </button>
-                {!selectedItemForDetails.resolved && (
-                  <button
-                    onClick={() => handleMarkResolved(selectedItemForDetails._id)}
-                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200"
-                  >
-                    <FiCheckCircle className="w-4 h-4" /> Mark as Resolved
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      <FeatureModal
-        isOpen={!!pendingDeleteItemId}
-        onClose={() => setPendingDeleteItemId(null)}
-        title="Delete Item"
-        error={null}
-      >
-        <p className="text-sm text-gray-600 mb-6">Are you sure you want to delete this item? This action cannot be undone.</p>
-        <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => setPendingDeleteItemId(null)}
-            className={UI_PATTERNS.buttonNeutral}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={() => pendingDeleteItemId && handleDeleteItem(pendingDeleteItemId)}
-            className={UI_PATTERNS.buttonDanger}
-          >
-            Delete
-          </button>
-        </div>
-      </FeatureModal>
-
-      {/* Zoomed Image Modal */}
-      {zoomedImage && (
-        <div 
-          className="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000] p-4" 
-          onClick={() => setZoomedImage(null)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') setZoomedImage(null);
-            if (selectedItemForDetails && selectedItemForDetails.images && selectedItemForDetails.images.length > 1) {
-              const currentIndex = selectedItemForDetails.images.findIndex(img => img.url === zoomedImage);
-              if (e.key === 'ArrowLeft') {
-                const prevIndex = (currentIndex - 1 + selectedItemForDetails.images.length) % selectedItemForDetails.images.length;
-                setZoomedImage(selectedItemForDetails.images[prevIndex].url);
-              } else if (e.key === 'ArrowRight') {
-                const nextIndex = (currentIndex + 1) % selectedItemForDetails.images.length;
-                setZoomedImage(selectedItemForDetails.images[nextIndex].url);
-              }
-            }
-          }}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Image viewer"
-          tabIndex={-1}
-        >
-          {/* Image */}
-          <img 
-            src={zoomedImage} 
-            alt="Zoomed"
-            className="max-h-[90vh] max-w-full lg:max-w-[80vw] rounded-lg object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
+          {modalType === 'form' && (
+            <LostFoundForm
+              item={selectedItem}
+              onSubmit={handleFormSubmit}
+              isSubmitting={isSubmitting}
+              error={formError}
+            />
+          )}
           
-          {/* Navigation Buttons */}
-          {selectedItemForDetails && selectedItemForDetails.images && selectedItemForDetails.images.length > 1 && (
-            <>
-              <button
-                className="absolute left-2 sm:left-4 top-[72%] sm:top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-2 sm:p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const currentIndex = selectedItemForDetails.images.findIndex(img => img.url === zoomedImage);
-                  const prevIndex = (currentIndex - 1 + selectedItemForDetails.images.length) % selectedItemForDetails.images.length;
-                  setZoomedImage(selectedItemForDetails.images[prevIndex].url);
-                }}
-                aria-label="Previous image"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                </svg>
-              </button>
-              <button
-                className="absolute right-2 sm:right-4 top-[72%] sm:top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-2 sm:p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const currentIndex = selectedItemForDetails.images.findIndex(img => img.url === zoomedImage);
-                  const nextIndex = (currentIndex + 1) % selectedItemForDetails.images.length;
-                  setZoomedImage(selectedItemForDetails.images[nextIndex].url);
-                }}
-                aria-label="Next image"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
-              </button>
-            </>
+          {modalType === 'detail' && selectedItem && (
+            <LostFoundDetail
+              item={selectedItem}
+              currentUser={user}
+              token={token}
+              onResolve={handleResolve}
+              onEdit={openEditModal}
+              onDelete={openDeleteModal}
+            />
           )}
 
-          {/* Close Button */}
-          <button
-            onClick={() => setZoomedImage(null)}
-            aria-label="Close zoomed image"
-            className={UI_PATTERNS.zoomCloseButton}
-          >
-            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-      )}
-
-      {/* Footer */}
+          {modalType === 'delete' && (
+            <div className="p-6 text-center">
+              <h3 className="text-xl font-bold mb-4">Are you sure?</h3>
+              <p className="text-gray-600 mb-8">This action cannot be undone. This will permanently delete your post.</p>
+              <div className="flex justify-center gap-4">
+                <button onClick={closeModal} className="px-6 py-2 border-2 border-gray-200 rounded-lg font-bold">Cancel</button>
+                <button onClick={handleDelete} className="px-6 py-2 bg-red-600 text-white rounded-lg font-bold">Delete Post</button>
+              </div>
+            </div>
+          )}
+        </FeatureModal>
+      </main>
       <Footer
         logo={<img src="/Logo.webp" alt="KampusKart Logo" className="h-7 w-7" />}
         brandName="KampusKart"
         socialLinks={socialLinks}
         mainLinks={[
-          { href: '/news', label: 'News' },
           { href: '/events', label: 'Events' },
           { href: '/facilities', label: 'Facilities' },
+          { href: '/clubs-recruitment', label: 'Clubs' },
           { href: '/campus-map', label: 'Map' },
         ]}
         legalLinks={[
@@ -1231,5 +336,3 @@ const LostFound = () => {
 };
 
 export default LostFound;
-
-

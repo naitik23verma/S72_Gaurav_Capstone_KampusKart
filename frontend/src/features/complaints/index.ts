@@ -1,5 +1,8 @@
-// Re-export main component from features
 export { default } from '../../components/Complaints';
-export type { Complaint } from './types';
-export { complaintsApi } from './api';
-export type { ComplaintFilters } from './types';
+export * from './types';
+export * from './api';
+export * from './hooks/useComplaints';
+export * from './components/ComplaintCard';
+export * from './components/ComplaintFilters';
+export * from './components/ComplaintForm';
+export * from './components/ComplaintDetail';

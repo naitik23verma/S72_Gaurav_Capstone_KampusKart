@@ -18,6 +18,40 @@ export const clubsApi = {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!response.ok) throw new Error('Failed to fetch clubs');
+    
+    const data = await response.json();
+    if (Array.isArray(data)) {
+      return { clubs: data, totalPages: 1 };
+    }
+    return { clubs: data.clubs || [], totalPages: data.totalPages || 1 };
+  },
+
+  createClub: async (token: string, formData: FormData): Promise<Club> => {
+    const response = await fetch(`${API_BASE}/api/clubs`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+    if (!response.ok) throw new Error('Failed to create club recruitment');
+    return response.json();
+  },
+
+  updateClub: async (token: string, id: string, formData: FormData): Promise<Club> => {
+    const response = await fetch(`${API_BASE}/api/clubs/${id}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+    if (!response.ok) throw new Error('Failed to update club recruitment');
+    return response.json();
+  },
+
+  deleteClub: async (token: string, id: string): Promise<{ message: string }> => {
+    const response = await fetch(`${API_BASE}/api/clubs/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error('Failed to delete club recruitment');
     return response.json();
   },
 };

@@ -1,264 +1,51 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { FiCalendar, FiSearch, FiFileText, FiTag, FiMail, FiInfo, FiUser, FiPhone, FiUsers } from 'react-icons/fi';
-import { FaWhatsapp } from 'react-icons/fa';
+import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
-import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { SuccessMessage } from './common/SuccessMessage';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
 import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
-import { UI_PATTERNS } from '../theme/uiPatterns';
 
-interface ClubRecruitment {
-  _id: string;
-  title: string;
-  description: string;
-  clubName: string;
-  startDate: string;
-  endDate: string;
-  formUrl: string;
-  image?: { public_id?: string; url?: string };
-  contactInfo?: {
-    name?: string;
-    email?: string;
-    phone?: string;
-  };
-  status: 'Open' | 'Closed';
-}
-
-interface ClubDetailsProps {
-  club: ClubRecruitment;
-  onClose: () => void;
-  onEdit?: (club: ClubRecruitment) => void;
-  onDelete?: (id: string) => void;
-  isAdmin?: boolean;
-}
-
-const ClubDetails: React.FC<ClubDetailsProps> = ({ club, onClose, onEdit, onDelete, isAdmin }) => {
-  const [zoomedImage, setZoomedImage] = useState<string | null>(null);
-
-  const buildWhatsAppShareUrl = () => {
-    const contactSegments = [club.contactInfo?.name, club.contactInfo?.email, club.contactInfo?.phone].filter(Boolean);
-    const lines = [
-      '🎓 *Join the Club Recruitment!* 🎓',
-      '',
-      `*Club:* ${club.clubName}`,
-      `*Title:* ${club.title}`,
-      `*Description:* ${club.description}`,
-      `*Recruitment Period:* ${new Date(club.startDate).toLocaleDateString()} - ${new Date(club.endDate).toLocaleDateString()}`,
-      ...(contactSegments.length > 0 ? [`*Contact:* ${contactSegments.join(' | ')}`] : []),
-      '',
-      'Apply now and be part of something amazing!',
-      `🔗 ${club.formUrl}`,
-      '',
-      `See more details here: ${typeof window !== 'undefined' ? window.location.href : ''}`,
-    ];
-
-    const encodedMessage = lines.map((line) => encodeURIComponent(line)).join('%0A');
-    return `https://wa.me/?text=${encodedMessage}`;
-  };
-
-  const handleImageClick = (imageUrl: string) => {
-    setZoomedImage(imageUrl);
-  };
-
-  const closeZoomedImageModal = () => {
-    setZoomedImage(null);
-  };
-
-  return (
-    <div
-      className={UI_PATTERNS.modalOverlay}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="club-details-title"
-      onClick={onClose}
-    >
-      <div className={UI_PATTERNS.modalPanel} onClick={(e) => e.stopPropagation()}>
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          className={UI_PATTERNS.modalCloseButton}
-        >
-          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-
-        <h2 id="club-details-title" className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12 sm:pr-14">{club.title}</h2>
-        <div className="flex flex-col md:flex-row gap-8">
-          {club.image?.url ? (
-            <div 
-              className="relative group mb-6 md:mb-0 rounded-lg overflow-hidden border-2 border-gray-200 w-full md:w-1/2 lg:w-1/2 h-48 sm:h-64 md:h-80 flex-shrink-0 mx-auto md:mx-0 max-w-xl cursor-pointer"
-              onClick={() => handleImageClick(club.image?.url || '')}
-            >
-              <img 
-                src={club.image.url} 
-                alt={club.title} 
-                className="block w-full h-full object-cover"
-              />
-              <div className="absolute bottom-2 right-2 px-2 py-1 rounded-md bg-black/60 text-white text-xs font-semibold">
-                Tap to zoom
-              </div>
-            </div>
-          ) : (
-            <div className="w-full md:w-1/2 lg:w-1/2 h-48 sm:h-64 md:h-80 bg-gray-50 rounded-lg mb-6 md:mb-0 flex flex-col items-center justify-center text-gray-400 flex-shrink-0 mx-auto md:mx-0 max-w-xl">
-              <FiUsers className="w-16 h-16 mb-2" />
-              <span className="text-sm font-medium">No Image Available</span>
-            </div>
-          )}
-          <div className="space-y-6 text-gray-700 flex-grow">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className={`px-3 py-1.5 rounded-lg text-xs font-medium ${club.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>{club.status}</span>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
-              <p className="text-gray-700 whitespace-pre-wrap text-sm">{club.description}</p>
-            </div>
-            <div className="space-y-3 pt-4 border-t-2 border-gray-200">
-              <div className="flex items-center text-sm text-gray-500">
-                <FiTag className="w-5 h-5 mr-2 flex-shrink-0 text-gray-500" />
-                <span className="font-medium text-gray-900">{club.clubName}</span>
-              </div>
-              <div className="flex items-center text-sm text-gray-500">
-                <FiCalendar className="w-5 h-5 mr-2 flex-shrink-0 text-gray-500" />
-                <span>{new Date(club.startDate).toLocaleDateString()} - {new Date(club.endDate).toLocaleDateString()}</span>
-              </div>
-              {club.contactInfo?.name && (
-                <div className="flex items-center text-sm text-gray-500">
-                  <FiUser className="w-5 h-5 mr-2 flex-shrink-0 text-gray-500" />
-                  <span>{club.contactInfo.name}</span>
-                </div>
-              )}
-              {club.contactInfo?.email && (
-                <div className="flex items-center text-sm text-gray-500">
-                  <FiMail className="w-5 h-5 mr-2 flex-shrink-0 text-gray-500" />
-                  <a href={`mailto:${club.contactInfo.email}`} className="text-[#00C6A7] hover:underline">{club.contactInfo.email}</a>
-                </div>
-              )}
-              {club.contactInfo?.phone && (
-                <div className="flex items-center text-sm text-gray-500">
-                  <FiPhone className="w-5 h-5 mr-2 flex-shrink-0 text-gray-500" />
-                  <a href={`tel:${club.contactInfo.phone}`} className="text-[#00C6A7] hover:underline">{club.contactInfo.phone}</a>
-                </div>
-              )}
-            </div>
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              {club.formUrl && (
-                <>
-                  <a
-                    href={club.formUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block w-full text-center px-6 py-3 rounded-lg font-bold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition mb-2"
-                  >
-                    Apply Now
-                  </a>
-                  <a
-                    href={buildWhatsAppShareUrl()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center w-full text-center px-6 py-2.5 rounded-lg font-semibold text-[#128C7E] border-2 border-[#25D366] bg-white hover:bg-green-50 transition mb-4 gap-2"
-                    style={{ textDecoration: 'none' }}
-                  >
-                    <FaWhatsapp className="w-5 h-5" /> Share on WhatsApp
-                  </a>
-                </>
-              )}
-              {isAdmin && (
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <button
-                    onClick={() => onEdit?.(club)}
-                    className={`${UI_PATTERNS.buttonNeutral} flex-1 transition-colors duration-200`}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => onDelete?.(club._id)}
-                    className={`${UI_PATTERNS.buttonDanger} flex-1 transition-colors duration-200`}
-                  >
-                    Delete
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-        {/* Zoomed Image Modal */}
-        {zoomedImage && (
-          <div 
-            className="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000]" 
-            onClick={closeZoomedImageModal}
-            onKeyDown={(e) => {
-              if (e.key === 'Escape') closeZoomedImageModal();
-            }}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Image viewer"
-            tabIndex={-1}
-          >
-            <img 
-              src={zoomedImage} 
-              alt="Zoomed" 
-              className="max-h-[80vh] max-w-[90vw] rounded-lg" 
-              onClick={(e) => e.stopPropagation()}
-            />
-            {/* Close Button */}
-            <button
-              onClick={closeZoomedImageModal}
-              aria-label="Close zoomed image"
-              className={UI_PATTERNS.zoomCloseButton}
-            >
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+// Import from the feature directory
+import { 
+  useClubs, 
+  Club, 
+  ClubCard, 
+  ClubFilters, 
+  ClubForm, 
+  ClubDetail,
+  clubsApi
+} from '../features/clubs';
 
 const ClubsRecruitment = () => {
-  const { user, token } = useAuth();
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchInput, setSearchInput] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [clubs, setClubs] = useState<ClubRecruitment[]>([]);
+  const { token, user } = useAuth();
+  
+  // Custom hook for state and data fetching
+  const {
+    clubs,
+    loading,
+    error: fetchError,
+    filters,
+    updateFilters,
+    refresh,
+    removeClub,
+  } = useClubs(token);
+
+  // Local UI state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingClub, setEditingClub] = useState<ClubRecruitment | null>(null);
-  const [newClub, setNewClub] = useState({
-    title: '',
-    description: '',
-    clubName: '',
-    startDate: '',
-    endDate: '',
-    formUrl: '',
-    images: [] as ImageFile[],
-    contactInfo: { name: '', email: '', phone: '' },
-    status: 'Open' as 'Open' | 'Closed',
-  });
-  const [error, setError] = useState<string | null>(null);
-  const [selectedClubForDetails, setSelectedClubForDetails] = useState<ClubRecruitment | null>(null);
-  const [filterStatus, setFilterStatus] = useState<'all' | 'Open' | 'Closed'>('all');
+  const [modalType, setModalType] = useState<'form' | 'detail' | 'delete'>('form');
+  const [selectedClub, setSelectedClub] = useState<Club | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [pendingDeleteClubId, setPendingDeleteClubId] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
-  const buildClubSuggestions = useCallback((club: ClubRecruitment, normalizedQuery: string): string[] => {
+  // Search Suggestions Hook
+  const buildSuggestions = useCallback((club: Club, query: string): string[] => {
     const suggestions: string[] = [];
-    if (club?.title?.toLowerCase().includes(normalizedQuery)) {
-      suggestions.push(club.title);
-    }
-    if (club?.clubName?.toLowerCase().includes(normalizedQuery)) {
-      suggestions.push(club.clubName);
-    }
+    const normalizedQuery = query.toLowerCase();
+    if (club.title?.toLowerCase().includes(normalizedQuery)) suggestions.push(club.title);
+    if (club.clubName?.toLowerCase().includes(normalizedQuery)) suggestions.push(club.clubName);
     return suggestions;
   }, []);
 
@@ -267,641 +54,199 @@ const ClubsRecruitment = () => {
     setShowSuggestions,
     filteredSuggestions,
     searchRef,
-    markSuggestionSelection,
-  } = useSearchSuggestions<ClubRecruitment>({
-    searchInput,
+  } = useSearchSuggestions<Club>({
+    searchInput: filters.search,
     items: clubs,
-    buildSuggestions: buildClubSuggestions,
+    buildSuggestions,
   });
 
-  useEffect(() => {
-    fetchClubs();
-  }, []);
+  // Modal handlers
+  const openAddModal = () => {
+    setSelectedClub(null);
+    setModalType('form');
+    setFormError(null);
+    setIsModalOpen(true);
+  };
 
-  // Auto-hide success message after 5 seconds
+  const openEditModal = (club: Club) => {
+    setSelectedClub(club);
+    setModalType('form');
+    setFormError(null);
+    setIsModalOpen(true);
+  };
+
+  const openDetailModal = (club: Club) => {
+    setSelectedClub(club);
+    setModalType('detail');
+    setIsModalOpen(true);
+  };
+
+  const openDeleteModal = (id: string) => {
+    const club = clubs.find(c => c._id === id);
+    if (club) {
+      setSelectedClub(club);
+      setModalType('delete');
+      setIsModalOpen(true);
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedClub(null);
+    setFormError(null);
+  };
+
+  // Action handlers
+  const handleFormSubmit = async (formData: FormData) => {
+    if (!token) return;
+    setIsSubmitting(true);
+    setFormError(null);
+
+    try {
+      if (selectedClub) {
+        await clubsApi.updateClub(token, selectedClub._id, formData);
+        setSuccessMessage('Club recruitment updated successfully!');
+      } else {
+        await clubsApi.createClub(token, formData);
+        setSuccessMessage('Club recruitment added successfully!');
+      }
+      refresh();
+      closeModal();
+    } catch (err: any) {
+      setFormError(err.message || 'Failed to save recruitment');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedClub) return;
+    const success = await removeClub(selectedClub._id);
+    if (success) {
+      setSuccessMessage('Club recruitment deleted successfully!');
+      closeModal();
+    }
+  };
+
+  // Success message auto-hide
   useEffect(() => {
     if (successMessage) {
-      const timer = setTimeout(() => {
-        setSuccessMessage(null);
-      }, 5000);
+      const timer = setTimeout(() => setSuccessMessage(null), 5000);
       return () => clearTimeout(timer);
     }
   }, [successMessage]);
 
-  const fetchClubs = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`${API_BASE}/api/clubs`);
-      if (!response.ok) throw new Error('Failed to fetch club recruitments');
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setClubs(data);
-      } else {
-        setClubs([]);
-      }
-    } catch (error) {
-      setError('Failed to load club recruitments');
-      setClubs([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleAddClub = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!token) return;
-
-    // Validate required fields
-    if (!newClub.title.trim() || !newClub.description.trim() || !newClub.clubName.trim() || !newClub.startDate || !newClub.endDate || !newClub.formUrl.trim()) {
-      setError('Please fill in all required fields.');
-      return;
-    }
-    if (new Date(newClub.startDate) >= new Date(newClub.endDate)) {
-      setError('Start date must be before end date.');
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const formData = new FormData();
-      formData.append('title', newClub.title);
-      formData.append('description', newClub.description);
-      formData.append('clubName', newClub.clubName);
-      formData.append('startDate', newClub.startDate);
-      formData.append('endDate', newClub.endDate);
-      formData.append('formUrl', newClub.formUrl);
-      formData.append('status', newClub.status);
-      formData.append('contactInfo', JSON.stringify(newClub.contactInfo));
-      if (newClub.images.length > 0 && newClub.images[0].file) {
-        formData.append('image', newClub.images[0].file);
-      }
-      const response = await fetch(`${API_BASE}/api/clubs`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to add club recruitment');
-      }
-      const savedClub = await response.json();
-      setClubs([savedClub, ...clubs]);
-      setIsModalOpen(false);
-      setNewClub({ 
-        title: '', 
-        description: '', 
-        clubName: '',
-        startDate: '',
-        endDate: '',
-        formUrl: '',
-        images: [],
-        contactInfo: { name: '', email: '', phone: '' },
-        status: 'Open',
-      });
-      setSuccessMessage('Club recruitment added successfully!');
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to add club recruitment');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleEditClub = (club: ClubRecruitment) => {
-    setEditingClub(club);
-    setNewClub({
-      title: club.title,
-      description: club.description,
-      clubName: club.clubName,
-      startDate: club.startDate.split('T')[0],
-      endDate: club.endDate.split('T')[0],
-      formUrl: club.formUrl,
-      images: club.image?.url ? [{ url: club.image.url, public_id: club.image.public_id, previewUrl: club.image.url }] : [],
-      contactInfo: {
-        name: club.contactInfo?.name || '',
-        email: club.contactInfo?.email || '',
-        phone: club.contactInfo?.phone || ''
-      },
-      status: club.status,
-    });
-    setIsModalOpen(true);
-  };
-
-  const handleDeleteClub = async (id: string) => {
-    if (!token) return;
-    try {
-      const response = await fetch(`${API_BASE}/api/clubs/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to delete club recruitment');
-      }
-      setClubs(prevClubs => prevClubs.filter(c => c._id !== id));
-      setSelectedClubForDetails(null);
-      setPendingDeleteClubId(null);
-      setSuccessMessage('Club recruitment deleted successfully!');
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to delete club recruitment');
-    }
-  };
-
-  const requestDeleteClub = (id: string) => {
-    setPendingDeleteClubId(id);
-  };
-
-  const handleSaveClub = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!token || !editingClub) return;
-
-    // Validate required fields
-    if (!newClub.title.trim() || !newClub.description.trim() || !newClub.clubName.trim() || !newClub.startDate || !newClub.endDate || !newClub.formUrl.trim()) {
-      setError('Please fill in all required fields.');
-      return;
-    }
-    if (new Date(newClub.startDate) >= new Date(newClub.endDate)) {
-      setError('Start date must be before end date.');
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const formData = new FormData();
-      formData.append('title', newClub.title);
-      formData.append('description', newClub.description);
-      formData.append('clubName', newClub.clubName);
-      formData.append('startDate', newClub.startDate);
-      formData.append('endDate', newClub.endDate);
-      formData.append('formUrl', newClub.formUrl);
-      formData.append('status', newClub.status);
-      formData.append('contactInfo', JSON.stringify(newClub.contactInfo));
-      if (newClub.images.length > 0 && newClub.images[0].file) {
-        formData.append('image', newClub.images[0].file);
-      }
-      const response = await fetch(`${API_BASE}/api/clubs/${editingClub._id}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to save club recruitment');
-      }
-      const savedClub = await response.json();
-      setClubs(clubs.map(c => c._id === savedClub._id ? savedClub : c));
-      setSuccessMessage('Club recruitment updated successfully!');
-      closeClubModal();
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to save club recruitment');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const closeClubModal = () => {
-    setIsModalOpen(false);
-    setEditingClub(null);
-    setNewClub({ 
-      title: '', 
-      description: '', 
-      clubName: '', 
-      startDate: '', 
-      endDate: '', 
-      formUrl: '', 
-      images: [],
-      contactInfo: { name: '', email: '', phone: '' }, 
-      status: 'Open' 
-    });
-    setError(null);
-  };
-
-  const openClubDetailsModal = (club: ClubRecruitment) => {
-    setSelectedClubForDetails(club);
-  };
-
-  const closeClubDetailsModal = () => {
-    setSelectedClubForDetails(null);
-  };
-
-  const filteredClubs = clubs.filter(club =>
-    (filterStatus === 'all' || club.status === filterStatus) &&
-    (club.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-     club.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     club.clubName.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-
-  if (isLoading) {
+  if (loading && clubs.length === 0) {
     return <PageSkeleton contentType="cards" itemCount={6} filterCount={1} showAddButton={user?.isAdmin} />;
   }
+
+  const filteredClubs = clubs.filter(club =>
+    (filters.status === 'all' || club.status === filters.status) &&
+    (club.title.toLowerCase().includes(filters.search.toLowerCase()) || 
+     club.description.toLowerCase().includes(filters.search.toLowerCase()) ||
+     club.clubName.toLowerCase().includes(filters.search.toLowerCase()))
+  );
 
   return (
     <div className="min-h-screen bg-white font-sans">
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
-        
-        {/* Success Message Banner */}
         <SuccessMessage message={successMessage} onDismiss={() => setSuccessMessage(null)} />
-        
+
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <h1 className="text-h2 font-extrabold text-black">Clubs Recruitment</h1>
           {user?.isAdmin && (
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200"
+            <button
+              onClick={openAddModal}
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] transition-colors"
             >
               + Add New Recruitment
             </button>
           )}
         </div>
-        {/* Filter/Search Row */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 gap-4">
-          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-            <div className="relative">
-              <select
-                value={filterStatus}
-                onChange={e => setFilterStatus(e.target.value as 'all' | 'Open' | 'Closed')}
-                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
-                aria-label="Filter by status"
-              >
-                <option value="all">All Statuses</option>
-                <option value="Open">Open</option>
-                <option value="Closed">Closed</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
+
+        <ClubFilters
+          filters={filters}
+          onFilterChange={updateFilters}
+          suggestions={filteredSuggestions}
+          showSuggestions={showSuggestions}
+          setShowSuggestions={setShowSuggestions}
+          searchRef={searchRef as any}
+          onSuggestionSelect={(val) => updateFilters({ search: val })}
+        />
+
+        {fetchError && (
+          <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg font-medium border-2 border-red-100">
+            {fetchError}
           </div>
-          {/* Search Bar with Autocomplete */}
-          <div className="relative w-full sm:w-[380px] md:w-[440px] lg:w-[520px]" ref={searchRef}>
-            <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
-              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
-              <input
-                type="text"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setSearchQuery(searchInput);
-                    setShowSuggestions(false);
-                  } else if (e.key === 'Escape') {
-                    setShowSuggestions(false);
-                  }
-                }}
-                placeholder="Search clubs..."
-                className="flex-1 pl-12 pr-3 py-3.5 bg-transparent text-gray-700 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery(searchInput);
-                  setShowSuggestions(false);
-                }}
-                className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] active:bg-[#181818] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
-                aria-label="Search"
-              >
-                <FiSearch className="w-4 h-4" />
-                <span className="hidden sm:inline">Search</span>
-              </button>
-            </div>
-            
-            {/* Autocomplete Dropdown */}
-            {showSuggestions && filteredSuggestions.length > 0 && (
-              <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg max-h-60 overflow-auto">
-                {filteredSuggestions.map((suggestion, index) => (
-                  <div
-                    key={index}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      markSuggestionSelection();
-                      setSearchInput(suggestion);
-                      setSearchQuery(suggestion);
-                      setShowSuggestions(false);
-                    }}
-                    className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0"
-                  >
-                    <FiSearch className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" />
-                    <span className="text-sm font-medium text-gray-700">{suggestion}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
-          {filteredClubs.map(club => (
-            <div 
-              key={club._id} 
-              className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden cursor-pointer hover:border-gray-300 transition-colors duration-200"
-              onClick={() => openClubDetailsModal(club)}
-            >
-              <div className="relative h-48 sm:h-56 md:h-64 overflow-hidden">
-                {club.image?.url ? (
-                  <>
-                    <img 
-                      src={club.image.url} 
-                      alt={club.title} 
-                      className="w-full h-full object-cover" 
-                    />
-                  </>
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                    <div className="flex flex-col items-center justify-center text-gray-300">
-                      <FiUsers className="w-16 h-16" />
-                      <span className="text-xs mt-2">No Image Available</span>
-                    </div>
-                  </div>
-                )}
-                <div className={UI_PATTERNS.badgeTopRight}>
-                  <span className={`${UI_PATTERNS.badgeLabel} ${club.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>{club.status}</span>
-                </div>
-              </div>
-              <div className="p-4 sm:p-5 md:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{club.title}</h2>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">{club.description}</p>
-                <div className="space-y-3 pt-4 border-t-2 border-gray-200">
-                  <div className="flex items-center text-sm text-gray-500">
-                    <FiTag className="mr-2 flex-shrink-0 text-gray-400" />
-                    <span className="font-medium text-gray-900">{club.clubName}</span>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <FiCalendar className="mr-2 flex-shrink-0 text-gray-400" />
-                    <span>{new Date(club.startDate).toLocaleDateString()} - {new Date(club.endDate).toLocaleDateString()}</span>
-                  </div>
-                </div>
-                <div className="mt-4 pt-4 border-t-2 border-gray-200">
-                  <button
-                    className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                      club.formUrl 
-                        ? 'bg-[#181818] text-white hover:bg-[#00C6A7] active:bg-[#181818]' 
-                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    }`}
-                    disabled={!club.formUrl}
-                    onClick={e => { e.stopPropagation(); if (club.formUrl) window.open(club.formUrl, '_blank'); }}
-                  >
-                    {club.formUrl ? 'Apply Now' : 'Applications Closed'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-          {filteredClubs.length === 0 && (
-            <div className="col-span-full flex flex-col items-center justify-center py-16 px-4">
-              <svg className={UI_PATTERNS.emptyStateIcon} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <circle cx="36" cy="32" r="14" fill="white" stroke="#E5E7EB" strokeWidth="3" />
-                <circle cx="60" cy="32" r="14" fill="white" stroke="#E5E7EB" strokeWidth="3" />
-                <path d="M8 80c0-15.464 12.536-28 28-28h24c15.464 0 28 12.536 28 28" stroke="#E5E7EB" strokeWidth="3" strokeLinecap="round" />
-                <circle cx="72" cy="72" r="16" fill="#F3F4F6" stroke="#E5E7EB" strokeWidth="2" />
-                <path d="M66 72h12M72 66v12" stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round" />
-              </svg>
-              <p className="text-gray-500 font-semibold text-lg mb-1">
-                {searchQuery || filterStatus !== 'all' ? 'No clubs match your filters' : 'No club recruitments yet'}
-              </p>
-              <p className="text-gray-400 text-sm mb-4">
-                {searchQuery || filterStatus !== 'all' ? 'Try adjusting your search or status filter.' : 'Club recruitment drives will appear here when open.'}
-              </p>
-              {(searchQuery || filterStatus !== 'all') && (
-                <button
-                  onClick={() => { setSearchInput(''); setSearchQuery(''); setFilterStatus('all'); }}
-                  className="px-5 py-2 rounded-lg bg-[#181818] text-white text-sm font-semibold hover:bg-[#00C6A7] transition-colors duration-200"
-                >
-                  Clear filters
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-        {/* Add/Edit Club Modal */}
-        <FeatureModal
-          isOpen={isModalOpen}
-          onClose={closeClubModal}
-          title={editingClub ? 'Edit Recruitment' : 'Add New Recruitment'}
-          error={error}
-        >
-              <form onSubmit={editingClub ? handleSaveClub : handleAddClub} className="space-y-8">
-                <div className="border-2 border-gray-200 rounded-lg p-6 mb-6">
-                  <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Recruitment Details <FiInfo className="text-gray-400" title="Fill in the details of your club recruitment." /></h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Title <FiTag className="inline text-gray-400" /></label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={newClub.title}
-                          onChange={e => setNewClub({...newClub, title: e.target.value})}
-                          className="w-full px-10 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base"
-                          placeholder="Enter recruitment title (e.g., Drama Club 2024 Intake)"
-                          required
-                          aria-label="Recruitment Title"
-                        />
-                        <FiTag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">Give a short, descriptive title for the recruitment.</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Club Name <FiTag className="inline text-gray-400" /></label>
-                      <input
-                        type="text"
-                        value={newClub.clubName}
-                        onChange={e => setNewClub({...newClub, clubName: e.target.value})}
-                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base"
-                        required
-                        aria-label="Club Name"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Which club is recruiting?</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Start Date <FiCalendar className="inline text-gray-400" /></label>
-                      <input
-                        type="date"
-                        value={newClub.startDate}
-                        onChange={e => setNewClub({...newClub, startDate: e.target.value})}
-                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base"
-                        required
-                        aria-label="Start Date"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">End Date <FiCalendar className="inline text-gray-400" /></label>
-                      <input
-                        type="date"
-                        value={newClub.endDate}
-                        onChange={e => setNewClub({...newClub, endDate: e.target.value})}
-                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base"
-                        required
-                        aria-label="End Date"
-                      />
-                    </div>
-                  </div>
-                  <div className="mt-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Description <FiFileText className="inline text-gray-400" /></label>
-                    <div className="relative">
-                      <textarea
-                        value={newClub.description}
-                        onChange={e => setNewClub({...newClub, description: e.target.value})}
-                        className="w-full px-10 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base resize-none"
-                        rows={4}
-                        placeholder="Provide a detailed description of the recruitment. Include requirements, process, and highlights."
-                        required
-                        aria-label="Recruitment Description"
-                      ></textarea>
-                      <FiFileText className="absolute left-3 top-3 text-gray-400" />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">Provide details to help users understand the recruitment.</p>
-                  </div>
-                  <div className="mt-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Form URL <FiMail className="inline text-gray-400" /></label>
-                    <div className="relative">
-                      <input
-                        type="url"
-                        value={newClub.formUrl}
-                        onChange={e => setNewClub({...newClub, formUrl: e.target.value})}
-                        className="w-full px-10 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base"
-                        placeholder="https://forms.google.com/..."
-                        required
-                        aria-label="Form URL"
-                      />
-                      <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">Add a recruitment form link.</p>
-                  </div>
-                  <div className="mt-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Status <FiTag className="inline text-gray-400" /></label>
-                    <select
-                      value={newClub.status}
-                      onChange={e => setNewClub({...newClub, status: e.target.value as 'Open' | 'Closed'})}
-                      className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base"
-                      required
-                      aria-label="Recruitment Status"
-                    >
-                      <option value="Open">Open</option>
-                      <option value="Closed">Closed</option>
-                    </select>
-                    <p className="text-xs text-gray-500 mt-1">Select the current status of the recruitment.</p>
-                  </div>
-                  <div className="mt-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Contact Info</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <input
-                        type="text"
-                        value={newClub.contactInfo.name}
-                        onChange={e => setNewClub({...newClub, contactInfo: {...newClub.contactInfo, name: e.target.value}})}
-                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base"
-                        placeholder="Contact Name"
-                        aria-label="Contact Name"
-                      />
-                      <input
-                        type="email"
-                        value={newClub.contactInfo.email}
-                        onChange={e => setNewClub({...newClub, contactInfo: {...newClub.contactInfo, email: e.target.value}})}
-                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base"
-                        placeholder="Contact Email"
-                        aria-label="Contact Email"
-                      />
-                      <input
-                        type="tel"
-                        value={newClub.contactInfo.phone}
-                        onChange={e => setNewClub({...newClub, contactInfo: {...newClub.contactInfo, phone: e.target.value}})}
-                        className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent text-base"
-                        placeholder="Contact Phone"
-                        aria-label="Contact Phone"
-                      />
-                    </div>
-                  </div>
-                </div>
-                {/* Images Section */}
-                <ImageUpload
-                  images={newClub.images}
-                  onImagesChange={(images) => setNewClub({ ...newClub, images })}
-                  maxImages={1}
-                  single={true}
-                  id="club-image-upload"
-                  label="Image"
-                  helpText="PNG, JPG, GIF up to 5MB. Recommended size: 1200x800px. Add a high-quality image that represents your club."
-                />
-                <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
-                  <button
-                    type="button"
-                    onClick={closeClubModal}
-                    className="px-6 py-3 rounded-lg text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-colors"
-                    disabled={isSubmitting}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`px-6 py-3 rounded-lg text-sm font-semibold text-white bg-[#181818] hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    {isSubmitting ? (
-                      <span className="flex items-center">
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        {editingClub ? 'Saving...' : 'Adding...'}
-                      </span>
-                    ) : (
-                      editingClub ? 'Save Changes' : 'Add Recruitment'
-                    )}
-                  </button>
-                </div>
-              </form>
-        </FeatureModal>
-        {/* Club Details Modal */}
-        {selectedClubForDetails && (
-          <ClubDetails
-            club={selectedClubForDetails}
-            onClose={closeClubDetailsModal}
-            onEdit={handleEditClub}
-            onDelete={requestDeleteClub}
-            isAdmin={user?.isAdmin}
-          />
         )}
 
+        {/* Clubs Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredClubs.length === 0 ? (
+            <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
+              <p className="text-xl font-bold text-gray-700">No recruitments found</p>
+              <p className="text-gray-400 text-sm mt-2">Try adjusting your filters or search terms.</p>
+            </div>
+          ) : (
+            filteredClubs.map((club) => (
+              <ClubCard
+                key={club._id}
+                club={club}
+                onSelect={openDetailModal}
+              />
+            ))
+          )}
+        </div>
+
+        {/* Modals */}
         <FeatureModal
-          isOpen={!!pendingDeleteClubId}
-          onClose={() => setPendingDeleteClubId(null)}
-          title="Delete Club Recruitment"
-          error={null}
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          title={
+            modalType === 'form' ? (selectedClub ? 'Edit Recruitment' : 'Add New Recruitment') :
+            modalType === 'detail' ? 'Recruitment Details' : 'Confirm Delete'
+          }
+          error={formError}
+          maxWidth={modalType === 'detail' ? '4xl' : '2xl'}
         >
-          <p className="text-sm text-gray-600 mb-6">Are you sure you want to delete this club recruitment? This action cannot be undone.</p>
-          <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => setPendingDeleteClubId(null)}
-              className={UI_PATTERNS.buttonNeutral}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={() => pendingDeleteClubId && handleDeleteClub(pendingDeleteClubId)}
-              className={UI_PATTERNS.buttonDanger}
-            >
-              Delete
-            </button>
-          </div>
+          {modalType === 'form' && (
+            <ClubForm
+              club={selectedClub}
+              onSubmit={handleFormSubmit}
+              isSubmitting={isSubmitting}
+              error={formError}
+            />
+          )}
+          
+          {modalType === 'detail' && selectedClub && (
+            <ClubDetail
+              club={selectedClub}
+              isAdmin={user?.isAdmin}
+              onEdit={openEditModal}
+              onDelete={openDeleteModal}
+            />
+          )}
+
+          {modalType === 'delete' && (
+            <div className="p-6 text-center">
+              <h3 className="text-xl font-bold mb-4">Delete Recruitment?</h3>
+              <p className="text-gray-600 mb-8">Are you sure you want to delete "{selectedClub?.title}"? This action cannot be undone.</p>
+              <div className="flex justify-center gap-4">
+                <button onClick={closeModal} className="px-6 py-2 border-2 border-gray-200 rounded-lg font-bold">Cancel</button>
+                <button onClick={handleDelete} className="px-6 py-2 bg-red-600 text-white rounded-lg font-bold">Delete Recruitment</button>
+              </div>
+            </div>
+          )}
         </FeatureModal>
       </main>
-
-      {/* Footer */}
       <Footer
         logo={<img src="/Logo.webp" alt="KampusKart Logo" className="h-7 w-7" />}
         brandName="KampusKart"
         socialLinks={socialLinks}
         mainLinks={[
-          { href: '/news', label: 'News' },
           { href: '/events', label: 'Events' },
           { href: '/facilities', label: 'Facilities' },
+          { href: '/clubs-recruitment', label: 'Clubs' },
           { href: '/campus-map', label: 'Map' },
         ]}
         legalLinks={[
@@ -918,5 +263,3 @@ const ClubsRecruitment = () => {
 };
 
 export default ClubsRecruitment;
-
-

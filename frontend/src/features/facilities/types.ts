@@ -3,9 +3,15 @@ export interface Facility {
   name: string;
   description: string;
   location: string;
-  type: string;
-  icon?: string;
+  type: 'Academic' | 'Food' | 'Service' | 'Accommodation';
+  icon: string;
   images?: { public_id?: string; url?: string }[];
+  createdAt?: string;
+  createdBy?: {
+    _id: string;
+    name?: string;
+    email?: string;
+  };
 }
 
 export interface FacilityFilters {

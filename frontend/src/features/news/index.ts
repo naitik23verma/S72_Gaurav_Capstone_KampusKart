@@ -1,5 +1,8 @@
-// Re-export main component from features
 export { default } from '../../components/News';
-export type { NewsItem } from './types';
-export { newsApi } from './api';
-export type { NewsFilters } from './types';
+export * from './types';
+export * from './api';
+export * from './hooks/useNews';
+export * from './components/NewsCard';
+export * from './components/NewsFilters';
+export * from './components/NewsForm';
+export * from './components/NewsDetail';

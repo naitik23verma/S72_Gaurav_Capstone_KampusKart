@@ -1,5 +1,8 @@
-// Re-export main component from features
 export { default } from '../../components/LostFound';
-export type { LostFoundItem } from './types';
-export { lostFoundApi } from './api';
-export type { LostFoundFilters } from './types';
+export * from './types';
+export * from './api';
+export * from './hooks/useLostFound';
+export * from './components/LostFoundCard';
+export * from './components/LostFoundFilters';
+export * from './components/LostFoundForm';
+export * from './components/LostFoundDetail';

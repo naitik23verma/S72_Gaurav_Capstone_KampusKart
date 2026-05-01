@@ -1,96 +1,55 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { FiEdit2, FiTrash2, FiUser, FiCalendar, FiTag, FiFileText, FiSearch, FiInfo } from 'react-icons/fi';
-import { API_BASE } from '../config';
 import { FeatureModal } from './common/FeatureModal';
-import { ImageUpload, ImageFile } from './common/ImageUpload';
 import { SuccessMessage } from './common/SuccessMessage';
 import { PageSkeleton } from './common/SkeletonLoader';
 import { Footer } from './ui/footer';
 import { socialLinks } from '../utils/socialLinks';
 import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
-import { UI_PATTERNS } from '../theme/uiPatterns';
 
-interface Complaint {
-  _id: string;
-  user?: {
-    _id: string;
-    name: string;
-    email: string;
-  } | null;
-  title: string;
-  description: string;
-  category: 'Academic' | 'Administrative' | 'Facilities' | 'IT' | 'Security' | 'Other';
-  priority: 'Low' | 'Medium' | 'High' | 'Urgent';
-  department: 'Academic Affairs' | 'Administration' | 'Facilities Management' | 'IT Services' | 'Security' | 'Student Services';
-  assignedTo?: {
-    _id: string;
-    name: string;
-  };
-  estimatedResolutionTime?: string;
-  status: 'Open' | 'In Progress' | 'Resolved' | 'Closed';
-  statusHistory: Array<{
-    status: 'Open' | 'In Progress' | 'Resolved' | 'Closed';
-    comment?: string;
-    updatedBy: {
-      _id: string;
-      name?: string;
-    } | string;
-    timestamp: string;
-  }>;
-  createdAt: string;
-  lastUpdated: string;
-  images?: { url: string; public_id?: string }[];
-}
-
-// Use ImageFile type from ImageUpload component
+// Import from the feature directory
+import { 
+  useComplaints, 
+  Complaint, 
+  ComplaintCard, 
+  ComplaintFilters, 
+  ComplaintForm, 
+  ComplaintDetail,
+  complaintsApi
+} from '../features/complaints';
 
 const Complaints = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [complaints, setComplaints] = useState<Complaint[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const { token, user } = useAuth();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newComplaint, setNewComplaint] = useState({
-    title: '',
-    description: '',
-    category: 'Other' as Complaint['category'],
-    priority: 'Medium' as Complaint['priority'],
-    department: 'Student Services' as Complaint['department'],
-    status: 'Open' as Complaint['status'],
-  });
-  const [formError, setFormError] = useState<string | null>(null);
-  const [editingComplaint, setEditingComplaint] = useState<Complaint | null>(null);
-  const [selectedComplaintForDetails, setSelectedComplaintForDetails] = useState<Complaint | null>(null);
-  const [filterStatus, setFilterStatus] = useState<'All' | 'Open' | 'In Progress' | 'Resolved' | 'Closed'>('All');
-  const [filterCategory, setFilterCategory] = useState<'all' | 'Academic' | 'Administrative' | 'Facilities' | 'IT' | 'Security' | 'Other'>('all');
-  const [images, setImages] = useState<ImageFile[]>([]);
-  const [zoomedImage, setZoomedImage] = useState<string | null>(null);
+  
+  // Custom hook for state and data fetching
+  const {
+    complaints,
+    loading,
+    error,
+    totalPages,
+    isFetchingMore,
+    isFiltering,
+    filters,
+    updateFilters,
+    setPage,
+    refresh,
+    removeComplaint,
+  } = useComplaints(token);
 
-  const [searchInput, setSearchInput] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const [isFiltering, setIsFiltering] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const itemsPerPage = 9;
-  const observer = useRef<IntersectionObserver | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
+  // Local UI state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<'form' | 'detail' | 'delete'>('form');
+  const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [pendingDeleteComplaintId, setPendingDeleteComplaintId] = useState<string | null>(null);
-  const [statusComment, setStatusComment] = useState('');
-  const buildComplaintSuggestions = useCallback((complaint: Complaint, normalizedQuery: string): string[] => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  // Search Suggestions Hook
+  const buildSuggestions = useCallback((complaint: Complaint, query: string): string[] => {
     const suggestions: string[] = [];
-    if (complaint?.title?.toLowerCase().includes(normalizedQuery)) {
-      suggestions.push(complaint.title);
-    }
-    if (complaint?.category?.toLowerCase().includes(normalizedQuery)) {
-      suggestions.push(complaint.category);
-    }
-    if (complaint?.department?.toLowerCase().includes(normalizedQuery)) {
-      suggestions.push(complaint.department);
-    }
+    const normalizedQuery = query.toLowerCase();
+    if (complaint.title?.toLowerCase().includes(normalizedQuery)) suggestions.push(complaint.title);
+    if (complaint.category?.toLowerCase().includes(normalizedQuery)) suggestions.push(complaint.category);
     return suggestions;
   }, []);
 
@@ -99,14 +58,94 @@ const Complaints = () => {
     setShowSuggestions,
     filteredSuggestions,
     searchRef,
-    markSuggestionSelection,
   } = useSearchSuggestions<Complaint>({
-    searchInput,
+    searchInput: filters.search,
     items: complaints,
-    buildSuggestions: buildComplaintSuggestions,
+    buildSuggestions,
   });
 
-  // Auto-hide success message after 3 seconds
+  // Modal handlers
+  const openAddModal = () => {
+    setSelectedComplaint(null);
+    setModalType('form');
+    setFormError(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (complaint: Complaint) => {
+    setSelectedComplaint(complaint);
+    setModalType('form');
+    setFormError(null);
+    setIsModalOpen(true);
+  };
+
+  const openDetailModal = (complaint: Complaint) => {
+    setSelectedComplaint(complaint);
+    setModalType('detail');
+    setIsModalOpen(true);
+  };
+
+  const openDeleteModal = (id: string) => {
+    const complaint = complaints.find(c => c._id === id);
+    if (complaint) {
+      setSelectedComplaint(complaint);
+      setModalType('delete');
+      setIsModalOpen(true);
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedComplaint(null);
+    setFormError(null);
+  };
+
+  // Action handlers
+  const handleFormSubmit = async (formData: FormData) => {
+    if (!token) return;
+    setIsSubmitting(true);
+    setFormError(null);
+
+    try {
+      if (selectedComplaint) {
+        await complaintsApi.updateComplaint(token, selectedComplaint._id, formData);
+        setSuccessMessage('Complaint updated successfully!');
+      } else {
+        await complaintsApi.createComplaint(token, formData);
+        setSuccessMessage('Complaint submitted successfully!');
+      }
+      refresh();
+      closeModal();
+    } catch (err: any) {
+      setFormError(err.message || 'Failed to save complaint');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedComplaint) return;
+    const success = await removeComplaint(selectedComplaint._id);
+    if (success) {
+      setSuccessMessage('Complaint deleted successfully!');
+      closeModal();
+    }
+  };
+
+  // Infinite scroll observer
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastItemRef = useCallback((node: HTMLDivElement | null) => {
+    if (isFetchingMore) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new window.IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && filters.page < totalPages) {
+        setPage(filters.page + 1);
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [isFetchingMore, filters.page, totalPages, setPage]);
+
+  // Success message auto-hide
   useEffect(() => {
     if (successMessage) {
       const timer = setTimeout(() => setSuccessMessage(null), 5000);
@@ -114,1060 +153,159 @@ const Complaints = () => {
     }
   }, [successMessage]);
 
-  // Field validation functions
-  const validateField = (fieldName: string, value: string): string | null => {
-    switch (fieldName) {
-      case 'title':
-        if (!value.trim()) return 'Title is required';
-        if (value.trim().length < 3) return 'Title must be at least 3 characters';
-        if (value.trim().length > 100) return 'Title must be less than 100 characters';
-        return null;
-      
-      case 'description':
-        if (!value.trim()) return 'Description is required';
-        if (value.trim().length < 10) return 'Description must be at least 10 characters';
-        if (value.trim().length > 1000) return 'Description must be less than 1000 characters';
-        return null;
-      
-      default:
-        return null;
-    }
-  };
-
-  const handleFieldBlur = (fieldName: string, value: string) => {
-    const error = validateField(fieldName, value);
-    setFieldErrors(prev => ({
-      ...prev,
-      [fieldName]: error || ''
-    }));
-  };
-
-  const lastComplaintRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      if (isFetchingMore) return;
-      if (observer.current) observer.current.disconnect();
-      observer.current = new window.IntersectionObserver(entries => {
-        if (entries[0].isIntersecting && currentPage < totalPages) {
-          setIsFetchingMore(true);
-          setCurrentPage(prev => prev + 1);
-        }
-      });
-      if (node) observer.current.observe(node);
-    }, [isFetchingMore, currentPage, totalPages]);
-
-  // Cleanup IntersectionObserver on unmount
-  useEffect(() => {
-    return () => {
-      if (observer.current) observer.current.disconnect();
-    };
-  }, []);
-
-  // Disconnect the previous observer when filters/search change to avoid stale observers.
-  useEffect(() => {
-    if (observer.current) {
-      observer.current.disconnect();
-      observer.current = null;
-    }
-  }, [filterStatus, filterCategory, searchQuery]);
-
-  const fetchComplaints = async () => {
-    if (!token) return;
-    try {
-      setError(null);
-      const url = new URL(`${API_BASE}/api/complaints`);
-      if (filterStatus !== 'All') {
-        url.searchParams.append('status', filterStatus);
-      }
-      if (filterCategory !== 'all') {
-        url.searchParams.append('category', filterCategory);
-      }
-      if (searchQuery.trim()) {
-        url.searchParams.append('search', searchQuery.trim());
-      }
-      url.searchParams.append('page', currentPage.toString());
-      url.searchParams.append('limit', itemsPerPage.toString());
-      const response = await fetch(url.toString(), {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to fetch complaints.');
-      }
-      const data = await response.json();
-      if (data && Array.isArray(data.complaints)) {
-        if (currentPage === 1) {
-          setComplaints(data.complaints);
-        } else {
-          setComplaints(prev => [...prev, ...data.complaints]);
-        }
-        if (data.totalPages !== undefined) {
-          setTotalPages(data.totalPages);
-        }
-      } else {
-        setComplaints([]);
-        setTotalPages(1);
-      }
-    } catch (err: any) {
-      console.error('Error fetching complaints:', err);
-      setError(err.message || 'Failed to fetch complaints.');
-    } finally {
-      if (currentPage === 1) {
-        setIsLoading(false);
-      }
-      setIsFiltering(false);
-      setIsFetchingMore(false);
-    }
-  };
-
-  useEffect(() => {
-    setCurrentPage(1);
-    setIsFiltering(true);
-  }, [filterStatus, filterCategory, searchQuery]);
-
-  useEffect(() => {
-    fetchComplaints();
-    // eslint-disable-next-line
-  }, [token, filterStatus, filterCategory, searchQuery, currentPage]);
-
-  const openAddComplaintModal = () => {
-    setEditingComplaint(null);
-    setNewComplaint({
-      title: '',
-      description: '',
-      category: 'Other' as Complaint['category'],
-      priority: 'Medium' as Complaint['priority'],
-      department: 'Student Services' as Complaint['department'],
-      status: 'Open' as Complaint['status'],
-    });
-    setFormError(null);
-    setIsModalOpen(true);
-  };
-
-  const openEditComplaintModal = (complaint: Complaint) => {
-    setEditingComplaint(complaint);
-    setNewComplaint({
-      title: complaint?.title || '',
-      description: complaint?.description || '',
-      category: complaint?.category || 'Other',
-      priority: complaint?.priority || 'Medium',
-      department: complaint?.department || '',
-      status: complaint?.status || 'Open',
-    });
-    setStatusComment('');
-    setImages(
-      (complaint.images || []).map(img => ({
-        previewUrl: img.url,
-        public_id: img.public_id,
-        url: img.url,
-      }))
-    );
-    setFormError(null);
-    setIsModalOpen(true);
-  };
-
-  const closeComplaintModal = () => {
-    setIsModalOpen(false);
-    setEditingComplaint(null);
-    setNewComplaint({
-      title: '',
-      description: '',
-      category: 'Other' as Complaint['category'],
-      priority: 'Medium' as Complaint['priority'],
-      department: 'Student Services' as Complaint['department'],
-      status: 'Open' as Complaint['status'],
-    });
-    setImages([]);
-    setFormError(null);
-    setFieldErrors({});
-    setStatusComment('');
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setNewComplaint({ ...newComplaint, [name]: value });
-  };
-
-
-
-  const handleSaveComplaint = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setFormError(null);
-    setFieldErrors({});
-
-    // Validate all fields
-    const errors: {[key: string]: string} = {};
-    const titleError = validateField('title', newComplaint.title);
-    const descError = validateField('description', newComplaint.description);
-
-    if (titleError) errors.title = titleError;
-    if (descError) errors.description = descError;
-
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
-      setFormError('Please fix the errors below');
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (
-      editingComplaint &&
-      user?.isAdmin &&
-      newComplaint.status !== editingComplaint.status &&
-      !statusComment.trim()
-    ) {
-      setFormError('Please add a status update note when changing complaint status.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    const method = editingComplaint ? 'PUT' : 'POST';
-    const url = editingComplaint ? `${API_BASE}/api/complaints/${editingComplaint._id}` : `${API_BASE}/api/complaints`;
-
-    try {
-      const formData = new FormData();
-      formData.append('title', newComplaint.title.trim());
-      formData.append('description', newComplaint.description.trim());
-      formData.append('category', newComplaint.category);
-      formData.append('priority', newComplaint.priority);
-      formData.append('department', newComplaint.department);
-      formData.append('status', newComplaint.status);
-      if (editingComplaint && user?.isAdmin && newComplaint.status !== editingComplaint.status) {
-        formData.append('statusComment', statusComment.trim());
-      }
-      
-      // Append new images
-      images.forEach((image) => {
-        if (image.file) {
-          formData.append('images', image.file);
-        }
-      });
-      
-      // For edit: send public_ids of existing images to keep
-      if (editingComplaint) {
-        const keepPublicIds = images.filter(img => img.public_id).map(img => img.public_id);
-        formData.append('keepImages', JSON.stringify(keepPublicIds));
-      }
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData,
-      });
-      
-      const data = await response.json();
-      if (response.ok) {
-        if (editingComplaint) {
-          setComplaints(complaints.map(comp => comp._id === editingComplaint._id ? data : comp));
-          setSuccessMessage('Complaint updated successfully!');
-        } else {
-          setComplaints([data, ...complaints]);
-          setSuccessMessage('Complaint submitted successfully!');
-        }
-        closeComplaintModal();
-        setImages([]);
-      } else {
-        // Handle validation errors from backend
-        if (data.details && Array.isArray(data.details)) {
-          const backendErrors: {[key: string]: string} = {};
-          data.details.forEach((err: any) => {
-            backendErrors[err.field] = err.message;
-          });
-          setFieldErrors(backendErrors);
-          setFormError(data.message || 'Validation failed');
-        } else {
-          setFormError(data.message || 'Failed to save complaint.');
-        }
-      }
-    } catch (err: any) {
-      console.error('Error saving complaint:', err);
-      setFormError('An error occurred while saving the complaint. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleDeleteComplaint = async (id: string) => {
-    try {
-      setIsSubmitting(true);
-      setError(null);
-      const response = await fetch(`${API_BASE}/api/complaints/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Failed to delete complaint.');
-      }
-      setComplaints(prevComplaints => prevComplaints.filter(comp => comp._id !== id));
-      setSelectedComplaintForDetails(null); // Close details modal if open
-      setPendingDeleteComplaintId(null);
-      setSuccessMessage('Complaint deleted successfully!');
-    } catch (err: any) {
-      console.error('Error deleting complaint:', err);
-      setError(err.message || 'Failed to delete complaint.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const requestDeleteComplaint = (id: string) => {
-    setPendingDeleteComplaintId(id);
-  };
-
-  const renderStatus = (status: Complaint['status']) => {
-    switch (status) {
-      case 'Open':
-        return <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-red-100 text-red-800">Open</span>;
-      case 'In Progress':
-        return <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-yellow-100 text-yellow-800">In Progress</span>;
-      case 'Resolved':
-        return <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-green-100 text-green-800">Resolved</span>;
-      case 'Closed':
-        return <span className="text-xs px-3 py-1.5 rounded-lg font-medium bg-gray-100 text-gray-800">Closed</span>;
-      default:
-        return null;
-    }
-  };
-
-  if (isLoading && complaints.length === 0) {
+  if (loading && filters.page === 1) {
     return <PageSkeleton contentType="cards" itemCount={8} filterCount={2} showAddButton={true} />;
-  }
-
-  if (error) {
-    return <div className="min-h-screen flex items-center justify-center bg-white font-sans"><p className="text-red-500">Error: {error}</p></div>;
   }
 
   return (
     <div className="min-h-screen bg-white font-sans">
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
-        {/* Success Message Banner */}
         <SuccessMessage message={successMessage} onDismiss={() => setSuccessMessage(null)} />
-        
-        {/* Top Bar: Heading + Add Button */}
+
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <h1 className="text-h2 font-extrabold text-black">College Complaints</h1>
           <button
-            onClick={openAddComplaintModal}
-            aria-label="Add Complaint"
-            className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] active:bg-[#181818] transition-colors duration-200"
+            onClick={openAddModal}
+            className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#181818] text-white font-bold text-lg hover:bg-[#00C6A7] transition-colors"
           >
             + Add Complaint
           </button>
         </div>
-        {/* Filter/Search Row */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 gap-4">
-          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-            {/* Filter by Category */}
-            <div className="relative">
-              <select
-                value={filterCategory}
-                onChange={e => setFilterCategory(e.target.value as 'all' | 'Academic' | 'Administrative' | 'Facilities' | 'IT' | 'Security' | 'Other')}
-                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
-              >
-                <option value="all">All Categories</option>
-                <option value="Academic">Academic</option>
-                <option value="Administrative">Administrative</option>
-                <option value="Facilities">Facilities</option>
-                <option value="IT">IT</option>
-                <option value="Security">Security</option>
-                <option value="Other">Other</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-            {/* Filter by Status */}
-            <div className="relative">
-              <select
-                value={filterStatus}
-                onChange={e => setFilterStatus(e.target.value as 'All' | 'Open' | 'In Progress' | 'Resolved' | 'Closed')}
-                className="appearance-none w-full sm:w-auto px-5 py-3 pr-10 rounded-lg bg-white text-gray-700 font-semibold border-2 border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent transition-all duration-200 cursor-pointer"
-              >
-                <option value="All">All Statuses</option>
-                <option value="Open">Open</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Resolved">Resolved</option>
-                <option value="Closed">Closed</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-          </div>
-          {/* Search Bar */}
-          <div className="relative w-full sm:w-[380px] md:w-[440px] lg:w-[520px]" ref={searchRef}>
-            <div className="relative w-full rounded-lg border-2 border-gray-200 bg-white hover:border-gray-300 focus-within:ring-2 focus-within:ring-[#00C6A7] focus-within:border-transparent transition-all duration-200 flex items-center">
-              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
-              <input
-                type="text"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setSearchQuery(searchInput);
-                    setShowSuggestions(false);
-                  } else if (e.key === 'Escape') {
-                    setShowSuggestions(false);
-                  }
-                }}
-                placeholder="Search complaints..."
-                className="flex-1 pl-12 pr-3 py-3.5 bg-transparent text-gray-700 font-medium outline-none text-base border-none placeholder:text-gray-400 rounded-l-lg"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery(searchInput);
-                  setShowSuggestions(false);
-                }}
-                className="px-6 py-3.5 bg-[#181818] text-white font-bold text-sm hover:bg-[#00C6A7] active:bg-[#181818] flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-gray-200 rounded-r-lg rounded-l-none"
-                aria-label="Search"
-              >
-                <FiSearch className="w-4 h-4" />
-                <span className="hidden sm:inline">Search</span>
-              </button>
-            </div>
-            
-            {/* Autocomplete Dropdown */}
-            {showSuggestions && filteredSuggestions.length > 0 && (
-              <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg max-h-60 overflow-auto">
-                {filteredSuggestions.map((suggestion, index) => (
-                  <div
-                    key={index}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      markSuggestionSelection();
-                      setSearchInput(suggestion);
-                      setSearchQuery(suggestion);
-                      setShowSuggestions(false);
-                    }}
-                    className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b-2 border-gray-200 last:border-b-0"
-                  >
-                    <FiSearch className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" />
-                    <span className="text-sm font-medium text-gray-700">{suggestion}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
 
-        {(searchQuery || filterStatus !== 'All' || filterCategory !== 'all') && (
+        <ComplaintFilters
+          filters={filters}
+          onFilterChange={updateFilters}
+          suggestions={filteredSuggestions}
+          showSuggestions={showSuggestions}
+          setShowSuggestions={setShowSuggestions}
+          searchRef={searchRef as any}
+          onSuggestionSelect={(val) => updateFilters({ search: val })}
+        />
+
+        {/* Active Filters Display */}
+        {(filters.search || filters.category !== 'all' || filters.status !== 'All') && (
           <div className="mb-6 flex flex-wrap items-center gap-2">
             <span className="text-xs font-semibold text-gray-500">Active filters:</span>
-            {filterCategory !== 'all' && (
-              <span className="text-xs px-3 py-1.5 rounded-lg border-2 border-gray-200 bg-white text-gray-700 font-semibold">
-                Category: {filterCategory}
+            {filters.category !== 'all' && (
+              <span className="text-xs px-3 py-1.5 rounded-lg border-2 border-gray-200 bg-white text-gray-700 font-semibold capitalize">
+                Category: {filters.category}
               </span>
             )}
-            {filterStatus !== 'All' && (
-              <span className="text-xs px-3 py-1.5 rounded-lg border-2 border-gray-200 bg-white text-gray-700 font-semibold">
-                Status: {filterStatus}
+            {filters.status !== 'All' && (
+              <span className="text-xs px-3 py-1.5 rounded-lg border-2 border-gray-200 bg-white text-gray-700 font-semibold capitalize">
+                Status: {filters.status}
               </span>
             )}
-            {searchQuery && (
+            {filters.search && (
               <span className="text-xs px-3 py-1.5 rounded-lg border-2 border-gray-200 bg-white text-gray-700 font-semibold">
-                Search: {searchQuery}
+                Search: {filters.search}
               </span>
             )}
             <button
-              type="button"
-              onClick={() => { setSearchQuery(''); setSearchInput(''); setFilterStatus('All'); setFilterCategory('all'); }}
-              className="ml-auto px-4 py-2 rounded-lg bg-[#181818] text-white text-xs font-bold hover:bg-[#00C6A7] transition-colors duration-200"
+              onClick={() => updateFilters({ search: '', category: 'all', status: 'All' })}
+              className="ml-auto px-4 py-2 rounded-lg bg-[#181818] text-white text-xs font-bold hover:bg-[#00C6A7] transition-colors"
             >
               Clear all
             </button>
           </div>
         )}
 
-        {/* Card Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+        {/* Complaints Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {isFiltering ? (
             Array.from({ length: 6 }).map((_, idx) => (
-              <div key={idx} className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden animate-pulse">
-                <div className="h-48 sm:h-56 md:h-64 bg-gray-200"></div>
+              <div key={idx} className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden animate-pulse h-[400px]">
+                <div className="h-64 bg-gray-200"></div>
                 <div className="p-6 space-y-3">
                   <div className="h-6 bg-gray-200 rounded w-3/4"></div>
                   <div className="h-4 bg-gray-200 rounded w-full"></div>
-                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
                 </div>
               </div>
             ))
-          ) : complaints.filter(complaint => complaint).map((complaint, idx) => (
-            <div
-              key={complaint._id}
-              ref={idx === complaints.length - 1 ? lastComplaintRef : undefined}
-              className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden cursor-pointer hover:border-gray-300 transition-colors duration-200"
-              onClick={() => setSelectedComplaintForDetails(complaint)}
-            >
-              {/* Image Section with Overlay */}
-              <div className="relative h-48 sm:h-56 md:h-64 overflow-hidden">
-                {complaint.images && complaint.images.length > 0 ? (
-                  <>
-                    <img
-                      src={complaint.images[0].url}
-                      alt={complaint.title}
-                      className="object-cover w-full h-full"
-                    />
-                  </>
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                    <span className="text-5xl text-gray-300">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-16 h-16">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-3A2.25 2.25 0 008.25 5.25V9m7.5 0v10.5A2.25 2.25 0 0113.5 21h-3a2.25 2.25 0 01-2.25-2.25V9m7.5 0H6.75m8.25 0H18m-12 0h2.25" />
-                      </svg>
-                    </span>
-                  </div>
-                )}
-                {/* Status and Priority Badges */}
-                <div className={`${UI_PATTERNS.badgeTopRight} flex flex-col gap-2`}>
-                  <span className={`${UI_PATTERNS.badgeLabel} ${
-                    complaint.status === 'Open' ? 'bg-red-100 text-red-800' :
-                    complaint.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' :
-                    complaint.status === 'Resolved' ? 'bg-green-100 text-green-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    {complaint.status}
-                  </span>
-                  <span className={`${UI_PATTERNS.badgeLabel} ${
-                    complaint.priority === 'Urgent' ? 'bg-red-100 text-red-800' :
-                    complaint.priority === 'High' ? 'bg-orange-100 text-orange-800' :
-                    complaint.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-blue-100 text-blue-800'
-                  }`}>
-                    {complaint.priority} Priority
-                  </span>
-                </div>
-              </div>
-
-              {/* Content Section */}
-              <div className="p-4 sm:p-5 md:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{complaint.title}</h2>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">{complaint.description}</p>
-
-                {/* Meta Info Row */}
-                <div className="space-y-3 pt-4 border-t-2 border-gray-200">
-                  <div className="flex items-center text-sm text-gray-500">
-                    <FiTag className="mr-2 flex-shrink-0" />
-                    <span className="truncate">{complaint.category}</span>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <FiUser className="mr-2 flex-shrink-0" />
-                    <span className="truncate">Posted by {complaint.user?.name || 'Unknown user'}</span>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <FiCalendar className="mr-2 flex-shrink-0" />
-                    <span>{new Date(complaint.createdAt).toLocaleDateString('en-US', { 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}</span>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                {user && complaint.user && (
-                  complaint.user?._id === user._id || 
-                  complaint.user?._id === user.id || 
-                  user.isAdmin
-                ) && (
-                  <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t-2 border-gray-200">
-                    {!['Resolved', 'Closed'].includes(complaint.status) && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); openEditComplaintModal(complaint); }}
-                        className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-4 sm:py-2.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200 text-xs sm:text-sm min-w-0 min-h-touch"
-                      >
-                        <FiEdit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                        <span className="truncate text-xs sm:text-sm">Edit</span>
-                      </button>
-                    )}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); requestDeleteComplaint(complaint._id); }}
-                      className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-4 sm:py-2.5 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200 text-xs sm:text-sm min-w-0 min-h-touch"
-                    >
-                      <FiTrash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                      <span className="truncate text-xs sm:text-sm">Delete</span>
-                    </button>
-                  </div>
-                )}
-              </div>
+          ) : complaints.length === 0 ? (
+            <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
+              <p className="text-xl font-bold text-gray-700">No complaints found</p>
+              <p className="text-gray-400 text-sm mt-2">Try adjusting your filters or search terms.</p>
             </div>
-          ))}
-          {!isFiltering && complaints.filter(c => c).length === 0 && (
-            <div className="col-span-full flex flex-col items-center justify-center py-20 px-4">
-              <svg className="w-40 h-40 mb-6 text-gray-200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                {/* Document */}
-                <rect x="55" y="40" width="90" height="115" rx="10" fill="#f3f4f6" stroke="#d1d5db" strokeWidth="3"/>
-                {/* Lines on document */}
-                <line x1="72" y1="72" x2="128" y2="72" stroke="#d1d5db" strokeWidth="3" strokeLinecap="round"/>
-                <line x1="72" y1="88" x2="128" y2="88" stroke="#d1d5db" strokeWidth="3" strokeLinecap="round"/>
-                <line x1="72" y1="104" x2="108" y2="104" stroke="#d1d5db" strokeWidth="3" strokeLinecap="round"/>
-                {/* Checkmark circle */}
-                <circle cx="138" cy="148" r="22" fill="#f0fdf4" stroke="#86efac" strokeWidth="3"/>
-                <path d="M128 148 L135 155 L150 140" stroke="#22c55e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <p className="text-xl font-bold text-gray-700 mb-2">No complaints found</p>
-              <p className="text-gray-400 text-sm text-center max-w-xs">
-                {searchQuery || filterStatus !== 'All' || filterCategory !== 'all'
-                  ? 'No complaints match your current filters. Try adjusting your search.'
-                  : "All clear! No complaints have been submitted yet. Use the button above to raise one."}
-              </p>
-              {(searchQuery || filterStatus !== 'All' || filterCategory !== 'all') && (
-                <button
-                  onClick={() => { setSearchQuery(''); setSearchInput(''); setFilterStatus('All'); setFilterCategory('all'); }}
-                  className="mt-5 px-5 py-2.5 rounded-lg bg-[#181818] text-white text-sm font-semibold hover:bg-[#00C6A7] transition-colors duration-200"
-                >
-                  Clear filters
-                </button>
-              )}
-            </div>
+          ) : (
+            complaints.map((complaint, idx) => (
+              <div key={complaint._id} ref={idx === complaints.length - 1 ? lastItemRef : undefined}>
+                <ComplaintCard
+                  complaint={complaint}
+                  currentUser={user}
+                  onSelect={openDetailModal}
+                  onEdit={openEditModal}
+                  onDelete={openDeleteModal}
+                />
+              </div>
+            ))
           )}
         </div>
 
-        {!isFiltering && !isFetchingMore && complaints.length > 0 && currentPage >= totalPages && (
+        {isFetchingMore && (
+          <div className="flex justify-center items-center mt-8">
+            <div className="animate-spin h-8 w-8 border-4 border-[#00C6A7] border-t-transparent rounded-full"></div>
+          </div>
+        )}
+
+        {!isFiltering && !isFetchingMore && complaints.length > 0 && filters.page >= totalPages && (
           <div className="mt-8 text-center">
-            <p className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm font-semibold text-gray-600">
-              <span className="w-2 h-2 rounded-full bg-[#00C6A7]" />
-              You have reached the end of complaints.
+            <p className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-gray-200 text-sm font-semibold text-gray-600">
+              You have reached the end of results.
             </p>
           </div>
         )}
 
-        {/* Add/Edit Complaint Modal */}
+        {/* Modals */}
         <FeatureModal
           isOpen={isModalOpen}
-          onClose={closeComplaintModal}
-          title={editingComplaint ? 'Edit Complaint' : 'Add New Complaint'}
+          onClose={closeModal}
+          title={
+            modalType === 'form' ? (selectedComplaint ? 'Edit Complaint' : 'Add New Complaint') :
+            modalType === 'detail' ? 'Complaint Details' : 'Confirm Delete'
+          }
           error={formError}
+          maxWidth={modalType === 'detail' ? '4xl' : '2xl'}
         >
+          {modalType === 'form' && (
+            <ComplaintForm
+              complaint={selectedComplaint}
+              onSubmit={handleFormSubmit}
+              isSubmitting={isSubmitting}
+              error={formError}
+              isAdmin={user?.isAdmin}
+            />
+          )}
+          
+          {modalType === 'detail' && selectedComplaint && (
+            <ComplaintDetail
+              complaint={selectedComplaint}
+              currentUser={user}
+              onEdit={openEditModal}
+              onDelete={openDeleteModal}
+            />
+          )}
 
-              <form onSubmit={handleSaveComplaint} className="space-y-8">
-                {/* Complaint Details Section */}
-                <div className="border-2 border-gray-200 rounded-lg p-6 mb-6">
-                  <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">Complaint Details <FiInfo className="text-gray-400" title="Fill in the details of your complaint." /></h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Title */}
-                    <div className="col-span-1 md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Title <FiTag className="inline text-gray-400" /></label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          name="title"
-                          value={newComplaint.title}
-                          onChange={(e) => {
-                            handleInputChange(e);
-                            if (fieldErrors.title) {
-                              setFieldErrors(prev => ({...prev, title: ''}));
-                            }
-                          }}
-                          onBlur={(e) => handleFieldBlur('title', e.target.value)}
-                          className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.title ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base`}
-                          placeholder="e.g. Mess Food Issue, Hostel Cleanliness"
-                          required
-                          aria-label="Complaint Title"
-                        />
-                        <FiTag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">Give a short, descriptive title for the complaint.</p>
-                      {fieldErrors.title && <p className="text-xs text-red-500 mt-1">{fieldErrors.title}</p>}
-                    </div>
-
-                    {/* Category */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Category <FiTag className="inline text-gray-400" /></label>
-                      <select
-                        name="category"
-                        value={newComplaint.category}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
-                        required
-                        aria-label="Complaint Category"
-                      >
-                        <option value="Academic">Academic</option>
-                        <option value="Administrative">Administrative</option>
-                        <option value="Facilities">Facilities</option>
-                        <option value="IT">IT</option>
-                        <option value="Security">Security</option>
-                        <option value="Other">Other</option>
-                      </select>
-                      <p className="text-xs text-gray-500 mt-1">Select the category that best fits your complaint.</p>
-                    </div>
-
-                    {/* Priority */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Priority <FiTag className="inline text-gray-400" /></label>
-                      <select
-                        name="priority"
-                        value={newComplaint.priority}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
-                        required
-                        aria-label="Complaint Priority"
-                      >
-                        <option value="Low">Low</option>
-                        <option value="Medium">Medium</option>
-                        <option value="High">High</option>
-                        <option value="Urgent">Urgent</option>
-                      </select>
-                      <p className="text-xs text-gray-500 mt-1">Indicate the urgency of the complaint.</p>
-                    </div>
-
-                    {/* Department (Admin Only - For now, just display/select) */}
-                    {/* This would ideally be conditionally rendered/editable based on user role */}
-                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Department <FiTag className="inline text-gray-400" /></label>
-                      <select
-                        name="department"
-                        value={newComplaint.department}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
-                        required
-                        aria-label="Assigned Department"
-                      >
-                        <option value="Academic Affairs">Academic Affairs</option>
-                        <option value="Administration">Administration</option>
-                        <option value="Facilities Management">Facilities Management</option>
-                        <option value="IT Services">IT Services</option>
-                        <option value="Security">Security</option>
-                        <option value="Student Services">Student Services</option>
-                      </select>
-                       <p className="text-xs text-gray-500 mt-1">The department responsible for handling this complaint.</p>
-                    </div>
-
-                    {editingComplaint && user?.isAdmin && ( // Only admins can change status
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select
-                          name="status"
-                          value={newComplaint.status || editingComplaint.status}
-                          onChange={(e) => setNewComplaint({ ...newComplaint, status: e.target.value as Complaint['status'] })}
-                          className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base"
-                        >
-                          <option value="Open">Open</option>
-                          <option value="In Progress">In Progress</option>
-                          <option value="Resolved">Resolved</option>
-                          <option value="Closed">Closed</option>
-                        </select>
-                        <p className="text-xs text-gray-500 mt-1">Update the status of the complaint.</p>
-                        {newComplaint.status !== editingComplaint.status && (
-                          <div className="mt-3">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Status Update Note</label>
-                            <textarea
-                              value={statusComment}
-                              onChange={(e) => setStatusComment(e.target.value)}
-                              rows={3}
-                              maxLength={500}
-                              placeholder="Add a short update for the complainant (required when status changes)."
-                              className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-sm resize-none"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">{statusComment.length}/500 characters</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                  </div>
-                  {/* Description */}
-                  <div className="mt-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">Description <FiFileText className="inline text-gray-400" /></label>
-                    <div className="relative">
-                      <textarea
-                        name="description"
-                        value={newComplaint.description}
-                        onChange={(e) => {
-                          handleInputChange(e);
-                          if (fieldErrors.description) {
-                            setFieldErrors(prev => ({...prev, description: ''}));
-                          }
-                        }}
-                        onBlur={(e) => handleFieldBlur('description', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2.5 border-2 ${fieldErrors.description ? 'border-red-400 focus:ring-red-400' : 'border-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C6A7] focus:border-transparent bg-white text-gray-700 text-base resize-none`}
-                        rows={4}
-                        placeholder="Describe the issue, any relevant details, etc."
-                        required
-                        aria-label="Complaint Description"
-                      ></textarea>
-                      <FiFileText className="absolute left-3 top-3 text-gray-400" />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">Provide details to help address the complaint.</p>
-                    {fieldErrors.description && <p className="text-xs text-red-500 mt-1">{fieldErrors.description}</p>}
-                  </div>
-                </div>
-
-                {/* Images Section */}
-                <ImageUpload
-                  images={images}
-                  onImagesChange={setImages}
-                  maxImages={5}
-                  id="complaint-image-upload"
-                />
-
-                <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
-                  <button
-                    type="button"
-                    onClick={closeComplaintModal}
-                    className={UI_PATTERNS.buttonNeutral}
-                    disabled={isSubmitting}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`${UI_PATTERNS.buttonPrimary} ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    {isSubmitting ? (
-                      <span className="flex items-center">
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Saving...
-                      </span>
-                    ) : (
-                      editingComplaint ? 'Save Changes' : 'Add Complaint'
-                    )}
-                  </button>
-                </div>
-              </form>
-        </FeatureModal>
-
-         {/* Complaint Details Modal */}
-         {selectedComplaintForDetails && (
-            <div
-              className={UI_PATTERNS.modalOverlay}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="complaint-details-title"
-              onClick={() => setSelectedComplaintForDetails(null)}
-            >
-                <div className={UI_PATTERNS.modalPanel} onClick={(e) => e.stopPropagation()}>
-                  {/* Close Button */}
-                  <button
-                    onClick={() => setSelectedComplaintForDetails(null)}
-                    aria-label="Close"
-                    className={UI_PATTERNS.modalCloseButton}
-                  >
-                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-
-                  <h2 id="complaint-details-title" className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12 sm:pr-14">{selectedComplaintForDetails.title}</h2>
-
-                    {/* Images Section - Moved Up */}
-                    {selectedComplaintForDetails.images && selectedComplaintForDetails.images.length > 0 && (
-                      <div className="mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                        {selectedComplaintForDetails.images.map((image, index) => (
-                          <img
-                            key={index}
-                            src={image.url}
-                            alt={`${selectedComplaintForDetails.title} image ${index + 1}`}
-                            className="w-full h-48 sm:h-56 md:h-64 object-cover rounded-lg cursor-zoom-in transition-colors duration-200"
-                            onClick={() => setZoomedImage(image.url)}
-                          />
-                        ))}
-                      </div>
-                    )}
-
-                    <div className="space-y-6 text-gray-700">
-                        {/* Status Badge */}
-                        <div className="flex flex-wrap items-center gap-3 mb-2">
-                            {renderStatus(selectedComplaintForDetails.status)}
-                        </div>
-                        <div>
-                            <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
-                            <p className="text-gray-700 whitespace-pre-wrap">{selectedComplaintForDetails.description}</p>
-                        </div>
-                        {/* Meta Info - Posted By, Posted At */}
-                        <div className="space-y-3 pt-4 border-t-2 border-gray-200">
-                            {/* Posted By and Posted At Combined */}
-                            <div className="flex items-center text-sm text-gray-500">
-                                      <FiUser className="w-5 h-5 mr-2 text-gray-500"/>
-                                     <span className="truncate">
-                                       Posted by {selectedComplaintForDetails.user?.name || 'Unknown user'} on {selectedComplaintForDetails.createdAt ? new Date(selectedComplaintForDetails.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' }) : ''}
-                                     </span>
-                            </div>
-                        </div>
-
-                        <div className="space-y-3 pt-4 border-t-2 border-gray-200">
-                          <h4 className="text-lg font-semibold text-gray-900">Follow-up Updates</h4>
-                          {selectedComplaintForDetails.statusHistory && selectedComplaintForDetails.statusHistory.length > 0 ? (
-                            <ol className="space-y-3">
-                              {[...selectedComplaintForDetails.statusHistory]
-                                .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-                                .map((entry, index) => {
-                                  const updaterName = typeof entry.updatedBy === 'string'
-                                    ? 'Admin'
-                                    : (entry.updatedBy?.name || 'Admin');
-                                  return (
-                                    <li key={`${entry.timestamp}-${index}`} className="rounded-lg border-2 border-gray-200 bg-white p-3">
-                                      <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                                        {renderStatus(entry.status)}
-                                        <span className="text-xs text-gray-500">by {updaterName}</span>
-                                        <span className="text-xs text-gray-400">•</span>
-                                        <span className="text-xs text-gray-500">{new Date(entry.timestamp).toLocaleString()}</span>
-                                      </div>
-                                      <p className="text-sm text-gray-700">
-                                        {entry.comment?.trim() ? entry.comment : 'No additional comment provided.'}
-                                      </p>
-                                    </li>
-                                  );
-                                })}
-                            </ol>
-                          ) : (
-                            <p className="text-sm text-gray-500">No follow-up updates yet. Admin status changes will appear here.</p>
-                          )}
-                        </div>
-                    </div>
-
-                     {user && selectedComplaintForDetails.user && (
-                        // Check if user can edit/delete this complaint
-                      (selectedComplaintForDetails.user?._id === user._id || 
-                       selectedComplaintForDetails.user?._id === user.id || 
-                         user.isAdmin)
-                     ) && (
-                        <div className="flex gap-3 mt-6">
-                            {!['Resolved', 'Closed'].includes(selectedComplaintForDetails.status) && (
-                              <button
-                                  onClick={() => { setSelectedComplaintForDetails(null); openEditComplaintModal(selectedComplaintForDetails); }}
-                                  className={`${UI_PATTERNS.buttonNeutral} flex items-center`}
-                              >
-                                  <FiEdit2 className="mr-1" /> Edit
-                              </button>
-                            )}
-                            <button
-                                onClick={() => requestDeleteComplaint(selectedComplaintForDetails._id)}
-                                className={`${UI_PATTERNS.buttonDanger} flex items-center`}
-                            >
-                                <FiTrash2 className="mr-1" /> Delete
-                            </button>
-                        </div>
-                     )}
-                </div>
+          {modalType === 'delete' && (
+            <div className="p-6 text-center">
+              <h3 className="text-xl font-bold mb-4">Delete Complaint?</h3>
+              <p className="text-gray-600 mb-8">Are you sure you want to delete this complaint? This action cannot be undone.</p>
+              <div className="flex justify-center gap-4">
+                <button onClick={closeModal} className="px-6 py-2 border-2 border-gray-200 rounded-lg font-bold">Cancel</button>
+                <button onClick={handleDelete} className="px-6 py-2 bg-red-600 text-white rounded-lg font-bold">Delete Complaint</button>
+              </div>
             </div>
-         )}
-
-        <FeatureModal
-          isOpen={!!pendingDeleteComplaintId}
-          onClose={() => setPendingDeleteComplaintId(null)}
-          title="Delete Complaint"
-          error={null}
-        >
-          <p className="text-sm text-gray-600 mb-6">Are you sure you want to delete this complaint? This action cannot be undone.</p>
-          <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => setPendingDeleteComplaintId(null)}
-              className={UI_PATTERNS.buttonNeutral}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              disabled={isSubmitting}
-              onClick={() => pendingDeleteComplaintId && handleDeleteComplaint(pendingDeleteComplaintId)}
-              className={`${UI_PATTERNS.buttonDanger} disabled:opacity-50 disabled:cursor-not-allowed`}
-            >
-              Delete
-            </button>
-          </div>
+          )}
         </FeatureModal>
-
-         {/* Zoomed Image Modal */}
-         {zoomedImage && selectedComplaintForDetails && selectedComplaintForDetails.images && selectedComplaintForDetails.images.length > 0 && (
-           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000] p-4 safe-top safe-bottom" onClick={() => setZoomedImage(null)}>
-             {/* Image */}
-             <img 
-               src={zoomedImage} 
-               alt="Zoomed"
-               className="max-h-[90vh] max-w-full lg:max-w-[80vw] rounded-lg object-contain"
-               onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the image
-             />
-             
-             {/* Navigation Buttons */}
-             {selectedComplaintForDetails.images.length > 1 && (
-               <>
-                 {/* Previous Button */}
-                 <button
-                   className="absolute left-2 sm:left-4 top-[72%] sm:top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-2 sm:p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
-                   onClick={(e) => {
-                     e.stopPropagation();
-                     const currentIndex = selectedComplaintForDetails.images!.findIndex(img => img.url === zoomedImage);
-                     const prevIndex = (currentIndex - 1 + selectedComplaintForDetails.images!.length) % selectedComplaintForDetails.images!.length;
-                     setZoomedImage(selectedComplaintForDetails.images![prevIndex].url);
-                   }}
-                   aria-label="Previous image"
-                 >
-                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                   </svg>
-                 </button>
-                 {/* Next Button */}
-                 <button
-                   className="absolute right-2 sm:right-4 top-[72%] sm:top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-lg p-2 sm:p-3 text-white hover:bg-gray-700 transition-colors duration-200 z-50"
-                   onClick={(e) => {
-                     e.stopPropagation();
-                     const currentIndex = selectedComplaintForDetails.images!.findIndex(img => img.url === zoomedImage);
-                     const nextIndex = (currentIndex + 1) % selectedComplaintForDetails.images!.length;
-                     setZoomedImage(selectedComplaintForDetails.images![nextIndex].url);
-                   }}
-                   aria-label="Next image"
-                 >
-                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                   </svg>
-                 </button>
-               </>
-             )}
-
-             {/* Close Button */}
-              <button
-               onClick={() => setZoomedImage(null)}
-               aria-label="Close zoomed image"
-                 className={UI_PATTERNS.zoomCloseButton}
-             >
-               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                 <line x1="18" y1="6" x2="6" y2="18" />
-                 <line x1="6" y1="6" x2="18" y2="18" />
-               </svg>
-             </button>
-
-           </div>
-         )}
-
-         {/* Loading Spinner */}
-         {isFetchingMore && (
-           <div className="flex justify-center items-center mt-8">
-             <svg className="animate-spin h-8 w-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-             </svg>
-           </div>
-         )}
       </main>
-
-      {/* Footer */}
       <Footer
         logo={<img src="/Logo.webp" alt="KampusKart Logo" className="h-7 w-7" />}
         brandName="KampusKart"
         socialLinks={socialLinks}
         mainLinks={[
-          { href: '/news', label: 'News' },
           { href: '/events', label: 'Events' },
           { href: '/facilities', label: 'Facilities' },
+          { href: '/clubs-recruitment', label: 'Clubs' },
           { href: '/campus-map', label: 'Map' },
         ]}
         legalLinks={[
@@ -1183,7 +321,4 @@ const Complaints = () => {
   );
 };
 
-export default Complaints; 
-
-
-
+export default Complaints;

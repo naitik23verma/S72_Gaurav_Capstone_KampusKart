@@ -1,5 +1,8 @@
-// Re-export main component from features
 export { default } from '../../components/Events';
-export type { Event } from './types';
-export { eventsApi } from './api';
-export type { EventFilters } from './types';
+export * from './types';
+export * from './api';
+export * from './hooks/useEvents';
+export * from './components/EventCard';
+export * from './components/EventFilters';
+export * from './components/EventForm';
+export * from './components/EventDetail';

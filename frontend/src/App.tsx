@@ -5,22 +5,22 @@ import ErrorBoundary from './components/ErrorBoundary';
 import KampusKartNavbar from './components/KampusKartNavbar';
 
 // Lazy load all route components
-const Login = React.lazy(() => import('./components/Login'));
-const Signup = React.lazy(() => import('./components/Signup'));
-const Landing = React.lazy(() => import('./components/Landing'));
-const ForgotPassword = React.lazy(() => import('./components/ForgotPassword'));
-const Home = React.lazy(() => import('./components/Home'));
-const LostFound = React.lazy(() => import('./components/LostFound'));
-const Profile = React.lazy(() => import('./components/Profile'));
-const Complaints = React.lazy(() => import('./components/Complaints'));
-const CampusMap = React.lazy(() => import('./components/CampusMap'));
-const Events = React.lazy(() => import('./components/Events'));
-const News = React.lazy(() => import('./components/News'));
-const Facilities = React.lazy(() => import('./components/Facilities'));
-const ChatWindow = React.lazy(() => import('./components/Chat/ChatWindow'));
-const ClubsRecruitment = React.lazy(() => import('./components/ClubsRecruitment'));
-const PrivacyPolicy = React.lazy(() => import('./components/PrivacyPolicy'));
-const TermsOfService = React.lazy(() => import('./components/TermsOfService'));
+const Login = React.lazy(() => import('./pages/Login'));
+const Signup = React.lazy(() => import('./pages/Signup'));
+const Landing = React.lazy(() => import('./pages/Landing'));
+const ForgotPassword = React.lazy(() => import('./pages/ForgotPassword'));
+const Home = React.lazy(() => import('./pages/Home'));
+const LostFound = React.lazy(() => import('./pages/LostFound'));
+const Profile = React.lazy(() => import('./pages/Profile'));
+const Complaints = React.lazy(() => import('./pages/Complaints'));
+const CampusMap = React.lazy(() => import('./pages/CampusMap'));
+const Events = React.lazy(() => import('./pages/Events'));
+const News = React.lazy(() => import('./pages/News'));
+const Facilities = React.lazy(() => import('./pages/Facilities'));
+const Chat = React.lazy(() => import('./pages/Chat'));
+const ClubsRecruitment = React.lazy(() => import('./pages/ClubsRecruitment'));
+const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = React.lazy(() => import('./pages/TermsOfService'));
 
 // Centralized lazy loading fallback - simple spinner
 const PageLoader = () => (
@@ -104,7 +104,7 @@ const AppLayout: React.FC = () => {
               path="/chat"
               element={
                 <ProtectedRoute>
-                  <ChatWindow />
+                  <Chat />
                 </ProtectedRoute>
               }
             />

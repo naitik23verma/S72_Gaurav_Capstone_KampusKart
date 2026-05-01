@@ -1,198 +1,39 @@
 const express = require('express');
 const router = express.Router();
-const News = require('../models/News');
-const authMiddleware = require('../middleware/authMiddleware');
-const multer = require('multer');
-const cloudinary = require('../config/cloudinary');
-const streamifier = require('streamifier');
-const rateLimit = require('express-rate-limit');
+const { authMiddleware, requireAdmin } = require('../middleware/auth');
+const { createMemoryUpload } = require('../middleware/uploads');
+const { createRateLimiter } = require('../middleware/rateLimit');
+const newsController = require('../controllers/newsController');
 
-const writeLimiter = rateLimit({
+const upload = createMemoryUpload();
+const writeLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   max: 50,
   message: { message: 'Too many requests, please try again later' }
 });
 
-// Multer configuration for file uploads
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+router.get('/', newsController.listNews);
+router.post(
+  '/',
+  authMiddleware,
+  requireAdmin('Not authorized to add news.'),
+  writeLimiter,
+  upload.array('images', 5),
+  newsController.createNews
+);
+router.put(
+  '/:id',
+  authMiddleware,
+  requireAdmin('Only admin can edit news.'),
+  writeLimiter,
+  upload.array('images', 5),
+  newsController.updateNews
+);
+router.delete(
+  '/:id',
+  authMiddleware,
+  requireAdmin('Only admin can delete news.'),
+  newsController.deleteNews
+);
 
-// Helper function to upload images to Cloudinary
-const uploadImages = async (files) => {
-  const uploadPromises = files.map(file => {
-    return new Promise((resolve, reject) => {
-      if (!file.mimetype.startsWith('image/')) {
-        return reject(new Error('Only image files are allowed'));
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        return reject(new Error('Image size should be less than 5MB'));
-      }
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: 'news',
-          resource_type: 'auto',
-          allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp']
-        },
-        (error, result) => {
-          if (error) {
-            return reject(error);
-          }
-          resolve({ public_id: result.public_id, url: result.secure_url });
-        }
-      );
-      streamifier.createReadStream(file.buffer).pipe(uploadStream);
-    });
-  });
-  return Promise.all(uploadPromises);
-};
-
-// GET all news
-router.get('/', async (req, res) => {
-  try {
-    const { category, search, page, limit } = req.query;
-    const query = {};
-
-    if (category && category !== 'All') {
-      query.category = category;
-    }
-
-    if (search && typeof search === 'string') {
-      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      query.$or = [
-        { title: { $regex: escaped, $options: 'i' } },
-        { description: { $regex: escaped, $options: 'i' } },
-      ];
-    }
-
-    if (page !== undefined && limit !== undefined) {
-      const parsedPage = Math.max(1, parseInt(page, 10) || 1);
-      const parsedLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 9));
-      const skip = (parsedPage - 1) * parsedLimit;
-      const total = await News.countDocuments(query);
-      const news = await News.find(query).sort({ date: -1 }).skip(skip).limit(parsedLimit);
-      return res.json({ news, totalItems: total, totalPages: Math.ceil(total / parsedLimit) });
-    }
-
-    const news = await News.find(query).sort({ date: -1 });
-    res.json(news);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// POST new news (admin only)
-router.post('/', authMiddleware, writeLimiter, upload.array('images', 5), async (req, res) => {
-  if (!req.user.isAdmin) {
-    return res.status(403).json({ message: 'Not authorized to add news.' });
-  }
-  const { title, description, date, category } = req.body;
-  if (!title || !description || !date || !category) {
-    return res.status(400).json({ message: 'All fields are required.' });
-  }
-  // Validate date format
-  if (isNaN(new Date(date).getTime())) {
-    return res.status(400).json({ message: 'Invalid date format.' });
-  }
-  try {
-    const images = req.files && req.files.length > 0 ? await uploadImages(req.files) : [];
-    const news = new News({
-      title,
-      description,
-      date,
-      category,
-      images,
-    });
-    const savedNews = await news.save();
-    res.status(201).json(savedNews);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
-// Update a news item (admin only)
-router.put('/:id', authMiddleware, writeLimiter, upload.array('images', 5), async (req, res) => {
-  if (!req.user.isAdmin) {
-    return res.status(403).json({ message: 'Only admin can edit news.' });
-  }
-  const { title, description, date, category, keepImages } = req.body;
-  if (!title || !description || !date || !category) {
-    return res.status(400).json({ message: 'Missing required fields.' });
-  }
-  // Validate date format
-  if (isNaN(new Date(date).getTime())) {
-    return res.status(400).json({ message: 'Invalid date format.' });
-  }
-  try {
-    const news = await News.findById(req.params.id);
-    if (!news) return res.status(404).json({ message: 'News not found.' });
-    news.title = title;
-    news.description = description;
-    news.date = date;
-    news.category = category;
-    // Handle image deletion and reordering
-    let keepPublicIds = [];
-    if (keepImages) {
-      try {
-        keepPublicIds = JSON.parse(keepImages);
-      } catch (e) {
-        keepPublicIds = [];
-      }
-    }
-    // Remove images not in keepPublicIds from Cloudinary
-    if (Array.isArray(news.images)) {
-      for (const img of news.images) {
-        if (!keepPublicIds.includes(img.public_id)) {
-          try {
-            await cloudinary.uploader.destroy(img.public_id);
-          } catch (err) {
-            // Ignore cloudinary deletion errors
-          }
-        }
-      }
-    }
-    // Only keep images whose public_id is in keepPublicIds, and preserve order
-    let keptImages = [];
-    if (Array.isArray(news.images)) {
-      keptImages = keepPublicIds
-        .map(pid => news.images.find(img => img.public_id === pid))
-        .filter(Boolean);
-    }
-    // Handle new images if provided
-    if (req.files && req.files.length > 0) {
-      const newImages = await uploadImages(req.files);
-      keptImages = [...keptImages, ...newImages];
-    }
-    news.images = keptImages;
-    const updated = await news.save();
-    res.json(updated);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// Delete a news item (admin only)
-router.delete('/:id', authMiddleware, async (req, res) => {
-  if (!req.user.isAdmin) {
-    return res.status(403).json({ message: 'Only admin can delete news.' });
-  }
-  try {
-    const news = await News.findById(req.params.id);
-    if (!news) return res.status(404).json({ message: 'News not found.' });
-    // Delete images from Cloudinary
-    if (Array.isArray(news.images)) {
-      for (const img of news.images) {
-        try {
-          await cloudinary.uploader.destroy(img.public_id);
-        } catch (err) {
-          console.error('Error deleting news image:', err);
-        }
-      }
-    }
-    await news.deleteOne();
-    res.json({ message: 'News deleted.' });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-module.exports = router; 
+module.exports = router;

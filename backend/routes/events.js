@@ -1,303 +1,39 @@
 const express = require('express');
 const router = express.Router();
-const Event = require('../models/Event');
-const authMiddleware = require('../middleware/authMiddleware');
-const multer = require('multer');
-const cloudinary = require('../config/cloudinary');
-const streamifier = require('streamifier');
-const rateLimit = require('express-rate-limit');
+const { authMiddleware, requireAdmin } = require('../middleware/auth');
+const { createMemoryUpload } = require('../middleware/uploads');
+const { createRateLimiter } = require('../middleware/rateLimit');
+const eventsController = require('../controllers/eventsController');
 
-const writeLimiter = rateLimit({
+const upload = createMemoryUpload();
+const writeLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   max: 50,
   message: { message: 'Too many requests, please try again later' }
 });
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+router.get('/', eventsController.listEvents);
+router.post(
+  '/',
+  authMiddleware,
+  requireAdmin('Not authorized to add events.'),
+  writeLimiter,
+  upload.single('image'),
+  eventsController.createEvent
+);
+router.put(
+  '/:id',
+  authMiddleware,
+  requireAdmin('Only admin can edit events.'),
+  writeLimiter,
+  upload.single('image'),
+  eventsController.updateEvent
+);
+router.delete(
+  '/:id',
+  authMiddleware,
+  requireAdmin('Only admin can delete events.'),
+  eventsController.deleteEvent
+);
 
-// GET all events
-router.get('/', async (req, res) => {
-  try {
-    const { status, search, page, limit } = req.query;
-    const query = {};
-
-    if (status && status !== 'All') {
-      query.status = status;
-    }
-
-    if (search && typeof search === 'string') {
-      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      query.$or = [
-        { title: { $regex: escaped, $options: 'i' } },
-        { description: { $regex: escaped, $options: 'i' } },
-        { location: { $regex: escaped, $options: 'i' } },
-      ];
-    }
-
-    // If page/limit provided, paginate; otherwise return all (backwards compat)
-    if (page !== undefined && limit !== undefined) {
-      const parsedPage = Math.max(1, parseInt(page, 10) || 1);
-      const parsedLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 9));
-      const skip = (parsedPage - 1) * parsedLimit;
-      const total = await Event.countDocuments(query);
-      const events = await Event.find(query).sort({ date: -1 }).skip(skip).limit(parsedLimit);
-      return res.json({ events, totalItems: total, totalPages: Math.ceil(total / parsedLimit) });
-    }
-
-    const events = await Event.find(query).sort({ date: -1 });
-    res.json(events);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// POST new event (admin only)
-router.post('/', authMiddleware, writeLimiter, upload.single('image'), async (req, res) => {
-  if (!req.user.isAdmin) {
-    return res.status(403).json({ message: 'Not authorized to add events.' });
-  }
-
-  const { 
-    title, 
-    description, 
-    date, 
-    location, 
-    status, 
-    registerUrl,
-    operatingHours,
-    contactInfo,
-    mapLocation
-  } = req.body;
-
-  if (!title || !description || !date || !location) {
-    return res.status(400).json({ message: 'All fields are required.' });
-  }
-
-  // Validate date is not in the past
-  const eventDate = new Date(date);
-  if (isNaN(eventDate.getTime())) {
-    return res.status(400).json({ message: 'Invalid date format.' });
-  }
-  
-  // Check if event date is in the past
-  const now = new Date();
-  now.setHours(0, 0, 0, 0); // Reset to start of day for fair comparison
-  if (eventDate < now) {
-    return res.status(400).json({ message: 'Event date cannot be in the past.' });
-  }
-
-  // Validate registerUrl if provided
-  if (registerUrl) {
-    try {
-      new URL(registerUrl);
-    } catch (e) {
-      return res.status(400).json({ message: 'Invalid registration URL format.' });
-    }
-  }
-
-  let image = undefined;
-  if (req.file) {
-    try {
-      const uploadPromise = new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          { folder: 'events' },
-          (error, result) => {
-            if (error) {
-              return reject(error);
-            }
-            resolve({ public_id: result.public_id, url: result.secure_url });
-          }
-        );
-        streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
-      });
-      
-      image = await uploadPromise;
-    } catch (err) {
-      return res.status(500).json({ message: 'Cloudinary upload failed', error: err.message });
-    }
-  }
-
-  try {
-    let parsedContactInfo, parsedMapLocation;
-    
-    if (contactInfo) {
-      try {
-        parsedContactInfo = JSON.parse(contactInfo);
-      } catch (e) {
-        return res.status(400).json({ message: 'Invalid contactInfo JSON format' });
-      }
-    }
-    
-    if (mapLocation) {
-      try {
-        parsedMapLocation = JSON.parse(mapLocation);
-      } catch (e) {
-        return res.status(400).json({ message: 'Invalid mapLocation JSON format' });
-      }
-    }
-
-    const event = new Event({
-      title,
-      description,
-      date,
-      location,
-      status: status || 'Upcoming',
-      registerUrl,
-      image,
-      operatingHours,
-      contactInfo: parsedContactInfo,
-      mapLocation: parsedMapLocation
-    });
-    const savedEvent = await event.save();
-    res.status(201).json(savedEvent);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
-// Update an event (admin only)
-router.put('/:id', authMiddleware, writeLimiter, upload.single('image'), async (req, res) => {
-  if (!req.user.isAdmin) {
-    return res.status(403).json({ message: 'Only admin can edit events.' });
-  }
-  const { 
-    title, 
-    description, 
-    date, 
-    location, 
-    status, 
-    registerUrl,
-    operatingHours,
-    contactInfo,
-    mapLocation
-  } = req.body;
-  
-  if (!title || !description || !date || !location || !status) {
-    return res.status(400).json({ message: 'Missing required fields.' });
-  }
-
-  // Validate date format
-  const eventDate = new Date(date);
-  if (isNaN(eventDate.getTime())) {
-    return res.status(400).json({ message: 'Invalid date format.' });
-  }
-
-  // Validate registerUrl if provided
-  if (registerUrl) {
-    try {
-      new URL(registerUrl);
-    } catch (e) {
-      return res.status(400).json({ message: 'Invalid registration URL format.' });
-    }
-  }
-
-  try {
-    const event = await Event.findById(req.params.id);
-    if (!event) return res.status(404).json({ message: 'Event not found.' });
-
-    // Handle image replacement if a new file is uploaded
-    if (req.file) {
-      // Delete old image from Cloudinary if exists
-      if (event.image && event.image.public_id) {
-        try {
-          await cloudinary.uploader.destroy(event.image.public_id);
-        } catch (err) {
-          console.error('Error deleting old event image:', err);
-        }
-      }
-      
-      try {
-        const uploadPromise = new Promise((resolve, reject) => {
-          const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: 'events' },
-            (error, result) => {
-              if (error) {
-                return reject(error);
-              }
-              resolve({ public_id: result.public_id, url: result.secure_url });
-            }
-          );
-          streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
-        });
-        
-        event.image = await uploadPromise;
-      } catch (error) {
-        return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
-      }
-    } else if (req.body.removeImage === 'true') {
-      // Remove existing image if requested
-      if (event.image && event.image.public_id) {
-        try {
-          await cloudinary.uploader.destroy(event.image.public_id);
-        } catch (err) {
-          console.error('Error deleting event image:', err);
-        }
-      }
-      event.image = undefined;
-    }
-
-    let parsedContactInfo, parsedMapLocation;
-    
-    if (contactInfo) {
-      try {
-        parsedContactInfo = JSON.parse(contactInfo);
-      } catch (e) {
-        return res.status(400).json({ message: 'Invalid contactInfo JSON format' });
-      }
-    }
-    
-    if (mapLocation) {
-      try {
-        parsedMapLocation = JSON.parse(mapLocation);
-      } catch (e) {
-        return res.status(400).json({ message: 'Invalid mapLocation JSON format' });
-      }
-    }
-
-    // Update fields
-    event.title = title;
-    event.description = description;
-    event.date = date;
-    event.location = location;
-    event.status = status;
-    event.registerUrl = registerUrl;
-    event.operatingHours = operatingHours;
-    event.contactInfo = parsedContactInfo;
-    event.mapLocation = parsedMapLocation;
-    await event.save();
-    res.json(event);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// Delete an event (admin only)
-router.delete('/:id', authMiddleware, async (req, res) => {
-  // Validate user exists
-  if (!req.user) {
-    return res.status(401).json({ message: 'Authentication required.' });
-  }
-  
-  if (!req.user.isAdmin) {
-    return res.status(403).json({ message: 'Only admin can delete events.' });
-  }
-  try {
-    const event = await Event.findById(req.params.id);
-    if (!event) return res.status(404).json({ message: 'Event not found.' });
-    // Delete image from Cloudinary if exists
-    if (event.image && event.image.public_id) {
-      try {
-        await cloudinary.uploader.destroy(event.image.public_id);
-      } catch (err) {
-        console.error('Error deleting event image:', err);
-      }
-    }
-    await event.deleteOne();
-    res.json({ message: 'Event deleted.' });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-module.exports = router; 
+module.exports = router;

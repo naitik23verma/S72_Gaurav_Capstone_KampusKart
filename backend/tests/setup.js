@@ -20,6 +20,25 @@ afterAll(async () => {
   }
 });
 
+// Connect mongoose to in-memory server for integration tests
+const mongoose = require('mongoose');
+beforeAll(async () => {
+  if (process.env.MONGODB_URI) {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+  }
+});
+
+afterAll(async () => {
+  try {
+    await mongoose.disconnect();
+  } catch (e) {
+    // ignore
+  }
+});
+
 // Mock console methods to reduce noise in tests
 global.console = {
   ...console,

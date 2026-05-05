@@ -6,7 +6,15 @@ const path = require('path');
 
 jest.mock('cloudinary', () => ({
   v2: {
-    uploader: { upload_stream: jest.fn((opts, cb) => cb(null, { secure_url: 'https://res.cloudinary.com/test/image.jpg', public_id: 'test-id' })) , destroy: jest.fn() },
+    uploader: {
+      upload_stream: (opts, cb) => {
+        const { PassThrough } = require('stream');
+        const stream = new PassThrough();
+        stream.on('finish', () => cb(null, { secure_url: 'https://res.cloudinary.com/test/image.jpg', public_id: 'test-id' }));
+        return stream;
+      },
+      destroy: jest.fn()
+    },
     config: jest.fn()
   }
 }));
@@ -18,11 +26,19 @@ describe('Uploads integration routes', () => {
 
   beforeAll(() => {
     app = express();
-    // Simple auth stub: attach a test user
-    app.use((req, res, next) => {
-      req.user = { _id: new mongoose.Types.ObjectId().toHexString(), name: 'Uploader' };
-      next();
-    });
+    // Provide Authorization header and mock User.findById used by authMiddleware
+    const userId = new mongoose.Types.ObjectId();
+    // Mock auth middleware before importing routes (use static user to keep mock factory pure)
+    jest.mock('../../middleware/auth', () => ({
+      authMiddleware: (req, res, next) => { req.user = { _id: 'test-user', email: 'uploader@test' }; next(); },
+      requireAdmin: () => (req, res, next) => next()
+    }));
+
+    const jwt = require('jsonwebtoken');
+    const token = jwt.sign({ userId: 'test-user' }, process.env.JWT_SECRET || 'test-secret-key');
+    app.use((req, res, next) => { req.headers.authorization = `Bearer ${token}`; next(); });
+
+    const profileRoutes = require('../../routes/profile');
     app.use('/api/profile', profileRoutes);
   });
 

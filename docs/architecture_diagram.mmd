@@ -1,0 +1,7 @@
+flowchart LR
+  Frontend[React SPA] -->|REST / WebSocket| Backend[Express API + Socket.IO]
+  Backend -->|Stores| MongoDB[(MongoDB)]
+  Backend -->|Uploads| Cloudinary[Cloudinary Media]
+  Frontend -->|Maps| GoogleMaps[Google Maps API]
+  Backend --> Cron[Scheduled Jobs]
+  Backend -->|Auth| GoogleOAuth[Google OAuth]

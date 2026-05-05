@@ -92,9 +92,18 @@ jobs:
         working-directory: ./backend
         run: npm run lint
 
-      - name: Run tests
+      - name: Run unit tests
         working-directory: ./backend
         run: npm test
+        env:
+          CI: true
+          NODE_ENV: test
+          JWT_SECRET: test_jwt_secret_for_ci_pipeline_minimum_32_chars
+          MONGODB_URI: mongodb://localhost:27017/kampuskart_test
+
+      - name: Run integration tests
+        working-directory: ./backend
+        run: npm run test:integration
         env:
           CI: true
           NODE_ENV: test

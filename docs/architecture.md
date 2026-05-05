@@ -36,3 +36,7 @@ flowchart LR
 - Frontend: Netlify build and deploy using Vite
 - Backend: Render service running the Express server
 - CI and CD: GitHub Actions for linting, testing, builds, and deploy triggers
+
+## Diagram and demo
+- Diagram: see `docs/architecture_diagram.mmd` for a compact mermaid diagram.
+- Demo: add a 60–90s demo video as `docs/demo.mp4` or link it from `docs/demo.md`.

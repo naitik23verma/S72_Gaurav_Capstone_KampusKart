@@ -22,6 +22,16 @@
 - Attachments use a MIME allow list for the chat module.
 - Cloudinary public IDs are stored for later cleanup.
 
+## Cloudinary preset guidance
+- If you use a client-side (unsigned) upload preset, ensure it is locked down: restrict uploads to a specific folder, enable allowed formats only, and limit file size and transformations.
+- Prefer server-side uploads where possible (the backend already streams uploads to Cloudinary using private API keys).
+- Rotate Cloudinary API keys if they were committed accidentally and remove any unsigned presets that allow unrestricted uploads.
+
+## Google Maps API key safety
+- Rotate any API keys exposed in the repository immediately.
+- Restrict Maps API keys to appropriate referrers (HTTP referrers for browser keys, IPs for server keys, or restrict to specific Android/iOS apps when applicable).
+- Use separate keys for development and production and store them in environment variables (see `.env.example`).
+
 ## OTP password reset
 - OTP is hashed with SHA-256 before storage.
 - Timing safe comparison is used to validate OTPs.

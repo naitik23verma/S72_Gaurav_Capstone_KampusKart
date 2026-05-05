@@ -43,6 +43,17 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const hpp = require('hpp');
+// Optional error tracking (Sentry)
+let Sentry;
+if (process.env.SENTRY_DSN) {
+  try {
+    Sentry = require('@sentry/node');
+    Sentry.init({ dsn: process.env.SENTRY_DSN, environment: process.env.NODE_ENV || 'development' });
+  } catch (err) {
+    console.warn('Sentry not installed or failed to initialize:', err.message);
+    Sentry = null;
+  }
+}
 // express-mongo-sanitize is incompatible with Express 5 (req.query is read-only).
 // Inline sanitizer that strips $ and . keys from req.body and req.params only.
 const sanitizeValue = (val) => {
@@ -78,8 +89,17 @@ const chatRoutes = require('./routes/chat');
 const clubsRoutes = require('./routes/clubs');
 const Chat = require('./models/Chat');
 const User = require('./models/User');
+const aiRoutes = require('./routes/ai');
 
 const app = express();
+
+// Request ID middleware and lightweight structured logger
+const requestId = require('./middleware/requestId');
+const logger = require('./utils/logger');
+app.use(requestId);
+
+// Attach Sentry request handler early if configured
+if (Sentry) app.use(Sentry.Handlers.requestHandler());
 
 // Security middleware
 app.use(helmet({
@@ -132,6 +152,7 @@ app.use('/api/events', eventsRoutes);
 app.use('/api/facilities', facilitiesRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/clubs', clubsRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check endpoint (used by keep-alive and monitoring services)
 app.get('/api/health', (req, res) => {
@@ -169,27 +190,31 @@ app.get('/api/server-status', (req, res) => {
 
 // Global error handling middleware
 app.use((err, req, res, _next) => {
-  console.error('Error:', err);
-  
-  // Log error details for debugging
-  console.error('Error details:', {
+  // Structured log with request id
+  logger.error('Unhandled error', {
     message: err.message,
     stack: err.stack,
-    url: req.url,
+    url: req.originalUrl,
     method: req.method,
     userAgent: req.get('User-Agent'),
-    ip: req.ip
+    ip: req.ip,
+    requestId: req.requestId
   });
 
   // Don't expose internal errors in production
   const isDevelopment = process.env.NODE_ENV === 'development';
-  
+
   res.status(err.status || 500).json({
     message: err.message || 'Internal server error',
     ...(isDevelopment && { stack: err.stack }),
     ...(isDevelopment && { error: err })
   });
 });
+
+// Sentry error handler (must be after all routes and before other error handlers)
+if (Sentry) {
+  app.use(Sentry.Handlers.errorHandler());
+}
 
 // 404 handler
 app.use((req, res) => {

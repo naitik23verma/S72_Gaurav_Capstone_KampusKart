@@ -14,6 +14,9 @@
 
 ---
 
+**Note:** This repository is owned by the `kalviumcommunity` organization. If you maintain a personal profile README (for example, `Gaurav-205`), please pin a link to this project and add the short blurb in [docs/profile_readme_snippet.md](docs/profile_readme_snippet.md) so visitors can find the project quickly.
+
+
 ## Overview
 
 KampusKart is a full-stack campus management portal built for MIT ADT University. Students and faculty can navigate the campus, stay updated on news and events, report lost items, submit complaints, chat in real time, and browse club recruitments — all in one place.

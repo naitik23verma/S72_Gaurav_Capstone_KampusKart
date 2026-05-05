@@ -1,0 +1,44 @@
+name: Uptime Heartbeat
+
+on:
+  schedule:
+    - cron: '*/15 * * * *' # every 15 minutes
+  workflow_dispatch: {}
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Health check
+        id: health
+        env:
+          HEALTH_URL: ${{ secrets.HEALTH_CHECK_URL || 'https://s72-gaurav-capstone-kampuskart.onrender.com/api/health' }}
+        run: |
+          echo "Checking $HEALTH_URL"
+          status=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || echo 000)
+          echo "status=$status" >> $GITHUB_OUTPUT
+          if [ "$status" -ne 200 ]; then
+            echo "Health check failed with status $status"
+            exit 1
+          fi
+
+      - name: Create issue on failure
+        if: steps.health.outputs.status != '200'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const status = parseInt(core.getInput('status')) || 0
+            const body = `Automated uptime check failed. Health endpoint returned status: ${process.env.STATUS || 'unknown'} or non-200 response.`
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Uptime alert: /api/health returned non-200',
+              body,
+              labels: ['uptime', 'automated-alert']
+            })
+        env:
+          STATUS: ${{ steps.health.outputs.status }}
